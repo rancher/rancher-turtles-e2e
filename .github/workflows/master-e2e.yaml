@@ -153,20 +153,30 @@ jobs:
       # For Rancher Manager
       RANCHER_VERSION: ${{ inputs.rancher_version }}
       TIMEOUT_SCALE: 3
+      TAG: 0.0.1
+      TURTLES_REPO: rancher-sandbox/rancher-turtles
+      MANIFEST_IMG: localhost:5000/$TURTLES_REPO-$ARCH
     steps:
       # Build rancher-turtles nightly chart
       - name: Check out rancher-turtles repo
         uses: actions/checkout@v3
         with:
-          repository: rancher-sandbox/rancher-turtles
+          repository: ${{ env.TURTLES_REPO }}
       - name: Install Go
         uses: actions/setup-go@v3
         with:
           go-version-file: go.mod
+
+      # This step builds latest turtles chart and pushes latest turtles docker image to local docker registry
       - name: Make chart
-        run: make e2e-image
+        run: |
+          TAG=v${{ env.TAG }} MANIFEST_IMG=${{ env.MANIFEST_IMG }} make docker-build
+          RELEASE_TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.MANIFEST_IMG }} CONTROLLER_IMAGE_VERSION=v${{ env.TAG }} make build-chart
+          docker run -d -p 5000:5000 --name registry registry:2
+          docker push ${{ env.MANIFEST_IMG }}:v${{ env.TAG }}
+
       - name: Copy chart file
-        run: sudo cp ${{ github.workspace }}/out/package/rancher-turtles-0.0.1.tgz ${{ runner.temp }}
+        run: sudo cp ${{ github.workspace }}/out/package/rancher-turtles-${{ env.TAG }}.tgz ${{ runner.temp }}
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -175,7 +185,7 @@ jobs:
         with:
           go-version-file: tests/go.mod
       - name: Copy chart file for chartmuseum
-        run: sudo cp ${{ runner.temp }}/rancher-turtles-0.0.1.tgz ${{ github.workspace }}/tests/assets
+        run: sudo cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
       - name: Install preriquisite components
         env:
           PUBLIC_DNS: ${{ needs.create-runner.outputs.public_dns }}
@@ -217,6 +227,7 @@ jobs:
             /workdir/e2e/unit_tests/turtles_operator.spec.ts
             /workdir/e2e/unit_tests/turtles_plugin.spec.ts
             /workdir/e2e/unit_tests/menu.spec.ts
+            /workdir/e2e/unit_tests/namespace.spec.ts
           UI_ACCOUNT: ${{ inputs.ui_account }}
           UPGRADE_OS_CHANNEL: ${{ inputs.upgrade_os_channel }}
         run: cd tests && make start-cypress-tests
