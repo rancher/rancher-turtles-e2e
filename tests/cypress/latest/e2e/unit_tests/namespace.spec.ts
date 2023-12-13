@@ -35,7 +35,7 @@ describe('Namespace testing', () => {
         .type('Project: Default{enter}{esc}');
       cy.get('.outlet').contains('CAPI Auto-Import');
 
-      // Reload required
+      // Reload required since kebab menu icon not clickable
       cy.reload();
       cy.getBySel('sortable-table-0-action-button').click();
       cy.contains('Enable CAPI Auto-Import')
