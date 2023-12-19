@@ -44,7 +44,6 @@ describe('Enable CAPD provider', () => {
       if (utils.isRancherManagerVersion('2.7')) {
         cy.reload();
       }
-
       // Edit Rancher turtles deployment
       cy.getBySel('sortable-table-1-action-button').click();
       cy.contains('Edit Config')
@@ -78,7 +77,6 @@ describe('Enable CAPD provider', () => {
       cy.typeValue('Name', namespace);
       cy.clickButton('Create');
       cy.contains('Active' + ' ' + namespace);
-
       cy.getBySel('namespaces-values').click();
       cy.contains('Only User Namespaces')
         .click();
@@ -107,5 +105,4 @@ describe('Enable CAPD provider', () => {
       cy.contains('Active ' + 'docker');
     })
   );
-
 });
