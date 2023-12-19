@@ -228,6 +228,8 @@ jobs:
             /workdir/e2e/unit_tests/turtles_plugin.spec.ts
             /workdir/e2e/unit_tests/menu.spec.ts
             /workdir/e2e/unit_tests/namespace.spec.ts
+            /workdir/e2e/unit_tests/capd_setup.spec.ts
+            /workdir/e2e/unit_tests/capd_cluster.spec.ts
           UI_ACCOUNT: ${{ inputs.ui_account }}
           UPGRADE_OS_CHANNEL: ${{ inputs.upgrade_os_channel }}
         run: cd tests && make start-cypress-tests

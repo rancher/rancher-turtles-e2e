@@ -7,6 +7,15 @@ pushd cypress/latest
 # Needed to install Cypress plugins
 npm install
 
+# Create network for CAPD, TODO: find way to run via cy.exec()
+docker network create \
+    --driver=bridge \
+    --subnet=172.19.0.0/16 \
+    --gateway=172.19.0.1 \
+    --opt "com.docker.network.bridge.enable_ip_masquerade"="true" \
+    --opt "com.docker.network.driver.mtu"="1500" \
+    kind
+
 # Start Cypress tests with docker
 docker run -v $PWD:/workdir -w /workdir                     \
     -e CYPRESS_TAGS=$CYPRESS_TAGS                           \
