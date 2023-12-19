@@ -40,7 +40,11 @@ describe('Enable CAPD provider', () => {
         .click()
         .type('rancher-turtles-system{enter}{esc}');
 
-      // Edit Rancher turtles deployment  
+      if (utils.isRancherManagerVersion('2.7')) {
+        cy.reload();
+      }
+
+      // Edit Rancher turtles deployment
       cy.getBySel('sortable-table-1-action-button').click();
       cy.contains('Edit Config')
         .click();
@@ -63,7 +67,10 @@ describe('Enable CAPD provider', () => {
       cy.contains('Only User Namespaces') // eslint-disable-line cypress/unsafe-to-chain-command
         .click()
         .type('Not{enter}{esc}');
-     
+
+      if (utils.isRancherManagerVersion('2.7')) {
+        cy.reload();
+      }
       // Create CAPD namespace
       cy.contains('Create Namespace')
         .click();

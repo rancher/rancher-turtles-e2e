@@ -85,6 +85,9 @@ describe('Import CAPD', () => {
         .click()
         .type('cattle-monitoring-system{enter}{esc}');
 
+      if (utils.isRancherManagerVersion('2.7')) {
+        cy.reload();
+      }
       // Resource should be deployed (green badge)
       cy.get('.outlet').contains('Deployed rancher-monitoring', {timeout: 240000});
 
