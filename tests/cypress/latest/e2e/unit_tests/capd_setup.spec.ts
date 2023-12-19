@@ -95,7 +95,7 @@ describe('Enable CAPD provider', () => {
       cypressLib.accesMenu('CAPI');
 
       // Create CAPD Infrastructure provider
-      cy.contains('.nav', "Infrastructure Providers").click();
+      cy.contains('Infrastructure Providers').click();
       cy.clickButton('Create from YAML')
       cy.readFile('./fixtures/capd-provider.yaml').then((data) => {
         cy.get('.CodeMirror')
