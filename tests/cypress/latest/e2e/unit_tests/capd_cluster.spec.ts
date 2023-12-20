@@ -36,9 +36,11 @@ describe('Import CAPD', () => {
       cypressLib.accesMenu('Continuous Delivery');
       cypressLib.accesMenu('Git Repos');
 
-      // Change fleet namespace
-      cy.contains('fleet-default').click();
-      cy.contains('fleet-local').click();
+      // Change namespace to fleet-local
+      cy.contains('fleet-').click();
+      cy.contains('fleet-local')
+        .should('be.visible')
+        .click();
 
       // Add CAPD fleet repository
       cy.clickButton('Add Repository');
