@@ -34,7 +34,7 @@ on:
         type: boolean
       capi_ui_version:
         description: Version of the capi ui which will be installed (dev/stable)
-        default: dev
+        default: gh-pages branch
         type: string
       k8s_version_to_provision:
         description: Name and version of installed K8s distribution
@@ -81,7 +81,7 @@ jobs:
     steps:
       # actions/checkout MUST come before auth
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Generate UUID and Runner hostname
         id: generator
         run: |
@@ -92,11 +92,11 @@ jobs:
           echo "uuid=${UUID//-}" >> ${GITHUB_OUTPUT}
           echo "runner=${GH_REPO//\//-}-ci-${UUID//-}" >> ${GITHUB_OUTPUT}
       - name: Authenticate to GCP
-        uses: google-github-actions/auth@v1
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.credentials }}
       - name: Setup gcloud
-        uses: google-github-actions/setup-gcloud@v1
+        uses: google-github-actions/setup-gcloud@v2
       - name: Create runner
         run: |
           gcloud compute instances create ${{ steps.generator.outputs.runner }} \
@@ -159,7 +159,7 @@ jobs:
     steps:
       # Build rancher-turtles nightly chart
       - name: Check out rancher-turtles repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ env.TURTLES_REPO }}
       - name: Install Go
@@ -179,7 +179,7 @@ jobs:
         run: sudo cp ${{ github.workspace }}/out/package/rancher-turtles-${{ env.TAG }}.tgz ${{ runner.temp }}
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install Go
         uses: actions/setup-go@v3
         with:
@@ -274,13 +274,13 @@ jobs:
     steps:
       # actions/checkout MUST come before auth
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Authenticate to GCP
-        uses: google-github-actions/auth@v1
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.credentials }}
       - name: Setup gcloud
-        uses: google-github-actions/setup-gcloud@v1
+        uses: google-github-actions/setup-gcloud@v2
       - name: Delete GCP secrets
         run: |
           gcloud --quiet secrets delete PAT_TOKEN_${{ needs.create-runner.outputs.uuid }} || true

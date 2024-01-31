@@ -43,7 +43,7 @@ describe('Install CAPI plugin', () => {
       // TODO: create a function to install any plugin and not elemental only
       cy.contains('Extensions')
         .click();
-      cy.contains('capi');
+      cy.contains('Rancher Turtles UI');
       cy.get('.plugin')
         .contains('Install')
         .click();
@@ -53,7 +53,7 @@ describe('Install CAPI plugin', () => {
       cy.clickButton('Reload');
       cy.get('.plugins')
         .children()
-        .should('contain', 'capi')
+        .should('contain', 'Rancher Turtles UI')
         .and('contain', 'Uninstall');
     })
   );
