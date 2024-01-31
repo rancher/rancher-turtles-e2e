@@ -34,7 +34,7 @@ on:
         type: boolean
       capi_ui_version:
         description: Version of the capi ui which will be installed (dev/stable)
-        default: gh-pages branch
+        default: dev
         type: string
       k8s_version_to_provision:
         description: Name and version of installed K8s distribution
