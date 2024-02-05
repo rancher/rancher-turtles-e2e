@@ -163,7 +163,7 @@ jobs:
         with:
           repository: ${{ env.TURTLES_REPO }}
       - name: Install Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
 
@@ -181,7 +181,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version-file: tests/go.mod
       - name: Copy chart file for chartmuseum
@@ -235,7 +235,7 @@ jobs:
         run: cd tests && make start-cypress-tests
       - name: Upload Cypress screenshots (Basics)
         if: failure() 
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: cypress-screenshots-basics-${{ inputs.cluster_name }}
           path: tests/cypress/latest/screenshots
@@ -244,7 +244,7 @@ jobs:
       - name: Upload Cypress videos (Basics)
         # Test run video is always captured, so this action uses "always()" condition
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: cypress-videos-basics-${{ inputs.cluster_name }}
           path: tests/cypress/latest/videos
