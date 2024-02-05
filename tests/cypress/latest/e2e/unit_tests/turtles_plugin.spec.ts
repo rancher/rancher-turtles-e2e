@@ -53,7 +53,8 @@ describe('Install CAPI plugin', () => {
       cy.clickButton('Reload');
       cy.get('.plugins')
         .children()
-        .should('contain', 'Rancher Turtles UI')
+        # Temporary change due to https://github.com/rancher/capi-ui-extension/issues/34
+        .should('contain', 'UI for CAPI cluster provisioning using the Rancher Turtles extension')
         .and('contain', 'Uninstall');
     })
   );
