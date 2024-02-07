@@ -13,7 +13,6 @@ limitations under the License.
 */
 
 import '~/support/commands';
-import { isUIVersion } from '../../support/utils';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 
@@ -34,7 +33,7 @@ describe('Install CAPI plugin', () => {
   
   qase(12,
     it('Enable extension support', () => {
-      isUIVersion('stable') ? cypressLib.enableExtensionSupport(true) : cypressLib.enableExtensionSupport(false);
+      cypressLib.enableExtensionSupport(true);
     })
   );
 
