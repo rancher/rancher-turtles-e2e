@@ -15,6 +15,7 @@ limitations under the License.
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
+import * as utils from "~/support/utils";
 
 Cypress.config();
 describe('Install CAPI plugin', () => {
@@ -43,9 +44,13 @@ describe('Install CAPI plugin', () => {
       cy.contains('Extensions')
         .click();
       cy.contains('Rancher Turtles UI');
-      cy.get('.plugin')
-        .contains('Install')
-        .click();
+        
+      if (utils.isRancherManagerVersion('2.7')) {
+        cy.getBySel('"extension-card-install-btn-Rancher Turtles UI"').click();
+      } else {
+        cy.getBySel('extension-card-install-btn-capi').click();
+      }  
+      
       cy.clickButton('Install');
       cy.contains('Installing');
       cy.contains('Extensions changed - reload required', {timeout: 40000});
