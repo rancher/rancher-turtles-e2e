@@ -28,6 +28,10 @@ describe('Namespace testing', () => {
       cy.contains('local')
         .click();
       cypressLib.accesMenu('Projects/Namespaces');
+      cy.contains('Create Project')
+        .should('be.visible');
+      // Reload required till capi-ui-extension/issues/17 is fixed
+      cy.reload(true);
 
       // Select default namespace
       cy.contains('Only User Namespaces') // eslint-disable-line cypress/unsafe-to-chain-command
@@ -38,7 +42,7 @@ describe('Namespace testing', () => {
       // cy.get('.outlet').contains('CAPI Auto-Import');
 
       // Reload required since kebab menu icon not clickable
-      cy.reload();
+      cy.reload(true);
       cy.getBySel('sortable-table-0-action-button').click();
       cy.contains('Enable CAPI Auto-Import')
         .click();

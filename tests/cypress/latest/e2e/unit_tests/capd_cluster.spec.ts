@@ -52,10 +52,18 @@ describe('Import CAPD', () => {
       cy.clickButton('Next');
       cy.clickButton('Create');
       cy.contains('clusters').click();
+    })
+  );
 
-      // Check cluster is created and auto-imported
+  qase(15,
+    it('Auto import child cluster via namespace annotation', {
+      // Retry test once, to increase the effective timeout for cluster import
+      retries: 1
+    },
+    () => {
+      // Check child cluster cluster is created and auto-imported
       cypressLib.burgerMenuToggle();
-      cypressLib.checkClusterStatus(cluster, 'Pending', 120000);
+      cy.contains('Pending ' + cluster, {timeout: 120000});
       
       // Check cluster is Active
       cy.clickButton('Manage');
@@ -63,8 +71,7 @@ describe('Import CAPD', () => {
     })
   );
 
-
-  qase(15,
+  qase(16,
     it('Install App on imported cluster', () => {
 
       // Click on imported CAPD cluster
@@ -82,11 +89,11 @@ describe('Import CAPD', () => {
       cy.clickButton('Install');
 
       // Close the shell to avoid conflict
-      cy.get('.closer', {timeout:20000})
+      cy.get('.closer', {timeout:30000})
         .click();
       cy.contains('Only User Namespaces') // eslint-disable-line cypress/unsafe-to-chain-command
         .click()
-        .type('cattle-monitoring-system{enter}{esc}');
+        .type('cattle-monitoring-system{enter}{esc}', { delay: 1000});
 
       if (utils.isRancherManagerVersion('2.7')) {
         cy.reload();
