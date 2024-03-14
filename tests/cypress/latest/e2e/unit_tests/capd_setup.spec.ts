@@ -105,4 +105,36 @@ describe('Enable CAPD provider', () => {
       cy.contains('Active ' + 'docker');
     })
   );
+
+  qase(14,
+    it('Enable CAPI Kubeadm provider', () => {
+      cy.contains('local')
+        .click();
+      cypressLib.accesMenu('Projects/Namespaces');
+      cy.contains('Only User Namespaces') // eslint-disable-line cypress/unsafe-to-chain-command
+        .click()
+        .type('Not{enter}{esc}');
+
+      // Create CAPI Kubeadm provider
+      cy.get('.header-buttons > :nth-child(1) > .icon')
+        .click();
+      cy.contains('Import YAML');
+      cy.readFile('./fixtures/capi-kubeadm-provider.yaml').then((data) => {
+        cy.get('.CodeMirror')
+          .then((editor) => {
+            editor[0].CodeMirror.setValue(data);
+        })
+      })
+
+      cy.clickButton('Import')
+      cy.clickButton('Close')
+      cy.contains('Active ' + 'capi-kubeadm-bootstrap-system');
+      cy.contains('Active ' + 'capi-kubeadm-control-plane-system');
+
+      cy.getBySel('namespaces-values').click();
+      cy.contains('Only User Namespaces')
+        .click();
+    })
+  );
+
 });
