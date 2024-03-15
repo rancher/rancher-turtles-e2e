@@ -43,10 +43,10 @@ describe('Install CAPI plugin', () => {
       // TODO: create a function to install any plugin and not elemental only
       cy.contains('Extensions')
         .click();
-      cy.contains('Rancher Turtles UI');
+      cy.contains('CAPI UI');
         
       if (utils.isRancherManagerVersion('2.7')) {
-        cy.getBySel('"extension-card-install-btn-Rancher Turtles UI"').click();
+        cy.getBySel('"extension-card-install-btn-CAPI UI"').click();
       } else {
         cy.getBySel('extension-card-install-btn-capi').click();
       }  
@@ -57,8 +57,7 @@ describe('Install CAPI plugin', () => {
       cy.clickButton('Reload');
       cy.get('.plugins')
         .children()
-        // Temporary change due to https://github.com/rancher/capi-ui-extension/issues/34
-        .should('contain', 'UI for CAPI cluster provisioning using the Rancher Turtles extension')
+        .should('contain', 'UI for CAPI cluster provisioning')
         .and('contain', 'Uninstall');
     })
   );
