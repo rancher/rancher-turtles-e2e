@@ -24,7 +24,10 @@ declare global {
       addFleetGitRepo(repoName: string, repoUrl?: string, branch?: string, path?: string): Chainable<Element>;
       removeFleetGitRepo(repoName: string): Chainable<Element>;
       accesMenuSelection(firstAccessMenu: string, secondAccessMenu?: string): Chainable<Element>;
+      installApp(appName: string, namespace: string): Chainable<Element>;
+      deleteCluster(clusterName: string): Chainable<Element>;
       setNamespace(namespace: string): Chainable<Element>;
+      checkCAPICluster(clustername: string): Chainable<Element>;
       namespaceReset(): Chainable<Element>;
     }
   }

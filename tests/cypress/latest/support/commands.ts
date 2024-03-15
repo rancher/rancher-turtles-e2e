@@ -58,6 +58,57 @@ Cypress.Commands.add('namespaceReset', () => {
   cy.getBySel('namespaces-dropdown').click();
 });
 
+// Command to check CAPI cluster Active status
+Cypress.Commands.add('checkCAPICluster', (clusterName) => {
+  cypressLib.burgerMenuToggle();
+  cy.accesMenuSelection('Cluster Management', 'CAPI');
+  cy.contains('CAPI Clusters').click();
+  cy.contains('Provisioned ' + clusterName, { timeout: 30000 });
+  cy.contains('Machine Deployments').click();
+  cy.contains('Running ' + clusterName, { timeout: 30000 });
+  cy.contains('Machine Sets').click();
+  cy.contains('Active ' + clusterName, { timeout: 30000 });
+});
+
+// Command to Install App from Charts menu
+Cypress.Commands.add('installApp', (appName, namespace) => {
+  cy.get('.nav').contains('Apps').click();
+  cy.contains(appName, { timeout: 30000 }).click();
+  cy.contains('Charts: ' + appName, { timeout: 30000 });
+  cy.clickButton('Install');
+  cy.contains('.outer-container > .header', appName);
+  cy.clickButton('Next');
+  cy.clickButton('Install');
+      
+  // Close the shell to avoid conflict
+  cy.get('.closer', { timeout:30000 }).click();
+
+  // Select app namespace
+  cy.setNamespace(namespace);
+  
+  // Resource should be deployed (green badge)
+  cy.get('.outlet').contains('Deployed', { timeout: 180000 });
+  cy.namespaceReset();
+});
+
+// Command to remove cluster
+Cypress.Commands.add('deleteCluster', (clusterName) => {
+  cy.visit('/');
+  cy.clickButton('Manage');
+  cy.contains('Active' + ' ' + clusterName);
+
+  cy.viewport(1920, 1080);
+  cy.get('.input-sm')
+    .click()
+    .type(clusterName);
+  cy.getBySel('sortable-table_check_select_all').click();
+  cy.clickButton('Delete');
+  cy.getBySel('prompt-remove-input')
+    .type(clusterName);
+  cy.getBySel('prompt-remove-confirm-button').click();
+  cy.contains('Active' + ' ' + clusterName).should('not.exist', {timeout:30000});
+});
+
 // Fleet commands
 // Command add Fleet Git Repository
 Cypress.Commands.add('addFleetGitRepo', ({ repoName, repoUrl, branch }) => {

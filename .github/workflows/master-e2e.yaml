@@ -53,7 +53,7 @@ on:
         type: string
       runner_template:
         description: Runner template to use
-        default: capi-e2e-ci-runner-spot-x86-64-template-n2-highmem-32-v5
+        default: capi-e2e-ci-runner-spot-n2-highmem-16-template-v1
         type: string
       test_description:
         description: Short description of the test
@@ -68,7 +68,7 @@ on:
         type: string
       zone:
         description: GCP zone to host the runner
-        default: us-central1-a
+        default: asia-south2-a
         type: string
 
 jobs:

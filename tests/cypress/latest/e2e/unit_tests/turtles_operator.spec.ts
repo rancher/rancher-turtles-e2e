@@ -15,7 +15,6 @@ limitations under the License.
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
-import * as utils from "~/support/utils";
 
 Cypress.config();
 describe('Install Turtles Operator', () => {
@@ -34,24 +33,8 @@ describe('Install Turtles Operator', () => {
 
   qase(13,
     it('Install Turtles operator', () => {
-      cy.contains('local')
-        .click();
-      cy.get('.nav').contains('Apps')
-        .click();
-      cy.contains('.item.has-description.color2', 'Rancher Turtles', { timeout: 30000 })
-        .click();
-      cy.contains('Charts: Rancher Turtles', { timeout: 30000 });
-      cy.clickButton('Install');
-      cy.contains('.outer-container > .header', 'Rancher Turtles');
-      cy.clickButton('Next');
-      cy.clickButton('Install');
-      
-      // Close the shell to avoid conflict
-      cy.get('.closer', {timeout:20000}).click();
-      // Select rancher-turtles-system namespace
-      cy.setNamespace('rancher-turtles-system');
-      // Resource should be deployed (green badge)
-      cy.get('.outlet').contains('Deployed rancher-turtles', {timeout: 240000});
+      cy.contains('local').click();
+      cy.installApp('Rancher Turtles', 'rancher-turtles-system');
     })
   );
 });

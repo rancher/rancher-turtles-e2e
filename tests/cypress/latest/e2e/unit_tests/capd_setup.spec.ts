@@ -112,7 +112,6 @@ describe('Enable CAPD provider', () => {
       cy.clickButton('Close')
       cy.contains('Active ' + 'capi-kubeadm-bootstrap-system');
       cy.contains('Active ' + 'capi-kubeadm-control-plane-system');
-
       cy.namespaceReset();
     })
   );
