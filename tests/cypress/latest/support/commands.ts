@@ -15,9 +15,64 @@ limitations under the License.
 // In this file you can write your custom commands and overwrite existing commands.
 
 import 'cypress-file-upload';
+import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 
 // Generic commands
-// ////////////////
+// Go to specific Sub Menu from Access Menu
+Cypress.Commands.add('accesMenuSelection', (firstAccessMenu,secondAccessMenu) => {
+  cypressLib.accesMenu(firstAccessMenu);
+  cypressLib.accesMenu(secondAccessMenu);
+});
+
+// Command to set CAPI Auto-import on default namespace
+Cypress.Commands.add('namespaceAutoImport', (mode) => {
+  cy.contains('local')
+    .click();
+  cypressLib.accesMenu('Projects/Namespaces');
+  cy.contains('Create Project')
+    .should('be.visible');
+
+  // Select default namespace
+  cy.setNamespace('Project: Default');
+
+  // Reload required since kebab menu icon not clickable
+  cy.reload(true);
+  cy.getBySel('sortable-table-0-action-button').click();
+
+  cy.contains(mode + ' CAPI Auto-Import')
+    .click();
+  cy.namespaceReset();
+});
+
+// Command to set namespace selection
+Cypress.Commands.add('setNamespace', (namespace) => {
+  cy.contains('Only User Namespaces') // eslint-disable-line cypress/unsafe-to-chain-command
+    .click()
+    .type(namespace + '{enter}{esc}');
+});
+
+// Command to reset namespace selection to default 'Only User Namespaces'
+Cypress.Commands.add('namespaceReset', () => {
+  cy.getBySel('namespaces-values-close-0').click();
+  cy.contains('Only User Namespaces').click();
+  cy.getBySel('namespaces-dropdown').click();
+});
+
+// Fleet commands
+// Command add Fleet Git Repository
+Cypress.Commands.add('addFleetGitRepo', ({ repoName, repoUrl, branch }) => {
+  cy.accesMenuSelection('Continuous Delivery', 'Git Repos');
+  cy.contains('fleet-').click();
+  cy.contains('fleet-local').should('be.visible').click();
+  cy.clickButton('Add Repository');
+  cy.contains('Git Repo:').should('be.visible');
+  cy.typeValue('Name', repoName);
+  cy.typeValue('Repository URL', repoUrl);
+  cy.typeValue('Branch Name', branch);
+  cy.clickButton('Next');
+  cy.get('button.btn').contains('Previous').should('be.visible');
+  cy.clickButton('Create');
+})
 
 Cypress.Commands.overwrite('type', (originalFn, subject, text, options = {}) => {
   options.delay = 100;

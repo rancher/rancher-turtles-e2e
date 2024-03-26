@@ -45,15 +45,13 @@ describe('Install Turtles Operator', () => {
       cy.contains('.outer-container > .header', 'Rancher Turtles');
       cy.clickButton('Next');
       cy.clickButton('Install');
+      
       // Close the shell to avoid conflict
-      cy.get('.closer', { timeout: 20000 })
-        .click();
+      cy.get('.closer', {timeout:20000}).click();
       // Select rancher-turtles-system namespace
-      cy.contains('Only User Namespaces') // eslint-disable-line cypress/unsafe-to-chain-command
-        .click()
-        .type('rancher-turtles-system{enter}{esc}');
+      cy.setNamespace('rancher-turtles-system');
       // Resource should be deployed (green badge)
-      cy.get('.outlet').contains('Deployed rancher-turtles', { timeout: 240000 });
+      cy.get('.outlet').contains('Deployed rancher-turtles', {timeout: 240000});
     })
   );
 });

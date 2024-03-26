@@ -37,9 +37,7 @@ describe('Enable CAPD provider', () => {
         .click();
       cy.get('.nav').contains('Deployments')
         .click();
-      cy.contains('Only User Namespaces') // eslint-disable-line cypress/unsafe-to-chain-command
-        .click()
-        .type('rancher-turtles-system{enter}{esc}');
+      cy.setNamespace('rancher-turtles-system');
 
       // Edit Rancher turtles deployment
       cy.getBySel('sortable-table-1-action-button').click();
@@ -48,11 +46,8 @@ describe('Enable CAPD provider', () => {
       cy.byLabel('Arguments').as('label')
       cy.get('@label').type(' --insecure-skip-verify=true')
       cy.clickButton('Save');
-      cy.contains('Active' + ' ' + deployment, { timeout: 20000 });
-      cy.getBySel('namespaces-values-close-0')
-        .click();
-      cy.contains('Only User Namespaces')
-        .click();
+      cy.contains('Active' + ' ' + deployment, {timeout: 20000});
+      cy.namespaceReset();
     })
   );
 
@@ -61,9 +56,7 @@ describe('Enable CAPD provider', () => {
       cy.contains('local')
         .click();
       cypressLib.accesMenu('Projects/Namespaces');
-      cy.contains('Only User Namespaces') // eslint-disable-line cypress/unsafe-to-chain-command
-        .click()
-        .type('Not{enter}{esc}');
+      cy.setNamespace('Not');
 
       // Create CAPD namespace
       cy.contains('Create Namespace')
@@ -71,9 +64,7 @@ describe('Enable CAPD provider', () => {
       cy.typeValue('Name', namespace);
       cy.clickButton('Create');
       cy.contains('Active' + ' ' + namespace);
-      cy.getBySel('namespaces-values').click();
-      cy.contains('Only User Namespaces')
-        .click();
+      cy.namespaceReset();
     })
   );
 
@@ -81,10 +72,9 @@ describe('Enable CAPD provider', () => {
     it('Create CAPD provider', () => {
       cypressLib.checkNavIcon('cluster-management')
         .should('exist');
-      cypressLib.accesMenu('Cluster Management');
 
       // Open Turtles menu
-      cypressLib.accesMenu('CAPI');
+      cy.accesMenuSelection('Cluster Management', 'CAPI');
 
       // Create CAPD Infrastructure provider
       cy.contains('Infrastructure Providers').click();
@@ -105,9 +95,7 @@ describe('Enable CAPD provider', () => {
       cy.contains('local')
         .click();
       cypressLib.accesMenu('Projects/Namespaces');
-      cy.contains('Only User Namespaces') // eslint-disable-line cypress/unsafe-to-chain-command
-        .click()
-        .type('Not{enter}{esc}');
+      cy.setNamespace('Not');
 
       // Create CAPI Kubeadm provider
       cy.get('.header-buttons > :nth-child(1) > .icon')
@@ -125,9 +113,7 @@ describe('Enable CAPD provider', () => {
       cy.contains('Active ' + 'capi-kubeadm-bootstrap-system');
       cy.contains('Active ' + 'capi-kubeadm-control-plane-system');
 
-      cy.getBySel('namespaces-values').click();
-      cy.contains('Only User Namespaces')
-        .click();
+      cy.namespaceReset();
     })
   );
 

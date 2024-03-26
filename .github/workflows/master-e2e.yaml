@@ -227,7 +227,6 @@ jobs:
             /workdir/e2e/unit_tests/turtles_operator.spec.ts
             /workdir/e2e/unit_tests/turtles_plugin.spec.ts
             /workdir/e2e/unit_tests/menu.spec.ts
-            /workdir/e2e/unit_tests/namespace.spec.ts
             /workdir/e2e/unit_tests/capd_setup.spec.ts
             /workdir/e2e/unit_tests/capd_cluster.spec.ts
           UI_ACCOUNT: ${{ inputs.ui_account }}

@@ -30,11 +30,8 @@ describe('Menu testing', () => {
       cypressLib.checkNavIcon('cluster-management')
         .should('exist');
 
-      // Click on the Cluster Management's icon
-      cypressLib.accesMenu('Cluster Management');
-
       // Open Turtles menu
-      cypressLib.accesMenu('CAPI');
+      cy.accesMenuSelection('Cluster Management', 'CAPI');
 
       // Check Turtles's side menu
       // TODO: DO a loop to check all the menu

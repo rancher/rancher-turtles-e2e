@@ -19,7 +19,9 @@ import * as utils from "~/support/utils";
 Cypress.config();
 describe('Import CAPD', () => {
   const cluster = "cluster1-capi"
-  const repo = "https://github.com/rancher-sandbox/rancher-turtles-fleet-example.git"
+  const repoUrl = "https://github.com/rancher-sandbox/rancher-turtles-fleet-example.git"
+  const repoName = 'clusters'
+  const branch = 'main'
 
   beforeEach(() => {
     cy.login();
@@ -32,26 +34,9 @@ describe('Import CAPD', () => {
       cypressLib.checkNavIcon('cluster-management')
         .should('exist');
 
-      // Click on the Continuous Delivery's icon
-      cypressLib.accesMenu('Continuous Delivery');
-      cypressLib.accesMenu('Git Repos');
-
-      // Change namespace to fleet-local
-      cy.contains('fleet-').click();
-      cy.contains('fleet-local')
-        .should('be.visible')
-        .click();
-
       // Add CAPD fleet repository
-      cy.clickButton('Add Repository');
-      cy.typeValue('Name', 'clusters');
-      cy.typeValue('Repository URL', repo);
-      cy.typeValue('Branch Name', 'main');
-
-      // Create Git repo
-      cy.clickButton('Next');
-      cy.clickButton('Create');
-      cy.contains('clusters').click();
+      cy.addFleetGitRepo({ repoName, repoUrl, branch });
+      cy.contains(repoName).click();
     })
   );
 
@@ -60,15 +45,18 @@ describe('Import CAPD', () => {
       // Retry test once, to increase the effective timeout for cluster import
       retries: 1
     },
-      () => {
-        // Check child cluster cluster is created and auto-imported
-        cypressLib.burgerMenuToggle();
-        cy.contains('Pending ' + cluster, { timeout: 120000 });
+    () => {
+      // Check child cluster cluster is created and auto-imported
+      cy.namespaceAutoImport('Enable');
+      
+      // Check child cluster is created and auto-imported
+      cy.visit('/');
+      cy.contains('Pending ' + cluster, {timeout: 120000});
 
-        // Check cluster is Active
-        cy.clickButton('Manage');
-        cy.contains('Active' + ' ' + cluster, { timeout: 120000 });
-      })
+      // Check cluster is Active
+      cy.clickButton('Manage');
+      cy.contains('Active ' + cluster, {timeout: 180000});
+    })
   );
 
   qase(16,
@@ -89,14 +77,12 @@ describe('Import CAPD', () => {
       cy.clickButton('Install');
 
       // Close the shell to avoid conflict
-      cy.get('.closer', { timeout: 30000 })
-        .click();
-      cy.contains('Only User Namespaces') // eslint-disable-line cypress/unsafe-to-chain-command
-        .click()
-        .type('cattle-monitoring-system{enter}{esc}', { delay: 1000 });
+      cy.get('.closer', {timeout:30000}).click();
+      cy.setNamespace('cattle-monitoring');
 
       // Resource should be deployed (green badge)
-      cy.get('.outlet').contains('Deployed rancher-monitoring', { timeout: 240000 });
+      cy.get('.outlet').contains('Deployed rancher-monitoring', {timeout: 240000});
+      cy.namespaceReset();
 
     })
   );
