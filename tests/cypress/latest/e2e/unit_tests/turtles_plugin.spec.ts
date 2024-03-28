@@ -31,7 +31,7 @@ describe('Install CAPI plugin', () => {
       cypressLib.addRepository('capi-ui', 'https://github.com/rancher/capi-ui-extension.git', 'git', 'gh-pages')
     })
   );
-  
+
   qase(12,
     it('Enable extension support', () => {
       cypressLib.enableExtensionSupport(true);
@@ -44,16 +44,12 @@ describe('Install CAPI plugin', () => {
       cy.contains('Extensions')
         .click();
       cy.contains('CAPI UI');
-        
-      if (utils.isRancherManagerVersion('2.7')) {
-        cy.getBySel('"extension-card-install-btn-CAPI UI"').click();
-      } else {
-        cy.getBySel('extension-card-install-btn-capi').click();
-      }  
-      
+
+      cy.getBySel('extension-card-install-btn-capi').click();
+
       cy.clickButton('Install');
       cy.contains('Installing');
-      cy.contains('Extensions changed - reload required', {timeout: 40000});
+      cy.contains('Extensions changed - reload required', { timeout: 40000 });
       cy.clickButton('Reload');
       cy.get('.plugins')
         .children()

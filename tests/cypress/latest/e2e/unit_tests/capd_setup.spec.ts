@@ -41,9 +41,6 @@ describe('Enable CAPD provider', () => {
         .click()
         .type('rancher-turtles-system{enter}{esc}');
 
-      if (utils.isRancherManagerVersion('2.7')) {
-        cy.reload();
-      }
       // Edit Rancher turtles deployment
       cy.getBySel('sortable-table-1-action-button').click();
       cy.contains('Edit Config')
@@ -51,7 +48,7 @@ describe('Enable CAPD provider', () => {
       cy.byLabel('Arguments').as('label')
       cy.get('@label').type(' --insecure-skip-verify=true')
       cy.clickButton('Save');
-      cy.contains('Active' + ' ' + deployment, {timeout: 20000});
+      cy.contains('Active' + ' ' + deployment, { timeout: 20000 });
       cy.getBySel('namespaces-values-close-0')
         .click();
       cy.contains('Only User Namespaces')
@@ -59,7 +56,7 @@ describe('Enable CAPD provider', () => {
     })
   );
 
-    qase(12,
+  qase(12,
     it('Create CAPD namespace', () => {
       cy.contains('local')
         .click();
@@ -68,9 +65,6 @@ describe('Enable CAPD provider', () => {
         .click()
         .type('Not{enter}{esc}');
 
-      if (utils.isRancherManagerVersion('2.7')) {
-        cy.reload();
-      }
       // Create CAPD namespace
       cy.contains('Create Namespace')
         .click();
@@ -99,7 +93,7 @@ describe('Enable CAPD provider', () => {
         cy.get('.CodeMirror')
           .then((editor) => {
             editor[0].CodeMirror.setValue(data);
-        })
+          })
       })
       cy.clickButton('Create')
       cy.contains('Active ' + 'docker');
@@ -123,7 +117,7 @@ describe('Enable CAPD provider', () => {
         cy.get('.CodeMirror')
           .then((editor) => {
             editor[0].CodeMirror.setValue(data);
-        })
+          })
       })
 
       cy.clickButton('Import')

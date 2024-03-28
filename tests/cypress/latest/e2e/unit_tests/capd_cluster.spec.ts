@@ -47,7 +47,7 @@ describe('Import CAPD', () => {
       cy.typeValue('Name', 'clusters');
       cy.typeValue('Repository URL', repo);
       cy.typeValue('Branch Name', 'main');
-      
+
       // Create Git repo
       cy.clickButton('Next');
       cy.clickButton('Create');
@@ -60,15 +60,15 @@ describe('Import CAPD', () => {
       // Retry test once, to increase the effective timeout for cluster import
       retries: 1
     },
-    () => {
-      // Check child cluster cluster is created and auto-imported
-      cypressLib.burgerMenuToggle();
-      cy.contains('Pending ' + cluster, {timeout: 120000});
-      
-      // Check cluster is Active
-      cy.clickButton('Manage');
-      cy.contains('Active' + ' ' + cluster, {timeout: 120000});
-    })
+      () => {
+        // Check child cluster cluster is created and auto-imported
+        cypressLib.burgerMenuToggle();
+        cy.contains('Pending ' + cluster, { timeout: 120000 });
+
+        // Check cluster is Active
+        cy.clickButton('Manage');
+        cy.contains('Active' + ' ' + cluster, { timeout: 120000 });
+      })
   );
 
   qase(16,
@@ -77,10 +77,10 @@ describe('Import CAPD', () => {
       // Click on imported CAPD cluster
       cy.contains(cluster).click();
       cy.get('.nav').contains('Apps')
-      .click();
-      cy.contains('Monitoring', {timeout:30000})
         .click();
-      cy.contains('Charts: Monitoring', {timeout:30000});
+      cy.contains('Monitoring', { timeout: 30000 })
+        .click();
+      cy.contains('Charts: Monitoring', { timeout: 30000 });
 
       // Install monitoring app
       cy.clickButton('Install');
@@ -89,17 +89,14 @@ describe('Import CAPD', () => {
       cy.clickButton('Install');
 
       // Close the shell to avoid conflict
-      cy.get('.closer', {timeout:30000})
+      cy.get('.closer', { timeout: 30000 })
         .click();
       cy.contains('Only User Namespaces') // eslint-disable-line cypress/unsafe-to-chain-command
         .click()
-        .type('cattle-monitoring-system{enter}{esc}', { delay: 1000});
+        .type('cattle-monitoring-system{enter}{esc}', { delay: 1000 });
 
-      if (utils.isRancherManagerVersion('2.7')) {
-        cy.reload();
-      }
       // Resource should be deployed (green badge)
-      cy.get('.outlet').contains('Deployed rancher-monitoring', {timeout: 240000});
+      cy.get('.outlet').contains('Deployed rancher-monitoring', { timeout: 240000 });
 
     })
   );
