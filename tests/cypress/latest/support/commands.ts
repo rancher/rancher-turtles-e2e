@@ -19,7 +19,7 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 
 // Generic commands
 // Go to specific Sub Menu from Access Menu
-Cypress.Commands.add('accesMenuSelection', (firstAccessMenu,secondAccessMenu) => {
+Cypress.Commands.add('accesMenuSelection', (firstAccessMenu, secondAccessMenu) => {
   cypressLib.accesMenu(firstAccessMenu);
   cypressLib.accesMenu(secondAccessMenu);
 });
@@ -74,6 +74,24 @@ Cypress.Commands.add('addFleetGitRepo', ({ repoName, repoUrl, branch }) => {
   cy.clickButton('Create');
 })
 
+// Command remove Fleet Git Repository
+Cypress.Commands.add('removeFleetGitRepo', (repoName) => {
+  // Go to 'Continuous Delivery'
+  cypressLib.accesMenu('Continuous Delivery');
+  // Click 'Git Repo' from the left navigation
+  cypressLib.accesMenu('Git Repos');
+  // Change the namespace to fleet-local using the dropdown on the top bar
+  cy.contains('fleet-').click();
+  cy.contains('fleet-local').should('be.visible').click();
+  // Click the repo link
+  cy.contains(repoName).click();
+  cy.url().should("include", "fleet/fleet.cattle.io.gitrepo/fleet-local/clusters")
+  // Click on the actions menu and select 'Delete' from the menu
+  cy.get('.actions .btn.actions').click();
+  cy.get('.icon.group-icon.icon-trash').click();
+  cypressLib.confirmDelete();
+})
+
 Cypress.Commands.overwrite('type', (originalFn, subject, text, options = {}) => {
   options.delay = 100;
   return originalFn(subject, text, options);
@@ -93,5 +111,5 @@ for (const command of ['visit', 'click', 'trigger', 'type', 'clear', 'reload', '
       }, COMMAND_DELAY);
     });
   });
-}; 
+};
 

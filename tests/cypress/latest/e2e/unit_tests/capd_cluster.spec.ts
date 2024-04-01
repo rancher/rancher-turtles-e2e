@@ -45,18 +45,18 @@ describe('Import CAPD', () => {
       // Retry test once, to increase the effective timeout for cluster import
       retries: 1
     },
-    () => {
-      // Check child cluster cluster is created and auto-imported
-      cy.namespaceAutoImport('Enable');
-      
-      // Check child cluster is created and auto-imported
-      cy.visit('/');
-      cy.contains('Pending ' + cluster, {timeout: 120000});
+      () => {
+        // Check child cluster cluster is created and auto-imported
+        cy.namespaceAutoImport('Enable');
 
-      // Check cluster is Active
-      cy.clickButton('Manage');
-      cy.contains('Active ' + cluster, {timeout: 180000});
-    })
+        // Check child cluster is created and auto-imported
+        cy.visit('/');
+        cy.contains('Pending ' + cluster, { timeout: 120000 });
+
+        // Check cluster is Active
+        cy.clickButton('Manage');
+        cy.contains('Active ' + cluster, { timeout: 180000 });
+      })
   );
 
   qase(16,
@@ -77,12 +77,25 @@ describe('Import CAPD', () => {
       cy.clickButton('Install');
 
       // Close the shell to avoid conflict
-      cy.get('.closer', {timeout:30000}).click();
+      cy.get('.closer', { timeout: 30000 }).click();
       cy.setNamespace('cattle-monitoring');
 
       // Resource should be deployed (green badge)
-      cy.get('.outlet').contains('Deployed rancher-monitoring', {timeout: 240000});
+      cy.get('.outlet').contains('Deployed rancher-monitoring', { timeout: 240000 });
       cy.namespaceReset();
+
+    })
+  );
+
+  qase(17,
+    it('delete the CAPD cluster repo', () => {
+
+      // Remove the fleet git repo
+      cy.removeFleetGitRepo(repoName)
+      // Wait until the following returns no clusters found:
+      // kubectl get clusters.cluster.x-k8s.io
+      // This is checked by ensuring the cluster is not available in navigation menu
+      cy.contains(cluster, { timeout: 120000 }).should('not.exist');
 
     })
   );

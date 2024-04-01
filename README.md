@@ -11,3 +11,18 @@ What tests are doing:
 
 
 [![UI-RM_head_2.8](https://github.com/rancher-sandbox/rancher-turtles-e2e/actions/workflows/ui-rm_head_2.8.yaml/badge.svg?branch=main)](https://github.com/rancher-sandbox/rancher-turtles-e2e/actions/workflows/ui-rm_head_2.8.yaml)
+
+## Running the tests locally
+
+### Pre-requisites
+1. Install Rancher.
+2. Install Rancher Turtles operator.
+3. Install CAPI UI Extensions.
+
+### Running the test
+1. `cd tests/cypress/latest`
+2. Install Cypress and its dependencies: `npm install`
+3. Export the following ENV VAR: `RANCHER_URL`, `RANCHER_PASSWORD`, `RANCHER_USERNAME`, `CYPRESS_TAGS=main`.
+4. Start Cypress: `./node_modules/cypress/bin/cypress open -C cypress.config.ts`
+
+The Cypress GUI should now be visible.
