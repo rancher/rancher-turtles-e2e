@@ -76,10 +76,8 @@ Cypress.Commands.add('addFleetGitRepo', ({ repoName, repoUrl, branch }) => {
 
 // Command remove Fleet Git Repository
 Cypress.Commands.add('removeFleetGitRepo', (repoName) => {
-  // Go to 'Continuous Delivery'
-  cypressLib.accesMenu('Continuous Delivery');
-  // Click 'Git Repo' from the left navigation
-  cypressLib.accesMenu('Git Repos');
+  // Go to 'Continuous Delivery' > 'Git Repos'
+  cy.accesMenuSelection('Continuous Delivery', 'Git Repos');
   // Change the namespace to fleet-local using the dropdown on the top bar
   cy.contains('fleet-').click();
   cy.contains('fleet-local').should('be.visible').click();
