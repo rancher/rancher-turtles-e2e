@@ -19,37 +19,12 @@ import * as utils from "~/support/utils";
 Cypress.config();
 describe('Enable CAPD provider', () => {
   const namespace = "capd-system"
-  const deployment = "rancher-turtles-controller-manager"
 
   beforeEach(() => {
     cy.login();
     cy.visit('/');
     cypressLib.burgerMenuToggle();
   });
-
-  qase(11,
-    it('CAPD prerequisites', () => {
-
-      // Open Rancher turtles deployment
-      cy.contains('local')
-        .click();
-      cy.get('.nav').contains('Workloads')
-        .click();
-      cy.get('.nav').contains('Deployments')
-        .click();
-      cy.setNamespace('rancher-turtles-system');
-
-      // Edit Rancher turtles deployment
-      cy.getBySel('sortable-table-1-action-button').click();
-      cy.contains('Edit Config')
-        .click();
-      cy.byLabel('Arguments').as('label')
-      cy.get('@label').type(' --insecure-skip-verify=true')
-      cy.clickButton('Save');
-      cy.contains('Active' + ' ' + deployment, {timeout: 20000});
-      cy.namespaceReset();
-    })
-  );
 
   qase(12,
     it('Create CAPD namespace', () => {
@@ -87,31 +62,11 @@ describe('Enable CAPD provider', () => {
       })
       cy.clickButton('Create')
       cy.contains('Active ' + 'docker');
-    })
-  );
 
-  qase(14,
-    it('Enable CAPI Kubeadm provider', () => {
-      cy.contains('local')
-        .click();
-      cypressLib.accesMenu('Projects/Namespaces');
-      cy.setNamespace('Not');
-
-      // Create CAPI Kubeadm provider
-      cy.get('.header-buttons > :nth-child(1) > .icon')
-        .click();
-      cy.contains('Import YAML');
-      cy.readFile('./fixtures/capi-kubeadm-provider.yaml').then((data) => {
-        cy.get('.CodeMirror')
-          .then((editor) => {
-            editor[0].CodeMirror.setValue(data);
-          })
-      })
-
-      cy.clickButton('Import')
-      cy.clickButton('Close')
-      cy.contains('Active ' + 'capi-kubeadm-bootstrap-system');
-      cy.contains('Active ' + 'capi-kubeadm-control-plane-system');
+      cy.contains('local').click();
+      cy.accesMenuSelection('Workloads', 'Deployments');
+      cy.setNamespace(namespace);
+      cy.contains('Active' + 'capd-controller-manager').should('exist');
       cy.namespaceReset();
     })
   );

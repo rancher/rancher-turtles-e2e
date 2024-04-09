@@ -24,7 +24,7 @@ What tests are doing:
 ### Running the test
 1. `cd tests/cypress/latest`
 2. Install Cypress and its dependencies: `npm install`
-3. Export the following ENV VAR: `RANCHER_URL`, `RANCHER_PASSWORD`, `RANCHER_USERNAME`, `CYPRESS_TAGS=main`.
+3. Export the following ENV VAR: `RANCHER_URL`, `RANCHER_PASSWORD`, `RANCHER_USERNAME`, `CYPRESS_TAGS=main`, and `AWS_B64ENCODED_CREDENTIALS` if testing CAPA.
 4. Start Cypress: `./node_modules/cypress/bin/cypress open -C cypress.config.ts`
 
 The Cypress GUI should now be visible.

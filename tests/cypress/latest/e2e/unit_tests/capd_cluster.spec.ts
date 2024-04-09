@@ -28,96 +28,96 @@ describe('Import CAPD', () => {
     cypressLib.burgerMenuToggle();
   });
 
- // TODO: Refactor tests to reduce running time
- branchNames.forEach((branch) => {
-  qase(14,
-    it('Import CAPD cluster using fleet', () => {
-      cypressLib.checkNavIcon('cluster-management')
-        .should('exist');
+  // TODO: Refactor tests to reduce running time
+  branchNames.forEach((branch) => {
+    qase(14,
+      it('Import CAPD cluster using fleet', () => {
+        cypressLib.checkNavIcon('cluster-management')
+          .should('exist');
 
-      // Add CAPD fleet repository
-      cy.addFleetGitRepo({ repoName, repoUrl, branch });
-      cy.contains(repoName).click();
-    })
-  );
-
-  qase(15,
-    it('Auto import child CAPD cluster', () => {
-      if (branch == 'main') {
-        cy.namespaceAutoImport('Enable');
-      }
-      // Check child cluster is created and auto-imported
-      cy.visit('/');
-      cy.contains('Pending ' + clusterFull, {timeout: 120000});
-
-      // Check cluster is Active
-      cy.clickButton('Manage');
-      cy.contains('Active ' + clusterFull, {timeout: 180000});
-      cy.checkCAPICluster(clusterShort);
-    })
-  );
-
-  qase(16,
-    it('Install App on imported cluster', { retries: 1 }, () => {
-
-      // Click on imported CAPD cluster
-      cy.contains(clusterFull).click();
-
-      // Install App
-      cy.installApp('Monitoring', 'cattle-monitoring');
-    })
-  );
-
-  qase(17,
-    it('Scale imported CAPD cluster', () => {
-
-      // Access CAPI cluster
-      cy.accesMenuSelection('Cluster Management', 'CAPI');
-      cy.contains("Machine Deployments").click();
-      cy.getBySel('sortable-table-0-action-button').click();
-      cy.contains('Edit YAML')
-        .click();
-      cy.get('.CodeMirror')
-        .then((editor) => {
-          var text = editor[0].CodeMirror.getValue();
-          text = text.replace(/replicas: 2/g, 'replicas: 3');
-          editor[0].CodeMirror.setValue(text);
-          cy.clickButton('Save');
+        // Add CAPD fleet repository
+        cy.addFleetGitRepo({ repoName, repoUrl, branch });
+        cy.contains(repoName).click();
       })
+    );
 
-      // Check CAPI cluster status
-      cy.contains('Machine Deployments').click();
-      cy.contains('Running ' + clusterShort, { timeout: 150000 });
-      cy.get('.content > .count').contains('3');
-      cy.checkCAPICluster(clusterShort);
-    })
-  );
+    qase(15,
+      it('Auto import child CAPD cluster', () => {
+        if (branch == 'main') {
+          cy.namespaceAutoImport('Enable');
+        }
+        // Check child cluster is created and auto-imported
+        cy.visit('/');
+        cy.contains('Pending ' + clusterFull, { timeout: 120000 });
 
-  qase(18,
-    it('Remove imported CAPD cluster from Rancher Manager', () => {
+        // Check cluster is Active
+        cy.clickButton('Manage');
+        cy.contains('Active ' + clusterFull, { timeout: 180000 });
+        cy.checkCAPICluster(clusterShort);
+      })
+    );
 
-      // Check cluster is not deleted after removal
-      cy.deleteCluster(clusterFull);
-      cy.visit('/');
-      cy.checkCAPICluster(clusterShort);
-    })
-  );
+    qase(16,
+      it('Install App on imported cluster', { retries: 1 }, () => {
 
-  qase(19,
-    it('Delete the CAPD cluster fleet repo', () => {
+        // Click on imported CAPD cluster
+        cy.contains(clusterFull).click();
 
-      // Remove the fleet git repo
-      cy.removeFleetGitRepo(repoName)
-      // Wait until the following returns no clusters found:
-      // kubectl get clusters.cluster.x-k8s.io
-      // This is checked by ensuring the cluster is not available in navigation menu and CAPI menu
-      cy.contains(clusterFull, { timeout: 120000 }).should('not.exist');
-      cypressLib.burgerMenuToggle();
-      cy.accesMenuSelection('Cluster Management', 'CAPI');
-      cy.contains('CAPI Clusters').click();
-      cy.contains(clusterShort).should('not.exist', { timeout: 150000 });
-    })
-  );
+        // Install App
+        cy.installApp('Monitoring', 'cattle-monitoring');
+      })
+    );
 
-})
+    qase(17,
+      it('Scale imported CAPD cluster', () => {
+
+        // Access CAPI cluster
+        cy.accesMenuSelection('Cluster Management', 'CAPI');
+        cy.contains("Machine Deployments").click();
+        cy.getBySel('sortable-table-0-action-button').click();
+        cy.contains('Edit YAML')
+          .click();
+        cy.get('.CodeMirror')
+          .then((editor) => {
+            var text = editor[0].CodeMirror.getValue();
+            text = text.replace(/replicas: 2/g, 'replicas: 3');
+            editor[0].CodeMirror.setValue(text);
+            cy.clickButton('Save');
+          })
+
+        // Check CAPI cluster status
+        cy.contains('Machine Deployments').click();
+        cy.contains('Running ' + clusterShort, { timeout: 150000 });
+        cy.get('.content > .count').contains('3');
+        cy.checkCAPICluster(clusterShort);
+      })
+    );
+
+    qase(18,
+      it('Remove imported CAPD cluster from Rancher Manager', () => {
+
+        // Check cluster is not deleted after removal
+        cy.deleteCluster(clusterFull);
+        cy.visit('/');
+        cy.checkCAPICluster(clusterShort);
+      })
+    );
+
+    qase(19,
+      it('Delete the CAPD cluster fleet repo', () => {
+
+        // Remove the fleet git repo
+        cy.removeFleetGitRepo(repoName)
+        // Wait until the following returns no clusters found:
+        // kubectl get clusters.cluster.x-k8s.io
+        // This is checked by ensuring the cluster is not available in navigation menu and CAPI menu
+        cy.contains(clusterFull, { timeout: 120000 }).should('not.exist');
+        cypressLib.burgerMenuToggle();
+        cy.accesMenuSelection('Cluster Management', 'CAPI');
+        cy.contains('CAPI Clusters').click();
+        cy.contains(clusterShort).should('not.exist', { timeout: 150000 });
+      })
+    );
+
+  })
 });

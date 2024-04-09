@@ -18,6 +18,7 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 
 Cypress.config();
 describe('Install Turtles Operator', () => {
+  const deployment = "rancher-turtles-controller-manager"
 
   beforeEach(() => {
     cy.login();
@@ -27,7 +28,13 @@ describe('Install Turtles Operator', () => {
 
   qase(11,
     it('Add local chartmuseum repo', () => {
-      cypressLib.addRepository('turtles-operator', Cypress.env('chartmuseum_repo') + ':8080', 'helm', 'none');
+      var turtlesHelmRepo = Cypress.env('chartmuseum_repo')
+      if (turtlesHelmRepo == undefined) {
+        turtlesHelmRepo = "https://rancher.github.io/turtles/"
+      } else {
+        turtlesHelmRepo += ':8080'
+      }
+      cypressLib.addRepository('turtles-operator', turtlesHelmRepo, 'helm', 'none');
     })
   );
 
@@ -37,4 +44,56 @@ describe('Install Turtles Operator', () => {
       cy.installApp('Rancher Turtles', 'rancher-turtles-system');
     })
   );
+
+  qase(11,
+    it('Turtles prerequisites', () => {
+
+      // Open Rancher turtles deployment
+      cy.contains('local')
+        .click();
+      cy.get('.nav').contains('Workloads')
+        .click();
+      cy.get('.nav').contains('Deployments')
+        .click();
+      cy.setNamespace('rancher-turtles-system');
+
+      // Edit Rancher turtles deployment
+      cy.getBySel('sortable-table-1-action-button').click();
+      cy.contains('Edit Config')
+        .click();
+      cy.byLabel('Arguments').as('label')
+      cy.get('@label').type(' --insecure-skip-verify=true')
+      cy.clickButton('Save');
+      cy.contains('Active' + ' ' + deployment, { timeout: 20000 });
+      cy.namespaceReset();
+    })
+  );
+
+  qase(14,
+    it('Enable CAPI Kubeadm provider', () => {
+      cy.contains('local')
+        .click();
+      cypressLib.accesMenu('Projects/Namespaces');
+      cy.setNamespace('Not');
+
+      // Create CAPI Kubeadm provider
+      cy.get('.header-buttons > :nth-child(1) > .icon')
+        .click();
+      cy.contains('Import YAML');
+      cy.readFile('./fixtures/capi-kubeadm-provider.yaml').then((data) => {
+        cy.get('.CodeMirror')
+          .then((editor) => {
+            editor[0].CodeMirror.setValue(data);
+          })
+      })
+
+      cy.clickButton('Import')
+      cy.clickButton('Close')
+      cy.contains('Active ' + 'capi-kubeadm-bootstrap-system');
+      cy.contains('Active ' + 'capi-kubeadm-control-plane-system');
+
+      cy.namespaceReset();
+    })
+  );
+
 });

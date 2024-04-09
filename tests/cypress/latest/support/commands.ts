@@ -79,13 +79,13 @@ Cypress.Commands.add('installApp', (appName, namespace) => {
   cy.contains('.outer-container > .header', appName);
   cy.clickButton('Next');
   cy.clickButton('Install');
-      
+
   // Close the shell to avoid conflict
-  cy.get('.closer', { timeout:30000 }).click();
+  cy.get('.closer', { timeout: 30000 }).click();
 
   // Select app namespace
   cy.setNamespace(namespace);
-  
+
   // Resource should be deployed (green badge)
   cy.get('.outlet').contains('Deployed', { timeout: 180000 });
   cy.namespaceReset();
@@ -106,7 +106,7 @@ Cypress.Commands.add('deleteCluster', (clusterName) => {
   cy.getBySel('prompt-remove-input')
     .type(clusterName);
   cy.getBySel('prompt-remove-confirm-button').click();
-  cy.contains('Active' + ' ' + clusterName).should('not.exist', {timeout:30000});
+  cy.contains('Active' + ' ' + clusterName).should('not.exist', { timeout: 30000 });
 });
 
 // Fleet commands

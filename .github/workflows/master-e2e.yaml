@@ -221,6 +221,7 @@ jobs:
           RANCHER_PASSWORD: rancherpassword
           RANCHER_URL: https://${{ needs.create-runner.outputs.public_dns }}/dashboard
           RANCHER_USER: admin
+          AWS_B64ENCODED_CREDENTIALS: ${{ secrets.aws_b64encoded_credentials }}
           SPEC: |
             /workdir/e2e/unit_tests/first_connection.spec.ts
             /workdir/e2e/unit_tests/user.spec.ts
@@ -229,6 +230,8 @@ jobs:
             /workdir/e2e/unit_tests/menu.spec.ts
             /workdir/e2e/unit_tests/capd_setup.spec.ts
             /workdir/e2e/unit_tests/capd_cluster.spec.ts
+            /workdir/e2e/unit_tests/capa_setup.spec.ts
+            /workdir/e2e/unit_tests/capa_cluster.spec.ts
           UI_ACCOUNT: ${{ inputs.ui_account }}
           UPGRADE_OS_CHANNEL: ${{ inputs.upgrade_os_channel }}
         run: cd tests && make start-cypress-tests
