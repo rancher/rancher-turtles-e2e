@@ -46,16 +46,14 @@ Cypress.Commands.add('namespaceAutoImport', (mode) => {
 
 // Command to set namespace selection
 Cypress.Commands.add('setNamespace', (namespace) => {
-  cy.contains('Only User Namespaces') // eslint-disable-line cypress/unsafe-to-chain-command
-    .click()
-    .type(namespace + '{enter}{esc}');
+  cy.get('.ns-dropdown', { timeout: 12000 }).trigger('click');
+  cy.get('.ns-clear').click();
+  cy.get('.ns-filter-input').type(namespace + '{enter}{esc}');
 });
 
 // Command to reset namespace selection to default 'Only User Namespaces'
 Cypress.Commands.add('namespaceReset', () => {
-  cy.getBySel('namespaces-values-close-0').click();
-  cy.contains('Only User Namespaces').click();
-  cy.getBySel('namespaces-dropdown').click();
+  cy.setNamespace('Only User Namespaces');
 });
 
 // Command to check CAPI cluster Active status
