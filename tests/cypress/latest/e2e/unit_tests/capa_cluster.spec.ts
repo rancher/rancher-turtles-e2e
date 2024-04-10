@@ -29,7 +29,7 @@ describe('Import CAPA', () => {
 
   qase(15,
     it('Auto import child CAPA cluster', () => {
-      // cy.namespaceAutoImport('Enable');
+      cy.namespaceAutoImport('Enable');
 
       // Check child cluster is created and auto-imported
       cy.visit('/');
@@ -81,7 +81,7 @@ describe('Import CAPA', () => {
       cypressLib.burgerMenuToggle();
       cy.accesMenuSelection('Cluster Management', 'CAPI');
       cy.contains('CAPI Clusters').click();
-      cy.contains(clusterShort).should('not.exist', { timeout: timeout });
+      cy.contains(clusterShort, { timeout: timeout }).should('not.exist');
     })
   );
 

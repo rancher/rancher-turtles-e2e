@@ -63,10 +63,11 @@ describe('Enable CAPD provider', () => {
       cy.clickButton('Create')
       cy.contains('Active ' + 'docker');
 
+      cypressLib.burgerMenuToggle();
       cy.contains('local').click();
       cy.accesMenuSelection('Workloads', 'Deployments');
       cy.setNamespace(namespace);
-      cy.contains('Active' + 'capd-controller-manager').should('exist');
+      cy.contains('Active ' + 'capd-controller-manager').should('exist');
       cy.namespaceReset();
     })
   );

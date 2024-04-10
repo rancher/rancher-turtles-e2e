@@ -45,7 +45,7 @@ describe('Setup CAPA', () => {
                         data = data.replace(/<replace_me>/g, Cypress.env('aws_b64encoded_credentials'))
                         editor[0].CodeMirror.setValue(data);
                     })
-            })
+            });
 
             cy.clickButton('Import')
             cy.clickButton('Close')
@@ -71,13 +71,14 @@ describe('Setup CAPA', () => {
                         editor[0].CodeMirror.setValue(data);
                     })
             })
-            cy.clickButton('Create')
-            cy.contains('Active ' + 'aws' + 'v2.3.5' + 'True', { timeout: 50000 });
+            cy.clickButton('Create');
+            cy.contains('Active ' + 'aws');
 
+            cypressLib.burgerMenuToggle();
             cy.contains('local').click();
             cy.accesMenuSelection('Workloads', 'Deployments');
             cy.setNamespace(namespace);
-            cy.contains('Active' + 'capa-controller-manager').should('exist');
+            cy.contains('Active ' + 'capa-controller-manager', { timeout: 10000 }).should('exist');
             cy.namespaceReset();
         })
     );

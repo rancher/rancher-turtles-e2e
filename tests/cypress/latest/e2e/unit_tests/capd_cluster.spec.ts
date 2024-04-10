@@ -115,7 +115,7 @@ describe('Import CAPD', () => {
         cypressLib.burgerMenuToggle();
         cy.accesMenuSelection('Cluster Management', 'CAPI');
         cy.contains('CAPI Clusters').click();
-        cy.contains(clusterShort).should('not.exist', { timeout: 150000 });
+        cy.contains(clusterShort, { timeout: 120000 }).should('not.exist');
       })
     );
 
