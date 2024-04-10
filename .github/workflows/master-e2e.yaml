@@ -17,6 +17,9 @@ on:
         # - if the person still has access to the repo
         description: PAT token used to add runner
         required: true
+      aws_b64encoded_credentials:
+        description: AWS_B64ENCODED_CREDENTIALS required to create CAPA cluster.
+        required: true
     inputs:
       cert-manager_version:
         description: Version of cert-manager to use
