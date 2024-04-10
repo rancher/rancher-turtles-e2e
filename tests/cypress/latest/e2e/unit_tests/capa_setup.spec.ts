@@ -73,13 +73,13 @@ describe('Setup CAPA', () => {
                     })
             })
             cy.clickButton('Create');
-            cy.contains('Active ' + 'aws');
+            cy.contains('Active aws v2.3.5 True', { timeout: 15000 });
 
             cypressLib.burgerMenuToggle();
             cy.contains('local').click();
             cy.accesMenuSelection('Workloads', 'Deployments');
             cy.setNamespace(namespace);
-            cy.contains('Active ' + 'capa-controller-manager', { timeout: 10000 }).should('exist');
+            cy.contains('Active ' + 'capa-controller-manager');
             cy.namespaceReset();
         })
     );
