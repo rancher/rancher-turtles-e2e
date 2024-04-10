@@ -33,6 +33,7 @@ describe('Setup CAPA', () => {
 
     qase(14,
         it('Create CAPA secret', () => {
+            const secretName = 'capa-variables'
             cy.contains('local')
                 .click();
 
@@ -47,9 +48,9 @@ describe('Setup CAPA', () => {
                     })
             });
 
-            cy.clickButton('Import')
-            cy.clickButton('Close')
-
+            cy.clickButton('Import');
+            cy.contains(secretName).trigger('click');
+            cy.url().should('include', 'secret/capa-system/' + secretName);
         })
     );
 
