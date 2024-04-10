@@ -17,19 +17,20 @@ docker network create \
     kind
 
 # Start Cypress tests with docker
-docker run -v $PWD:/workdir -w /workdir                     \
-    -e CYPRESS_TAGS=$CYPRESS_TAGS                           \
-    -e CAPI_UI_VERSION=$CAPI_UI_VERSION                     \
-    -e CHARTMUSEUM_REPO=$CHARTMUSEUM_REPO                   \
-    -e K8S_UPSTREAM_VERSION=$K8S_UPSTREAM_VERSION           \
-    -e K8S_VERSION_TO_PROVISION=$K8S_VERSION_TO_PROVISION   \
-    -e OPERATOR_REPO=$OPERATOR_REPO                         \
-    -e RANCHER_VERSION=$RANCHER_VERSION                     \
-    -e RANCHER_PASSWORD=$RANCHER_PASSWORD                   \
-    -e RANCHER_URL=$RANCHER_URL                             \
-    -e RANCHER_USER=$RANCHER_USER                           \
-    -e UI_ACCOUNT=$UI_ACCOUNT                               \
-    --add-host host.docker.internal:host-gateway            \
-    --ipc=host                                              \
-    $CYPRESS_DOCKER                                         \
+docker run -v $PWD:/workdir -w /workdir \
+    -e CYPRESS_TAGS=$CYPRESS_TAGS \
+    -e CAPI_UI_VERSION=$CAPI_UI_VERSION \
+    -e CHARTMUSEUM_REPO=$CHARTMUSEUM_REPO \
+    -e K8S_UPSTREAM_VERSION=$K8S_UPSTREAM_VERSION \
+    -e K8S_VERSION_TO_PROVISION=$K8S_VERSION_TO_PROVISION \
+    -e OPERATOR_REPO=$OPERATOR_REPO \
+    -e RANCHER_VERSION=$RANCHER_VERSION \
+    -e RANCHER_PASSWORD=$RANCHER_PASSWORD \
+    -e RANCHER_URL=$RANCHER_URL \
+    -e AWS_B64ENCODED_CREDENTIALS=$AWS_B64ENCODED_CREDENTIALS \
+    -e RANCHER_USER=$RANCHER_USER \
+    -e UI_ACCOUNT=$UI_ACCOUNT \
+    --add-host host.docker.internal:host-gateway \
+    --ipc=host \
+    $CYPRESS_DOCKER \
     -s $SPEC
