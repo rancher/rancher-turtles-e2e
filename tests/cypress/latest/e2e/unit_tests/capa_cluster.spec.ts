@@ -16,6 +16,12 @@ describe('Import CAPA', () => {
     cypressLib.burgerMenuToggle();
   });
 
+  qase(13,
+    it('Setup the namespace for importing', () => {
+      cy.namespaceAutoImport('Enable');
+    })
+  );
+
   qase(14,
     it('Import CAPA cluster using fleet', () => {
       cypressLib.checkNavIcon('cluster-management')
@@ -29,8 +35,6 @@ describe('Import CAPA', () => {
 
   qase(15,
     it('Auto import child CAPA cluster', () => {
-      cy.namespaceAutoImport('Enable');
-
       // Check child cluster is created and auto-imported
       cy.visit('/');
       cy.contains('Pending ' + clusterFull, { timeout: timeout });

@@ -39,12 +39,21 @@ Cypress.Commands.add('namespaceAutoImport', (mode) => {
   cy.reload(true);
   cy.getBySel('sortable-table-0-action-button').click();
 
-  cy.contains(mode + ' CAPI Auto-Import')
-    .click();
+
+  // If the desired mode is already in place, then simply reload the page.
+  cy.get('.list-unstyled.menu').then(($list) => {
+    if ($list.text().includes(mode + ' CAPI Auto-Import')) {
+      cy.contains(mode + ' CAPI Auto-Import').click();
+    } else {
+      // Workaround to close the dropdown menu
+      cy.reload();
+    }
+  })
   cy.namespaceReset();
 });
 
 // Command to set namespace selection
+// TOOD(pvala): Could be improved to check if the namespace is already set before changing it
 Cypress.Commands.add('setNamespace', (namespace) => {
   cy.get('.ns-dropdown', { timeout: 12000 }).trigger('click');
   cy.get('.ns-clear').click();

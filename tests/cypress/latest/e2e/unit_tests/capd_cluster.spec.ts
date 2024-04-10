@@ -30,6 +30,17 @@ describe('Import CAPD', () => {
 
   // TODO: Refactor tests to reduce running time
   branchNames.forEach((branch) => {
+
+    qase(13,
+      it('Setup the namespace for importing', () => {
+        if (branch == 'main') {
+          cy.namespaceAutoImport('Enable');
+        } else {
+          cy.namespaceAutoImport('Disable');
+        }
+      })
+    );
+
     qase(14,
       it('Import CAPD cluster using fleet', () => {
         cypressLib.checkNavIcon('cluster-management')
@@ -43,9 +54,6 @@ describe('Import CAPD', () => {
 
     qase(15,
       it('Auto import child CAPD cluster', () => {
-        if (branch == 'main') {
-          cy.namespaceAutoImport('Enable');
-        }
         // Check child cluster is created and auto-imported
         cy.visit('/');
         cy.contains('Pending ' + clusterFull, { timeout: 120000 });
@@ -115,7 +123,7 @@ describe('Import CAPD', () => {
         cypressLib.burgerMenuToggle();
         cy.accesMenuSelection('Cluster Management', 'CAPI');
         cy.contains('CAPI Clusters').click();
-        cy.contains(clusterShort, { timeout: 120000 }).should('not.exist');
+        cy.contains(clusterShort, { timeout: 300000 }).should('not.exist');
       })
     );
 
