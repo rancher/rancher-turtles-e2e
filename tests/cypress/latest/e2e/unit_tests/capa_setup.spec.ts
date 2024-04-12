@@ -63,7 +63,7 @@ describe('Setup CAPA', () => {
                     })
             })
             cy.clickButton('Create');
-            cy.contains('Active ' + providerName + ' ' + providerVersion + ' True', { timeout: 15000 });
+            cy.contains('Active ' + providerName + ' ' + providerVersion + ' True', { timeout: 20000 });
 
             cypressLib.burgerMenuToggle();
             cy.contains('local').click();

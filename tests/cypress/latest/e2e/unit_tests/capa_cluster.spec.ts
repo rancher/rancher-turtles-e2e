@@ -88,7 +88,6 @@ describe('Import CAPA', () => {
       cy.accesMenuSelection('Cluster Management', 'CAPI');
       cy.contains('CAPI Clusters').click();
       cy.contains('Deleting ' + clusterShort);
-      // TODO: uncomment this once the cluster deletion issue is fixed. The cluster sometimes is not deleted and stays around.
       cy.contains(clusterShort, { timeout: timeout }).should('not.exist');
     })
   );
