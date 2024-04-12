@@ -71,7 +71,7 @@ describe('Import CAPA', () => {
       cypressLib.burgerMenuToggle();
       cy.accesMenuSelection('Cluster Management', 'CAPI');
       cy.contains('CAPI Clusters').click();
-      cy.contains('Provisioned ' + clusterShort, { timeout: timeout });
+      cy.contains('Provisioned ' + clusterShort);
     })
   );
 

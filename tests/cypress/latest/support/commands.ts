@@ -52,10 +52,25 @@ Cypress.Commands.add('namespaceAutoImport', (mode) => {
   cy.namespaceReset();
 });
 
+// Command to create namespace
+Cypress.Commands.add('createNamespace', (namespace) => {
+  cy.contains('local')
+    .click();
+  cypressLib.accesMenu('Projects/Namespaces');
+  cy.setNamespace('Not');
+
+  // Create namespace
+  cy.contains('Create Namespace').click();
+  cy.typeValue('Name', namespace);
+  cy.clickButton('Create');
+  cy.contains('Active' + ' ' + namespace);
+  cy.namespaceReset();
+});
+
 // Command to set namespace selection
 // TOOD(pvala): Could be improved to check if the namespace is already set before changing it
 Cypress.Commands.add('setNamespace', (namespace) => {
-  cy.get('.ns-dropdown', { timeout: 12000 }).trigger('click');
+  cy.getBySel('namespaces-dropdown', { timeout: 12000 }).trigger('click');
   cy.get('.ns-clear').click();
   cy.get('.ns-filter-input').type(namespace + '{enter}{esc}');
 });

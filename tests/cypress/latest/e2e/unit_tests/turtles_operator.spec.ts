@@ -27,7 +27,7 @@ describe('Install Turtles Operator', () => {
   });
 
   qase(11,
-    it('Add local chartmuseum repo', () => {
+    it('Add turtles repo', () => {
       var turtlesHelmRepo = Cypress.env('chartmuseum_repo')
       if (turtlesHelmRepo == undefined) {
         turtlesHelmRepo = "https://rancher.github.io/turtles/"

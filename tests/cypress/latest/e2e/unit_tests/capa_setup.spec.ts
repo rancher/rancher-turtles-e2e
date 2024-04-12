@@ -1,11 +1,12 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
-import * as utils from "~/support/utils";
 
 Cypress.config();
 describe('Setup CAPA', () => {
     const namespace = "capa-system"
+    const providerName = "aws"
+    const providerVersion = "v2.3.5"
 
     beforeEach(() => {
         cy.login();
@@ -16,18 +17,7 @@ describe('Setup CAPA', () => {
 
     qase(12,
         it('Create CAPA namespace', () => {
-            cy.contains('local')
-                .click();
-            cypressLib.accesMenu('Projects/Namespaces');
-            cy.setNamespace('Not');
-
-            // Create CAPA namespace
-            cy.contains('Create Namespace')
-                .click();
-            cy.typeValue('Name', namespace);
-            cy.clickButton('Create');
-            cy.contains('Active' + ' ' + namespace);
-            cy.namespaceReset();
+            cy.createNamespace(namespace);
         })
     );
 
@@ -73,7 +63,7 @@ describe('Setup CAPA', () => {
                     })
             })
             cy.clickButton('Create');
-            cy.contains('Active aws v2.3.5 True', { timeout: 15000 });
+            cy.contains('Active ' + providerName + ' ' + providerVersion + ' True', { timeout: 15000 });
 
             cypressLib.burgerMenuToggle();
             cy.contains('local').click();

@@ -28,18 +28,7 @@ describe('Enable CAPD provider', () => {
 
   qase(12,
     it('Create CAPD namespace', () => {
-      cy.contains('local')
-        .click();
-      cypressLib.accesMenu('Projects/Namespaces');
-      cy.setNamespace('Not');
-
-      // Create CAPD namespace
-      cy.contains('Create Namespace')
-        .click();
-      cy.typeValue('Name', namespace);
-      cy.clickButton('Create');
-      cy.contains('Active' + ' ' + namespace);
-      cy.namespaceReset();
+      cy.createNamespace(namespace);
     })
   );
 
