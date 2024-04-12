@@ -6,8 +6,8 @@ Cypress.config();
 describe('Import CAPA', () => {
   const timeout = 1200000
   const repoName = 'clusters'
-  const clusterShort = "pvala-cluster"
-  const clusterFull = "pvala-cluster-capi"
+  const clusterShort = "turtles-qa-cluster"
+  const clusterFull = "turtles-qa-cluster-capi"
   const branch = 'aws'
   const repoUrl = "https://github.com/valaparthvi/rancher-turtles-fleet-example.git"
 
@@ -30,6 +30,12 @@ describe('Import CAPA', () => {
       // Add CAPA fleet repository
       cy.addFleetGitRepo({ repoName, repoUrl, branch });
       cy.contains(repoName).click();
+
+      // Go to Cluster Management > CAPI > CAPI Clusters and check if the cluster has started provisioning
+      cypressLib.burgerMenuToggle();
+      cy.accesMenuSelection('Cluster Management', 'CAPI');
+      cy.contains('CAPI Clusters').click();
+      cy.contains('Provisioned ' + clusterShort, { timeout: timeout });
     })
   );
 
@@ -37,15 +43,11 @@ describe('Import CAPA', () => {
     it('Auto import child CAPA cluster', () => {
       // Check child cluster is created and auto-imported
       cy.visit('/');
-      cy.contains('Pending ' + clusterFull, { timeout: timeout });
+      cy.contains('Pending ' + clusterFull);
 
       // Check cluster is Active
       cy.clickButton('Manage');
       cy.contains('Active ' + clusterFull, { timeout: 300000 });
-      cypressLib.burgerMenuToggle();
-      cy.accesMenuSelection('Cluster Management', 'CAPI');
-      cy.contains('CAPI Clusters').click();
-      cy.contains('Provisioned ' + clusterShort, { timeout: 30000 });
     })
   );
 
@@ -87,7 +89,7 @@ describe('Import CAPA', () => {
       cy.contains('CAPI Clusters').click();
       cy.contains('Deleting ' + clusterShort);
       // TODO: uncomment this once the cluster deletion issue is fixed. The cluster sometimes is not deleted and stays around.
-      // cy.contains(clusterShort, { timeout: timeout }).should('not.exist');
+      cy.contains(clusterShort, { timeout: timeout }).should('not.exist');
     })
   );
 

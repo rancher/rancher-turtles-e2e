@@ -123,9 +123,7 @@ describe('Import CAPD', () => {
         cypressLib.burgerMenuToggle();
         cy.accesMenuSelection('Cluster Management', 'CAPI');
         cy.contains('CAPI Clusters').click();
-        cy.contains('Deleting ' + clusterShort);
-        // TODO: uncomment this once the cluster deletion issue is fixed. The cluster sometimes is not deleted and stays around.
-        // cy.contains(clusterShort, { timeout: 300000 }).should('not.exist');
+        cy.contains(clusterShort, { timeout: 300000 }).should('not.exist');
       })
     );
 
