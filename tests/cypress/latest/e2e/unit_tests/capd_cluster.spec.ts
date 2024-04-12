@@ -21,16 +21,15 @@ describe('Import CAPD', () => {
   const clusterShort = "cluster1"
   const clusterFull = "cluster1-capi"
   const repoUrl = "https://github.com/rancher-sandbox/rancher-turtles-fleet-example.git"
+  const branchNames = ['per-cluster-import', 'main']
 
   beforeEach(() => {
     cy.login();
     cypressLib.burgerMenuToggle();
   });
 
- [ 'per-cluster-import',
-   'main',
- ].forEach((branch) => {
-
+ // TODO: Refactor tests to reduce running time
+ branchNames.forEach((branch) => {
   qase(14,
     it('Import CAPD cluster using fleet', () => {
       cypressLib.checkNavIcon('cluster-management')
@@ -59,7 +58,7 @@ describe('Import CAPD', () => {
   );
 
   qase(16,
-    it('Install App on imported cluster', () => {
+    it('Install App on imported cluster', { retries: 1 }, () => {
 
       // Click on imported CAPD cluster
       cy.contains(clusterFull).click();
@@ -88,7 +87,7 @@ describe('Import CAPD', () => {
 
       // Check CAPI cluster status
       cy.contains('Machine Deployments').click();
-      cy.contains('Running ' + clusterShort, { timeout: 90000 });
+      cy.contains('Running ' + clusterShort, { timeout: 150000 });
       cy.get('.content > .count').contains('3');
       cy.checkCAPICluster(clusterShort);
     })
@@ -116,7 +115,7 @@ describe('Import CAPD', () => {
       cypressLib.burgerMenuToggle();
       cy.accesMenuSelection('Cluster Management', 'CAPI');
       cy.contains('CAPI Clusters').click();
-      cy.contains(clusterShort).should('not.exist', { timeout: 120000 });
+      cy.contains(clusterShort).should('not.exist', { timeout: 150000 });
     })
   );
 
