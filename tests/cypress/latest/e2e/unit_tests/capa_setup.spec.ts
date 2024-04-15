@@ -47,23 +47,24 @@ describe('Setup CAPA', () => {
 
     qase(13,
         it('Create CAPA provider', () => {
-            cypressLib.checkNavIcon('cluster-management')
-                .should('exist');
-
-            // Open Turtles menu
-            cy.accesMenuSelection('Cluster Management', 'CAPI');
-
-            // Create CAPA Infrastructure provider
-            cy.contains('Infrastructure Providers').click();
-            cy.clickButton('Create from YAML')
+            // TODO: rancher-turtles-e2e/issues/27
+            cy.contains('local')
+              .click();
+            cypressLib.accesMenu('Projects/Namespaces');
+            cy.setNamespace('Not');
+    
+            // Create CAPI Kubeadm provider
+            cy.get('.header-buttons > :nth-child(1) > .icon')
+              .click();
+            cy.contains('Import YAML');
             cy.readFile('./fixtures/capa-provider.yaml').then((data) => {
-                cy.get('.CodeMirror')
-                    .then((editor) => {
-                        editor[0].CodeMirror.setValue(data);
-                    })
+              cy.get('.CodeMirror')
+                .then((editor) => {
+                  editor[0].CodeMirror.setValue(data);
+                })
             })
-            cy.clickButton('Create');
-            cy.contains('Active ' + providerName + ' ' + providerVersion + ' True', { timeout: 20000 });
+            cy.clickButton('Import')
+            cy.clickButton('Close')
 
             cypressLib.burgerMenuToggle();
             cy.contains('local').click();

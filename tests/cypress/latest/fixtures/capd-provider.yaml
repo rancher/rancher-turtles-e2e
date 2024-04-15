@@ -1,8 +1,10 @@
-apiVersion: operator.cluster.x-k8s.io/v1alpha1
-kind: InfrastructureProvider
+apiVersion: turtles-capi.cattle.io/v1alpha1
+kind: CAPIProvider
 metadata:
   name: docker
   namespace: capd-system
 spec:
-  secretName: capi-env-variables
-  secretNamespace: capi-system
+  name: docker
+  type: infrastructure
+  configSecret:
+    name: variables

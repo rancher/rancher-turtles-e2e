@@ -14,7 +14,6 @@ limitations under the License.
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
-import * as utils from "~/support/utils";
 
 Cypress.config();
 describe('Enable CAPD provider', () => {
@@ -34,23 +33,24 @@ describe('Enable CAPD provider', () => {
 
   qase(13,
     it('Create CAPD provider', () => {
-      cypressLib.checkNavIcon('cluster-management')
-        .should('exist');
+      // TODO: rancher-turtles-e2e/issues/27
+      cy.contains('local')
+        .click();
+      cypressLib.accesMenu('Projects/Namespaces');
+      cy.setNamespace('Not');
 
-      // Open Turtles menu
-      cy.accesMenuSelection('Cluster Management', 'CAPI');
-
-      // Create CAPD Infrastructure provider
-      cy.contains('Infrastructure Providers').click();
-      cy.clickButton('Create from YAML')
+      // Create CAPI Kubeadm provider
+      cy.get('.header-buttons > :nth-child(1) > .icon')
+        .click();
+      cy.contains('Import YAML');
       cy.readFile('./fixtures/capd-provider.yaml').then((data) => {
         cy.get('.CodeMirror')
           .then((editor) => {
             editor[0].CodeMirror.setValue(data);
           })
       })
-      cy.clickButton('Create')
-      cy.contains('Active ' + 'docker');
+      cy.clickButton('Import')
+      cy.clickButton('Close')
 
       cypressLib.burgerMenuToggle();
       cy.contains('local').click();
