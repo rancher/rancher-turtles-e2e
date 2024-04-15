@@ -9,7 +9,7 @@ describe('Import CAPA', () => {
   const clusterShort = "turtles-qa-cluster"
   const clusterFull = "turtles-qa-cluster-capi"
   const branch = 'aws'
-  // TODO: rancher-turtles-e2e/issues/26
+  // TODO: use official repo, rancher-turtles-e2e/issues/26
   const repoUrl = "https://github.com/valaparthvi/rancher-turtles-fleet-example.git"
 
   beforeEach(() => {
