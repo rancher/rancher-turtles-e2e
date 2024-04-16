@@ -14,14 +14,17 @@ limitations under the License.
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
+import { contains } from 'cypress/types/jquery';
 
 Cypress.config();
 describe('Import CAPD', () => {
   const repoName = 'clusters'
   const clusterShort = "cluster1"
   const clusterFull = "cluster1-capi"
-  const repoUrl = "https://github.com/rancher-sandbox/rancher-turtles-fleet-example.git"
-  const branchNames = ['per-cluster-import', 'main']
+  const repoUrl = "https://github.com/rancher-sandbox/rancher-turtles-e2e.git"
+  const basePath = "/tests/assets/rancher-turtles-fleet-example/"
+  const pathNames = ['cluster_autoimport', 'namespace_autoimport']
+  const branch = "fleet-example-fork"
 
   beforeEach(() => {
     cy.login();
@@ -29,11 +32,11 @@ describe('Import CAPD', () => {
   });
 
   // TODO: Refactor tests to reduce running time
-  branchNames.forEach((branch) => {
+  pathNames.forEach((path) => {
 
     qase(13,
       it('Setup the namespace for importing', () => {
-        if (branch == 'main') {
+        if (path == 'namespace_autoimport') {
           cy.namespaceAutoImport('Enable');
         } else {
           cy.namespaceAutoImport('Disable');
@@ -45,9 +48,9 @@ describe('Import CAPD', () => {
       it('Import CAPD cluster using fleet', () => {
         cypressLib.checkNavIcon('cluster-management')
           .should('exist');
-
+        path = basePath + path
         // Add CAPD fleet repository
-        cy.addFleetGitRepo({ repoName, repoUrl, branch });
+        cy.addFleetGitRepo({ repoName, repoUrl, branch, path });
         cy.contains(repoName).click();
       })
     );

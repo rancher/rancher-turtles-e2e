@@ -133,7 +133,7 @@ Cypress.Commands.add('deleteCluster', (clusterName) => {
 
 // Fleet commands
 // Command add Fleet Git Repository
-Cypress.Commands.add('addFleetGitRepo', ({ repoName, repoUrl, branch }) => {
+Cypress.Commands.add('addFleetGitRepo', ({ repoName, repoUrl, branch, path }) => {
   cy.accesMenuSelection('Continuous Delivery', 'Git Repos');
   cy.contains('fleet-').click();
   cy.contains('fleet-local').should('be.visible').click();
@@ -142,6 +142,10 @@ Cypress.Commands.add('addFleetGitRepo', ({ repoName, repoUrl, branch }) => {
   cy.typeValue('Name', repoName);
   cy.typeValue('Repository URL', repoUrl);
   cy.typeValue('Branch Name', branch);
+  cy.clickButton('Add Path');
+  cy.getBySel('gitRepo-paths').within(($gitRepoPaths) => {
+    cy.getBySel('input-0').type(path);
+  })
   cy.clickButton('Next');
   cy.get('button.btn').contains('Previous').should('be.visible');
   cy.clickButton('Create');

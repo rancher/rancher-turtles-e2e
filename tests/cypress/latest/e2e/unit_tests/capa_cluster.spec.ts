@@ -8,9 +8,9 @@ describe('Import CAPA', () => {
   const repoName = 'clusters'
   const clusterShort = "turtles-qa-cluster"
   const clusterFull = "turtles-qa-cluster-capi"
-  const branch = 'aws'
-  // TODO: use official repo, rancher-turtles-e2e/issues/26
-  const repoUrl = "https://github.com/valaparthvi/rancher-turtles-fleet-example.git"
+  const branch = 'fleet-example-fork'
+  const path = '/tests/assets/rancher-turtles-fleet-example/aws'
+  const repoUrl = "https://github.com/rancher-sandbox/rancher-turtles-e2e.git"
 
   beforeEach(() => {
     cy.login();
@@ -29,7 +29,7 @@ describe('Import CAPA', () => {
         .should('exist');
 
       // Add CAPA fleet repository
-      cy.addFleetGitRepo({ repoName, repoUrl, branch });
+      cy.addFleetGitRepo({ repoName, repoUrl, branch, path });
       cy.contains(repoName).click();
 
       // Go to Cluster Management > CAPI > CAPI Clusters and check if the cluster has started provisioning
