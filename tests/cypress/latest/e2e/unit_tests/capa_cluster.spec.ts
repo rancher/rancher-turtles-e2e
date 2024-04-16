@@ -8,7 +8,7 @@ describe('Import CAPA', () => {
   const repoName = 'clusters'
   const clusterShort = "turtles-qa-cluster"
   const clusterFull = "turtles-qa-cluster-capi"
-  const branch = 'fleet-example-fork'
+  const branch = 'main'
   const path = '/tests/assets/rancher-turtles-fleet-example/aws'
   const repoUrl = "https://github.com/rancher-sandbox/rancher-turtles-e2e.git"
 

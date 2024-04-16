@@ -24,7 +24,7 @@ describe('Import CAPD', () => {
   const repoUrl = "https://github.com/rancher-sandbox/rancher-turtles-e2e.git"
   const basePath = "/tests/assets/rancher-turtles-fleet-example/"
   const pathNames = ['cluster_autoimport', 'namespace_autoimport']
-  const branch = "fleet-example-fork"
+  const branch = "main"
 
   beforeEach(() => {
     cy.login();
