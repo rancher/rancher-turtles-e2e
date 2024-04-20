@@ -34,11 +34,7 @@ Cypress.Commands.add('namespaceAutoImport', (mode) => {
 
   // Select default namespace
   cy.setNamespace('Project: Default');
-
-  // Reload required since kebab menu icon not clickable
-  cy.reload(true);
   cy.getBySel('sortable-table-0-action-button').click();
-
 
   // If the desired mode is already in place, then simply reload the page.
   cy.get('.list-unstyled.menu').then(($list) => {
@@ -68,7 +64,7 @@ Cypress.Commands.add('createNamespace', (namespace) => {
 });
 
 // Command to set namespace selection
-// TOOD(pvala): Could be improved to check if the namespace is already set before changing it
+// TODO(pvala): Could be improved to check if the namespace is already set before changing it
 Cypress.Commands.add('setNamespace', (namespace) => {
   cy.getBySel('namespaces-dropdown', { timeout: 12000 }).trigger('click');
   cy.get('.ns-clear').click();
@@ -92,10 +88,66 @@ Cypress.Commands.add('checkCAPICluster', (clusterName) => {
   cy.contains('Active ' + clusterName, { timeout: 30000 });
 });
 
+// Command to add CAPI Custom provider
+Cypress.Commands.add('addCustomProvider', (name, namespace, providerName, providerType, version, url) => {
+  // Navigate to providers Menu
+  cy.accesMenuSelection('Cluster Management', 'CAPI');
+  cy.contains('Infrastructure Providers').click();
+  cy.clickButton('Create');
+  cy.contains('Custom').click();
+
+  // Select provider type
+  cy.contains("Provider type").click();
+  cy.contains(providerType).click();
+
+  cy.getBySel('name-ns-description-namespace').type(namespace + '{enter}');
+  cy.typeValue('Name', name);
+  cy.typeValue('Provider', providerName);
+  cy.typeValue('Version', version);
+  cy.typeValue('URL', url);
+  cy.clickButton('Create');
+  cy.contains('Infrastructure Providers').should('be.visible');
+});
+
+// Command to add CAPI Infrastructure provider
+Cypress.Commands.add('addInfraProvider', (providerType, name, namespace, cloudCredentials) => {
+  // Navigate to providers Menu
+  cy.accesMenuSelection('Cluster Management', 'CAPI');
+  cy.contains('Infrastructure Providers').click();
+  cy.clickButton('Create');
+  cy.contains(providerType, { matchCase: false }).click();
+  cy.contains('Infrastructure Provider: Create ' + providerType, { matchCase: false }).should('be.visible');
+
+  // TODO: Add variables support after capi-ui-extension/issues/49
+  cy.getBySel('name-ns-description-namespace').type(namespace + '{enter}');
+  cy.typeValue('Name', name);
+
+  // Select Cloud credntials name
+  if (providerType != 'docker') {
+    cy.getBySel('cluster-prov-select-credential').trigger('click');
+    cy.contains(cloudCredentials).click();
+  }
+  cy.clickButton('Create');
+  cy.contains('Infrastructure Providers').should('be.visible');
+});
+
+// Command to add AWS Cloud Credentials
+Cypress.Commands.add('addCloudCredsAWS', (name, accessKey, secretKey) => {
+  cy.accesMenuSelection('Cluster Management', 'Cloud Credentials');
+  cy.clickButton('Create');
+  cy.contains('Cloud Credential: Create').should('be.visible');
+  cy.contains('Amazon').click();
+  cy.typeValue('Name', name);
+  cy.typeValue('Access Key', accessKey);
+  cy.typeValue('Secret Key', secretKey, false, false );
+  cy.clickButton('Create');
+  cy.getBySel('name-ns-description-name').should('not.exist');
+});
+
 // Command to Install App from Charts menu
 Cypress.Commands.add('installApp', (appName, namespace) => {
   cy.get('.nav').contains('Apps').click();
-  cy.contains(appName, { timeout: 30000 }).click();
+  cy.contains(appName, { timeout: 60000 }).click();
   cy.contains('Charts: ' + appName, { timeout: 30000 });
   cy.clickButton('Install');
   cy.contains('.outer-container > .header', appName);

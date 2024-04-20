@@ -17,8 +17,11 @@ on:
         # - if the person still has access to the repo
         description: PAT token used to add runner
         required: true
-      aws_b64encoded_credentials:
-        description: AWS_B64ENCODED_CREDENTIALS required to create CAPA cluster.
+      aws_access_key:
+        description: AWS_ACCESS_KEY_ID required to create AWS Cloud credentials.
+        required: true
+      aws_secret_key:
+        description: AWS_SECRET_ACCESS_KEY required to create AWS Cloud credentials.
         required: true
     inputs:
       cert-manager_version:
@@ -224,16 +227,16 @@ jobs:
           RANCHER_PASSWORD: rancherpassword
           RANCHER_URL: https://${{ needs.create-runner.outputs.public_dns }}/dashboard
           RANCHER_USER: admin
-          AWS_B64ENCODED_CREDENTIALS: ${{ secrets.aws_b64encoded_credentials }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key}}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
           SPEC: |
             /workdir/e2e/unit_tests/first_connection.spec.ts
             /workdir/e2e/unit_tests/user.spec.ts
             /workdir/e2e/unit_tests/turtles_operator.spec.ts
             /workdir/e2e/unit_tests/turtles_plugin.spec.ts
             /workdir/e2e/unit_tests/menu.spec.ts
-            /workdir/e2e/unit_tests/capd_setup.spec.ts
+            /workdir/e2e/unit_tests/providers_setup.spec.ts
             /workdir/e2e/unit_tests/capd_cluster.spec.ts
-            /workdir/e2e/unit_tests/capa_setup.spec.ts
             /workdir/e2e/unit_tests/capa_cluster.spec.ts
           UI_ACCOUNT: ${{ inputs.ui_account }}
           UPGRADE_OS_CHANNEL: ${{ inputs.upgrade_os_channel }}

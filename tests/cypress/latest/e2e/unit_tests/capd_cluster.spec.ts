@@ -14,7 +14,6 @@ limitations under the License.
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { contains } from 'cypress/types/jquery';
 
 Cypress.config();
 describe('Import CAPD', () => {
@@ -99,7 +98,9 @@ describe('Import CAPD', () => {
         // Check CAPI cluster status
         cy.contains('Machine Deployments').click();
         cy.contains('Running ' + clusterShort, { timeout: 150000 });
-        cy.get('.content > .count').contains('3');
+        cy.get('.content > .count')
+          .invoke('text')
+          .should('equal', '3', { timeout: 120000 });
         cy.checkCAPICluster(clusterShort);
       })
     );
