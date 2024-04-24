@@ -1,0 +1,21 @@
+name: Janitor
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  aws-janitor:
+    name: aws-janitor
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    steps:
+      - name: Cleanup
+        uses: rancher-sandbox/aws-janitor@v0.1.0
+        with:
+          regions: ap-south-2
+          commit: true
+          ignore-tag: janitor-ignore
