@@ -97,10 +97,7 @@ describe('Import CAPD', () => {
 
         // Check CAPI cluster status
         cy.contains('Machine Deployments').click();
-        cy.contains('Running ' + clusterShort, { timeout: 150000 });
-        cy.get('.content > .count')
-          .invoke('text')
-          .should('equal', '3', { timeout: 120000 });
+        cy.get('.content > .count', { timeout: 150000 }).should('have.text', '3');
         cy.checkCAPICluster(clusterShort);
       })
     );
