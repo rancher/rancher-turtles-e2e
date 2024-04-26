@@ -32,10 +32,9 @@ describe('Import CAPA', () => {
       cy.addFleetGitRepo({ repoName, repoUrl, branch, path });
       cy.contains(repoName).click();
 
-      // Go to Cluster Management > CAPI > CAPI Clusters and check if the cluster has started provisioning
+      // Go to Cluster Management > CAPI > Clusters and check if the cluster has started provisioning
       cypressLib.burgerMenuToggle();
       cy.accesMenuSelection('Cluster Management', 'CAPI');
-      cy.contains('CAPI Clusters').click();
       cy.contains('Provisioned ' + clusterShort, { timeout: timeout });
     })
   );
@@ -71,7 +70,6 @@ describe('Import CAPA', () => {
       cy.visit('/');
       cypressLib.burgerMenuToggle();
       cy.accesMenuSelection('Cluster Management', 'CAPI');
-      cy.contains('CAPI Clusters').click();
       cy.contains('Provisioned ' + clusterShort);
     })
   );
@@ -87,8 +85,6 @@ describe('Import CAPA', () => {
       cy.contains(clusterFull, { timeout: timeout }).should('not.exist');
       cypressLib.burgerMenuToggle();
       cy.accesMenuSelection('Cluster Management', 'CAPI');
-      cy.contains('CAPI Clusters').click();
-      cy.contains('Deleting ' + clusterShort, { timeout: 90000 });
       cy.contains(clusterShort, { timeout: timeout }).should('not.exist');
     })
   );

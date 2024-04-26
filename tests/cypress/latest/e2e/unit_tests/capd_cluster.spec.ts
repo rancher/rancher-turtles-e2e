@@ -97,10 +97,7 @@ describe('Import CAPD', () => {
 
         // Check CAPI cluster status
         cy.contains('Machine Deployments').click();
-        cy.contains('Running ' + clusterShort, { timeout: 150000 });
-        cy.get('.content > .count')
-          .invoke('text')
-          .should('equal', '3', { timeout: 120000 });
+        cy.get('.content > .count', { timeout: 150000 }).should('have.text', '3');
         cy.checkCAPICluster(clusterShort);
       })
     );
@@ -126,7 +123,6 @@ describe('Import CAPD', () => {
         cy.contains(clusterFull, { timeout: 120000 }).should('not.exist');
         cypressLib.burgerMenuToggle();
         cy.accesMenuSelection('Cluster Management', 'CAPI');
-        cy.contains('CAPI Clusters').click();
         cy.contains(clusterShort, { timeout: 150000 }).should('not.exist');
       })
     );

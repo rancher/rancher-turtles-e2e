@@ -80,7 +80,6 @@ Cypress.Commands.add('namespaceReset', () => {
 Cypress.Commands.add('checkCAPICluster', (clusterName) => {
   cypressLib.burgerMenuToggle();
   cy.accesMenuSelection('Cluster Management', 'CAPI');
-  cy.contains('CAPI Clusters').click();
   cy.contains('Provisioned ' + clusterName, { timeout: 30000 });
   cy.contains('Machine Deployments').click();
   cy.contains('Running ' + clusterName, { timeout: 30000 });
@@ -92,13 +91,13 @@ Cypress.Commands.add('checkCAPICluster', (clusterName) => {
 Cypress.Commands.add('addCustomProvider', (name, namespace, providerName, providerType, version, url) => {
   // Navigate to providers Menu
   cy.accesMenuSelection('Cluster Management', 'CAPI');
-  cy.contains('Infrastructure Providers').click();
+  cy.contains('Providers').click();
   cy.clickButton('Create');
   cy.contains('Custom').click();
 
   // Select provider type
   cy.contains("Provider type").click();
-  cy.contains(providerType).click();
+  cy.contains(providerType, { matchCase: false }).click();
 
   cy.getBySel('name-ns-description-namespace').type(namespace + '{enter}');
   cy.typeValue('Name', name);
@@ -106,17 +105,17 @@ Cypress.Commands.add('addCustomProvider', (name, namespace, providerName, provid
   cy.typeValue('Version', version);
   cy.typeValue('URL', url);
   cy.clickButton('Create');
-  cy.contains('Infrastructure Providers').should('be.visible');
+  cy.contains('Providers').should('be.visible');
 });
 
 // Command to add CAPI Infrastructure provider
 Cypress.Commands.add('addInfraProvider', (providerType, name, namespace, cloudCredentials) => {
   // Navigate to providers Menu
   cy.accesMenuSelection('Cluster Management', 'CAPI');
-  cy.contains('Infrastructure Providers').click();
+  cy.contains('Providers').click();
   cy.clickButton('Create');
   cy.contains(providerType, { matchCase: false }).click();
-  cy.contains('Infrastructure Provider: Create ' + providerType, { matchCase: false }).should('be.visible');
+  cy.contains('Provider: Create ' + providerType, { matchCase: false }).should('be.visible');
 
   // TODO: Add variables support after capi-ui-extension/issues/49
   cy.getBySel('name-ns-description-namespace').type(namespace + '{enter}');
@@ -128,7 +127,7 @@ Cypress.Commands.add('addInfraProvider', (providerType, name, namespace, cloudCr
     cy.contains(cloudCredentials).click();
   }
   cy.clickButton('Create');
-  cy.contains('Infrastructure Providers').should('be.visible');
+  cy.contains('Providers').should('be.visible');
 });
 
 // Command to add AWS Cloud Credentials

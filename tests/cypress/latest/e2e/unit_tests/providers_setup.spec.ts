@@ -24,7 +24,7 @@ describe('Enable CAPI Providers', () => {
   const amazonProvider = 'aws'
   const kubeadmProviderVersion = 'v1.4.6'
   const kubeadmBaseURL = 'https://github.com/kubernetes-sigs/cluster-api/releases/'
-  const kubeadmProviderTypes = ['bootstrap', 'controlPlane']
+  const kubeadmProviderTypes = ['bootstrap', 'control plane']
   const providerNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system', 'capd-system', 'capa-system']
 
   beforeEach(() => {
@@ -48,7 +48,7 @@ describe('Enable CAPI Providers', () => {
         
         // TODO: Remove condition after capi-ui-extension/issues/51
         // Create CAPI Kubeadm providers
-        if (providerType == 'controlPlane') {
+        if (providerType == 'control plane') {
           const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + 'control-plane' + '-components.yaml'
           const providerName = kubeadmProvider + '-' + 'control-plane'
           const namespace = 'capi-kubeadm-control-plane-system'
