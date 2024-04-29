@@ -35,6 +35,7 @@ describe('Import CAPA', () => {
       // Go to Cluster Management > CAPI > Clusters and check if the cluster has started provisioning
       cypressLib.burgerMenuToggle();
       cy.accesMenuSelection('Cluster Management', 'CAPI');
+      cy.checkCAPIMenu();
       cy.contains('Provisioned ' + clusterShort, { timeout: timeout });
     })
   );
@@ -70,6 +71,7 @@ describe('Import CAPA', () => {
       cy.visit('/');
       cypressLib.burgerMenuToggle();
       cy.accesMenuSelection('Cluster Management', 'CAPI');
+      cy.checkCAPIMenu();
       cy.contains('Provisioned ' + clusterShort);
     })
   );
@@ -85,6 +87,7 @@ describe('Import CAPA', () => {
       cy.contains(clusterFull, { timeout: timeout }).should('not.exist');
       cypressLib.burgerMenuToggle();
       cy.accesMenuSelection('Cluster Management', 'CAPI');
+      cy.checkCAPIMenu();
       cy.contains(clusterShort, { timeout: timeout }).should('not.exist');
     })
   );

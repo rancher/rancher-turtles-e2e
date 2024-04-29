@@ -29,6 +29,7 @@ declare global {
       createNamespace(namespace: string): Chainable<Element>;
       setNamespace(namespace: string): Chainable<Element>;
       checkCAPICluster(clustername: string): Chainable<Element>;
+      checkCAPIMenu(): Chainable<Element>;
       namespaceReset(): Chainable<Element>;
       addCustomProvider(name: string, namespace: string, providerName: string, providerType: string, version: string, url: string): Chainable<Element>;
       addInfraProvider(providerType: string, name: string, namespace: string, cloudCredentials?: string): Chainable<Element>;

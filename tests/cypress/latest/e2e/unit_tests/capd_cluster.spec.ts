@@ -83,6 +83,7 @@ describe('Import CAPD', () => {
 
         // Access CAPI cluster
         cy.accesMenuSelection('Cluster Management', 'CAPI');
+        cy.checkCAPIMenu();
         cy.contains("Machine Deployments").click();
         cy.getBySel('sortable-table-0-action-button').click();
         cy.contains('Edit YAML')
@@ -123,6 +124,7 @@ describe('Import CAPD', () => {
         cy.contains(clusterFull, { timeout: 120000 }).should('not.exist');
         cypressLib.burgerMenuToggle();
         cy.accesMenuSelection('Cluster Management', 'CAPI');
+        cy.checkCAPIMenu();
         cy.contains(clusterShort, { timeout: 150000 }).should('not.exist');
       })
     );

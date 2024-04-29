@@ -80,6 +80,7 @@ Cypress.Commands.add('namespaceReset', () => {
 Cypress.Commands.add('checkCAPICluster', (clusterName) => {
   cypressLib.burgerMenuToggle();
   cy.accesMenuSelection('Cluster Management', 'CAPI');
+  cy.checkCAPIMenu();
   cy.contains('Provisioned ' + clusterName, { timeout: 30000 });
   cy.contains('Machine Deployments').click();
   cy.contains('Running ' + clusterName, { timeout: 30000 });
@@ -87,10 +88,20 @@ Cypress.Commands.add('checkCAPICluster', (clusterName) => {
   cy.contains('Active ' + clusterName, { timeout: 30000 });
 });
 
+// Command to check CAPI Menu is visible
+Cypress.Commands.add('checkCAPIMenu', () => {
+  cy.contains('.nav', 'Clusters')
+  cy.contains('.nav', 'Machine Deployments')
+  cy.contains('.nav', 'Machine Sets')
+  cy.contains('.nav', 'Cluster Classes')
+  cy.contains('.nav', 'Providers')
+});
+
 // Command to add CAPI Custom provider
 Cypress.Commands.add('addCustomProvider', (name, namespace, providerName, providerType, version, url) => {
   // Navigate to providers Menu
   cy.accesMenuSelection('Cluster Management', 'CAPI');
+  cy.checkCAPIMenu();
   cy.contains('Providers').click();
   cy.clickButton('Create');
   cy.contains('Custom').click();
@@ -112,6 +123,7 @@ Cypress.Commands.add('addCustomProvider', (name, namespace, providerName, provid
 Cypress.Commands.add('addInfraProvider', (providerType, name, namespace, cloudCredentials) => {
   // Navigate to providers Menu
   cy.accesMenuSelection('Cluster Management', 'CAPI');
+  cy.checkCAPIMenu();
   cy.contains('Providers').click();
   cy.clickButton('Create');
   cy.contains(providerType, { matchCase: false }).click();

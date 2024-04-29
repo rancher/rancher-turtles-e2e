@@ -34,12 +34,7 @@ describe('Menu testing', () => {
       cy.accesMenuSelection('Cluster Management', 'CAPI');
 
       // Check Turtles's side menu
-      // TODO: DO a loop to check all the menu
-      cy.contains('.nav', "Clusters")
-      cy.contains('.nav', "Machine Deployments")
-      cy.contains('.nav', "Machine Sets")
-      cy.contains('.nav', "Cluster Classes")
-      cy.contains('.nav', "Providers")
+      cy.checkCAPIMenu();
     })
   );
 });
