@@ -15,7 +15,6 @@ limitations under the License.
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
-import * as utils from "~/support/utils";
 
 Cypress.config();
 describe('Install CAPI plugin', () => {
@@ -26,19 +25,15 @@ describe('Install CAPI plugin', () => {
     cypressLib.burgerMenuToggle();
   });
 
-  qase(11,
-    it('Add capi-ui repo', () => {
-      cypressLib.addRepository('capi-ui', 'https://github.com/rancher/capi-ui-extension.git', 'git', 'gh-pages')
-    })
-  );
+  it('Add capi-ui repo', () => {
+    cypressLib.addRepository('capi-ui', 'https://github.com/rancher/capi-ui-extension.git', 'git', 'gh-pages')
+  })
 
-  qase(12,
-    it('Enable extension support', () => {
-      cypressLib.enableExtensionSupport(true);
-    })
-  );
+  it('Enable extension support', () => {
+    cypressLib.enableExtensionSupport(true);
+  })
 
-  qase(13,
+  qase(3,
     it('Install CAPI plugin', () => {
       // TODO: create a function to install any plugin and not elemental only
       cy.contains('Extensions')

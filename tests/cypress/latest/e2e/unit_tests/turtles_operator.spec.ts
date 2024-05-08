@@ -26,47 +26,43 @@ describe('Install Turtles Operator', () => {
     cypressLib.burgerMenuToggle();
   });
 
-  qase(11,
-    it('Add turtles repo', () => {
-      var turtlesHelmRepo = Cypress.env('chartmuseum_repo')
-      if (turtlesHelmRepo == undefined) {
-        turtlesHelmRepo = "https://rancher.github.io/turtles/"
-      } else {
-        turtlesHelmRepo += ':8080'
-      }
-      cypressLib.addRepository('turtles-operator', turtlesHelmRepo, 'helm', 'none');
-    })
-  );
+  it('Add turtles repo', () => {
+    var turtlesHelmRepo = Cypress.env('chartmuseum_repo')
+    if (turtlesHelmRepo == undefined) {
+      turtlesHelmRepo = "https://rancher.github.io/turtles/"
+    } else {
+      turtlesHelmRepo += ':8080'
+    }
+    cypressLib.addRepository('turtles-operator', turtlesHelmRepo, 'helm', 'none');
+  })
 
-  qase(13,
+  qase(2,
     it('Install Turtles operator', () => {
       cy.contains('local').click();
       cy.installApp('Rancher Turtles', 'rancher-turtles-system');
     })
   );
 
-  qase(11,
-    it('Turtles prerequisites', () => {
+  it('Turtles prerequisites', () => {
 
-      // Open Rancher turtles deployment
-      cy.contains('local')
-        .click();
-      cy.get('.nav').contains('Workloads')
-        .click();
-      cy.get('.nav').contains('Deployments')
-        .click();
-      cy.setNamespace('rancher-turtles-system');
+    // Open Rancher turtles deployment
+    cy.contains('local')
+      .click();
+    cy.get('.nav').contains('Workloads')
+      .click();
+    cy.get('.nav').contains('Deployments')
+      .click();
+    cy.setNamespace('rancher-turtles-system');
 
-      // Edit Rancher turtles deployment
-      cy.getBySel('sortable-table-1-action-button').click();
-      cy.contains('Edit Config')
-        .click();
-      cy.byLabel('Arguments').as('label')
-      cy.get('@label').type(' --insecure-skip-verify=true')
-      cy.clickButton('Save');
-      cy.contains('Active' + ' ' + deployment, { timeout: 20000 });
-      cy.namespaceReset();
-    })
-  );
+    // Edit Rancher turtles deployment
+    cy.getBySel('sortable-table-1-action-button').click();
+    cy.contains('Edit Config')
+      .click();
+    cy.byLabel('Arguments').as('label')
+    cy.get('@label').type(' --insecure-skip-verify=true')
+    cy.clickButton('Save');
+    cy.contains('Active' + ' ' + deployment, { timeout: 20000 });
+    cy.namespaceReset();
+  })
 
 });

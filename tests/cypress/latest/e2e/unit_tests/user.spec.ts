@@ -25,11 +25,9 @@ describe('User role testing', () => {
     cy.visit('/');
   });
 
-  qase(15,
-    it('Create standard user', () => {
-      cy.login();
-      cypressLib.burgerMenuToggle();
-      cypressLib.createUser(stdUser, uiPassword);
-    })
-  );
+  it('Create standard user', () => {
+    cy.login();
+    cypressLib.burgerMenuToggle();
+    cypressLib.createUser(stdUser, uiPassword);
+  })
 });

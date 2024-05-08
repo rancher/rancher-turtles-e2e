@@ -24,17 +24,15 @@ describe('Menu testing', () => {
     cypressLib.burgerMenuToggle();
   });
 
-  qase(3,
-    it('Check Turtles menu', () => {
-      // Cluster Management's icon should appear in the side menu
-      cypressLib.checkNavIcon('cluster-management')
-        .should('exist');
+  it('Check Turtles menu', () => {
+    // Cluster Management's icon should appear in the side menu
+    cypressLib.checkNavIcon('cluster-management')
+      .should('exist');
 
-      // Open Turtles menu
-      cy.accesMenuSelection('Cluster Management', 'CAPI');
+    // Open Turtles menu
+    cy.accesMenuSelection('Cluster Management', 'CAPI');
 
-      // Check Turtles's side menu
-      cy.checkCAPIMenu();
-    })
-  );
+    // Check Turtles's side menu
+    cy.checkCAPIMenu();
+  })
 });

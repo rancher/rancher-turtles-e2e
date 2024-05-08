@@ -145,8 +145,8 @@ Cypress.Commands.add('addInfraProvider', (providerType, name, namespace, cloudCr
 // Command to add AWS Cloud Credentials
 Cypress.Commands.add('addCloudCredsAWS', (name, accessKey, secretKey) => {
   cy.accesMenuSelection('Cluster Management', 'Cloud Credentials');
+  cy.contains('API Key').should('be.visible');
   cy.clickButton('Create');
-  cy.contains('Cloud Credential: Create').should('be.visible');
   cy.contains('Amazon').click();
   cy.typeValue('Name', name);
   cy.typeValue('Access Key', accessKey);
@@ -158,6 +158,7 @@ Cypress.Commands.add('addCloudCredsAWS', (name, accessKey, secretKey) => {
 // Command to Install App from Charts menu
 Cypress.Commands.add('installApp', (appName, namespace) => {
   cy.get('.nav').contains('Apps').click();
+  cy.contains('Featured Charts').should('be.visible');
   cy.contains(appName, { timeout: 60000 }).click();
   cy.contains('Charts: ' + appName, { timeout: 30000 });
   cy.clickButton('Install');
@@ -229,25 +230,3 @@ Cypress.Commands.add('removeFleetGitRepo', (repoName) => {
   cy.get('.icon.group-icon.icon-trash').click();
   cypressLib.confirmDelete();
 })
-
-Cypress.Commands.overwrite('type', (originalFn, subject, text, options = {}) => {
-  options.delay = 100;
-  return originalFn(subject, text, options);
-});
-
-// Add a delay between command without using cy.wait()
-// https://github.com/cypress-io/cypress/issues/249#issuecomment-443021084
-const COMMAND_DELAY = 1000;
-
-for (const command of ['visit', 'click', 'trigger', 'type', 'clear', 'reload', 'contains']) {
-  Cypress.Commands.overwrite(command, (originalFn, ...args) => {
-    const origVal = originalFn(...args);
-
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(origVal);
-      }, COMMAND_DELAY);
-    });
-  });
-};
-

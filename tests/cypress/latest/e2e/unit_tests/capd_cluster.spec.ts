@@ -32,18 +32,15 @@ describe('Import CAPD', () => {
 
   // TODO: Refactor tests to reduce running time
   pathNames.forEach((path) => {
+    it('Setup the namespace for importing', () => {
+      if (path == 'namespace_autoimport') {
+        cy.namespaceAutoImport('Enable');
+      } else {
+        cy.namespaceAutoImport('Disable');
+      }
+    })
 
-    qase(13,
-      it('Setup the namespace for importing', () => {
-        if (path == 'namespace_autoimport') {
-          cy.namespaceAutoImport('Enable');
-        } else {
-          cy.namespaceAutoImport('Disable');
-        }
-      })
-    );
-
-    qase(14,
+    qase(5,
       it('Import CAPD cluster using fleet', () => {
         cypressLib.checkNavIcon('cluster-management')
           .should('exist');
@@ -54,7 +51,7 @@ describe('Import CAPD', () => {
       })
     );
 
-    qase(15,
+    qase(6,
       it('Auto import child CAPD cluster', () => {
         // Check child cluster is created and auto-imported
         cy.visit('/');
@@ -67,18 +64,15 @@ describe('Import CAPD', () => {
       })
     );
 
-    qase(16,
-      it('Install App on imported cluster', { retries: 1 }, () => {
+    it('Install App on imported cluster', { retries: 1 }, () => {
+      // Click on imported CAPD cluster
+      cy.contains(clusterFull).click();
 
-        // Click on imported CAPD cluster
-        cy.contains(clusterFull).click();
+      // Install App
+      cy.installApp('Monitoring', 'cattle-monitoring');
+    })
 
-        // Install App
-        cy.installApp('Monitoring', 'cattle-monitoring');
-      })
-    );
-
-    qase(17,
+    qase(12,
       it('Scale imported CAPD cluster', () => {
 
         // Access CAPI cluster
@@ -103,7 +97,7 @@ describe('Import CAPD', () => {
       })
     );
 
-    qase(18,
+    qase(9,
       it('Remove imported CAPD cluster from Rancher Manager', () => {
 
         // Check cluster is not deleted after removal
@@ -113,7 +107,7 @@ describe('Import CAPD', () => {
       })
     );
 
-    qase(19,
+    qase(10,
       it('Delete the CAPD cluster fleet repo', () => {
 
         // Remove the fleet git repo

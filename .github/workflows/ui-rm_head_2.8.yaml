@@ -23,6 +23,7 @@ jobs:
       pat_token: ${{ secrets.SELF_HOSTED_RUNNER_PAT_TOKEN }}
       aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
       aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      qase_api_token: ${{ secrets.QASE_API_TOKEN }}
     with:
       test_description: "CI/Manual - UI - Deployment test with Standard K3s"
       cluster_name: cluster-k3s

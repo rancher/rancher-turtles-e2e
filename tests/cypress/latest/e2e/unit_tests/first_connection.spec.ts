@@ -18,7 +18,7 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 
 Cypress.config();
 describe('First login on Rancher', () => {
-  qase(46,
+  qase(1,
     it('Log in and accept terms and conditions', () => {
       cypressLib.firstLogin();
     })

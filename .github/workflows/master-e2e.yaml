@@ -23,6 +23,9 @@ on:
       aws_secret_key:
         description: AWS_SECRET_ACCESS_KEY required to create AWS Cloud credentials.
         required: true
+      qase_api_token:
+        description: Qase API token to use for Qase reporting
+        required: true
     inputs:
       cert-manager_version:
         description: Version of cert-manager to use
@@ -76,6 +79,13 @@ on:
         description: GCP zone to host the runner
         default: asia-south2-a
         type: string
+
+env:
+  QASE_API_TOKEN: ${{ secrets.QASE_API_TOKEN }}
+  QASE_PROJECT_CODE: RT
+  QASE_REPORT: 1
+  QASE_RUN_COMPLETE: 1
+  QASE_HELPER: ${{ github.workspace }}/tests/e2e/helpers/qase/helper_qase.go
 
 jobs:
   create-runner:
@@ -139,8 +149,39 @@ jobs:
             echo "PUBLIC_IP and/or PUBLIC_DNS are empty!" >&2
             false
           fi
+
+  pre-qase:
+    runs-on: ubuntu-latest
+    outputs:
+      qase_run_description: ${{ steps.qase.outputs.qase_run_description }}
+      qase_run_id: ${{ steps.qase.outputs.qase_run_id }}
+      qase_run_name: ${{ steps.qase.outputs.qase_run_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: tests/go.mod
+      - name: Create/Export Qase Run
+        id: qase
+        run: |
+          # Define and export URL of GH test run in Qase run description
+          GH_RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          export QASE_RUN_DESCRIPTION="${GH_RUN_URL}"
+          export QASE_RUN_NAME="${GITHUB_WORKFLOW}"
+        
+          # Create a Qase run, get its ID
+          ID=$(cd tests && go run ${{ env.QASE_HELPER }} -create)
+          # Export outputs for future use
+          echo "qase_run_id=${ID}" >> ${GITHUB_OUTPUT}
+    
+          # Just an info for debugging purposes
+          echo -e "Exported values:\nQASE_RUN_ID=${ID}\nQASE_RUN_DESCRIPTION=${QASE_RUN_DESCRIPTION}\nQASE_RUN_NAME=${QASE_RUN_NAME}"
+        
   e2e:
-    needs: create-runner
+    needs: [create-runner, pre-qase]
     runs-on: ${{ needs.create-runner.outputs.uuid }}
     env:
       ARCH: amd64
@@ -220,7 +261,7 @@ jobs:
         env:
           BROWSER: chrome
           CHARTMUSEUM_REPO: http://${{ needs.create-runner.outputs.public_dns }}
-          CYPRESS_DOCKER: 'cypress/included:10.9.0'
+          CYPRESS_DOCKER: 'cypress/included:13.6.4'
           CAPI_UI_VERSION: ${{ inputs.capi_ui_version }}
           K8S_UPSTREAM_VERSION: ${{ inputs.upstream_cluster_version }}
           RANCHER_VERSION: ${{ steps.component.outputs.rm_version }}
@@ -229,6 +270,7 @@ jobs:
           RANCHER_USER: admin
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key}}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
+          QASE_RUN_ID: ${{ needs.pre-qase.outputs.qase_run_id }}
           SPEC: |
             /workdir/e2e/unit_tests/first_connection.spec.ts
             /workdir/e2e/unit_tests/user.spec.ts
@@ -299,3 +341,25 @@ jobs:
           gcloud --quiet compute instances delete ${{ needs.create-runner.outputs.runner }} \
             --delete-disks all \
             --zone ${{ inputs.zone }}
+
+  post-qase:
+    if: ${{ always() && needs.pre-qase.outputs.qase_run_id != '' }}
+    needs: [e2e, pre-qase]
+    runs-on: ubuntu-latest
+    env:
+      QASE_RUN_ID: ${{ needs.pre-qase.outputs.qase_run_id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4          
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: tests/go.mod
+      - name: Finalize Qase Run and publish Results
+        if: ${{ always() && !contains(needs.e2e.result, 'cancelled') }}
+        run: |
+          REPORT=$(cd tests && go run ${{ env.QASE_HELPER }} -publish)
+          echo "${REPORT}"
+      - name: Delete Qase Run if job has been cancelled
+        if: ${{ always() && contains(needs.e2e.result, 'cancelled') }}
+        run: cd tests && go run ${{ env.QASE_HELPER }} -delete

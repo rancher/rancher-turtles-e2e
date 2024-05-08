@@ -34,36 +34,30 @@ describe('Enable CAPI Providers', () => {
   });
 
   providerNamespaces.forEach(namespace => {
-    qase(12,
-      it('Create CAPI Providers Namespaces', () => {
-        cy.createNamespace(namespace);
-      })
-    );
+    it('Create CAPI Providers Namespaces', () => {
+      cy.createNamespace(namespace);
+    })
   })
 
-  // TODO: Align QASE ID's
   kubeadmProviderTypes.forEach(providerType => {
-    qase(13,
-      it('Create Kubeadm Providers', () => {
-        
-        // TODO: Remove condition after capi-ui-extension/issues/51
-        // Create CAPI Kubeadm providers
-        if (providerType == 'control plane') {
-          const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + 'control-plane' + '-components.yaml'
-          const providerName = kubeadmProvider + '-' + 'control-plane'
-          const namespace = 'capi-kubeadm-control-plane-system'
-          cy.addCustomProvider(providerName, namespace, kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
-        } else {
-          const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + providerType + '-components.yaml'
-          const providerName = kubeadmProvider + '-' + providerType
-          const namespace = 'capi-kubeadm-bootstrap-system'
-          cy.addCustomProvider(providerName, namespace, kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
-        }
-      })
-    );
+    it('Create Kubeadm Providers', () => {
+      // TODO: Remove condition after capi-ui-extension/issues/51
+      // Create CAPI Kubeadm providers
+      if (providerType == 'control plane') {
+        const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + 'control-plane' + '-components.yaml'
+        const providerName = kubeadmProvider + '-' + 'control-plane'
+        const namespace = 'capi-kubeadm-control-plane-system'
+        cy.addCustomProvider(providerName, namespace, kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
+      } else {
+        const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + providerType + '-components.yaml'
+        const providerName = kubeadmProvider + '-' + providerType
+        const namespace = 'capi-kubeadm-bootstrap-system'
+        cy.addCustomProvider(providerName, namespace, kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
+      }
+    })
   })
 
-  qase(13,
+  qase(4,
     it('Create CAPD provider', () => {
       // Create Docker Infrastructure provider
       cy.addInfraProvider(dockerProvider, dockerProvider, 'capd-system');

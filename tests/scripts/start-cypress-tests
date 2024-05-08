@@ -31,6 +31,9 @@ docker run -v $PWD:/workdir -w /workdir \
     -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
     -e RANCHER_USER=$RANCHER_USER \
     -e UI_ACCOUNT=$UI_ACCOUNT \
+    -e QASE_API_TOKEN=$QASE_API_TOKEN \
+    -e QASE_RUN_ID=$QASE_RUN_ID \
+    -e QASE_REPORT=$QASE_REPORT \
     --add-host host.docker.internal:host-gateway \
     --ipc=host \
     $CYPRESS_DOCKER \

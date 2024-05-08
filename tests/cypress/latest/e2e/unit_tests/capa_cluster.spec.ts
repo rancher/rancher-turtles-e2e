@@ -17,11 +17,9 @@ describe('Import CAPA', () => {
     cypressLib.burgerMenuToggle();
   });
 
-  qase(13,
-    it('Setup the namespace for importing', () => {
-      cy.namespaceAutoImport('Enable');
-    })
-  );
+  it('Setup the namespace for importing', () => {
+    cy.namespaceAutoImport('Enable');
+  })
 
   qase(14,
     it('Import CAPA cluster using fleet', () => {
@@ -40,30 +38,25 @@ describe('Import CAPA', () => {
     })
   );
 
+  it('Auto import child CAPA cluster', () => {
+    // Check child cluster is created and auto-imported
+    cy.visit('/');
+    cy.contains('Pending ' + clusterFull);
+
+    // Check cluster is Active
+    cy.clickButton('Manage');
+    cy.contains('Active ' + clusterFull, { timeout: 300000 });
+  })
+
+  it('Install App on imported cluster', () => {
+    // Click on imported CAPA cluster
+    cy.contains(clusterFull).click();
+
+    // Install App
+    cy.installApp('Monitoring', 'cattle-monitoring');
+  })
+
   qase(15,
-    it('Auto import child CAPA cluster', () => {
-      // Check child cluster is created and auto-imported
-      cy.visit('/');
-      cy.contains('Pending ' + clusterFull);
-
-      // Check cluster is Active
-      cy.clickButton('Manage');
-      cy.contains('Active ' + clusterFull, { timeout: 300000 });
-    })
-  );
-
-  qase(16,
-    it('Install App on imported cluster', () => {
-
-      // Click on imported CAPA cluster
-      cy.contains(clusterFull).click();
-
-      // Install App
-      cy.installApp('Monitoring', 'cattle-monitoring');
-    })
-  );
-
-  qase(18,
     it('Remove imported CAPA cluster from Rancher Manager', () => {
 
       // Check cluster is not deleted after removal
@@ -76,7 +69,7 @@ describe('Import CAPA', () => {
     })
   );
 
-  qase(19,
+  qase(16,
     it('Delete the CAPA cluster fleet repo', () => {
 
       // Remove the fleet git repo
