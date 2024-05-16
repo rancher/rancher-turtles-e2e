@@ -34,6 +34,7 @@ declare global {
       addCustomProvider(name: string, namespace: string, providerName: string, providerType: string, version: string, url: string): Chainable<Element>;
       addInfraProvider(providerType: string, name: string, namespace: string, cloudCredentials?: string): Chainable<Element>;
       addCloudCredsAWS(name: string, accessKey: string, secretKey: string): Chainable<Element>;
+      addCloudCredsGCP(name: string, gcpCredentials: string): Chainable<Element>;
     }
   }
 }

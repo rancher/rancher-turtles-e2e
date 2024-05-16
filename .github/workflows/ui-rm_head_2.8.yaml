@@ -19,7 +19,7 @@ jobs:
   ui:
     uses: ./.github/workflows/master-e2e.yaml
     secrets:
-      credentials: ${{ secrets.GCP_CREDENTIALS }}
+      gcp_credentials: ${{ secrets.GCP_CREDENTIALS }}
       pat_token: ${{ secrets.SELF_HOSTED_RUNNER_PAT_TOKEN }}
       aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
       aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

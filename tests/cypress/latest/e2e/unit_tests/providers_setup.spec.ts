@@ -22,10 +22,11 @@ describe('Enable CAPI Providers', () => {
   const kubeadmProvider = 'kubeadm'
   const dockerProvider = 'docker'
   const amazonProvider = 'aws'
+  const googleProvider = 'gcp'
   const kubeadmProviderVersion = 'v1.4.6'
   const kubeadmBaseURL = 'https://github.com/kubernetes-sigs/cluster-api/releases/'
   const kubeadmProviderTypes = ['bootstrap', 'control plane']
-  const providerNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system', 'capd-system', 'capa-system']
+  const providerNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system', 'capd-system', 'capa-system', 'capg-system']
 
   beforeEach(() => {
     cy.login();
@@ -34,7 +35,7 @@ describe('Enable CAPI Providers', () => {
   });
 
   providerNamespaces.forEach(namespace => {
-    it('Create CAPI Providers Namespaces', () => {
+    it('Create CAPI Providers Namespaces - '+ namespace, () => {
       cy.createNamespace(namespace);
     })
   })
@@ -78,5 +79,15 @@ describe('Enable CAPI Providers', () => {
       cy.contains(statusReady, { timeout: 30000 });
     })
   );
+
+  it('Create CAPG provider', () => {
+    // Create AWS Infrastructure provider
+    cy.addCloudCredsGCP(googleProvider, Cypress.env('gcp_credentials'));
+    cypressLib.burgerMenuToggle();
+    cy.addInfraProvider('Google', googleProvider, 'capg-system', googleProvider);
+    var statusReady = 'Ready'
+    statusReady = statusReady.concat(' ', googleProvider, ' infrastructure ', googleProvider, ' ', 'v1.6.0')
+    cy.contains(statusReady, { timeout: 30000 });
+  })
 
 });

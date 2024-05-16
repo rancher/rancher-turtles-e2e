@@ -5,7 +5,7 @@ on:
   workflow_call:
     # Variables to set when calling this reusable workflow
     secrets:
-      credentials:
+      gcp_credentials:
         description: Credentials to use to connect
         required: true
       pat_token:
@@ -110,7 +110,7 @@ jobs:
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.credentials }}
+          credentials_json: ${{ secrets.gcp_credentials }}
       - name: Setup gcloud
         uses: google-github-actions/setup-gcloud@v2
       - name: Create runner
@@ -270,6 +270,7 @@ jobs:
           RANCHER_USER: admin
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key}}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
+          GCP_CREDENTIALS: ${{ secrets.gcp_credentials }}
           QASE_RUN_ID: ${{ needs.pre-qase.outputs.qase_run_id }}
           SPEC: |
             /workdir/e2e/unit_tests/first_connection.spec.ts
@@ -328,7 +329,7 @@ jobs:
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.credentials }}
+          credentials_json: ${{ secrets.gcp_credentials }}
       - name: Setup gcloud
         uses: google-github-actions/setup-gcloud@v2
       - name: Delete GCP secrets

@@ -133,7 +133,7 @@ Cypress.Commands.add('addInfraProvider', (providerType, name, namespace, cloudCr
   cy.getBySel('name-ns-description-namespace').type(namespace + '{enter}');
   cy.typeValue('Name', name);
 
-  // Select Cloud credntials name
+  // Select Cloud credentials name
   if (providerType != 'docker') {
     cy.getBySel('cluster-prov-select-credential').trigger('click');
     cy.contains(cloudCredentials).click();
@@ -152,7 +152,21 @@ Cypress.Commands.add('addCloudCredsAWS', (name, accessKey, secretKey) => {
   cy.typeValue('Access Key', accessKey);
   cy.typeValue('Secret Key', secretKey, false, false );
   cy.clickButton('Create');
-  cy.getBySel('name-ns-description-name').should('not.exist');
+  cy.contains('API Key').should('be.visible');
+  cy.contains(name).should('be.visible');
+});
+
+// Command to add GCP Cloud Credentials
+Cypress.Commands.add('addCloudCredsGCP', (name, gcpCredentials) => {
+  cy.accesMenuSelection('Cluster Management', 'Cloud Credentials');
+  cy.contains('API Key').should('be.visible');
+  cy.clickButton('Create');
+  cy.contains('Google').click();
+  cy.typeValue('Name', name);
+  cy.getBySel('text-area-auto-grow').type(gcpCredentials, { log: false });
+  cy.clickButton('Create');
+  cy.contains('API Key').should('be.visible');
+  cy.contains(name).should('be.visible');
 });
 
 // Command to Install App from Charts menu
