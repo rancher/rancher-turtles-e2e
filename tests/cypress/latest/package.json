@@ -21,7 +21,7 @@
   },
   "homepage": "https://github.com/rancher-sandbox/rancher-turtles-e2e",
   "dependencies": {
-    "@rancher-ecp-qa/cypress-library": "1.0.9",
+    "@rancher-ecp-qa/cypress-library": "1.1.0",
     "cy-verify-downloads": "^0.1.8",
     "cypress": "^13.6.4",
     "cypress-dark": "^1.8.3",

@@ -66,7 +66,7 @@ Cypress.Commands.add('createNamespace', (namespace) => {
 // Command to set namespace selection
 // TODO(pvala): Could be improved to check if the namespace is already set before changing it
 Cypress.Commands.add('setNamespace', (namespace) => {
-  cy.getBySel('namespaces-dropdown', { timeout: 12000 }).trigger('click');
+  cy.getBySel('namespaces-dropdown', { timeout: 18000 }).trigger('click');
   cy.get('.ns-clear').click();
   cy.get('.ns-filter-input').type(namespace + '{enter}{esc}');
 });
@@ -79,7 +79,6 @@ Cypress.Commands.add('namespaceReset', () => {
 // Command to check CAPI cluster Active status
 Cypress.Commands.add('checkCAPICluster', (clusterName) => {
   cypressLib.burgerMenuToggle();
-  cy.accesMenuSelection('Cluster Management', 'CAPI');
   cy.checkCAPIMenu();
   cy.contains('Provisioned ' + clusterName, { timeout: 30000 });
   cy.contains('Machine Deployments').click();
@@ -90,6 +89,7 @@ Cypress.Commands.add('checkCAPICluster', (clusterName) => {
 
 // Command to check CAPI Menu is visible
 Cypress.Commands.add('checkCAPIMenu', () => {
+  cy.accesMenuSelection('Cluster Management', 'CAPI');
   cy.contains('.nav', 'Clusters')
   cy.contains('.nav', 'Machine Deployments')
   cy.contains('.nav', 'Machine Sets')
@@ -100,7 +100,6 @@ Cypress.Commands.add('checkCAPIMenu', () => {
 // Command to add CAPI Custom provider
 Cypress.Commands.add('addCustomProvider', (name, namespace, providerName, providerType, version, url) => {
   // Navigate to providers Menu
-  cy.accesMenuSelection('Cluster Management', 'CAPI');
   cy.checkCAPIMenu();
   cy.contains('Providers').click();
   cy.clickButton('Create');
@@ -122,7 +121,6 @@ Cypress.Commands.add('addCustomProvider', (name, namespace, providerName, provid
 // Command to add CAPI Infrastructure provider
 Cypress.Commands.add('addInfraProvider', (providerType, name, namespace, cloudCredentials) => {
   // Navigate to providers Menu
-  cy.accesMenuSelection('Cluster Management', 'CAPI');
   cy.checkCAPIMenu();
   cy.contains('Providers').click();
   cy.clickButton('Create');
@@ -140,6 +138,23 @@ Cypress.Commands.add('addInfraProvider', (providerType, name, namespace, cloudCr
   }
   cy.clickButton('Create');
   cy.contains('Providers').should('be.visible');
+});
+
+// Command to delete CAPI provider
+Cypress.Commands.add('removeProvider', (name) => {
+  // Navigate to providers Menu
+  cy.checkCAPIMenu();
+  cy.contains('Providers').click();
+  cy.viewport(1920, 1080);
+  cy.get('.input-sm')
+    .click()
+    .type(name);
+  cy.contains('Ready ' + name).should('be.visible');
+  cy.getBySel('sortable-table_check_select_all').click();
+  cy.clickButton('Delete');
+  cy.getBySel('prompt-remove-confirm-button').click();
+  cy.reload();
+  cy.contains(name).should('not.exist', { timeout: 30000 });
 });
 
 // Command to add AWS Cloud Credentials

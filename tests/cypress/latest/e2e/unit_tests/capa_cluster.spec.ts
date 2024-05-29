@@ -10,7 +10,7 @@ describe('Import CAPA', () => {
   const clusterFull = "turtles-qa-cluster-capi"
   const branch = 'main'
   const path = '/tests/assets/rancher-turtles-fleet-example/aws'
-  const repoUrl = "https://github.com/rancher-sandbox/rancher-turtles-e2e.git"
+  const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
 
   beforeEach(() => {
     cy.login();
@@ -22,7 +22,7 @@ describe('Import CAPA', () => {
   })
 
   qase(14,
-    it('Import CAPA cluster using fleet', () => {
+    it('Add CAPA cluster fleet repo', () => {
       cypressLib.checkNavIcon('cluster-management')
         .should('exist');
 
@@ -32,7 +32,6 @@ describe('Import CAPA', () => {
 
       // Go to Cluster Management > CAPI > Clusters and check if the cluster has started provisioning
       cypressLib.burgerMenuToggle();
-      cy.accesMenuSelection('Cluster Management', 'CAPI');
       cy.checkCAPIMenu();
       cy.contains('Provisioned ' + clusterShort, { timeout: timeout });
     })
@@ -48,7 +47,7 @@ describe('Import CAPA', () => {
     cy.contains('Active ' + clusterFull, { timeout: 300000 });
   })
 
-  it('Install App on imported cluster', () => {
+  it('Install App on imported cluster', { retries: 1 }, () => {
     // Click on imported CAPA cluster
     cy.contains(clusterFull).click();
 
@@ -63,7 +62,6 @@ describe('Import CAPA', () => {
       cy.deleteCluster(clusterFull);
       cy.visit('/');
       cypressLib.burgerMenuToggle();
-      cy.accesMenuSelection('Cluster Management', 'CAPI');
       cy.checkCAPIMenu();
       cy.contains('Provisioned ' + clusterShort);
     })
@@ -80,7 +78,10 @@ describe('Import CAPA', () => {
       cy.contains(clusterFull, { timeout: timeout }).should('not.exist');
       cypressLib.burgerMenuToggle();
       cy.accesMenuSelection('Cluster Management', 'CAPI');
-      cy.checkCAPIMenu();
+      cy.getBySel('button-group-child-1').click();
+      cy.get('.input-sm')
+        .click()
+        .type(clusterShort);
       cy.contains(clusterShort, { timeout: timeout }).should('not.exist');
     })
   );

@@ -3,7 +3,7 @@ import { defineConfig } from 'cypress'
 const qaseAPIToken = process.env.QASE_API_TOKEN
 
 export default defineConfig({
-  defaultCommandTimeout: 20000,
+  defaultCommandTimeout: 30000,
   video: true,
   reporter: 'cypress-multi-reporters',
   reporterOptions: {

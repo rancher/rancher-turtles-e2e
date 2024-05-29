@@ -17,12 +17,14 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 
 Cypress.config();
 describe('Import CAPD', () => {
+  const timeoutShort = 180000
+  const timeoutFull = 300000
   const repoName = 'clusters'
   const clusterShort = "cluster1"
   const clusterFull = "cluster1-capi"
-  const repoUrl = "https://github.com/rancher-sandbox/rancher-turtles-e2e.git"
+  const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
   const basePath = "/tests/assets/rancher-turtles-fleet-example/"
-  const pathNames = ['cluster_autoimport', 'namespace_autoimport']
+  const pathNames = ['cluster_autoimport', 'namespace_autoimport', 'rke2_namespace_autoimport']
   const branch = "main"
 
   beforeEach(() => {
@@ -30,10 +32,40 @@ describe('Import CAPD', () => {
     cypressLib.burgerMenuToggle();
   });
 
-  // TODO: Refactor tests to reduce running time
   pathNames.forEach((path) => {
+
+    if (path == 'rke2_namespace_autoimport') {
+      it('Remove Docker provider', () => {
+        cy.removeProvider('docker');
+      })
+
+      // TODO: Using Import YAML till capi-ui-extension/issues/60 is fixed
+      it('Create Docker-RKE2 provider', () => {
+        cy.contains('local')
+          .click();
+        cy.get('.header-buttons > :nth-child(1) > .icon')
+          .click();
+        cy.contains('Import YAML');
+        cy.readFile('./fixtures/capd-rke2-provider.yaml').then((data) => {
+          cy.get('.CodeMirror')
+              .then((editor) => {
+                  editor[0].CodeMirror.setValue(data);
+              })
+        });
+        cy.clickButton('Import');
+        cy.clickButton('Close');
+        // Navigate to providers Menu
+        cypressLib.burgerMenuToggle();
+        cy.checkCAPIMenu();
+        cy.contains('Providers').click();
+        var statusReady = 'Ready'
+        statusReady = statusReady.concat(' docker-rke2 ', 'infrastructure')
+        cy.contains(statusReady, { timeout: timeoutShort });
+      })
+    }
+
     it('Setup the namespace for importing', () => {
-      if (path == 'namespace_autoimport') {
+      if (path.includes('namespace_autoimport')) {
         cy.namespaceAutoImport('Enable');
       } else {
         cy.namespaceAutoImport('Disable');
@@ -41,7 +73,7 @@ describe('Import CAPD', () => {
     })
 
     qase(5,
-      it('Import CAPD cluster using fleet', () => {
+      it('Add CAPD cluster fleet repo - ' + path, () => {
         cypressLib.checkNavIcon('cluster-management')
           .should('exist');
         path = basePath + path
@@ -55,11 +87,11 @@ describe('Import CAPD', () => {
       it('Auto import child CAPD cluster', () => {
         // Check child cluster is created and auto-imported
         cy.visit('/');
-        cy.contains('Pending ' + clusterFull, { timeout: 120000 });
+        cy.contains('Pending ' + clusterFull, { timeout: timeoutFull });
 
         // Check cluster is Active
         cy.clickButton('Manage');
-        cy.contains('Active ' + clusterFull, { timeout: 180000 });
+        cy.contains('Active ' + clusterFull, { timeout: timeoutFull });
         cy.checkCAPICluster(clusterShort);
       })
     );
@@ -72,34 +104,34 @@ describe('Import CAPD', () => {
       cy.installApp('Monitoring', 'cattle-monitoring');
     })
 
-    qase(12,
-      it('Scale imported CAPD cluster', () => {
+    // TODO: Add test for RKE2 also
+    if (!path.includes('rke2')) {
+      qase(12,
+        it('Scale imported CAPD cluster', () => {
+          // Access CAPI cluster
+          cy.checkCAPIMenu();
+          cy.contains("Machine Deployments").click();
+          cy.getBySel('sortable-table-0-action-button').click();
+          cy.contains('Edit YAML')
+            .click();
+          cy.get('.CodeMirror')
+            .then((editor) => {
+              var text = editor[0].CodeMirror.getValue();
+              text = text.replace(/replicas: 2/g, 'replicas: 3');
+              editor[0].CodeMirror.setValue(text);
+              cy.clickButton('Save');
+            })
 
-        // Access CAPI cluster
-        cy.accesMenuSelection('Cluster Management', 'CAPI');
-        cy.checkCAPIMenu();
-        cy.contains("Machine Deployments").click();
-        cy.getBySel('sortable-table-0-action-button').click();
-        cy.contains('Edit YAML')
-          .click();
-        cy.get('.CodeMirror')
-          .then((editor) => {
-            var text = editor[0].CodeMirror.getValue();
-            text = text.replace(/replicas: 2/g, 'replicas: 3');
-            editor[0].CodeMirror.setValue(text);
-            cy.clickButton('Save');
-          })
-
-        // Check CAPI cluster status
-        cy.contains('Machine Deployments').click();
-        cy.get('.content > .count', { timeout: 150000 }).should('have.text', '3');
-        cy.checkCAPICluster(clusterShort);
-      })
-    );
+          // Check CAPI cluster status
+          cy.contains('Machine Deployments').click();
+          cy.get('.content > .count', { timeout: timeoutShort }).should('have.text', '3');
+          cy.checkCAPICluster(clusterShort);
+        })
+      );
+    }
 
     qase(9,
       it('Remove imported CAPD cluster from Rancher Manager', () => {
-
         // Check cluster is not deleted after removal
         cy.deleteCluster(clusterFull);
         cy.visit('/');
@@ -108,18 +140,20 @@ describe('Import CAPD', () => {
     );
 
     qase(10,
-      it('Delete the CAPD cluster fleet repo', () => {
-
+      it('Delete the CAPD cluster fleet repo - ' + path, () => {
         // Remove the fleet git repo
         cy.removeFleetGitRepo(repoName)
         // Wait until the following returns no clusters found:
         // kubectl get clusters.cluster.x-k8s.io
         // This is checked by ensuring the cluster is not available in navigation menu and CAPI menu
-        cy.contains(clusterFull, { timeout: 120000 }).should('not.exist');
+        cy.contains(clusterFull, { timeout: timeoutShort }).should('not.exist');
         cypressLib.burgerMenuToggle();
         cy.accesMenuSelection('Cluster Management', 'CAPI');
-        cy.checkCAPIMenu();
-        cy.contains(clusterShort, { timeout: 150000 }).should('not.exist');
+        cy.getBySel('button-group-child-1').click();
+        cy.get('.input-sm')
+          .click()
+          .type(clusterShort);
+        cy.contains(clusterShort, { timeout: timeoutFull }).should('not.exist');
       })
     );
 

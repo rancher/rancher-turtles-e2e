@@ -1,0 +1,13 @@
+apiVersion: turtles-capi.cattle.io/v1alpha1
+kind: CAPIProvider
+metadata:
+  name: docker-rke2
+  namespace: capd-system
+spec:
+  name: docker-rke2
+  type: infrastructure
+  configSecret:
+    name: variables
+  fetchConfig:
+    url: https://github.com/belgaied2/cluster-api/releases/v1.3.3-cabpr-fix/infrastructure-components.yaml
+  version: v1.3.3-cabpr-fix
