@@ -64,7 +64,7 @@ describe('Enable CAPI Providers', () => {
       cy.addInfraProvider(dockerProvider, dockerProvider, 'capd-system');
       var statusReady = 'Ready'
       statusReady = statusReady.concat(' ', dockerProvider, ' infrastructure ', dockerProvider, ' ', kubeadmProviderVersion)
-      cy.contains(statusReady, { timeout: 30000 });
+      cy.contains(statusReady);
     })
   );
 
@@ -76,7 +76,7 @@ describe('Enable CAPI Providers', () => {
       cy.addInfraProvider('Amazon', amazonProvider, 'capa-system', amazonProvider);
       var statusReady = 'Ready'
       statusReady = statusReady.concat(' ', amazonProvider, ' infrastructure ', amazonProvider, ' ', 'v2.3.5')
-      cy.contains(statusReady, { timeout: 30000 });
+      cy.contains(statusReady);
     })
   );
 
@@ -87,7 +87,7 @@ describe('Enable CAPI Providers', () => {
     cy.addInfraProvider('Google', googleProvider, 'capg-system', googleProvider);
     var statusReady = 'Ready'
     statusReady = statusReady.concat(' ', googleProvider, ' infrastructure ', googleProvider, ' ', 'v1.6.0')
-    cy.contains(statusReady, { timeout: 30000 });
+    cy.contains(statusReady);
   })
 
 });

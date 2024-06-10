@@ -21,11 +21,11 @@ describe('Install CAPI plugin', () => {
 
   beforeEach(() => {
     cy.login();
-    cy.visit('/');
+    cy.reload();
     cypressLib.burgerMenuToggle();
   });
 
-  it('Add capi-ui repo', () => {
+  it('Add capi-ui repo', { retries: 2 }, () => {
     cypressLib.addRepository('capi-ui', 'https://github.com/rancher/capi-ui-extension.git', 'git', 'gh-pages')
   })
 

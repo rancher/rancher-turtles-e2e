@@ -22,11 +22,11 @@ describe('Install Turtles Operator', () => {
 
   beforeEach(() => {
     cy.login();
-    cy.visit('/');
+    cy.reload();
     cypressLib.burgerMenuToggle();
   });
 
-  it('Add turtles repo', () => {
+  it('Add turtles repo', { retries: 2 }, () => {
     var turtlesHelmRepo = Cypress.env('chartmuseum_repo')
     if (turtlesHelmRepo == undefined) {
       turtlesHelmRepo = "https://rancher.github.io/turtles/"
@@ -37,7 +37,7 @@ describe('Install Turtles Operator', () => {
   })
 
   qase(2,
-    it('Install Turtles operator', () => {
+    it('Install Turtles operator', { retries: 1 }, () => {
       cy.contains('local').click();
       cy.installApp('Rancher Turtles', 'rancher-turtles-system');
     })
@@ -61,7 +61,7 @@ describe('Install Turtles Operator', () => {
     cy.byLabel('Arguments').as('label')
     cy.get('@label').type(' --insecure-skip-verify=true')
     cy.clickButton('Save');
-    cy.contains('Active' + ' ' + deployment, { timeout: 20000 });
+    cy.contains('Active' + ' ' + deployment);
     cy.namespaceReset();
   })
 

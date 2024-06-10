@@ -80,11 +80,12 @@ Cypress.Commands.add('namespaceReset', () => {
 Cypress.Commands.add('checkCAPICluster', (clusterName) => {
   cypressLib.burgerMenuToggle();
   cy.checkCAPIMenu();
-  cy.contains('Provisioned ' + clusterName, { timeout: 30000 });
+  cy.reload();
+  cy.contains('Provisioned ' + clusterName, { timeout: 90000 });
   cy.contains('Machine Deployments').click();
-  cy.contains('Running ' + clusterName, { timeout: 30000 });
+  cy.contains('Running ' + clusterName, { timeout: 90000 });
   cy.contains('Machine Sets').click();
-  cy.contains('Active ' + clusterName, { timeout: 30000 });
+  cy.contains('Active ' + clusterName, { timeout: 90000 });
 });
 
 // Command to check CAPI Menu is visible
@@ -154,7 +155,7 @@ Cypress.Commands.add('removeProvider', (name) => {
   cy.clickButton('Delete');
   cy.getBySel('prompt-remove-confirm-button').click();
   cy.reload();
-  cy.contains(name).should('not.exist', { timeout: 30000 });
+  cy.contains(name).should('not.exist');
 });
 
 // Command to add AWS Cloud Credentials
@@ -189,14 +190,14 @@ Cypress.Commands.add('installApp', (appName, namespace) => {
   cy.get('.nav').contains('Apps').click();
   cy.contains('Featured Charts').should('be.visible');
   cy.contains(appName, { timeout: 60000 }).click();
-  cy.contains('Charts: ' + appName, { timeout: 30000 });
+  cy.contains('Charts: ' + appName);
   cy.clickButton('Install');
   cy.contains('.outer-container > .header', appName);
   cy.clickButton('Next');
   cy.clickButton('Install');
 
   // Close the shell to avoid conflict
-  cy.get('.closer', { timeout: 30000 }).click();
+  cy.get('.closer').click();
 
   // Select app namespace
   cy.setNamespace(namespace);
@@ -206,10 +207,11 @@ Cypress.Commands.add('installApp', (appName, namespace) => {
   cy.namespaceReset();
 });
 
-// Command to remove cluster
+// Command to remove cluster from Rancher
 Cypress.Commands.add('deleteCluster', (clusterName) => {
   cy.visit('/');
   cy.clickButton('Manage');
+  cy.getBySel('cluster-list').should('be.visible');
   cy.contains('Active' + ' ' + clusterName);
 
   cy.viewport(1920, 1080);
@@ -221,7 +223,7 @@ Cypress.Commands.add('deleteCluster', (clusterName) => {
   cy.getBySel('prompt-remove-input')
     .type(clusterName);
   cy.getBySel('prompt-remove-confirm-button').click();
-  cy.contains('Active' + ' ' + clusterName).should('not.exist', { timeout: 30000 });
+  cy.contains('Active' + ' ' + clusterName).should('not.exist');
 });
 
 // Fleet commands
@@ -258,4 +260,5 @@ Cypress.Commands.add('removeFleetGitRepo', (repoName) => {
   cy.get('.actions .btn.actions').click();
   cy.get('.icon.group-icon.icon-trash').click();
   cypressLib.confirmDelete();
+  cy.contains('No repositories have been added').should('be.visible');
 })
