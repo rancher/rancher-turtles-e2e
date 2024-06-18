@@ -155,6 +155,7 @@ Cypress.Commands.add('removeProvider', (name) => {
   cy.clickButton('Delete');
   cy.getBySel('prompt-remove-confirm-button').click();
   cy.reload();
+  cy.contains('Providers').should('be.visible');
   cy.contains(name).should('not.exist');
 });
 
