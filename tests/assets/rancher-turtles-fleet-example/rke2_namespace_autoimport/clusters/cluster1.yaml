@@ -67,7 +67,7 @@ spec:
     kind: DockerMachineTemplate
     name:  cluster1-control-plane
   nodeDrainTimeout: 30s
-  version: v1.26.4+rke2r1
+  version: v1.28.9+rke2r1
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: DockerMachineTemplate
@@ -110,7 +110,7 @@ spec:
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: DockerMachineTemplate
         name: cluster1-md-0
-      version: v1.26.4+rke2r1
+      version: v1.28.9+rke2r1
 ---
 apiVersion: v1
 data:
