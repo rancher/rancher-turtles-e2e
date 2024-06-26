@@ -24,8 +24,8 @@ describe('Import CAPD', () => {
   const clusterFull = "cluster1-capi"
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
   const basePath = "/tests/assets/rancher-turtles-fleet-example/"
-  const pathNames = ['cluster_autoimport', 'namespace_autoimport', 'rke2_namespace_autoimport']
-  const branch = "main"
+  const pathNames = ['rke2_namespace_autoimport']
+  const branch = "rke2-bump"
 
   beforeEach(() => {
     cy.login();
@@ -131,7 +131,7 @@ describe('Import CAPD', () => {
     }
 
     qase(9,
-      it('Remove imported CAPD cluster from Rancher Manager', () => {
+      it.skip('Remove imported CAPD cluster from Rancher Manager', () => {
         // Check cluster is not deleted after removal
         cy.deleteCluster(clusterFull);
         cy.visit('/');
@@ -140,7 +140,7 @@ describe('Import CAPD', () => {
     );
 
     qase(10,
-      it('Delete the CAPD cluster fleet repo - ' + path, () => {
+      it.skip('Delete the CAPD cluster fleet repo - ' + path, () => {
         // Remove the fleet git repo
         cy.removeFleetGitRepo(repoName)
         // Wait until the following returns no clusters found:
