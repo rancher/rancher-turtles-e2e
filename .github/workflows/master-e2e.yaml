@@ -26,6 +26,9 @@ on:
       qase_api_token:
         description: Qase API token to use for Qase reporting
         required: true
+      rancher_password:
+        description: Rancher login password
+        required: true
     inputs:
       cert-manager_version:
         description: Version of cert-manager to use
@@ -265,10 +268,10 @@ jobs:
           CAPI_UI_VERSION: ${{ inputs.capi_ui_version }}
           K8S_UPSTREAM_VERSION: ${{ inputs.upstream_cluster_version }}
           RANCHER_VERSION: ${{ steps.component.outputs.rm_version }}
-          RANCHER_PASSWORD: rancherpassword
+          RANCHER_PASSWORD: ${{ secrets.rancher_password }}
           RANCHER_URL: https://${{ needs.create-runner.outputs.public_dns }}/dashboard
           RANCHER_USER: admin
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key}}
+          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
           GCP_CREDENTIALS: ${{ secrets.gcp_credentials }}
           QASE_RUN_ID: ${{ needs.pre-qase.outputs.qase_run_id }}

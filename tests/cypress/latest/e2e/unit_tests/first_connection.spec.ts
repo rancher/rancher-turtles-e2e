@@ -18,9 +18,30 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 
 Cypress.config();
 describe('First login on Rancher', () => {
+  const password = 'rancherpassword'
+
   qase(1,
-    it('Log in and accept terms and conditions', () => {
+    it('Log in and accept terms and conditions',
+    {
+      env: {
+        password: password,
+      },
+    }, () => {
       cypressLib.firstLogin();
     })
   );
+
+  it('Change Rancher password', () => {
+    // Change default password
+    cy.login(Cypress.env('username'), password);
+    cy.getBySel('nav_header_showUserMenu').click();
+    cy.contains('Account & API Keys').click();
+    cy.clickButton('Change Password');
+    cy.typeValue('Current Password', password);
+    cy.typeValue('New Password', Cypress.env('password'), false, false);
+    cy.typeValue('Confirm Password', Cypress.env('password'), false, false);
+    cy.clickButton('Apply');
+    cy.contains('Error').should('not.exist');
+    cy.contains('Generate a random password').should('not.exist');
+  })
 })

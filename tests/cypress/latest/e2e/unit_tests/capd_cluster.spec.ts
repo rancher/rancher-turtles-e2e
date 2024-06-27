@@ -20,8 +20,7 @@ describe('Import CAPD', () => {
   const timeoutShort = 180000
   const timeoutFull = 300000
   const repoName = 'clusters'
-  const clusterShort = "cluster1"
-  const clusterFull = "cluster1-capi"
+  const clusterName = "cluster1"
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
   const basePath = "/tests/assets/rancher-turtles-fleet-example/"
   const pathNames = ['cluster_autoimport', 'namespace_autoimport', 'rke2_namespace_autoimport']
@@ -87,18 +86,18 @@ describe('Import CAPD', () => {
       it('Auto import child CAPD cluster', () => {
         // Check child cluster is created and auto-imported
         cy.visit('/');
-        cy.contains('Pending ' + clusterFull, { timeout: timeoutFull });
+        cy.contains('Pending ' + clusterName, { timeout: timeoutFull });
 
         // Check cluster is Active
         cy.clickButton('Manage');
-        cy.contains('Active ' + clusterFull, { timeout: timeoutFull });
-        cy.checkCAPICluster(clusterShort);
+        cy.contains('Active ' + clusterName, { timeout: timeoutFull });
+        cy.checkCAPICluster(clusterName);
       })
     );
 
     it('Install App on imported cluster', { retries: 1 }, () => {
       // Click on imported CAPD cluster
-      cy.contains(clusterFull).click();
+      cy.contains(clusterName).click();
 
       // Install App
       cy.installApp('Monitoring', 'cattle-monitoring');
@@ -125,7 +124,7 @@ describe('Import CAPD', () => {
           // Check CAPI cluster status
           cy.contains('Machine Deployments').click();
           cy.get('.content > .count', { timeout: timeoutFull }).should('have.text', '3');
-          cy.checkCAPICluster(clusterShort);
+          cy.checkCAPICluster(clusterName);
         })
       );
     }
@@ -133,9 +132,9 @@ describe('Import CAPD', () => {
     qase(9,
       it('Remove imported CAPD cluster from Rancher Manager', () => {
         // Check cluster is not deleted after removal
-        cy.deleteCluster(clusterFull);
+        cy.deleteCluster(clusterName);
         cy.visit('/');
-        cy.checkCAPICluster(clusterShort);
+        cy.checkCAPICluster(clusterName);
       })
     );
 
@@ -146,14 +145,14 @@ describe('Import CAPD', () => {
         // Wait until the following returns no clusters found:
         // kubectl get clusters.cluster.x-k8s.io
         // This is checked by ensuring the cluster is not available in navigation menu and CAPI menu
-        cy.contains(clusterFull, { timeout: timeoutShort }).should('not.exist');
+        cy.contains(clusterName, { timeout: timeoutShort }).should('not.exist');
         cypressLib.burgerMenuToggle();
         cy.accesMenuSelection('Cluster Management', 'CAPI');
         cy.getBySel('button-group-child-1').click();
         cy.get('.input-sm')
           .click()
-          .type(clusterShort);
-        cy.contains(clusterShort, { timeout: timeoutFull }).should('not.exist');
+          .type(clusterName);
+        cy.contains(clusterName, { timeout: timeoutFull }).should('not.exist');
       })
     );
 

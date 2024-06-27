@@ -6,8 +6,7 @@ Cypress.config();
 describe('Import CAPA', () => {
   const timeout = 1200000
   const repoName = 'clusters'
-  const clusterShort = "turtles-qa-cluster"
-  const clusterFull = "turtles-qa-cluster-capi"
+  const clusterName = "turtles-qa-cluster"
   const branch = 'main'
   const path = '/tests/assets/rancher-turtles-fleet-example/aws'
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
@@ -33,23 +32,23 @@ describe('Import CAPA', () => {
       // Go to Cluster Management > CAPI > Clusters and check if the cluster has started provisioning
       cypressLib.burgerMenuToggle();
       cy.checkCAPIMenu();
-      cy.contains('Provisioned ' + clusterShort, { timeout: timeout });
+      cy.contains('Provisioned ' + clusterName, { timeout: timeout });
     })
   );
 
   it('Auto import child CAPA cluster', () => {
     // Check child cluster is created and auto-imported
     cy.visit('/');
-    cy.contains('Pending ' + clusterFull);
+    cy.contains('Pending ' + clusterName);
 
     // Check cluster is Active
     cy.clickButton('Manage');
-    cy.contains('Active ' + clusterFull, { timeout: 300000 });
+    cy.contains('Active ' + clusterName, { timeout: 300000 });
   })
 
   it('Install App on imported cluster', { retries: 1 }, () => {
     // Click on imported CAPA cluster
-    cy.contains(clusterFull).click();
+    cy.contains(clusterName).click();
 
     // Install App
     cy.installApp('Monitoring', 'cattle-monitoring');
@@ -59,11 +58,11 @@ describe('Import CAPA', () => {
     it('Remove imported CAPA cluster from Rancher Manager', () => {
 
       // Check cluster is not deleted after removal
-      cy.deleteCluster(clusterFull);
+      cy.deleteCluster(clusterName);
       cy.visit('/');
       cypressLib.burgerMenuToggle();
       cy.checkCAPIMenu();
-      cy.contains('Provisioned ' + clusterShort);
+      cy.contains('Provisioned ' + clusterName);
     })
   );
 
@@ -75,14 +74,14 @@ describe('Import CAPA', () => {
       // Wait until the following returns no clusters found:
       // kubectl get clusters.cluster.x-k8s.io
       // This is checked by ensuring the cluster is not available in navigation menu and CAPI menu
-      cy.contains(clusterFull, { timeout: timeout }).should('not.exist');
+      cy.contains(clusterName, { timeout: timeout }).should('not.exist');
       cypressLib.burgerMenuToggle();
       cy.accesMenuSelection('Cluster Management', 'CAPI');
       cy.getBySel('button-group-child-1').click();
       cy.get('.input-sm')
         .click()
-        .type(clusterShort);
-      cy.contains(clusterShort, { timeout: timeout }).should('not.exist');
+        .type(clusterName);
+      cy.contains(clusterName, { timeout: timeout }).should('not.exist');
     })
   );
 
