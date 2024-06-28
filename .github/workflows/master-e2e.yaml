@@ -62,7 +62,7 @@ on:
         type: string
       runner_template:
         description: Runner template to use
-        default: capi-e2e-ci-runner-spot-n2-highmem-16-template-v1
+        default: capi-e2e-ci-runner-spot-n2-highmem-16-template-v2
         type: string
       test_description:
         description: Short description of the test
@@ -73,7 +73,7 @@ on:
         type: string
       upstream_cluster_version:
         description: Cluster upstream version where to install Rancher (K3s or RKE2)
-        default: v1.26.10+k3s2
+        default: v1.28.10+k3s2
         type: string
       zone:
         description: GCP zone to host the runner
@@ -204,6 +204,8 @@ jobs:
       TURTLES_REPO: rancher-sandbox/rancher-turtles
       MANIFEST_IMG: localhost:5000/$TURTLES_REPO-$ARCH
     steps:
+      - name: Adding /usr/local/bin into PATH
+        run: echo "/usr/local/bin/" >> ${GITHUB_PATH}
       # Build rancher-turtles nightly chart
       - name: Check out rancher-turtles repo
         uses: actions/checkout@v4
