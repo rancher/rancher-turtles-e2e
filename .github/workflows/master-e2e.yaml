@@ -207,6 +207,8 @@ jobs:
       - name: Adding /usr/local/bin into PATH
         run: echo "/usr/local/bin/" >> ${GITHUB_PATH}
       # Build rancher-turtles nightly chart
+      - name: Installing helm
+        run: curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
       - name: Check out rancher-turtles repo
         uses: actions/checkout@v4
         with:
