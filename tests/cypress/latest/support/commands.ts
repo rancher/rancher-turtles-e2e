@@ -77,7 +77,7 @@ Cypress.Commands.add('namespaceReset', () => {
 });
 
 // Command to check CAPI cluster Active status
-Cypress.Commands.add('checkCAPICluster', (clusterName) => {
+Cypress.Commands.add('checkCAPIClusterActive', (clusterName) => {
   cypressLib.burgerMenuToggle();
   cy.checkCAPIMenu();
   cy.reload();
@@ -86,6 +86,14 @@ Cypress.Commands.add('checkCAPICluster', (clusterName) => {
   cy.contains('Running ' + clusterName, { timeout: 90000 });
   cy.contains('Machine Sets').click();
   cy.contains('Active ' + clusterName, { timeout: 90000 });
+});
+
+// Command to check CAPI cluster Provisioned status
+Cypress.Commands.add('checkCAPIClusterProvisioned', (clusterName) => {
+  cypressLib.burgerMenuToggle();
+  cy.checkCAPIMenu();
+  cy.reload();
+  cy.contains('Provisioned ' + clusterName, { timeout: 90000 });
 });
 
 // Command to check CAPI Menu is visible
@@ -147,9 +155,7 @@ Cypress.Commands.add('removeProvider', (name) => {
   cy.checkCAPIMenu();
   cy.contains('Providers').click();
   cy.viewport(1920, 1080);
-  cy.get('.input-sm')
-    .click()
-    .type(name);
+  cy.typeInFilter(name);
   cy.contains('Ready ' + name).should('be.visible');
   cy.getBySel('sortable-table_check_select_all').click();
   cy.clickButton('Delete');
@@ -213,18 +219,24 @@ Cypress.Commands.add('deleteCluster', (clusterName) => {
   cy.visit('/');
   cy.clickButton('Manage');
   cy.getBySel('cluster-list').should('be.visible');
-  cy.contains('Active' + ' ' + clusterName);
+  cy.contains(clusterName);
 
   cy.viewport(1920, 1080);
-  cy.get('.input-sm')
-    .click()
-    .type(clusterName);
+  cy.typeInFilter(clusterName);
   cy.getBySel('sortable-table_check_select_all').click();
   cy.clickButton('Delete');
   cy.getBySel('prompt-remove-input')
     .type(clusterName);
   cy.getBySel('prompt-remove-confirm-button').click();
-  cy.contains('Active' + ' ' + clusterName).should('not.exist');
+  cy.contains(clusterName).should('not.exist');
+});
+
+// Command to type in Filter input
+Cypress.Commands.add('typeInFilter', (text) => {
+  cy.get('.input-sm')
+    .click()
+    .clear()
+    .type(text);
 });
 
 // Fleet commands

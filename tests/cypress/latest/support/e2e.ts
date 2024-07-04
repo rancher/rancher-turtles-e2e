@@ -28,7 +28,8 @@ declare global {
       deleteCluster(clusterName: string): Chainable<Element>;
       createNamespace(namespace: string): Chainable<Element>;
       setNamespace(namespace: string): Chainable<Element>;
-      checkCAPICluster(clustername: string): Chainable<Element>;
+      checkCAPIClusterActive(clustername: string): Chainable<Element>;
+      checkCAPIClusterProvisioned(clustername: string): Chainable<Element>;
       checkCAPIMenu(): Chainable<Element>;
       namespaceReset(): Chainable<Element>;
       addCustomProvider(name: string, namespace: string, providerName: string, providerType: string, version: string, url: string): Chainable<Element>;
@@ -36,6 +37,7 @@ declare global {
       removeProvider(name: string): Chainable<Element>;
       addCloudCredsAWS(name: string, accessKey: string, secretKey: string): Chainable<Element>;
       addCloudCredsGCP(name: string, gcpCredentials: string): Chainable<Element>;
+      typeInFilter(text: string): Chainable<Element>;
     }
   }
 }

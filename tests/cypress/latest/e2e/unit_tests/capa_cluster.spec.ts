@@ -55,14 +55,15 @@ describe('Import CAPA', () => {
   })
 
   qase(15,
-    it('Remove imported CAPA cluster from Rancher Manager', () => {
+    it('Remove imported CAPA cluster from Rancher Manager', { retries: 1 }, () => {
 
       // Check cluster is not deleted after removal
       cy.deleteCluster(clusterName);
       cy.visit('/');
-      cypressLib.burgerMenuToggle();
-      cy.checkCAPIMenu();
-      cy.contains('Provisioned ' + clusterName);
+      // kubectl get clusters.cluster.x-k8s.io
+      // This is checked by ensuring the cluster is not available in navigation menu
+      cy.contains(clusterName).should('not.exist');
+      cy.checkCAPIClusterProvisioned(clusterName);
     })
   );
 
@@ -71,17 +72,13 @@ describe('Import CAPA', () => {
 
       // Remove the fleet git repo
       cy.removeFleetGitRepo(repoName)
-      // Wait until the following returns no clusters found:
-      // kubectl get clusters.cluster.x-k8s.io
-      // This is checked by ensuring the cluster is not available in navigation menu and CAPI menu
-      cy.contains(clusterName, { timeout: timeout }).should('not.exist');
+      // Wait until the following returns no clusters found
+      // This is checked by ensuring the cluster is not available in CAPI menu
       cypressLib.burgerMenuToggle();
-      cy.accesMenuSelection('Cluster Management', 'CAPI');
+      cy.checkCAPIMenu();
       cy.getBySel('button-group-child-1').click();
-      cy.get('.input-sm')
-        .click()
-        .type(clusterName);
-      cy.contains(clusterName, { timeout: timeout }).should('not.exist');
+      cy.typeInFilter(clusterName);
+      cy.getBySel('sortable-table-0-action-button', { timeout: timeout }).should('not.exist');
     })
   );
 

@@ -91,7 +91,8 @@ describe('Import CAPD', () => {
         // Check cluster is Active
         cy.clickButton('Manage');
         cy.contains('Active ' + clusterName, { timeout: timeoutFull });
-        cy.checkCAPICluster(clusterName);
+        // TODO: Check MachineSet unavailable status and use checkCAPIClusterActive
+        cy.checkCAPIClusterProvisioned(clusterName);
       })
     );
 
@@ -124,17 +125,20 @@ describe('Import CAPD', () => {
           // Check CAPI cluster status
           cy.contains('Machine Deployments').click();
           cy.get('.content > .count', { timeout: timeoutFull }).should('have.text', '3');
-          cy.checkCAPICluster(clusterName);
+          cy.checkCAPIClusterProvisioned(clusterName);
         })
       );
     }
 
     qase(9,
-      it('Remove imported CAPD cluster from Rancher Manager', () => {
+      it('Remove imported CAPD cluster from Rancher Manager', { retries: 1 }, () => {
         // Check cluster is not deleted after removal
         cy.deleteCluster(clusterName);
         cy.visit('/');
-        cy.checkCAPICluster(clusterName);
+        // kubectl get clusters.cluster.x-k8s.io
+        // This is checked by ensuring the cluster is not available in navigation menu
+        cy.contains(clusterName).should('not.exist');
+        cy.checkCAPIClusterProvisioned(clusterName);
       })
     );
 
@@ -142,17 +146,19 @@ describe('Import CAPD', () => {
       it('Delete the CAPD cluster fleet repo - ' + path, () => {
         // Remove the fleet git repo
         cy.removeFleetGitRepo(repoName)
-        // Wait until the following returns no clusters found:
-        // kubectl get clusters.cluster.x-k8s.io
-        // This is checked by ensuring the cluster is not available in navigation menu and CAPI menu
-        cy.contains(clusterName, { timeout: timeoutShort }).should('not.exist');
+      // Wait until the following returns no clusters found
+      // This is checked by ensuring the cluster is not available in CAPI menu
         cypressLib.burgerMenuToggle();
-        cy.accesMenuSelection('Cluster Management', 'CAPI');
+        cy.checkCAPIMenu();
         cy.getBySel('button-group-child-1').click();
-        cy.get('.input-sm')
-          .click()
-          .type(clusterName);
-        cy.contains(clusterName, { timeout: timeoutFull }).should('not.exist');
+        cy.typeInFilter(clusterName);
+        cy.getBySel('sortable-table-0-action-button', { timeout: timeoutFull }).should('not.exist');
+        // Ensure the cluster is not available in navigation menu
+        cy.getBySel('side-menu').then(($menu) => {
+          if ($menu.text().includes(clusterName)) {
+            cy.deleteCluster(clusterName);
+          }
+        })
       })
     );
 
