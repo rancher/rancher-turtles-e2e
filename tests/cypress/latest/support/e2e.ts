@@ -22,7 +22,7 @@ declare global {
       // Functions declared in commands.ts
       namespaceAutoImport(mode: string): Chainable<Element>;
       addFleetGitRepo(repoName: string, repoUrl?: string, branch?: string, path?: string): Chainable<Element>;
-      removeFleetGitRepo(repoName: string): Chainable<Element>;
+      removeFleetGitRepo(repoName: string, noRepoCheck?: boolean): Chainable<Element>;
       accesMenuSelection(firstAccessMenu: string, secondAccessMenu?: string): Chainable<Element>;
       installApp(appName: string, namespace: string): Chainable<Element>;
       deleteCluster(clusterName: string): Chainable<Element>;

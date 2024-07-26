@@ -1,0 +1,5 @@
+namespace: fleet-default
+dependsOn:
+  - selector:
+      matchLabels:
+        classes: "true"

@@ -26,7 +26,7 @@ describe('Import CAPA', () => {
         .should('exist');
 
       // Add CAPA fleet repository
-      cy.addFleetGitRepo({ repoName, repoUrl, branch, path });
+      cy.addFleetGitRepo(repoName, repoUrl, branch, path);
       cy.contains(repoName).click();
 
       // Go to Cluster Management > CAPI > Clusters and check if the cluster has started provisioning

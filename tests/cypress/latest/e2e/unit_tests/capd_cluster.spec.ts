@@ -77,7 +77,7 @@ describe('Import CAPD', () => {
           .should('exist');
         path = basePath + path
         // Add CAPD fleet repository
-        cy.addFleetGitRepo({ repoName, repoUrl, branch, path });
+        cy.addFleetGitRepo(repoName, repoUrl, branch, path);
         cy.contains(repoName).click();
       })
     );
@@ -107,7 +107,7 @@ describe('Import CAPD', () => {
     // TODO: Add test for RKE2 also
     if (!path.includes('rke2')) {
       qase(12,
-        it('Scale imported CAPD cluster', () => {
+        it('Scale up imported CAPD cluster', () => {
           // Access CAPI cluster
           cy.checkCAPIMenu();
           cy.contains("Machine Deployments").click();

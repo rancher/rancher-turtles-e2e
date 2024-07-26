@@ -241,7 +241,7 @@ Cypress.Commands.add('typeInFilter', (text) => {
 
 // Fleet commands
 // Command add Fleet Git Repository
-Cypress.Commands.add('addFleetGitRepo', ({ repoName, repoUrl, branch, path }) => {
+Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, path) => {
   cy.accesMenuSelection('Continuous Delivery', 'Git Repos');
   cy.contains('fleet-').click();
   cy.contains('fleet-local').should('be.visible').click();
@@ -260,7 +260,7 @@ Cypress.Commands.add('addFleetGitRepo', ({ repoName, repoUrl, branch, path }) =>
 })
 
 // Command remove Fleet Git Repository
-Cypress.Commands.add('removeFleetGitRepo', (repoName) => {
+Cypress.Commands.add('removeFleetGitRepo', (repoName, noRepoCheck) => {
   // Go to 'Continuous Delivery' > 'Git Repos'
   cy.accesMenuSelection('Continuous Delivery', 'Git Repos');
   // Change the namespace to fleet-local using the dropdown on the top bar
@@ -268,10 +268,14 @@ Cypress.Commands.add('removeFleetGitRepo', (repoName) => {
   cy.contains('fleet-local').should('be.visible').click();
   // Click the repo link
   cy.contains(repoName).click();
-  cy.url().should("include", "fleet/fleet.cattle.io.gitrepo/fleet-local/clusters")
+  cy.url().should("include", "fleet/fleet.cattle.io.gitrepo/fleet-local/" + repoName)
   // Click on the actions menu and select 'Delete' from the menu
   cy.get('.actions .btn.actions').click();
   cy.get('.icon.group-icon.icon-trash').click();
   cypressLib.confirmDelete();
-  cy.contains('No repositories have been added').should('be.visible');
+  if (noRepoCheck == true) {
+    cy.contains(repoName).should('not.exist');
+  } else {
+    cy.contains('No repositories have been added').should('be.visible');
+  }
 })
