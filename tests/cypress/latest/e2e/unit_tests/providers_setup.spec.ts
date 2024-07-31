@@ -18,7 +18,7 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 // TODO: Align QASE ID's
 Cypress.config();
 describe('Enable CAPI Providers', () => {
-  
+
   const kubeadmProvider = 'kubeadm'
   const dockerProvider = 'docker'
   const amazonProvider = 'aws'
@@ -35,7 +35,7 @@ describe('Enable CAPI Providers', () => {
   });
 
   providerNamespaces.forEach(namespace => {
-    it('Create CAPI Providers Namespaces - '+ namespace, () => {
+    it('Create CAPI Providers Namespaces - ' + namespace, () => {
       cy.createNamespace(namespace);
     })
   })
