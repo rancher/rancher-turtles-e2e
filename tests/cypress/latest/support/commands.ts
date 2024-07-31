@@ -204,7 +204,10 @@ Cypress.Commands.add('installApp', (appName, namespace, questions) => {
   cy.clickButton('Next');
 
   if (questions != undefined) {
-    cy.contains('Customize install settings').should('be.visible').click();
+    // Needs to be adapted for different Apps with questions
+    if (appName == 'Rancher Turtles') {
+      cy.contains('Customize install settings').should('be.visible').click();
+    }
 
     questions.forEach((question: { menuEntry: string; checkbox: string; inputBoxTitle: string ; inputBoxValue: string; }) => {
       if (question.checkbox) {
