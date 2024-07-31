@@ -39,7 +39,14 @@ describe('Install Turtles Operator', () => {
   qase(2,
     it('Install Turtles operator', { retries: 1 }, () => {
       cy.contains('local').click();
-      cy.installApp('Rancher Turtles', 'rancher-turtles-system');
+
+      const questions = [
+        { menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Seamless integration with Fleet and CAPI' },
+        // Following is a "working" example for possible future use of inputBoxes
+        // { menuEntry: 'Rancher webhook cleanup settings', inputBoxTitle: 'Webhook Cleanup Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.28.0' },
+      ];
+
+      cy.installApp('Rancher Turtles', 'rancher-turtles-system', questions);
     })
   );
 
