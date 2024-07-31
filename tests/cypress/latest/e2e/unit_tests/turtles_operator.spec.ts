@@ -62,7 +62,8 @@ describe('Install Turtles Operator', () => {
     cy.setNamespace('rancher-turtles-system');
 
     // Edit Rancher turtles deployment
-    cy.getBySel('sortable-table-1-action-button').click();
+    cy.typeInFilter(deployment);
+    cy.getBySel('sortable-table-0-action-button').click();
     cy.contains('Edit Config')
       .click();
     cy.byLabel('Arguments').as('label')
