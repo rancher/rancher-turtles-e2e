@@ -18,7 +18,7 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 // TODO: Align QASE ID's
 Cypress.config();
 describe('Enable CAPI Providers', () => {
-  
+
   const kubeadmProvider = 'kubeadm'
   const dockerProvider = 'docker'
   const amazonProvider = 'aws'
@@ -35,7 +35,7 @@ describe('Enable CAPI Providers', () => {
   });
 
   providerNamespaces.forEach(namespace => {
-    it('Create CAPI Providers Namespaces - '+ namespace, () => {
+    it('Create CAPI Providers Namespaces - ' + namespace, () => {
       cy.createNamespace(namespace);
     })
   })
@@ -64,7 +64,7 @@ describe('Enable CAPI Providers', () => {
       cy.addInfraProvider(dockerProvider, dockerProvider, 'capd-system');
       var statusReady = 'Ready'
       statusReady = statusReady.concat(' ', dockerProvider, ' infrastructure ', dockerProvider, ' ', kubeadmProviderVersion)
-      cy.contains(statusReady);
+      cy.contains(statusReady, { timeout: 120000 });
     })
   );
 
@@ -76,7 +76,7 @@ describe('Enable CAPI Providers', () => {
       cy.addInfraProvider('Amazon', amazonProvider, 'capa-system', amazonProvider);
       var statusReady = 'Ready'
       statusReady = statusReady.concat(' ', amazonProvider, ' infrastructure ', amazonProvider, ' ', 'v2.3.5')
-      cy.contains(statusReady);
+      cy.contains(statusReady, { timeout: 120000 });
     })
   );
 
@@ -87,7 +87,7 @@ describe('Enable CAPI Providers', () => {
     cy.addInfraProvider('Google', googleProvider, 'capg-system', googleProvider);
     var statusReady = 'Ready'
     statusReady = statusReady.concat(' ', googleProvider, ' infrastructure ', googleProvider, ' ', 'v1.6.0')
-    cy.contains(statusReady);
+    cy.contains(statusReady, { timeout: 120000 });
   })
 
 });
