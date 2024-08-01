@@ -22,7 +22,7 @@ describe('Import CAPD Clusterclass', () => {
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
   const basePath = "/tests/assets/rancher-turtles-fleet-example/"
   const path = 'clusterclass_autoimport'
-  const branch = "main"
+  const branch = "fleet-addon" // CHANGE ME TO "main" BEFORE MERGING
 
   beforeEach(() => {
     cy.login();
@@ -56,10 +56,11 @@ describe('Import CAPD Clusterclass', () => {
     cy.contains(clusterName).click();
 
     // Install App
-    cy.installApp('Monitoring', 'cattle-monitoring');
+    // cy.installApp('Monitoring', 'cattle-monitoring');
+    cy.installApp('Alerting', 'default', [{ menuEntry: '(None)', checkbox: 'Enable SMS' }]);
   })
 
-  it('Scale down imported CAPD cluster', () => {
+  it('Scale up imported CAPD cluster', () => {
     // Access CAPI cluster
     cy.checkCAPIMenu();
     cy.contains("Machine Deployments").click();
@@ -69,7 +70,7 @@ describe('Import CAPD Clusterclass', () => {
     cy.get('.CodeMirror')
       .then((editor) => {
         var text = editor[0].CodeMirror.getValue();
-        text = text.replace(/replicas: 3/g, 'replicas: 2');
+        text = text.replace(/replicas: 1/g, 'replicas: 2');
         editor[0].CodeMirror.setValue(text);
         cy.clickButton('Save');
       })
@@ -111,5 +112,4 @@ describe('Import CAPD Clusterclass', () => {
       }
     })
   })
-
 });
