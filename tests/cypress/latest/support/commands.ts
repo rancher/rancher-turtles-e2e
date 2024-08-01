@@ -255,7 +255,8 @@ Cypress.Commands.add('typeInFilter', (text) => {
   cy.get('.input-sm')
     .click()
     .clear()
-    .type(text);
+    .type(text)
+    .wait(2000);
 });
 
 // Command to navigate to Home page
