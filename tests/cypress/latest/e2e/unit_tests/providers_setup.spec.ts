@@ -95,7 +95,7 @@ describe('Enable CAPI Providers', () => {
     cy.checkCAPIMenu();
     cy.contains('Providers').click();
     var statusReady = 'Ready'
-    // ProviderName is not set for fleet addon hence the empty string
+    // ProviderName is not set for fleet addon hence the empty string, see https://github.com/rancher/turtles/issues/630
     statusReady = statusReady.concat(' ', 'fleet', ' addon ', '', 'v0.3.0')
     cy.contains(statusReady).scrollIntoView();
   })
