@@ -4,7 +4,6 @@ metadata:
   name: cluster1
   namespace: default
   labels:
-    cni: quick-start-crs-0
     cluster-api.cattle.io/rancher-auto-import: "true"
 spec:
   clusterNetwork:
@@ -19,7 +18,7 @@ spec:
     class: quick-start
     controlPlane:
       metadata: {}
-      replicas: 3
+      replicas: 1
     variables:
     - name: imageRepository
       value: ""
@@ -38,4 +37,4 @@ spec:
       machineDeployments:
       - class: default-worker
         name: md-0
-        replicas: 3
+        replicas: 1
