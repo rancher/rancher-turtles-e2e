@@ -64,7 +64,7 @@ describe('Enable CAPI Providers', () => {
       cy.addInfraProvider(dockerProvider, dockerProvider, 'capd-system');
       var statusReady = 'Ready'
       statusReady = statusReady.concat(' ', dockerProvider, ' infrastructure ', dockerProvider, ' ', kubeadmProviderVersion)
-      cy.contains(statusReady, { timeout: 120000 });
+      cy.contains(statusReady, { timeout: 120000 }).scrollIntoView();
     })
   );
 
@@ -76,7 +76,7 @@ describe('Enable CAPI Providers', () => {
       cy.addInfraProvider('Amazon', amazonProvider, 'capa-system', amazonProvider);
       var statusReady = 'Ready'
       statusReady = statusReady.concat(' ', amazonProvider, ' infrastructure ', amazonProvider, ' ', 'v2.3.5')
-      cy.contains(statusReady, { timeout: 120000 });
+      cy.contains(statusReady, { timeout: 120000 }).scrollIntoView();
     })
   );
 
@@ -87,7 +87,16 @@ describe('Enable CAPI Providers', () => {
     cy.addInfraProvider('Google', googleProvider, 'capg-system', googleProvider);
     var statusReady = 'Ready'
     statusReady = statusReady.concat(' ', googleProvider, ' infrastructure ', googleProvider, ' ', 'v1.6.0')
-    cy.contains(statusReady, { timeout: 120000 });
+    cy.contains(statusReady, { timeout: 120000 }).scrollIntoView();
   })
 
+  it('Check Fleet addon provider', () => {
+    // Fleet addon provider is provisioned automatically when enabled during installation
+    cy.checkCAPIMenu();
+    cy.contains('Providers').click();
+    var statusReady = 'Ready'
+    // ProviderName is not set for fleet addon hence the empty string
+    statusReady = statusReady.concat(' ', 'fleet', ' addon ', '', 'v0.3.0')
+    cy.contains(statusReady, { timeout: 120000 }).scrollIntoView();
+  })
 });
