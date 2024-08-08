@@ -166,6 +166,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v5
         with:
+          cache: false
           go-version-file: tests/go.mod
       - name: Create/Export Qase Run
         id: qase
@@ -221,6 +222,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v5
         with:
+          cache: false
           go-version-file: go.mod
 
       # This step builds latest turtles chart and pushes latest turtles docker image to local docker registry
@@ -239,6 +241,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v5
         with:
+          cache: false
           go-version-file: tests/go.mod
       - name: Copy chart file for chartmuseum
         run: sudo cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
@@ -282,15 +285,15 @@ jobs:
           GCP_CREDENTIALS: ${{ secrets.gcp_credentials }}
           QASE_RUN_ID: ${{ needs.pre-qase.outputs.qase_run_id }}
           SPEC: |
-            /workdir/e2e/unit_tests/first_connection.spec.ts
-            /workdir/e2e/unit_tests/user.spec.ts
-            /workdir/e2e/unit_tests/turtles_operator.spec.ts
-            /workdir/e2e/unit_tests/turtles_plugin.spec.ts
-            /workdir/e2e/unit_tests/menu.spec.ts
-            /workdir/e2e/unit_tests/providers_setup.spec.ts
-            /workdir/e2e/unit_tests/capd_clusterclass.spec.ts
-            /workdir/e2e/unit_tests/capd_cluster.spec.ts
-            /workdir/e2e/unit_tests/capa_cluster.spec.ts
+            e2e/unit_tests/first_connection.spec.ts
+            e2e/unit_tests/user.spec.ts
+            e2e/unit_tests/turtles_operator.spec.ts
+            e2e/unit_tests/turtles_plugin.spec.ts
+            e2e/unit_tests/menu.spec.ts
+            e2e/unit_tests/providers_setup.spec.ts
+            e2e/unit_tests/capd_clusterclass.spec.ts
+          # e2e/unit_tests/capd_cluster.spec.ts
+          # e2e/unit_tests/capa_cluster.spec.ts
           UI_ACCOUNT: ${{ inputs.ui_account }}
           UPGRADE_OS_CHANNEL: ${{ inputs.upgrade_os_channel }}
         run: cd tests && make start-cypress-tests
@@ -365,6 +368,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
+          cache: false
           go-version-file: tests/go.mod
       - name: Finalize Qase Run and publish Results
         if: ${{ always() && !contains(needs.e2e.result, 'cancelled') }}

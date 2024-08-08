@@ -193,7 +193,7 @@ Cypress.Commands.add('addCloudCredsGCP', (name, gcpCredentials) => {
 });
 
 // Command to Install App from Charts menu
-Cypress.Commands.add('installApp', (appName, namespace) => {
+Cypress.Commands.add('installApp', (appName, namespace, questions) => {
   cy.get('.nav').contains('Apps').click();
   cy.contains('Featured Charts').should('be.visible');
   cy.contains(appName, { timeout: 60000 }).click();
@@ -201,6 +201,24 @@ Cypress.Commands.add('installApp', (appName, namespace) => {
   cy.clickButton('Install');
   cy.contains('.outer-container > .header', appName);
   cy.clickButton('Next');
+
+  if (questions != undefined) {
+    // Needs to be adapted for different Apps with questions
+    if (appName == 'Rancher Turtles') {
+      cy.contains('Customize install settings').should('be.visible').click();
+    }
+
+    questions.forEach((question: { menuEntry: string; checkbox: string; inputBoxTitle: string ; inputBoxValue: string; }) => {
+      if (question.checkbox) {
+        cy.contains('a', question.menuEntry).click();
+        cy.contains(question.checkbox).click(); // TODO make sure the checkbox is enabled
+      } else if (question.inputBoxTitle && question.inputBoxValue) {
+        cy.contains(question.menuEntry).click();
+        cy.contains(question.inputBoxTitle).siblings('input').clear().type(question.inputBoxValue);
+      }
+    });
+  }
+
   cy.clickButton('Install');
 
   // Close the shell to avoid conflict
@@ -236,7 +254,8 @@ Cypress.Commands.add('typeInFilter', (text) => {
   cy.get('.input-sm')
     .click()
     .clear()
-    .type(text);
+    .type(text)
+    .wait(2000);
 });
 
 // Fleet commands
