@@ -1,6 +1,6 @@
 # rancher-turtles-e2e
 
-[![UI-RM_head_2.8](https://github.com/rancher-sandbox/rancher-turtles-e2e/actions/workflows/ui-rm_head_2.8.yaml/badge.svg?branch=main)](https://github.com/rancher-sandbox/rancher-turtles-e2e/actions/workflows/ui-rm_head_2.8.yaml)
+[![UI-E2E_head_2.9](https://github.com/rancher-sandbox/rancher-turtles-e2e/actions/workflows/ui-e2e.yaml/badge.svg?branch=main)](https://github.com/rancher-sandbox/rancher-turtles-e2e/actions/workflows/ui-e2e.yaml)
 
 What tests are doing:
 1. Create the infra stack ( GCP runner, cert-manager, rancher )
