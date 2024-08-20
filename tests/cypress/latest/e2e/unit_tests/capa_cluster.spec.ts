@@ -38,7 +38,7 @@ describe('Import CAPA', () => {
 
   it('Auto import child CAPA cluster', () => {
     // Check child cluster is created and auto-imported
-    cy.visit('/');
+    cy.goToHome();
     cy.contains('Pending ' + clusterName);
 
     // Check cluster is Active
@@ -59,7 +59,7 @@ describe('Import CAPA', () => {
 
       // Check cluster is not deleted after removal
       cy.deleteCluster(clusterName);
-      cy.visit('/');
+      cy.goToHome();
       // kubectl get clusters.cluster.x-k8s.io
       // This is checked by ensuring the cluster is not available in navigation menu
       cy.contains(clusterName).should('not.exist');

@@ -97,7 +97,7 @@ spec:
       kind: DockerMachineTemplate
       name: cluster1-control-plane
   replicas: 1
-  version: v1.26.4
+  version: v1.30.3
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: DockerMachineTemplate
@@ -150,7 +150,7 @@ spec:
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: DockerMachineTemplate
         name: cluster1-md-0
-      version: v1.26.4
+      version: v1.30.3
 ---
 apiVersion: addons.cluster.x-k8s.io/v1beta1
 kind: ClusterResourceSet

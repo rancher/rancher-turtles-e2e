@@ -78,9 +78,9 @@ Cypress.Commands.add('namespaceReset', () => {
 
 // Command to check CAPI cluster Active status
 Cypress.Commands.add('checkCAPIClusterActive', (clusterName) => {
+  cy.goToHome();
   cypressLib.burgerMenuToggle();
   cy.checkCAPIMenu();
-  cy.reload();
   cy.contains('Provisioned ' + clusterName, { timeout: 90000 });
   cy.contains('Machine Deployments').click();
   cy.contains('Running ' + clusterName, { timeout: 90000 });
@@ -90,15 +90,16 @@ Cypress.Commands.add('checkCAPIClusterActive', (clusterName) => {
 
 // Command to check CAPI cluster Provisioned status
 Cypress.Commands.add('checkCAPIClusterProvisioned', (clusterName) => {
+  cy.goToHome();
   cypressLib.burgerMenuToggle();
   cy.checkCAPIMenu();
-  cy.reload();
   cy.contains('Provisioned ' + clusterName, { timeout: 90000 });
 });
 
 // Command to check CAPI Menu is visible
 Cypress.Commands.add('checkCAPIMenu', () => {
-  cy.accesMenuSelection('Cluster Management', 'CAPI');
+  cypressLib.accesMenu('Cluster Management');
+  cy.get('.header').contains('CAPI').click();
   cy.contains('.nav', 'Clusters')
   cy.contains('.nav', 'Machine Deployments')
   cy.contains('.nav', 'Machine Sets')
@@ -216,7 +217,7 @@ Cypress.Commands.add('installApp', (appName, namespace) => {
 
 // Command to remove cluster from Rancher
 Cypress.Commands.add('deleteCluster', (clusterName) => {
-  cy.visit('/');
+  cy.goToHome();
   cy.clickButton('Manage');
   cy.getBySel('cluster-list').should('be.visible');
   cy.contains(clusterName);
@@ -237,6 +238,12 @@ Cypress.Commands.add('typeInFilter', (text) => {
     .click()
     .clear()
     .type(text);
+});
+
+// Command to navigate to Home page
+Cypress.Commands.add('goToHome', () => {
+  cy.visit('/');
+  cy.getBySel('banner-title').contains('Welcome to Rancher');
 });
 
 // Fleet commands

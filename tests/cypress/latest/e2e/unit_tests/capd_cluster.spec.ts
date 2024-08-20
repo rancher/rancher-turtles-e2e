@@ -33,36 +33,6 @@ describe('Import CAPD', () => {
 
   pathNames.forEach((path) => {
 
-    if (path == 'rke2_namespace_autoimport') {
-      it('Remove Docker provider', () => {
-        cy.removeProvider('docker');
-      })
-
-      // TODO: Using Import YAML till capi-ui-extension/issues/60 is fixed
-      it('Create Docker-RKE2 provider', () => {
-        cy.contains('local')
-          .click();
-        cy.get('.header-buttons > :nth-child(1) > .icon')
-          .click();
-        cy.contains('Import YAML');
-        cy.readFile('./fixtures/capd-rke2-provider.yaml').then((data) => {
-          cy.get('.CodeMirror')
-              .then((editor) => {
-                  editor[0].CodeMirror.setValue(data);
-              })
-        });
-        cy.clickButton('Import');
-        cy.clickButton('Close');
-        // Navigate to providers Menu
-        cypressLib.burgerMenuToggle();
-        cy.checkCAPIMenu();
-        cy.contains('Providers').click();
-        var statusReady = 'Ready'
-        statusReady = statusReady.concat(' docker-rke2 ', 'infrastructure')
-        cy.contains(statusReady, { timeout: timeoutShort });
-      })
-    }
-
     it('Setup the namespace for importing', () => {
       if (path.includes('namespace_autoimport')) {
         cy.namespaceAutoImport('Enable');
@@ -85,7 +55,7 @@ describe('Import CAPD', () => {
     qase(6,
       it('Auto import child CAPD cluster', () => {
         // Check child cluster is created and auto-imported
-        cy.visit('/');
+        cy.goToHome();
         cy.contains('Pending ' + clusterName, { timeout: timeoutFull });
 
         // Check cluster is Active
@@ -134,7 +104,7 @@ describe('Import CAPD', () => {
       it('Remove imported CAPD cluster from Rancher Manager', { retries: 1 }, () => {
         // Check cluster is not deleted after removal
         cy.deleteCluster(clusterName);
-        cy.visit('/');
+        cy.goToHome();
         // kubectl get clusters.cluster.x-k8s.io
         // This is checked by ensuring the cluster is not available in navigation menu
         cy.contains(clusterName).should('not.exist');

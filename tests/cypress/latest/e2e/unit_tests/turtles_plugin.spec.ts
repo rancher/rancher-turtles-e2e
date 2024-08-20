@@ -29,10 +29,6 @@ describe('Install CAPI plugin', () => {
     cypressLib.addRepository('capi-ui', 'https://github.com/rancher/capi-ui-extension.git', 'git', 'gh-pages')
   })
 
-  it('Enable extension support', () => {
-    cypressLib.enableExtensionSupport(true);
-  })
-
   qase(3,
     it('Install CAPI plugin', () => {
       // TODO: create a function to install any plugin and not elemental only

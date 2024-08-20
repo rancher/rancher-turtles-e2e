@@ -22,7 +22,7 @@ metadata:
   name: "turtles-qa-cluster-control-plane"
 spec:
   region: "ap-south-2"
-  version: "v1.28"
+  version: "v1.30"
 ---
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: MachinePool

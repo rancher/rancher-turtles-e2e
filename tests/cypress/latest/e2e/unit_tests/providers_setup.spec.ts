@@ -23,14 +23,14 @@ describe('Enable CAPI Providers', () => {
   const dockerProvider = 'docker'
   const amazonProvider = 'aws'
   const googleProvider = 'gcp'
-  const kubeadmProviderVersion = 'v1.4.6'
+  const kubeadmProviderVersion = 'v1.7.3'
   const kubeadmBaseURL = 'https://github.com/kubernetes-sigs/cluster-api/releases/'
   const kubeadmProviderTypes = ['bootstrap', 'control plane']
   const providerNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system', 'capd-system', 'capa-system', 'capg-system']
 
   beforeEach(() => {
     cy.login();
-    cy.visit('/');
+    cy.goToHome();
     cypressLib.burgerMenuToggle();
   });
 
@@ -75,7 +75,7 @@ describe('Enable CAPI Providers', () => {
       cypressLib.burgerMenuToggle();
       cy.addInfraProvider('Amazon', amazonProvider, 'capa-system', amazonProvider);
       var statusReady = 'Ready'
-      statusReady = statusReady.concat(' ', amazonProvider, ' infrastructure ', amazonProvider, ' ', 'v2.3.5')
+      statusReady = statusReady.concat(' ', amazonProvider, ' infrastructure ', amazonProvider, ' ', 'v2.6.1')
       cy.contains(statusReady);
     })
   );
@@ -86,7 +86,7 @@ describe('Enable CAPI Providers', () => {
     cypressLib.burgerMenuToggle();
     cy.addInfraProvider('Google', googleProvider, 'capg-system', googleProvider);
     var statusReady = 'Ready'
-    statusReady = statusReady.concat(' ', googleProvider, ' infrastructure ', googleProvider, ' ', 'v1.6.0')
+    statusReady = statusReady.concat(' ', googleProvider, ' infrastructure ', googleProvider, ' ', 'v1.7.0')
     cy.contains(statusReady);
   })
 

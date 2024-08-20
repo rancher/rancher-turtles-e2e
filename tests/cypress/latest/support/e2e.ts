@@ -38,6 +38,7 @@ declare global {
       addCloudCredsAWS(name: string, accessKey: string, secretKey: string): Chainable<Element>;
       addCloudCredsGCP(name: string, gcpCredentials: string): Chainable<Element>;
       typeInFilter(text: string): Chainable<Element>;
+      goToHome(): Chainable<Element>;
     }
   }
 }

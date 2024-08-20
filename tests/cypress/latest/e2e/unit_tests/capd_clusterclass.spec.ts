@@ -41,7 +41,7 @@ describe('Import CAPD Clusterclass', () => {
 
   it('Auto import child CAPD cluster', () => {
     // Check child cluster is created and auto-imported
-    cy.visit('/');
+    cy.goToHome();
     cy.contains('Pending ' + clusterName, { timeout: timeout });
 
     // Check cluster is Active
@@ -82,8 +82,7 @@ describe('Import CAPD Clusterclass', () => {
   it('Remove imported CAPD cluster from Rancher Manager', { retries: 1 }, () => {
     // Check cluster is not deleted after removal
     cy.deleteCluster(clusterName);
-    cy.visit('/');
-    cy.getBySel('banner-title').contains('Welcome to Rancher');
+    cy.goToHome();
     // kubectl get clusters.cluster.x-k8s.io
     // This is checked by ensuring the cluster is not available in navigation menu
     cy.contains(clusterName).should('not.exist');

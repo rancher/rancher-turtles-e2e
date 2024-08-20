@@ -6,7 +6,7 @@ metadata:
 spec:
   type: infrastructure
   name: aws
-  version: v2.3.5
+  version: v2.6.1
   configSecret:
     name: capa-variables
   variables:

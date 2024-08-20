@@ -20,7 +20,7 @@ Cypress.config();
 describe('Menu testing', () => {
   beforeEach(() => {
     cy.login();
-    cy.visit('/');
+    cy.goToHome();
     cypressLib.burgerMenuToggle();
   });
 
