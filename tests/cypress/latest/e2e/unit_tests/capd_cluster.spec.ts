@@ -122,7 +122,14 @@ describe('Import CAPD', () => {
         cy.checkCAPIMenu();
         cy.getBySel('button-group-child-1').click();
         cy.typeInFilter(clusterName);
-        cy.getBySel('sortable-table-0-action-button', { timeout: timeoutFull }).should('not.exist');
+        
+        // Workaround for turtles/issues/685
+        if (path.includes('rke2')) {
+          cy.contains('Unavailable ' + clusterName + ' Deleting', { timeout: 90000 });
+        } else {
+          cy.getBySel('sortable-table-0-action-button', { timeout: timeoutFull }).should('not.exist');
+        }
+        
         // Ensure the cluster is not available in navigation menu
         cy.getBySel('side-menu').then(($menu) => {
           if ($menu.text().includes(clusterName)) {
