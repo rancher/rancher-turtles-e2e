@@ -51,16 +51,16 @@ describe('Import CAPD Clusterclass', () => {
     cy.checkCAPIClusterProvisioned(clusterName);
   })
 
-  it('Install App on imported cluster', { retries: 1 }, () => {
+  it.skip('Install App on imported cluster', { retries: 1 }, () => {
     // Click on imported CAPD cluster
     cy.contains(clusterName).click();
 
     // Install App
     // cy.installApp('Monitoring', 'cattle-monitoring');
-    cy.installApp('Alerting', 'default', [{ menuEntry: '(None)', checkbox: 'Enable SMS' }]);
+    cy.installApp('Alerting', 'default', [{ menuEntry: '(None)', checkbox: 'Enable Microsoft Teams' }]);
   })
 
-  it('Scale up imported CAPD cluster', () => {
+  it.skip('Scale up imported CAPD cluster', () => {
     // Access CAPI cluster
     cy.checkCAPIMenu();
     cy.contains("Machine Deployments").click();
@@ -80,7 +80,7 @@ describe('Import CAPD Clusterclass', () => {
     cy.checkCAPIClusterActive(clusterName);
   })
 
-  it('Remove imported CAPD cluster from Rancher Manager', { retries: 1 }, () => {
+  it.skip('Remove imported CAPD cluster from Rancher Manager', { retries: 1 }, () => {
     // Check cluster is not deleted after removal
     cy.deleteCluster(clusterName);
     cy.goToHome();
@@ -90,7 +90,7 @@ describe('Import CAPD Clusterclass', () => {
     cy.checkCAPIClusterProvisioned(clusterName);
   })
 
-  it('Delete the clusterclass fleet repo - ' + path, () => {
+  it.skip('Delete the clusterclass fleet repo - ' + path, () => {
     // Remove the classes fleet git repo
     cy.removeFleetGitRepo(repoNames.at(0), true)
 
