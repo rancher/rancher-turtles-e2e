@@ -5,6 +5,10 @@ run-name: UI-E2E on Rancher-${{ inputs.rancher_version || 'latest/devel/2.9' }}
 on:
   workflow_dispatch:
     inputs:
+      qase_run_id:
+        description: Qase run ID where the results will be reported (auto|none|existing_run_id)
+        default: auto
+        type: string
       destroy_runner:
         description: Destroy the auto-generated self-hosted runner
         default: true
@@ -32,3 +36,4 @@ jobs:
       destroy_runner: ${{ github.event_name == 'schedule' && true || inputs.destroy_runner }}
       capi_ui_version: dev
       rancher_version: ${{ inputs.rancher_version || 'latest/devel/2.9' }}
+      qase_run_id: ${{ inputs.qase_run_id || 'auto' }}

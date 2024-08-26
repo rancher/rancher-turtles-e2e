@@ -75,13 +75,9 @@ on:
         description: GCP zone to host the runner
         default: asia-south2-a
         type: string
-
-env:
-  QASE_API_TOKEN: ${{ secrets.QASE_API_TOKEN }}
-  QASE_PROJECT_CODE: RT
-  QASE_REPORT: 1
-  QASE_RUN_COMPLETE: 1
-  QASE_HELPER: ${{ github.workspace }}/tests/e2e/helpers/qase/helper_qase.go
+      qase_run_id:
+        description: Qase run ID to use for reporting
+        type: string
 
 jobs:
   create-runner:
@@ -123,22 +119,13 @@ jobs:
       - name: Get public dns name in GCP
         id: dns
         run: |
-          # Do a timed out loop here, as gcloud can sometimes fail
-          typeset -i i=0
-          while true; do
-            # Get public IP
-            PUBLIC_IP=$(gcloud compute instances list 2> /dev/null \
-                        | awk '/${{ steps.generator.outputs.runner }}/ {print $6}')
-            # Exit if we reach the timeout or if IP is set
-            if (( ++i > 10 )) || [[ -n "${PUBLIC_IP}" ]]; then
-              break
-            fi
-            # Wait a little before retrying
+          for ((i=0; i<10; i++)); do
+            PUBLIC_IP=$(gcloud compute instances list --format="value(EXTERNAL_IP)" \
+              --filter="name=${{ steps.generator.outputs.runner }}" 2> /dev/null)
+            [[ -n "${PUBLIC_IP}" ]] && break
             sleep 2
           done
-          # Get the public DNS
-          PUBLIC_DNS=$(host -l ${PUBLIC_IP} 2> /dev/null \
-                       | awk '{sub(/\.$/, ""); print $5}')
+          PUBLIC_DNS=$(dig -x ${PUBLIC_IP} +short 2> /dev/null | sed 's/\.$//')
           echo "public_dns=${PUBLIC_DNS}" >> ${GITHUB_OUTPUT}
           # Raise an error if either IP and/or DNS are empty
           if [[ -z "${PUBLIC_IP}" || -z "${PUBLIC_DNS}" ]]; then
@@ -148,6 +135,9 @@ jobs:
 
   pre-qase:
     runs-on: ubuntu-latest
+    env:
+      QASE_API_TOKEN: ${{ secrets.QASE_API_TOKEN }}
+      QASE_PROJECT_CODE: RT
     outputs:
       qase_run_description: ${{ steps.qase.outputs.qase_run_description }}
       qase_run_id: ${{ steps.qase.outputs.qase_run_id }}
@@ -155,27 +145,51 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Install Go
         uses: actions/setup-go@v5
         with:
           go-version-file: tests/go.mod
       - name: Create/Export Qase Run
         id: qase
+        env:
+          QASE_RUN_NAME: ${{ github.event_name == 'workflow_dispatch' && inputs.rancher_version || github.workflow }}
         run: |
-          # Define and export URL of GH test run in Qase run description
-          GH_RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          export QASE_RUN_DESCRIPTION="${GH_RUN_URL}"
-          export QASE_RUN_NAME="${GITHUB_WORKFLOW}"
-        
-          # Create a Qase run, get its ID
-          ID=$(cd tests && go run ${{ env.QASE_HELPER }} -create)
-          # Export outputs for future use
-          echo "qase_run_id=${ID}" >> ${GITHUB_OUTPUT}
-    
-          # Just an info for debugging purposes
-          echo -e "Exported values:\nQASE_RUN_ID=${ID}\nQASE_RUN_DESCRIPTION=${QASE_RUN_DESCRIPTION}\nQASE_RUN_NAME=${QASE_RUN_NAME}"
-        
+          case ${{ inputs.qase_run_id }} in
+            'auto')
+              # Define and export URL of GH test run in Qase run description
+              GH_RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+              QASE_DESC="${GH_RUN_URL}"
+              export QASE_RUN_DESCRIPTION="${QASE_DESC}"
+
+              # Use full rancher version
+              QASE_RUN_NAME=$(echo $QASE_RUN_NAME | grep -P '[0-9]+\.[0-9]+\.[0-9]+(-[a-z]+[0-9]+)?' || true)
+              # Or workflow name if the full rancher version is not found
+              if [ -z "$QASE_RUN_NAME" ]; then
+                QASE_RUN_NAME="${{ github.workflow }}"
+              fi
+
+              # Create a Qase run, get its ID
+              ID=$(cd tests && make create-qase-run)
+
+              # Export outputs for future use
+              echo "qase_run_description=${QASE_DESC}" >> ${GITHUB_OUTPUT}
+              echo "qase_run_id=${ID}" >> ${GITHUB_OUTPUT}
+              echo "qase_run_name=${QASE_RUN_NAME}" >> ${GITHUB_OUTPUT}
+
+              # Just an info for debugging purposes
+              echo -e "Exported values:\nQASE_RUN_ID=${ID}\nQASE_RUN_DESCRIPTION=${QASE_DESC}\nQASE_RUN_NAME=${QASE_RUN_NAME}"
+              ;;
+            'none')
+              echo "qase_run_id=" >> ${GITHUB_OUTPUT}
+              echo "### Test not reported in QASE!" >> ${GITHUB_STEP_SUMMARY}
+              ;;
+            [0-9]*)
+              # If the run ID has been specified
+              echo "qase_run_id=${{ inputs.qase_run_id }}" >> ${GITHUB_OUTPUT}
+              ;;
+          esac
+
   e2e:
     needs: [create-runner, pre-qase]
     runs-on: ${{ needs.create-runner.outputs.uuid }}
@@ -193,6 +207,11 @@ jobs:
       # For Rancher Manager
       RANCHER_VERSION: ${{ inputs.rancher_version }}
       TIMEOUT_SCALE: 3
+      QASE_API_TOKEN: ${{ secrets.qase_api_token }}
+      QASE_PROJECT_CODE: RT
+      QASE_RUN_ID: ${{ needs.pre-qase.outputs.qase_run_id }}
+      # NOTE: this REPORT var is needed for Cypress!
+      QASE_REPORT: 1
       TAG: 0.0.1
       TURTLES_REPO: rancher-sandbox/rancher-turtles
       MANIFEST_IMG: localhost:5000/$TURTLES_REPO-$ARCH
@@ -283,7 +302,14 @@ jobs:
             /workdir/e2e/unit_tests/capa_cluster.spec.ts
           UI_ACCOUNT: ${{ inputs.ui_account }}
           UPGRADE_OS_CHANNEL: ${{ inputs.upgrade_os_channel }}
-        run: cd tests && make start-cypress-tests
+        run: |
+          if ${{ inputs.qase_run_id == 'none' }}; then
+            # Unset default QASE_* variables when reporting is disabled
+            unset QASE_REPORT
+            unset QASE_API_TOKEN
+            # QASE_RUN_ID is empty string already
+          fi
+          cd tests && make start-cypress-tests
       - name: Upload Cypress screenshots (Basics)
         if: failure() 
         uses: actions/upload-artifact@v4
@@ -317,6 +343,7 @@ jobs:
           fi
           echo "### Kubernetes" >> ${GITHUB_STEP_SUMMARY}
           echo "K3s on Rancher Manager: ${{ env.INSTALL_K3S_VERSION }}" >> ${GITHUB_STEP_SUMMARY}
+
   delete-runner:
     if: ${{ always() }}
     needs: [create-runner, e2e]
@@ -347,7 +374,12 @@ jobs:
     needs: [e2e, pre-qase]
     runs-on: ubuntu-latest
     env:
+      QASE_API_TOKEN: ${{ secrets.qase_api_token }}
+      QASE_PROJECT_CODE: RT
+      QASE_REPORT: 1
+      QASE_RUN_COMPLETE: 1
       QASE_RUN_ID: ${{ needs.pre-qase.outputs.qase_run_id }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4          
@@ -358,8 +390,24 @@ jobs:
       - name: Finalize Qase Run and publish Results
         if: ${{ always() && !contains(needs.e2e.result, 'cancelled') }}
         run: |
-          REPORT=$(cd tests && go run ${{ env.QASE_HELPER }} -publish)
+          REPORT=$(cd tests && make publish-qase-run)
           echo "${REPORT}"
-      - name: Delete Qase Run if job has been cancelled
-        if: ${{ always() && contains(needs.e2e.result, 'cancelled') }}
-        run: cd tests && go run ${{ env.QASE_HELPER }} -delete
+
+          # Extract report URL and put it in summary
+          REPORT_URL=$(awk '/available:/ { print $NF }' <<<${REPORT})
+          if [[ -n "${REPORT_URL}" ]]; then
+            echo "## QASE Reporting" >> ${GITHUB_STEP_SUMMARY}
+            echo "Public Qase report: ${REPORT_URL}" >> ${GITHUB_STEP_SUMMARY}
+          fi
+      - name: Delete Qase Run if job has been cancelled or skipped
+        if: ${{ always() && (contains(needs.e2e.result, 'cancelled') || contains(needs.e2e.result, 'skipped')) }}
+        run: cd tests && make delete-qase-run
+
+  # Just to signify that something has been cancelled and it's not useful to check the test
+  declare-cancelled:
+    if: ${{ always() && contains(needs.e2e.result, 'cancelled') }}
+    needs: e2e
+    runs-on: ubuntu-latest
+    steps:
+      - name: Specify in summary if something has been cancelled
+        run: echo "# TEST CANCELLED!" >> ${GITHUB_STEP_SUMMARY}
