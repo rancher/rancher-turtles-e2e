@@ -250,6 +250,7 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v5
         with:
+          cache: false
           go-version-file: tests/go.mod
       - name: Copy chart file for chartmuseum
         run: sudo cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
