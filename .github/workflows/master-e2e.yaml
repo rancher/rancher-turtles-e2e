@@ -403,8 +403,8 @@ jobs:
             echo "## QASE Reporting" >> ${GITHUB_STEP_SUMMARY}
             echo "Public Qase report: ${REPORT_URL}" >> ${GITHUB_STEP_SUMMARY}
           fi
-      - name: Delete Qase Run if job has been cancelled or skipped
-        if: ${{ always() && (contains(needs.e2e.result, 'cancelled') || contains(needs.e2e.result, 'skipped')) }}
+      - name: Delete Qase Run if job cancelled or skipped and not using existing id
+        if: ${{ always() && (contains(needs.e2e.result, 'cancelled') || contains(needs.e2e.result, 'skipped')) && inputs.qase_run_id == 'auto' }}
         run: cd tests && make delete-qase-run
 
   # Just to signify that something has been cancelled and it's not useful to check the test
