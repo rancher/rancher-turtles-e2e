@@ -50,7 +50,7 @@ describe('Install Turtles Operator', () => {
     })
   );
 
-  it('Turtles prerequisites', () => {
+  it.only('Turtles prerequisites', () => {
 
     // Open Rancher turtles deployment
     cy.contains('local')

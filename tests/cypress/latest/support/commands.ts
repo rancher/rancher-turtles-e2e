@@ -16,6 +16,7 @@ limitations under the License.
 
 import 'cypress-file-upload';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
+import jsyaml from 'js-yaml'
 
 // Generic commands
 // Go to specific Sub Menu from Access Menu
@@ -174,7 +175,7 @@ Cypress.Commands.add('addCloudCredsAWS', (name, accessKey, secretKey) => {
   cy.contains('Amazon').click();
   cy.typeValue('Name', name);
   cy.typeValue('Access Key', accessKey);
-  cy.typeValue('Secret Key', secretKey, false, false );
+  cy.typeValue('Secret Key', secretKey, false, false);
   cy.clickButton('Create');
   cy.contains('API Key').should('be.visible');
   cy.contains(name).should('be.visible');
@@ -209,7 +210,7 @@ Cypress.Commands.add('installApp', (appName, namespace, questions) => {
       cy.contains('Customize install settings').should('be.visible').click();
     }
 
-    questions.forEach((question: { menuEntry: string; checkbox: string; inputBoxTitle: string ; inputBoxValue: string; }) => {
+    questions.forEach((question: { menuEntry: string; checkbox: string; inputBoxTitle: string; inputBoxValue: string; }) => {
       if (question.checkbox) {
         cy.contains('a', question.menuEntry).click();
         cy.contains(question.checkbox).click(); // TODO make sure the checkbox is enabled
@@ -230,6 +231,80 @@ Cypress.Commands.add('installApp', (appName, namespace, questions) => {
 
   // Resource should be deployed (green badge)
   cy.get('.outlet').contains('Deployed', { timeout: 180000 });
+  cy.namespaceReset();
+});
+
+Cypress.Commands.add('patchYamlResource', (clusterName, namespace, resourceKind, resourceName, patch) => {
+  // Locate the resource and initiate Edit YAML mode
+  cypressLib.accesMenu(clusterName);
+  cy.setNamespace(namespace);
+  // Open Resource Search modal
+  cy.get('.icon-search.icon-lg').click();
+  cy.get('input.search').type(resourceKind);
+  cy.contains('a', resourceKind, { matchCase: false }).click();
+  cy.typeInFilter(resourceName);
+  // Click three dots menu on filtered resource (must be unique)
+  cy.getBySel('sortable-table-0-action-button').click();
+  //cy.get('.btn.actions.role-multi-action').click();
+  cy.contains('Edit YAML').click();
+
+  // Do the CodeMirror stuff here
+  // WARNING!!! Hightly experimental code - currently handling nested keys under 'data' only but they have to exist (as data.manifests)
+  cy.get('.CodeMirror')
+    .then((editor) => {
+    var text = editor[0].CodeMirror.getValue();
+
+    // Convert YAML to JSON
+    var json = jsyaml.load(text);
+
+    Object.keys(patch).forEach(key => {
+      const keys = key.split('.');
+      let obj = json;
+
+      // Check if the key is nested under 'data', TODO but there are maybe also other keys with nested values
+      if (key.startsWith('data.')) {
+        // Extract the nested key after 'data.'
+        const nestedKey = key.replace('data.', '');
+
+        // Determine the specific nested key within 'data'
+        const [firstKey, ...restKeys] = nestedKey.split('.');
+        if (json.data[firstKey]) {
+          // Parse the nested YAML content
+          let nestedJson = jsyaml.load(json.data[firstKey]);
+
+          // Apply the patch to the nested YAML content
+          let nestedObj = nestedJson;
+          restKeys.forEach((k, index) => {
+            if (index === restKeys.length - 1) {
+              nestedObj[k] = patch[key];
+            } else {
+              if (!nestedObj[k]) nestedObj[k] = {};
+              nestedObj = nestedObj[k];
+            }
+          });
+
+          // Convert the modified nested JSON back to YAML
+          json.data[firstKey] = jsyaml.dump(nestedJson);
+        }
+      } else {
+        // Apply the patch to the main JSON object
+        while (keys.length > 1) {
+          const k = keys.shift();
+          if (!obj[k]) obj[k] = {};
+          obj = obj[k];
+        }
+        obj[keys[0]] = patch[key];
+      }
+    });
+
+    console.log(json);
+    text = jsyaml.dump(json);
+
+    editor[0].CodeMirror.setValue(text);
+    cy.clickButton('Save');
+  })
+
+  // Reset the namespace after the operation
   cy.namespaceReset();
 });
 

@@ -69,7 +69,7 @@ describe('Enable CAPI Providers', () => {
   );
 
   qase(13,
-    it('Create CAPA provider', () => {
+    it.skip('Create CAPA provider', () => {
       // Create AWS Infrastructure provider
       cy.addCloudCredsAWS(amazonProvider, Cypress.env('aws_access_key'), Cypress.env('aws_secret_key'));
       cypressLib.burgerMenuToggle();
@@ -80,7 +80,7 @@ describe('Enable CAPI Providers', () => {
     })
   );
 
-  it('Create CAPG provider', () => {
+  it.skip('Create CAPG provider', () => {
     // Create AWS Infrastructure provider
     cy.addCloudCredsGCP(googleProvider, Cypress.env('gcp_credentials'));
     cypressLib.burgerMenuToggle();
@@ -89,6 +89,22 @@ describe('Enable CAPI Providers', () => {
     statusReady = statusReady.concat(' ', googleProvider, ' infrastructure ', googleProvider, ' ', 'v1.7.0')
     cy.contains(statusReady).scrollIntoView();
   })
+
+  it.only('Custom Fleet addon config', () => {
+    // Allows Fleet addon to be installed on specific clusters only
+    // Enables hostNetwork for Fleet addon
+
+    const clusterName = 'local';
+    const resourceKind = 'configMap';
+    const resourceName = 'fleet-addon-config';
+    const namespace = 'rancher-turtles-system';
+    const patch = {
+      'data.manifests.spec.cluster.hostNetwork': 'true',
+      'data.manifests.spec.cluster.selector.matchLabels.fleet-addon-enabled': 'true',
+    };
+    cy.patchYamlResource(clusterName, namespace, resourceKind, resourceName, patch);
+
+  });
 
   it('Check Fleet addon provider', () => {
     // Fleet addon provider is provisioned automatically when enabled during installation

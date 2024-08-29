@@ -39,6 +39,7 @@ declare global {
       addCloudCredsGCP(name: string, gcpCredentials: string): Chainable<Element>;
       typeInFilter(text: string): Chainable<Element>;
       goToHome(): Chainable<Element>;
+      patchYamlResource(clusterName: string, namespace: string, resourceKind: string, resourceName: string, patch: any): Chainable<Element>;
     }
   }
 }
