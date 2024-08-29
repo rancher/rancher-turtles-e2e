@@ -4,6 +4,7 @@ metadata:
   name: cluster1
   namespace: default
   labels:
+    fleet-addon-enabled: "true"
     cluster-api.cattle.io/rancher-auto-import: "true"
 spec:
   clusterNetwork:
