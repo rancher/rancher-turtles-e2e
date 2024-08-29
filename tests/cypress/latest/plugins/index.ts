@@ -39,9 +39,11 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   config.env.rancher_version = process.env.RANCHER_VERSION;
   config.env.ui_account = process.env.UI_ACCOUNT;
   config.env.username = process.env.RANCHER_USER;
-  config.env.aws_access_key = process.env.AWS_ACCESS_KEY_ID
-  config.env.aws_secret_key = process.env.AWS_SECRET_ACCESS_KEY
-  config.env.gcp_credentials = process.env.GCP_CREDENTIALS
+  config.env.aws_access_key = process.env.AWS_ACCESS_KEY_ID;
+  config.env.aws_secret_key = process.env.AWS_SECRET_ACCESS_KEY;
+  config.env.gcp_credentials = process.env.GCP_CREDENTIALS;
+  config.env.grep = process.env.GREP;
+  config.env.grepTags = process.env.GREPTAGS;
 
   return config;
 };

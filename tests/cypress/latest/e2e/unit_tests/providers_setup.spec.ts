@@ -34,60 +34,63 @@ describe('Enable CAPI Providers', () => {
     cypressLib.burgerMenuToggle();
   });
 
-  providerNamespaces.forEach(namespace => {
-    it('Create CAPI Providers Namespaces - '+ namespace, () => {
-      cy.createNamespace(namespace);
+  context('Local providers', { tags: '@short' }, () => {
+    providerNamespaces.forEach(namespace => {
+      it('Create CAPI Providers Namespaces - '+ namespace, () => {
+        cy.createNamespace(namespace);
+      })
     })
+
+    kubeadmProviderTypes.forEach(providerType => {
+      it('Create Kubeadm Providers', () => {
+        // TODO: Remove condition after capi-ui-extension/issues/51
+        // Create CAPI Kubeadm providers
+        if (providerType == 'control plane') {
+          const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + 'control-plane' + '-components.yaml'
+          const providerName = kubeadmProvider + '-' + 'control-plane'
+          const namespace = 'capi-kubeadm-control-plane-system'
+          cy.addCustomProvider(providerName, namespace, kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
+        } else {
+          const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + providerType + '-components.yaml'
+          const providerName = kubeadmProvider + '-' + providerType
+          const namespace = 'capi-kubeadm-bootstrap-system'
+          cy.addCustomProvider(providerName, namespace, kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
+        }
+      })
+    })
+
+    qase(4,
+      it('Create CAPD provider', () => {
+        // Create Docker Infrastructure provider
+        cy.addInfraProvider(dockerProvider, dockerProvider, 'capd-system');
+        var statusReady = 'Ready'
+        statusReady = statusReady.concat(' ', dockerProvider, ' infrastructure ', dockerProvider, ' ', kubeadmProviderVersion)
+        cy.contains(statusReady);
+      })
+    );
   })
 
-  kubeadmProviderTypes.forEach(providerType => {
-    it('Create Kubeadm Providers', () => {
-      // TODO: Remove condition after capi-ui-extension/issues/51
-      // Create CAPI Kubeadm providers
-      if (providerType == 'control plane') {
-        const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + 'control-plane' + '-components.yaml'
-        const providerName = kubeadmProvider + '-' + 'control-plane'
-        const namespace = 'capi-kubeadm-control-plane-system'
-        cy.addCustomProvider(providerName, namespace, kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
-      } else {
-        const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + providerType + '-components.yaml'
-        const providerName = kubeadmProvider + '-' + providerType
-        const namespace = 'capi-kubeadm-bootstrap-system'
-        cy.addCustomProvider(providerName, namespace, kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
-      }
-    })
-  })
+  context('Cloud Providers', { tags: '@full' }, () => {
+    qase(13,
+      it('Create CAPA provider', () => {
+        // Create AWS Infrastructure provider
+        cy.addCloudCredsAWS(amazonProvider, Cypress.env('aws_access_key'), Cypress.env('aws_secret_key'));
+        cypressLib.burgerMenuToggle();
+        cy.addInfraProvider('Amazon', amazonProvider, 'capa-system', amazonProvider);
+        var statusReady = 'Ready'
+        statusReady = statusReady.concat(' ', amazonProvider, ' infrastructure ', amazonProvider, ' ', 'v2.6.1')
+        cy.contains(statusReady);
+      })
+    );
 
-  qase(4,
-    it('Create CAPD provider', () => {
-      // Create Docker Infrastructure provider
-      cy.addInfraProvider(dockerProvider, dockerProvider, 'capd-system');
-      var statusReady = 'Ready'
-      statusReady = statusReady.concat(' ', dockerProvider, ' infrastructure ', dockerProvider, ' ', kubeadmProviderVersion)
-      cy.contains(statusReady);
-    })
-  );
-
-  qase(13,
-    it('Create CAPA provider', () => {
-      // Create AWS Infrastructure provider
-      cy.addCloudCredsAWS(amazonProvider, Cypress.env('aws_access_key'), Cypress.env('aws_secret_key'));
+    it('Create CAPG provider', () => {
+      // Create GCP Infrastructure provider
+      cy.addCloudCredsGCP(googleProvider, Cypress.env('gcp_credentials'));
       cypressLib.burgerMenuToggle();
-      cy.addInfraProvider('Amazon', amazonProvider, 'capa-system', amazonProvider);
+      cy.addInfraProvider('Google', googleProvider, 'capg-system', googleProvider);
       var statusReady = 'Ready'
-      statusReady = statusReady.concat(' ', amazonProvider, ' infrastructure ', amazonProvider, ' ', 'v2.6.1')
+      statusReady = statusReady.concat(' ', googleProvider, ' infrastructure ', googleProvider, ' ', 'v1.7.0')
       cy.contains(statusReady);
     })
-  );
-
-  it('Create CAPG provider', () => {
-    // Create AWS Infrastructure provider
-    cy.addCloudCredsGCP(googleProvider, Cypress.env('gcp_credentials'));
-    cypressLib.burgerMenuToggle();
-    cy.addInfraProvider('Google', googleProvider, 'capg-system', googleProvider);
-    var statusReady = 'Ready'
-    statusReady = statusReady.concat(' ', googleProvider, ' infrastructure ', googleProvider, ' ', 'v1.7.0')
-    cy.contains(statusReady);
   })
-
 });

@@ -16,7 +16,7 @@ import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 
 Cypress.config();
-describe('User role testing', () => {
+describe('User role testing', { tags: '@install' }, () => {
   const stdUser       = "std-user"
   const uiPassword    = "rancherpassword"
 

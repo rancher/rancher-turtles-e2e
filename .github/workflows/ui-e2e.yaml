@@ -17,6 +17,11 @@ on:
         description: Rancher Manager channel/version/head_version to use for installation
         default: latest/devel/2.9
         type: string
+      grep_test_by_tag:
+        description: Grep tags. For multiple selection separate with spaces. Keep always @install
+        required: true
+        type: string
+        default: '@install @short @full'
   schedule:
     - cron: '0 4 * * *'
 
@@ -37,3 +42,5 @@ jobs:
       capi_ui_version: dev
       rancher_version: ${{ inputs.rancher_version || 'latest/devel/2.9' }}
       qase_run_id: ${{ inputs.qase_run_id || 'auto' }}
+      grep_test_by_tag: ${{ inputs.grep_test_by_tag || '@install @short' }}
+

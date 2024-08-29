@@ -17,7 +17,7 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 
 
 Cypress.config();
-describe('First login on Rancher', () => {
+describe('First login on Rancher', { tags: '@install' }, () => {
   const password = 'rancherpassword'
 
   qase(1,

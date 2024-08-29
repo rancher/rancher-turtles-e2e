@@ -17,7 +17,7 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 
 Cypress.config();
-describe('Install Turtles Operator', () => {
+describe('Install Turtles Operator', { tags: '@install' }, () => {
   const deployment = "rancher-turtles-controller-manager"
 
   beforeEach(() => {

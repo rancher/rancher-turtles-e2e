@@ -78,6 +78,11 @@ on:
       qase_run_id:
         description: Qase run ID to use for reporting
         type: string
+      grep_test_by_tag:
+        description: Grep tags. For multiple selection separate with spaces
+        required: true
+        type: string
+        default: '@install @short @full'
 
 jobs:
   create-runner:
@@ -293,6 +298,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
           GCP_CREDENTIALS: ${{ secrets.gcp_credentials }}
           QASE_RUN_ID: ${{ needs.pre-qase.outputs.qase_run_id }}
+          GREPTAGS: ${{ inputs.grep_test_by_tag }}
           SPEC: |
             /workdir/e2e/unit_tests/first_connection.spec.ts
             /workdir/e2e/unit_tests/user.spec.ts
@@ -302,6 +308,7 @@ jobs:
             /workdir/e2e/unit_tests/providers_setup.spec.ts
             /workdir/e2e/unit_tests/capd_kubeadm_cluster.spec.ts
             /workdir/e2e/unit_tests/capd_rke2_cluster.spec.ts
+            /workdir/e2e/unit_tests/capa_eks_cluster.spec.ts
           UI_ACCOUNT: ${{ inputs.ui_account }}
           UPGRADE_OS_CHANNEL: ${{ inputs.upgrade_os_channel }}
         run: |

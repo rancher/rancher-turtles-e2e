@@ -7,11 +7,11 @@ What tests are doing:
 2. Install the Turtles operator with locally built latest chart
 3. Deploy the Turtles UI extension
 4. Test the Turtles menu, namespaces import features
-5. Perform CAPD setup prerequisites
-6. Create & Import CAPD cluster using fleet by cluster, namespace annotation
-7. Install App on imported CAPD cluster
-8. Scale the imported CAPD cluster
-9. Remove & Delete the imported CAPD cluster
+5. Perform CAPI setup prerequisites
+6. Create & Import CAPI cluster using fleet by cluster, namespace annotation
+7. Install App on imported CAPI cluster
+8. Scale the imported CAPI cluster
+9. Remove & Delete the imported CAPI cluster
 
 
 ## Running the tests locally
@@ -28,3 +28,23 @@ What tests are doing:
 4. Start Cypress: `./node_modules/cypress/bin/cypress open -C cypress.config.ts`
 
 The Cypress GUI should now be visible.
+
+---
+
+# Test structure
+Currently, we divide our tests by tags (`short`, `full`,...). Aside of this we have an initial one, `install`.
+Specs with `short` tag are local (docker) based tests and with `full` tag are cloud providers based tests.
+
+# Running tests using Cypress grep
+We have implemented tags for more precise selection of tests using a Cypress pluging called [cypress-grep](https://github.com/cypress-io/cypress/tree/develop/npm/grep)
+
+Note: the title can be either at `describe`, `context` or `it` level.
+
+By default, daily runs will run test with the tags`@install`, `@short`
+
+To use locally use the tag `--env grepTags=tag` along with the npx command
+
+For example:
+```
+npx cypress run -C cypress.config.ts  --env grepTags="@short" cypress/e2e/unit_tests/*.spec.ts
+```

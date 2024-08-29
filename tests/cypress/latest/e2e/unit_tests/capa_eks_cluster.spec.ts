@@ -3,7 +3,7 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 
 Cypress.config();
-describe('Import CAPA', () => {
+describe('Import CAPA EKS', { tags: '@full' }, () => {
   const timeout = 1200000
   const repoName = 'clusters'
   const clusterName = "turtles-qa-cluster"

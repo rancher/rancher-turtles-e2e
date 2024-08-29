@@ -34,6 +34,8 @@ docker run -v $PWD:/workdir -w /workdir \
     -e QASE_API_TOKEN=$QASE_API_TOKEN \
     -e QASE_RUN_ID=$QASE_RUN_ID \
     -e QASE_REPORT=$QASE_REPORT \
+    -e "GREP=$GREP" \
+    -e "GREPTAGS=$GREPTAGS" \
     --add-host host.docker.internal:host-gateway \
     --ipc=host \
     $CYPRESS_DOCKER \

@@ -16,7 +16,7 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 
 Cypress.config();
-describe('Import CAPD', () => {
+describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
   const timeout = 300000
   const classesRepo = 'classes'
   const clustersRepo = 'clusters'
@@ -72,6 +72,7 @@ describe('Import CAPD', () => {
       })
     );
 
+    // TODO: Refactor for other paths
     if (path.includes('namespace_autoimport')) {
       it('Install App on imported cluster', { retries: 1 }, () => {
         // Click on imported CAPD cluster
