@@ -53,7 +53,6 @@ metadata:
     "helm.sh/resource-policy": keep
 spec: 
   replicas: 1
-  registrationMethod: internal-first
   rolloutStrategy:
     rollingUpdate:
       maxSurge: 1
@@ -176,3 +175,5 @@ kind: ConfigMap
 metadata:
   name: cluster1-lb-config
   namespace: default
+  annotations:
+    "helm.sh/resource-policy": keep

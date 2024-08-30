@@ -120,8 +120,7 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
         cy.checkCAPIMenu();
         cy.getBySel('button-group-child-1').click();
         cy.typeInFilter(clusterName); 
-        // Workaround for turtles/issues/685
-        cy.contains(clusterName + ' Deleting', { timeout: 90000 });
+        cy.getBySel('sortable-table-0-action-button', { timeout: timeout }).should('not.exist');
        
         // Ensure the cluster is not available in navigation menu
         cy.getBySel('side-menu').then(($menu) => {

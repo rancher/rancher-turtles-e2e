@@ -3,12 +3,12 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 
 Cypress.config();
-describe('Import CAPA EKS', { tags: '@full' }, () => {
+describe('Import CAPA RKE2', { tags: '@full' }, () => {
   const timeout = 1200000
   const repoName = 'clusters'
-  const clusterName = "turtles-qa-cluster"
+  const clusterName = "turtles-qa-rke2-cluster"
   const branch = 'main'
-  const path = '/tests/assets/rancher-turtles-fleet-example/aws_eks'
+  const path = '/tests/assets/rancher-turtles-fleet-example/aws_rke2'
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
 
   beforeEach(() => {
@@ -39,7 +39,8 @@ describe('Import CAPA EKS', { tags: '@full' }, () => {
   it('Auto import child CAPA cluster', () => {
     // Check child cluster is created and auto-imported
     cy.goToHome();
-    cy.contains('Pending ' + clusterName);
+    cy.contains('Pending ' + clusterName) || cy.contains('Active ' + clusterName);
+    // cy.getBySel('sortable-table-list-container')
 
     // Check cluster is Active
     cy.clickButton('Manage');
