@@ -38,6 +38,7 @@ declare global {
       removeCAPIResource(resourceType: string, resourceName: string): Chainable<Element>;
       addCloudCredsAWS(name: string, accessKey: string, secretKey: string): Chainable<Element>;
       addCloudCredsGCP(name: string, gcpCredentials: string): Chainable<Element>;
+      addCloudCredsAzure(name: string, clientID: string, clientSecret: string, subscriptionID: string): Chainable<Element>;
       typeInFilter(text: string): Chainable<Element>;
       goToHome(): Chainable<Element>;
       patchYamlResource(clusterName: string, namespace: string, resourceKind: string, resourceName: string, patch: object): Chainable<Element>;

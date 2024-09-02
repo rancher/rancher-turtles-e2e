@@ -17,15 +17,16 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 
 Cypress.config();
 describe('Enable CAPI Providers', () => {
-  
+
   const kubeadmProvider = 'kubeadm'
   const dockerProvider = 'docker'
   const amazonProvider = 'aws'
   const googleProvider = 'gcp'
+  const azureProvider = 'azure'
   const kubeadmProviderVersion = 'v1.7.3'
   const kubeadmBaseURL = 'https://github.com/kubernetes-sigs/cluster-api/releases/'
   const kubeadmProviderTypes = ['bootstrap', 'control plane']
-  const providerNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system', 'capd-system', 'capa-system', 'capg-system']
+  const providerNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system', 'capd-system', 'capa-system', 'capg-system', 'capz-system']
 
   beforeEach(() => {
     cy.login();
@@ -35,7 +36,7 @@ describe('Enable CAPI Providers', () => {
 
   context('Local providers', { tags: '@short' }, () => {
     providerNamespaces.forEach(namespace => {
-      it('Create CAPI Providers Namespaces - '+ namespace, () => {
+      it('Create CAPI Providers Namespaces - ' + namespace, () => {
         cy.createNamespace(namespace);
       })
     })
@@ -77,7 +78,7 @@ describe('Enable CAPI Providers', () => {
       const resourceKind = 'configMap';
       const resourceName = 'fleet-addon-config';
       const namespace = 'rancher-turtles-system';
-      const patch = { data: { manifests: { isNestedIn: true, spec: { cluster: { hostNetwork: true, selector: { matchLabels: { cni: 'by-fleet-addon-kindnet' }}}}}}};
+      const patch = { data: { manifests: { isNestedIn: true, spec: { cluster: { hostNetwork: true, selector: { matchLabels: { cni: 'by-fleet-addon-kindnet' } } } } } } };
 
       cy.patchYamlResource(clusterName, namespace, resourceKind, resourceName, patch);
     });
@@ -117,5 +118,15 @@ describe('Enable CAPI Providers', () => {
         cy.contains(statusReady);
       })
     );
+
+    it('Create CAPZ provider', () => {
+      // Create Azure Infrastructure provider
+      cy.addCloudCredsAzure(azureProvider, Cypress.env('azure_client_id'), Cypress.env('azure_client_secret'), Cypress.env('azure_subscription_id'));
+      cypressLib.burgerMenuToggle();
+      cy.addInfraProvider('Azure', azureProvider, 'capz-system', azureProvider);
+      var statusReady = 'Ready'
+      statusReady = statusReady.concat(' ', azureProvider, ' infrastructure ', azureProvider, ' ', 'v1.16.0')
+      cy.contains(statusReady);
+    })
   })
 });

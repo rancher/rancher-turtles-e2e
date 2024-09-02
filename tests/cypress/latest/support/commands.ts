@@ -182,7 +182,7 @@ Cypress.Commands.add('addCloudCredsAWS', (name, accessKey, secretKey) => {
   cy.contains('Amazon').click();
   cy.typeValue('Name', name);
   cy.typeValue('Access Key', accessKey);
-  cy.typeValue('Secret Key', secretKey, false, false );
+  cy.typeValue('Secret Key', secretKey, false, false);
   cy.clickButton('Create');
   cy.contains('API Key').should('be.visible');
   cy.contains(name).should('be.visible');
@@ -200,6 +200,22 @@ Cypress.Commands.add('addCloudCredsGCP', (name, gcpCredentials) => {
   cy.contains('API Key').should('be.visible');
   cy.contains(name).should('be.visible');
 });
+
+// Command to add Azure Cloud Credentials
+Cypress.Commands.add('addCloudCredsAzure', (name: string, clientID: string, clientSecret: string, subscriptionID: string) => {
+  cy.accesMenuSelection('Cluster Management', 'Cloud Credentials');
+  cy.contains('API Key').should('be.visible');
+  cy.clickButton('Create');
+  cy.contains('Azure').click();
+  cy.typeValue('Name', name);
+  cy.typeValue('Client ID', clientID);
+  cy.typeValue('Client Secret', clientSecret, false, false);
+  cy.typeValue('Subscription ID', subscriptionID);
+  cy.clickButton('Create');
+  cy.contains('API Key').should('be.visible');
+  cy.contains(name).should('be.visible');
+});
+
 
 // Command to Install App from Charts menu
 // You can optionally provide an array of questions and answer them before the installation starts
