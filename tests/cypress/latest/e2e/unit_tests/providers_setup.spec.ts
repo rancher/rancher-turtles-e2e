@@ -14,6 +14,7 @@ limitations under the License.
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
+import { isNewExpression } from 'typescript';
 
 // TODO: Align QASE ID's
 Cypress.config();
@@ -98,10 +99,45 @@ describe('Enable CAPI Providers', () => {
     const resourceKind = 'configMap';
     const resourceName = 'fleet-addon-config';
     const namespace = 'rancher-turtles-system';
+    //const patch = { 
+    //  'data.manifests.spec.cluster.hostNetwork': 'true',
+    //  'data.manifests.spec.cluster.selector.matchLabels.fleet-addon-enabled': 'true',
+    //  //'data.anewone.spec.cluster.selector.matchLabels.cluster': 'blah',
+      //'spec.cluster.hostNetwork': 'true',
+    //};
     const patch = {
-      'data.manifests.spec.cluster.hostNetwork': 'true',
-      'data.manifests.spec.cluster.selector.matchLabels.fleet-addon-enabled': 'true',
+      data: {
+        manifests: {
+          isNestedIn: true,
+          spec: {
+            cluster: {
+              hostNetwork: 'true',
+              selector: {
+                matchLabels: {
+                  'fleet-addon-enabled': 'true'
+                }
+              }
+            }
+          }
+        },
+        another_nonexisting_manifests_in_data: {
+          isNestedIn: true,
+          spec: {
+            cluster: {
+              selector: {
+                matchLabels: {
+                  'fleet-addon-enabled': 'true'
+                }
+              },
+              anarray: ['one', 'two', 'three']
+            }
+          }
+        }   
+      },
+      key: 'value',
+      anarray: ['one', 'two', 'three']
     };
+    
     cy.patchYamlResource(clusterName, namespace, resourceKind, resourceName, patch);
 
   });
