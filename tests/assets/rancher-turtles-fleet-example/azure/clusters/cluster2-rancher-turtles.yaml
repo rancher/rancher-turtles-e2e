@@ -32,7 +32,7 @@ spec:
   location: centralindia
   resourceGroupName: "turtles-qa-cluster"
   nodeResourceGroupName: "turtles-qa-cluster-nodes"
-  sshPublicKey: ""
+  sshPublicKey: null
   subscriptionID: 80de5134-ca65-4731-be21-13fb1f0910a2
   version: v1.28.10
 ---
