@@ -1,0 +1,113 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: "turtles-qa-cluster"
+  namespace: default
+spec:
+  clusterNetwork:
+    services:
+      cidrBlocks:
+        - 192.168.0.0/16
+  controlPlaneRef:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: AzureManagedControlPlane
+    name: "turtles-qa-cluster"
+  infrastructureRef:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: AzureManagedCluster
+    name: "turtles-qa-cluster"
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: AzureManagedControlPlane
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  name: "turtles-qa-cluster"
+  namespace: default
+spec:
+  identityRef:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: AzureClusterIdentity
+    name: cluster-identity
+  location: centralindia
+  resourceGroupName: "turtles-qa-cluster"
+  nodeResourceGroupName: "turtles-qa-cluster-nodes"
+  sshPublicKey: ""
+  subscriptionID: 80de5134-ca65-4731-be21-13fb1f0910a2
+  version: v1.28.10
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: AzureManagedCluster
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  name: "turtles-qa-cluster"
+  namespace: default
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachinePool
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  name: "turtles-qa-cluster-pool0"
+  namespace: default
+spec:
+  clusterName: "turtles-qa-cluster"
+  replicas: 1
+  template:
+    metadata: {}
+    spec:
+      bootstrap:
+        dataSecretName: ""
+      clusterName: "turtles-qa-cluster"
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: AzureManagedMachinePool
+        name: "turtles-qa-cluster-pool0"
+      version: v1.28.10
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: AzureManagedMachinePool
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  name: "turtles-qa-cluster-pool0"
+  namespace: default
+spec:
+  mode: System
+  name: pool0
+  sku: Standard_D2s_v3
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachinePool
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  name: "turtles-qa-cluster-pool1"
+  namespace: default
+spec:
+  clusterName: "turtles-qa-cluster"
+  replicas: 2
+  template:
+    metadata: {}
+    spec:
+      bootstrap:
+        dataSecretName: ""
+      clusterName: "turtles-qa-cluster"
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: AzureManagedMachinePool
+        name: "turtles-qa-cluster-pool1"
+      version: v1.28.10
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: AzureManagedMachinePool
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  name: "turtles-qa-cluster-pool1"
+  namespace: default
+spec:
+  mode: User
+  name: pool1
+  sku: Standard_D2s_v3
