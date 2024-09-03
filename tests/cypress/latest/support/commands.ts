@@ -236,7 +236,10 @@ Cypress.Commands.add('installApp', (appName, namespace, questions) => {
 });
 
 Cypress.Commands.add('patchYamlResource', (clusterName, namespace, resourceKind, resourceName, patch) => {
-  
+  // Provides a way how to patch generic YAML resource under Rancher
+  // With support for nested objects, but "isNestedIn" flag must be set to true (the flag will be removed from the YAML)
+  // Patch example: const patch = {data: {manifests: {isNestedIn: true, spec: {...}}};
+
   // Locate the resource and initiate Edit YAML mode
   cypressLib.accesMenu(clusterName);
   cy.setNamespace(namespace);
@@ -249,9 +252,8 @@ Cypress.Commands.add('patchYamlResource', (clusterName, namespace, resourceKind,
   cy.getBySel('sortable-table-0-action-button').click();
   //cy.get('.btn.actions.role-multi-action').click();
   cy.contains('Edit YAML').click(); 
-  // --- end of generic part ---
 
-  // Do the CodeMirror stuff here
+  // Do the CodeMirror magic here
 
   cy.get('.CodeMirror').then((editor) => {
     const yaml = editor[0].CodeMirror.getValue();
@@ -260,6 +262,7 @@ Cypress.Commands.add('patchYamlResource', (clusterName, namespace, resourceKind,
     function applyPatch(yamlObj, patchObj) {
       Object.keys(patchObj).forEach(key => {
         if (patchObj[key].isNestedIn) {
+          // If the patch is for a nested object merge the original and patched objects
           const originalValue = _.get(yamlObj, key);
           let nestedObject = {};
           if (originalValue) {
@@ -268,16 +271,17 @@ Cypress.Commands.add('patchYamlResource', (clusterName, namespace, resourceKind,
           const patchedNestedObject = _.merge(nestedObject, _.omit(patchObj[key], 'isNestedIn'));
           _.set(yamlObj, key, jsyaml.dump(patchedNestedObject));
         } else if (typeof patchObj[key] === 'object' && !Array.isArray(patchObj[key])) {
-          if (!yamlObj[key]) {
-            yamlObj[key] = {};
-          }
+            // If the patch is for an object, recursively apply the patch
+            if (!yamlObj[key]) {
+              yamlObj[key] = {};
+            }
           applyPatch(yamlObj[key], patchObj[key]);
         } else {
-          _.set(yamlObj, key, patchObj[key]);
+            // If the patch is for a value, simply set the value in the YAML object
+            _.set(yamlObj, key, patchObj[key]);
         }
       });
     }
-  
     applyPatch(yamlObject, patch);
   
     const patchedYaml = jsyaml.dump(yamlObject);
@@ -286,9 +290,8 @@ Cypress.Commands.add('patchYamlResource', (clusterName, namespace, resourceKind,
     cy.clickButton('Save');
     });
 
-// Reset the namespace after the operation
-// cy.contains(resourceName).should('be.visible');
-// cy.namespaceReset();
+  // Reset the namespace after the operation
+  cy.namespaceReset();
 
 });
 
