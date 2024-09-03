@@ -9,9 +9,9 @@ metadata:
   namespace: default
 spec:
   allowedNamespaces: {}
-  clientID: { { .Values.azure.client_id } }
+  clientID: "{{ .Values.azure.client_id }}"
   clientSecret:
     name: cluster-identity-secret
     namespace: default
-  tenantID: { { .Values.azure.tenant_id } }
+  tenantID: "{{ .Values.azure.tenant_id }}"
   type: ServicePrincipal

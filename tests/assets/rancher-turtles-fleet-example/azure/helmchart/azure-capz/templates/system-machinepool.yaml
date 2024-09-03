@@ -7,7 +7,7 @@ metadata:
   namespace: default
 spec:
   clusterName: "{{ .Values.cluster.name }}"
-  replicas: { { .Values.cluster.systempoolCount } }
+  replicas: "{{ .Values.cluster.systempoolCount }}"
   template:
     metadata: {}
     spec:
@@ -18,4 +18,4 @@ spec:
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: AzureManagedMachinePool
         name: "{{ .Values.cluster.name }}-pool0"
-      version: { { .Values.cluster.kubernetesVersion } }
+      version: "{{ .Values.cluster.kubernetesVersion }}"
