@@ -57,7 +57,6 @@ describe('Import CAPA RKE2', { tags: '@full' }, () => {
 
   qase(15,
     it('Remove imported CAPA cluster from Rancher Manager', { retries: 1 }, () => {
-
       // Check cluster is not deleted after removal
       cy.deleteCluster(clusterName);
       cy.goToHome();
@@ -70,7 +69,6 @@ describe('Import CAPA RKE2', { tags: '@full' }, () => {
 
   qase(16,
     it('Delete the CAPA cluster fleet repo', () => {
-
       // Remove the fleet git repo
       cy.removeFleetGitRepo(repoName)
       // Wait until the following returns no clusters found
