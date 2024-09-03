@@ -102,13 +102,15 @@ describe('Import CAPD Clusterclass', () => {
 
   it.skip('Delete the clusterclass fleet repo - ' + path, () => {
     // Remove the classes fleet git repo
-    cy.removeFleetGitRepo(repoNames.at(0), true)
+    cy.removeFleetGitRepo('fleet-local', repoNames.at(0), true)
 
     // Remove the cluster fleet git repo
     cypressLib.burgerMenuToggle();
-    cy.removeFleetGitRepo(repoNames.at(-1))
+    cy.removeFleetGitRepo('fleet-local', repoNames.at(-1))
     // Wait until the following returns no clusters found
     
+    // TODO: remove the cni repo from fleet-default workspace
+
     // This is checked by ensuring the cluster is not available in CAPI menu
     cypressLib.burgerMenuToggle();
     cy.checkCAPIMenu();
