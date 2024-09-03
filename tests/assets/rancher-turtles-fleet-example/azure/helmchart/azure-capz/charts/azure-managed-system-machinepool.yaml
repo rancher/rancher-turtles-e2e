@@ -1,0 +1,11 @@
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: AzureManagedMachinePool
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  name: "{{ .Values.cluster.name }}-pool0"
+  namespace: default
+spec:
+  mode: System
+  name: pool0
+  sku: Standard_D2s_v3

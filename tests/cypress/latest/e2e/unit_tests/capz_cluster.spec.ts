@@ -20,8 +20,13 @@ describe('Import CAPA', () => {
     cy.namespaceAutoImport('Enable');
   })
 
+  it('Create AzureManagedClusterIdentity', () => {
+    // Replace assets/rancher-turtles-fleet-example/azure/azure-cluster-identity.yaml base64 AZURE_CLIENT_SECRET
+  })
+
   qase(14,
     it('Add CAPA cluster fleet repo', () => {
+      // TODO: Consider using kubectl instead of fleet; will make it easier to test cluster scaling and manage to hide the sensitive information
       cypressLib.checkNavIcon('cluster-management')
         .should('exist');
 

@@ -1,0 +1,9 @@
+namespace: default
+
+helm:
+  chart: ./azure-capz
+  valuesFrom:
+    - secretKeyRef:
+        name: azure-secret-values
+        namespace: default
+        key: values.yaml
