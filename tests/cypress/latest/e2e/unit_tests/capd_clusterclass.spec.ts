@@ -17,7 +17,8 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 Cypress.config();
 describe('Import CAPD Clusterclass', () => {
   const timeout = 300000
-  const repoNames = ['classes' ,'clusters']
+  const repoNamesLocal = ['classes' ,'clusters']
+  const repoNamesDefault = ['cni']
   const clusterName = "cluster1"
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
   const basePath = "/tests/assets/rancher-turtles-fleet-example/"
@@ -30,11 +31,20 @@ describe('Import CAPD Clusterclass', () => {
   });
 
   // TODO: Add QASE IDs
-  repoNames.forEach((repo) => {
+  repoNamesLocal.forEach((repo) => {
     it('Add clusterclass fleet repo - ' + repo, () => {
       cypressLib.checkNavIcon('cluster-management').should('exist');
       var fullPath = basePath.concat(path, '/', repo)
-      cy.addFleetGitRepo(repo, repoUrl, branch, fullPath);
+      cy.addFleetGitRepo('fleet-local', repo, repoUrl, branch, fullPath);
+      cy.contains(repo).click();
+    })
+  })
+
+  repoNamesDefault.forEach((repo) => {
+    it('Add clusterclass fleet repo - ' + repo, () => {
+      cypressLib.checkNavIcon('cluster-management').should('exist');
+      var fullPath = basePath.concat(path, '/', repo)
+      cy.addFleetGitRepo('fleet-default', repo, repoUrl, branch, fullPath);
       cy.contains(repo).click();
     })
   })

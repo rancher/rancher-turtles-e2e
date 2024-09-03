@@ -21,8 +21,8 @@ declare global {
     interface Chainable {
       // Functions declared in commands.ts
       namespaceAutoImport(mode: string): Chainable<Element>;
-      addFleetGitRepo(repoName: string, repoUrl?: string, branch?: string, path?: string): Chainable<Element>;
-      removeFleetGitRepo(repoName: string, noRepoCheck?: boolean): Chainable<Element>;
+      addFleetGitRepo(workspace: string, repoName: string, repoUrl?: string, branch?: string, path?: string): Chainable<Element>;
+      removeFleetGitRepo(workspace: string, repoName: string, noRepoCheck?: boolean): Chainable<Element>;
       accesMenuSelection(firstAccessMenu: string, secondAccessMenu?: string): Chainable<Element>;
       installApp(appName: string, namespace: string, questions?: any): Chainable<Element>;
       deleteCluster(clusterName: string): Chainable<Element>;

@@ -135,7 +135,7 @@ describe('Enable CAPI Providers', () => {
         }   
       },
       key: 'value',
-      anarray: ['one', 'two', 'three']
+      anarray: [ { 'one': 'true' }, 'two', 'three']
     };
     
     cy.patchYamlResource(clusterName, namespace, resourceKind, resourceName, patch);

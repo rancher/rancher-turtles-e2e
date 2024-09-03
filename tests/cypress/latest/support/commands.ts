@@ -329,10 +329,10 @@ Cypress.Commands.add('goToHome', () => {
 
 // Fleet commands
 // Command add Fleet Git Repository
-Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, path) => {
+Cypress.Commands.add('addFleetGitRepo', (workspace, repoName, repoUrl, branch, path) => {
   cy.accesMenuSelection('Continuous Delivery', 'Git Repos');
   cy.contains('fleet-').click();
-  cy.contains('fleet-local').should('be.visible').click();
+  cy.contains(workspace).should('be.visible').click();
   cy.clickButton('Add Repository');
   cy.contains('Git Repo:').should('be.visible');
   cy.typeValue('Name', repoName);
@@ -348,12 +348,12 @@ Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, path) => {
 })
 
 // Command remove Fleet Git Repository
-Cypress.Commands.add('removeFleetGitRepo', (repoName, noRepoCheck) => {
+Cypress.Commands.add('removeFleetGitRepo', (workspace, repoName, noRepoCheck) => {
   // Go to 'Continuous Delivery' > 'Git Repos'
   cy.accesMenuSelection('Continuous Delivery', 'Git Repos');
   // Change the namespace to fleet-local using the dropdown on the top bar
   cy.contains('fleet-').click();
-  cy.contains('fleet-local').should('be.visible').click();
+  cy.contains(workspace).should('be.visible').click();
   // Click the repo link
   cy.contains(repoName).click();
   cy.url().should("include", "fleet/fleet.cattle.io.gitrepo/fleet-local/" + repoName)
