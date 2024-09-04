@@ -7,7 +7,7 @@ metadata:
   namespace: default
 spec:
   clusterName: "{{ .Values.cluster.name }}"
-  replicas: "{{ .Values.cluster.systempoolCount }}"
+  replicas: {{ .Values.cluster.systempoolCount | int }}
   template:
     metadata: {}
     spec:
