@@ -3,7 +3,7 @@ namespace: default
 helm:
   chart: ./azure-capz
   valuesFrom:
-    - secretKeyRef:
-        name: azure-secret-values
+    - configMapKeyRef:
+        name: my-custom-cm
         namespace: default
         key: values.yaml
