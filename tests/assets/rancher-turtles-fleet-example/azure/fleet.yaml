@@ -1,9 +1,9 @@
 namespace: default
 
 helm:
-  chart: ./azure-capz
+  chart: ./azure-capz-helmchart
   valuesFrom:
     - configMapKeyRef:
-        name: my-custom-cm
+        name: azure-creds-cm
         namespace: default
         key: values.yaml

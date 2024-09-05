@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: azure-creds-cm
+  namespace: default
+data:
+  values.yaml: |
+    cluster:
+      name: turtles-qa-capz
+      kubernetesVersion: v1.28.0
+      systempoolCount: 1
+      userpoolCount: 2
+      location: centralindia
+    azure:
+      subscriptionID: $azure_subscription_id
+      clientID: $azure_client_id
+      tenantID: $azure_tenant_id

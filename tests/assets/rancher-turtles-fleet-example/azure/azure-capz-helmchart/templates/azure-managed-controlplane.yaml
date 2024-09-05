@@ -14,5 +14,5 @@ spec:
   resourceGroupName: "{{ .Values.cluster.name }}"
   nodeResourceGroupName: "{{ .Values.cluster.name }}-nodes"
   sshPublicKey: null
-  subscriptionID: "{{ .Values.azure.subscription_id }}"
+  subscriptionID: "{{ .Values.azure.subscriptionID }}"
   version: "{{ .Values.cluster.kubernetesVersion }}"
