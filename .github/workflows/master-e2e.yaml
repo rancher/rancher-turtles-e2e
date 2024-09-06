@@ -29,6 +29,18 @@ on:
       rancher_password:
         description: Rancher login password
         required: true
+      azure_client_id:
+        description: AZURE_CLIENT_ID is required to create Azure Cloud credentials
+        required: true
+      azure_client_secret:
+        description: AZURE_CLIENT_SECRET is required to create Azure Cloud credentials
+        required: true
+      azure_subscription_id:
+        description: AZURE_SUBSCRIPTION_ID is required to create Azure Cloud credentials
+        required: true
+      azure_tenant_id:
+        description: AZURE_TENANT_ID is required to create Azure Cloud credentials
+        required: true
     inputs:
       cert-manager_version:
         description: Version of cert-manager to use
@@ -296,6 +308,10 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
           GCP_CREDENTIALS: ${{ secrets.gcp_credentials }}
+          AZURE_CLIENT_SECRET: ${{ secrets.azure_client_secret }}
+          AZURE_CLIENT_ID: ${{ secrets.azure_client_id }}
+          AZURE_TENANT_ID: ${{ secrets.azure_tenant_id }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.azure_subscription_id }}
           QASE_RUN_ID: ${{ needs.pre-qase.outputs.qase_run_id }}
           GREPTAGS: ${{ inputs.grep_test_by_tag }}
           SPEC: |
@@ -309,6 +325,7 @@ jobs:
             e2e/unit_tests/capd_rke2_cluster.spec.ts
             e2e/unit_tests/capa_rke2_cluster.spec.ts
             e2e/unit_tests/capa_eks_cluster.spec.ts
+            e2e/unit_tests/capz_cluster.spec.ts
           UI_ACCOUNT: ${{ inputs.ui_account }}
           UPGRADE_OS_CHANNEL: ${{ inputs.upgrade_os_channel }}
         run: |
