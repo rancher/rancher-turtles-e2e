@@ -10,7 +10,6 @@ describe('Import CAPZ', { tags: '@full' }, () => {
   const branch = 'automate-capz'
   const path = '/tests/assets/rancher-turtles-fleet-example/azure'
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
-  // const cmFilePath = "/tests/assets/rancher-turtles-fleet-example/azure/values-configmap.yaml"
   const clientID = "azure_client_id"
   const clientSecret = "azure_client_secret"
   const subscriptionID = "azure_subscription_id"
@@ -63,7 +62,7 @@ describe('Import CAPZ', { tags: '@full' }, () => {
   })
 
 
-  it('Add CAPZ cluster fleet repo', () => {
+  qase(21, it('Add CAPZ cluster fleet repo', () => {
     cypressLib.checkNavIcon('cluster-management')
       .should('exist');
 
@@ -76,9 +75,9 @@ describe('Import CAPZ', { tags: '@full' }, () => {
     cy.checkCAPIMenu();
     cy.contains('Provisioned ' + clusterName, { timeout: timeout });
   })
+  );
 
-
-  it('Auto import child CAPZ cluster', () => {
+  qase(22, it('Auto import child CAPZ cluster', () => {
     // Check child cluster is created and auto-imported
     cy.goToHome();
     cy.contains('Pending ' + clusterName);
@@ -87,16 +86,17 @@ describe('Import CAPZ', { tags: '@full' }, () => {
     cy.clickButton('Manage');
     cy.contains('Active ' + clusterName, { timeout: 300000 });
   })
-
-  it('Install App on imported cluster', { retries: 1 }, () => {
+  );
+  qase(23, it('Install App on imported cluster', { retries: 1 }, () => {
     // Click on imported CAPA cluster
     cy.contains(clusterName).click();
 
     // Install App
     cy.installApp('Monitoring', 'cattle-monitoring');
   })
+  );
 
-  xit("Scale up imported CAPZ cluster by updating configmap and forcefully updating the repo", () => {
+  qase(24, xit("Scale up imported CAPZ cluster by updating configmap and forcefully updating the repo", () => {
     // find a way to run kubectl command via cypress kubectl.Run()
     cy.contains('local')
       .click();
@@ -129,8 +129,9 @@ describe('Import CAPZ', { tags: '@full' }, () => {
     cy.checkCAPIMenu();
     cy.contains('Provisioned ' + clusterName, { timeout: timeout });
   })
+  );
 
-  it('Remove imported CAPZ cluster from Rancher Manager', { retries: 1 }, () => {
+  qase(25, it('Remove imported CAPZ cluster from Rancher Manager', { retries: 1 }, () => {
 
     // Check cluster is not deleted after removal
     cy.deleteCluster(clusterName);
@@ -140,8 +141,9 @@ describe('Import CAPZ', { tags: '@full' }, () => {
     cy.contains(clusterName).should('not.exist');
     cy.checkCAPIClusterProvisioned(clusterName);
   })
+  );
 
-  it('Delete the CAPZ cluster fleet repo', () => {
+  qase(26, it('Delete the CAPZ cluster fleet repo', () => {
 
     // Remove the fleet git repo
     cy.removeFleetGitRepo(repoName)
@@ -153,6 +155,6 @@ describe('Import CAPZ', { tags: '@full' }, () => {
     cy.typeInFilter(clusterName);
     cy.getBySel('sortable-table-0-action-button', { timeout: timeout }).should('not.exist');
   })
-
+  );
 
 });

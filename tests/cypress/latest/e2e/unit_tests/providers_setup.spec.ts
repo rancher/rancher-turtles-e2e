@@ -119,7 +119,7 @@ describe('Enable CAPI Providers', () => {
       })
     );
 
-    it('Create CAPZ provider', () => {
+    qase(20, it('Create CAPZ provider', () => {
       // Create Azure Infrastructure provider
       cy.addCloudCredsAzure(azureProvider, Cypress.env('azure_client_id'), Cypress.env('azure_client_secret'), Cypress.env('azure_subscription_id'));
       cypressLib.burgerMenuToggle();
@@ -128,6 +128,7 @@ describe('Enable CAPI Providers', () => {
       statusReady = statusReady.concat(' ', azureProvider, ' infrastructure ', azureProvider, ' ', 'v1.13.2')
       cy.contains(statusReady);
     })
+    );
   })
 
 });
