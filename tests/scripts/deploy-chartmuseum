@@ -39,4 +39,4 @@ helm plugin install https://github.com/chartmuseum/helm-push.git
 helm repo add chartmuseum http://localhost:8080
 
 # Push helm chart to local repo
-helm cm-push ./assets/rancher-turtles-v0.0.1.tgz chartmuseum
+helm cm-push ./assets/rancher-turtles-0.0.1.tgz chartmuseum

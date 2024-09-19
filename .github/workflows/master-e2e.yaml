@@ -248,7 +248,7 @@ jobs:
           docker push ${{ env.CONTROLLER_IMG }}:v${{ env.TAG }}
 
       - name: Copy chart file
-        run: sudo cp ${{ github.workspace }}/out/package/rancher-turtles-v${{ env.TAG }}.tgz ${{ runner.temp }}
+        run: sudo cp ${{ github.workspace }}/out/package/rancher-turtles-${{ env.TAG }}.tgz ${{ runner.temp }}
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -258,7 +258,7 @@ jobs:
           cache: false
           go-version-file: tests/go.mod
       - name: Copy chart file for chartmuseum
-        run: sudo cp ${{ runner.temp }}/rancher-turtles-v${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
+        run: sudo cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
       - name: Install prerequisite components
         env:
           PUBLIC_DNS: ${{ needs.create-runner.outputs.public_dns }}
