@@ -40,6 +40,8 @@ describe('Import CAPZ', { tags: '@full' }, () => {
     });
     cy.clickButton('Import');
     cy.clickButton('Close');
+
+    // This secret is currently not deleted at the end of test.
   })
 
   it('Create values.yaml ConfigMap', () => {
@@ -59,6 +61,8 @@ describe('Import CAPZ', { tags: '@full' }, () => {
     });
     cy.clickButton('Import');
     cy.clickButton('Close');
+
+    // This config map is currently not deleted at the end of test.
   })
 
 
