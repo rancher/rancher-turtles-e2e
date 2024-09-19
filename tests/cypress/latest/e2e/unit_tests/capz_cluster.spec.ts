@@ -72,7 +72,9 @@ describe('Import CAPZ', { tags: '@full' }, () => {
     cy.contains(repoName).click();
 
     // Go to Cluster Management > CAPI > Clusters and check if the cluster has started provisioning
-    cy.checkCAPIClusterProvisioned(clusterName);
+    cypressLib.burgerMenuToggle();
+    cy.checkCAPIMenu();
+    cy.contains('Provisioned ' + clusterName, { timeout: timeout });
   })
 
 
@@ -123,11 +125,12 @@ describe('Import CAPZ', { tags: '@full' }, () => {
     // TODO: check if the cluster is actually updated
     // TODO: Wait until the fleet repo is ready
     // Go to Cluster Management > CAPI > Clusters and check if the cluster has started provisioning
-    cy.checkCAPIClusterProvisioned(clusterName);
-
+    cypressLib.burgerMenuToggle();
+    cy.checkCAPIMenu();
+    cy.contains('Provisioned ' + clusterName, { timeout: timeout });
   })
 
-  xit('Remove imported CAPA cluster from Rancher Manager', { retries: 1 }, () => {
+  it('Remove imported CAPZ cluster from Rancher Manager', { retries: 1 }, () => {
 
     // Check cluster is not deleted after removal
     cy.deleteCluster(clusterName);
