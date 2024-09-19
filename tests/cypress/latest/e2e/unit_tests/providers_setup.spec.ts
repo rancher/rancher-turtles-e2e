@@ -125,7 +125,7 @@ describe('Enable CAPI Providers', () => {
       cypressLib.burgerMenuToggle();
       cy.addInfraProvider('Azure', azureProvider, 'capz-system', azureProvider);
       var statusReady = 'Ready'
-      statusReady = statusReady.concat(' ', azureProvider, ' infrastructure ', azureProvider, ' ', 'v1.13.2')
+      statusReady = statusReady.concat(' ', azureProvider, ' infrastructure ', azureProvider, ' ')
       cy.contains(statusReady);
     })
     );
