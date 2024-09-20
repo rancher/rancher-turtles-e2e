@@ -21,6 +21,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
   const classesRepo = 'classes'
   const clustersRepo = 'clusters'
   const clusterName = "cluster1"
+  const className = "quick-start"
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
   const basePath = "/tests/assets/rancher-turtles-fleet-example/"
   const pathNames = ['namespace_autoimport', 'cluster_autoimport', 'clusterclass_autoimport']
@@ -130,24 +131,28 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
     qase(10,
       it('Delete the CAPD cluster fleet repo(s) - ' + path, () => {
         if (path.includes('clusterclass_autoimport')) {
-          // Remove the classes fleet repo
-          cy.removeFleetGitRepo(classesRepo, true)
-          cypressLib.burgerMenuToggle();
           // Remove the cni fleet repo from fleet-default workspace
           cy.removeFleetGitRepo('clusterclass-cni', true, 'fleet-default');
+          // Remove the classes fleet repo
           cypressLib.burgerMenuToggle();
-        }
-        // Remove the clusters fleet repo
-        cy.removeFleetGitRepo(clustersRepo)
+          cy.removeFleetGitRepo(classesRepo, true);
+          // Remove the clusters fleet repo
+          cypressLib.burgerMenuToggle();
+          cy.removeFleetGitRepo(clustersRepo);
+          
+          // Wait until the following returns no clusters found
+          cy.checkCAPIClusterDeleted(clusterName, timeout);
+          // Remove the clusterclass
+          cy.removeCAPIResource("Cluster Classes", className);
+        } else {
+          // Remove the clusters fleet repo
+          cy.removeFleetGitRepo(clustersRepo);
 
-        // Wait until the following returns no clusters found
-        // This is checked by ensuring the cluster is not available in CAPI menu
-        cypressLib.burgerMenuToggle();
-        cy.checkCAPIMenu();
-        cy.getBySel('button-group-child-1').click();
-        cy.typeInFilter(clusterName);
-        cy.getBySel('sortable-table-0-action-button', { timeout: timeout }).should('not.exist');
-        
+          // Wait until the following returns no clusters found
+          // This is checked by ensuring the cluster is not available in CAPI menu
+          cy.checkCAPIClusterDeleted(clusterName, timeout);
+        }
+
         // Ensure the cluster is not available in navigation menu
         cy.getBySel('side-menu').then(($menu) => {
           if ($menu.text().includes(clusterName)) {

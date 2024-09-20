@@ -30,11 +30,12 @@ declare global {
       setNamespace(namespace: string): Chainable<Element>;
       checkCAPIClusterActive(clustername: string): Chainable<Element>;
       checkCAPIClusterProvisioned(clustername: string): Chainable<Element>;
+      checkCAPIClusterDeleted(clustername: string, timeout: number): Chainable<Element>;
       checkCAPIMenu(): Chainable<Element>;
       namespaceReset(): Chainable<Element>;
       addCustomProvider(name: string, namespace: string, providerName: string, providerType: string, version: string, url: string): Chainable<Element>;
       addInfraProvider(providerType: string, name: string, namespace: string, cloudCredentials?: string): Chainable<Element>;
-      removeProvider(name: string): Chainable<Element>;
+      removeCAPIResource(resourceType: string, resourceName: string): Chainable<Element>;
       addCloudCredsAWS(name: string, accessKey: string, secretKey: string): Chainable<Element>;
       addCloudCredsGCP(name: string, gcpCredentials: string): Chainable<Element>;
       typeInFilter(text: string): Chainable<Element>;

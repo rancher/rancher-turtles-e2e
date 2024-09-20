@@ -18,11 +18,13 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 Cypress.config();
 describe('Import CAPD RKE2', { tags: '@short' }, () => {
   const timeout = 300000
-  const repoName = 'clusters'
+  const classesRepo = 'classes'
+  const clustersRepo = 'clusters'
   const clusterName = "cluster1"
+  const className = "quick-start"
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
   const basePath = "/tests/assets/rancher-turtles-fleet-example/"
-  const pathNames = ['rke2_namespace_autoimport']
+  const pathNames = ['rke2_namespace_autoimport', 'rke2_clusterclass_autoimport']
   const branch = "main"
 
   beforeEach(() => {
@@ -40,18 +42,28 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
       }
     })
 
-    qase(5,
+    qase(31,
       it('Add CAPD cluster fleet repo - ' + path, () => {
-        cypressLib.checkNavIcon('cluster-management')
-          .should('exist');
-        path = basePath + path
-        // Add CAPD fleet repository
-        cy.addFleetGitRepo(repoName, repoUrl, branch, path);
-        cy.contains(repoName).click();
+        cypressLib.checkNavIcon('cluster-management').should('exist');
+        var fullPath = basePath + path
+
+        if (path.includes('clusterclass_autoimport')) {
+          // Add classes fleet repo to fleel-local workspace
+          fullPath = fullPath.concat('/', classesRepo)
+          cy.addFleetGitRepo(classesRepo, repoUrl, branch, fullPath);
+          cy.contains(classesRepo).click();
+          cy.contains('Bundles').should('be.visible');
+          fullPath = fullPath.replace(classesRepo, clustersRepo);
+          cypressLib.burgerMenuToggle();
+        }
+
+        cy.addFleetGitRepo(clustersRepo, repoUrl, branch, fullPath);
+        cy.contains(clustersRepo).click();
+        cy.contains('Bundles').should('be.visible'); // Wait until the repo details are loaded
       })
     );
 
-    qase(6,
+    qase(32,
       it('Auto import child CAPD cluster', () => {
         // Check child cluster is created and auto-imported
         cy.goToHome();
@@ -65,39 +77,42 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
       })
     );
 
-    it('Install App on imported cluster', { retries: 1 }, () => {
-      // Click on imported CAPD cluster
-      cy.contains(clusterName).click();
+    // TODO: Refactor for other paths
+    if (path.includes('namespace_autoimport')) {
+      it('Install App on imported cluster', { retries: 1 }, () => {
+        // Click on imported CAPD cluster
+        cy.contains(clusterName).click();
 
-      // Install App
-      cy.installApp('Monitoring', 'cattle-monitoring');
-    })
-
-
-    qase(12,
-      it('Scale up imported CAPD cluster', () => {
-        // Access CAPI cluster
-        cy.checkCAPIMenu();
-        cy.contains("Machine Deployments").click();
-        cy.getBySel('sortable-table-0-action-button').click();
-        cy.contains('Edit YAML')
-          .click();
-        cy.get('.CodeMirror')
-          .then((editor) => {
-            var text = editor[0].CodeMirror.getValue();
-            text = text.replace(/replicas: 1/g, 'replicas: 2');
-            editor[0].CodeMirror.setValue(text);
-            cy.clickButton('Save');
-          })
-
-        // Check CAPI cluster status
-        cy.contains('Machine Deployments').click();
-        cy.get('.content > .count', { timeout: timeout }).should('have.text', '2');
-        cy.checkCAPIClusterProvisioned(clusterName);
+        // Install App
+        cy.installApp('Monitoring', 'cattle-monitoring');
       })
-    );
 
-    qase(9,
+
+      qase(33,
+        it('Scale up imported CAPD cluster', () => {
+          // Access CAPI cluster
+          cy.checkCAPIMenu();
+          cy.contains("Machine Deployments").click();
+          cy.getBySel('sortable-table-0-action-button').click();
+          cy.contains('Edit YAML')
+            .click();
+          cy.get('.CodeMirror')
+            .then((editor) => {
+              var text = editor[0].CodeMirror.getValue();
+              text = text.replace(/replicas: 1/g, 'replicas: 2');
+              editor[0].CodeMirror.setValue(text);
+              cy.clickButton('Save');
+            })
+
+          // Check CAPI cluster status
+          cy.contains('Machine Deployments').click();
+          cy.get('.content > .count', { timeout: timeout }).should('have.text', '2');
+          cy.checkCAPIClusterProvisioned(clusterName);
+        })
+      );
+    }
+
+    qase(34,
       it('Remove imported CAPD cluster from Rancher Manager', { retries: 1 }, () => {
         // Check cluster is not deleted after removal
         cy.deleteCluster(clusterName);
@@ -109,19 +124,28 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
       })
     );
 
-    qase(10,
-      it('Delete the CAPD cluster fleet repo - ' + path, () => {
-        // Remove the fleet git repo
-        cy.removeFleetGitRepo(repoName)
+    qase(35,
+      it('Delete the CAPD cluster fleet repo(s) - ' + path, () => {
+        if (path.includes('clusterclass_autoimport')) {
+          // Remove the classes fleet repo
+          cy.removeFleetGitRepo(classesRepo, true);
+          // Remove the clusters fleet repo
+          cypressLib.burgerMenuToggle();
+          cy.removeFleetGitRepo(clustersRepo);
 
-        // Wait until the following returns no clusters found
-        // This is checked by ensuring the cluster is not available in CAPI menu
-        cypressLib.burgerMenuToggle();
-        cy.checkCAPIMenu();
-        cy.getBySel('button-group-child-1').click();
-        cy.typeInFilter(clusterName); 
-        cy.getBySel('sortable-table-0-action-button', { timeout: timeout }).should('not.exist');
-       
+          // Wait until the following returns no clusters found
+          cy.checkCAPIClusterDeleted(clusterName, timeout);
+          // Remove the clusterclass
+          cy.removeCAPIResource("Cluster Classes", className);
+        } else {
+          // Remove the clusters fleet repo
+          cy.removeFleetGitRepo(clustersRepo);
+
+          // Wait until the following returns no clusters found
+          // This is checked by ensuring the cluster is not available in CAPI menu
+          cy.checkCAPIClusterDeleted(clusterName, timeout);
+        }
+        
         // Ensure the cluster is not available in navigation menu
         cy.getBySel('side-menu').then(($menu) => {
           if ($menu.text().includes(clusterName)) {

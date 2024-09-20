@@ -80,8 +80,6 @@ Cypress.Commands.add('namespaceReset', () => {
 
 // Command to check CAPI cluster Active status
 Cypress.Commands.add('checkCAPIClusterActive', (clusterName) => {
-  cy.goToHome();
-  cypressLib.burgerMenuToggle();
   cy.checkCAPIMenu();
   cy.contains('Provisioned ' + clusterName, { timeout: 90000 });
   cy.contains('Machine Deployments').click();
@@ -92,14 +90,22 @@ Cypress.Commands.add('checkCAPIClusterActive', (clusterName) => {
 
 // Command to check CAPI cluster Provisioned status
 Cypress.Commands.add('checkCAPIClusterProvisioned', (clusterName) => {
-  cy.goToHome();
-  cypressLib.burgerMenuToggle();
   cy.checkCAPIMenu();
   cy.contains('Provisioned ' + clusterName, { timeout: 90000 });
 });
 
+// Command to check CAPI cluster deletion status
+Cypress.Commands.add('checkCAPIClusterDeleted', (clusterName, timeout) => {
+  cy.checkCAPIMenu();
+  cy.getBySel('button-group-child-1').click();
+  cy.typeInFilter(clusterName);
+  cy.getBySel('sortable-table-0-action-button', { timeout: timeout }).should('not.exist');
+});
+
 // Command to check CAPI Menu is visible
 Cypress.Commands.add('checkCAPIMenu', () => {
+  cy.goToHome();
+  cypressLib.burgerMenuToggle();
   cypressLib.accesMenu('Cluster Management');
   cy.get('.header').contains('CAPI').click();
   cy.contains('.nav', 'Clusters')
@@ -152,20 +158,20 @@ Cypress.Commands.add('addInfraProvider', (providerType, name, namespace, cloudCr
   cy.contains('Providers').should('be.visible');
 });
 
-// Command to delete CAPI provider
-Cypress.Commands.add('removeProvider', (name) => {
-  // Navigate to providers Menu
+// Command to delete CAPI resource
+Cypress.Commands.add('removeCAPIResource', (resourcetype, resourceName) => {
+  // Navigate to CAPI Menu
   cy.checkCAPIMenu();
-  cy.contains('Providers').click();
+  cy.contains(resourcetype).click();
   cy.viewport(1920, 1080);
-  cy.typeInFilter(name);
-  cy.contains('Ready ' + name).should('be.visible');
+  cy.typeInFilter(resourceName);
+  cy.contains(resourceName).should('be.visible');
   cy.getBySel('sortable-table_check_select_all').click();
   cy.clickButton('Delete');
   cy.getBySel('prompt-remove-confirm-button').click();
   cy.reload();
-  cy.contains('Providers').should('be.visible');
-  cy.contains(name).should('not.exist');
+  cy.contains(resourcetype).should('be.visible').click();
+  cy.contains(resourceName).should('not.exist');
 });
 
 // Command to add AWS Cloud Credentials

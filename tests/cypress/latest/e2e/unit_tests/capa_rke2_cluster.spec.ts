@@ -30,7 +30,6 @@ describe('Import CAPA RKE2', { tags: '@full' }, () => {
       cy.contains(repoName).click();
 
       // Go to Cluster Management > CAPI > Clusters and check if the cluster has started provisioning
-      cypressLib.burgerMenuToggle();
       cy.checkCAPIMenu();
       cy.contains('Provisioned ' + clusterName, { timeout: timeout });
     })
@@ -73,11 +72,7 @@ describe('Import CAPA RKE2', { tags: '@full' }, () => {
       cy.removeFleetGitRepo(repoName)
       // Wait until the following returns no clusters found
       // This is checked by ensuring the cluster is not available in CAPI menu
-      cypressLib.burgerMenuToggle();
-      cy.checkCAPIMenu();
-      cy.getBySel('button-group-child-1').click();
-      cy.typeInFilter(clusterName);
-      cy.getBySel('sortable-table-0-action-button', { timeout: timeout }).should('not.exist');
+      cy.checkCAPIClusterDeleted(clusterName, timeout);
     })
   );
 
