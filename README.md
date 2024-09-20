@@ -27,7 +27,7 @@ What tests are doing:
 3. Export the following ENV VAR: `RANCHER_URL` (format: `<FQDN>/dashboard`), `RANCHER_PASSWORD`, `RANCHER_USER`, `CYPRESS_TAGS=main`, and provider specific env var:
     1. CAPA - `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
     2. CAPG - `GCP_CREDENTIALS`
-    3. CAPZ - `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, and `AZURE_SUBSCRIPTION_ID`.
+    3. CAPZ - `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, `AZURE_SUBSCRIPTION_ID`, and `AZURE_LOCATION`.
 4. Start Cypress: `./node_modules/cypress/bin/cypress open -C cypress.config.ts`
 
 The Cypress GUI should now be visible.

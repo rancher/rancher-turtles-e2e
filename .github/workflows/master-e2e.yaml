@@ -41,6 +41,9 @@ on:
       azure_tenant_id:
         description: AZURE_TENANT_ID is required to create Azure Cloud credentials
         required: true
+      azure_location:
+        description: AZURE_LOCATION is required to create Azure cluster
+        required: true
     inputs:
       cert-manager_version:
         description: Version of cert-manager to use
@@ -312,6 +315,7 @@ jobs:
           AZURE_CLIENT_ID: ${{ secrets.azure_client_id }}
           AZURE_TENANT_ID: ${{ secrets.azure_tenant_id }}
           AZURE_SUBSCRIPTION_ID: ${{ secrets.azure_subscription_id }}
+          AZURE_LOCATION: ${{ secrets.AZURE_LOCATION }}
           QASE_RUN_ID: ${{ needs.pre-qase.outputs.qase_run_id }}
           GREPTAGS: ${{ inputs.grep_test_by_tag }}
           SPEC: |

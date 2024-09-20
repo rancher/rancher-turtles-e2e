@@ -10,10 +10,11 @@ describe('Import CAPZ', { tags: '@full' }, () => {
   const branch = 'automate-capz'
   const path = '/tests/assets/rancher-turtles-fleet-example/azure'
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
-  const clientID = "azure_client_id"
-  const clientSecret = "azure_client_secret"
-  const subscriptionID = "azure_subscription_id"
-  const tenantID = "azure_tenant_id"
+  const clientID = Cypress.env("azure_client_id")
+  const clientSecret = Cypress.env("azure_client_secret")
+  const subscriptionID = Cypress.env("azure_subscription_id")
+  const tenantID = Cypress.env("azure_tenant_id")
+  const location = Cypress.env("azure_location")
 
   beforeEach(() => {
     cy.login();
@@ -34,7 +35,7 @@ describe('Import CAPZ', { tags: '@full' }, () => {
     cy.readFile('./fixtures/capz-client-secret.yaml').then((data) => {
       cy.get('.CodeMirror')
         .then((editor) => {
-          data = data.replace(/replace_client_secret/g, Cypress.env(clientSecret))
+          data = data.replace(/replace_client_secret/g, clientSecret)
           editor[0].CodeMirror.setValue(data);
         })
     });
@@ -53,9 +54,10 @@ describe('Import CAPZ', { tags: '@full' }, () => {
     cy.readFile('./fixtures/capz-helm-values-cm.yaml').then((data) => {
       cy.get('.CodeMirror')
         .then((editor) => {
-          data = data.replace(/replace_client_id/g, Cypress.env(clientID))
-          data = data.replace(/replace_tenant_id/g, Cypress.env(tenantID))
-          data = data.replace(/replace_subscription_id/g, Cypress.env(subscriptionID))
+          data = data.replace(/replace_location/g, location)
+          data = data.replace(/replace_client_id/g, clientID)
+          data = data.replace(/replace_tenant_id/g, tenantID)
+          data = data.replace(/replace_subscription_id/g, subscriptionID)
           editor[0].CodeMirror.setValue(data);
         })
     });
@@ -92,7 +94,7 @@ describe('Import CAPZ', { tags: '@full' }, () => {
   })
   );
   qase(23, it('Install App on imported cluster', { retries: 1 }, () => {
-    // Click on imported CAPA cluster
+    // Click on imported CAPZ cluster
     cy.contains(clusterName).click();
 
     // Install App
@@ -101,22 +103,21 @@ describe('Import CAPZ', { tags: '@full' }, () => {
   );
 
   qase(24, xit("Scale up imported CAPZ cluster by updating configmap and forcefully updating the repo", () => {
-    // find a way to run kubectl command via cypress kubectl.Run()
     cy.contains('local')
       .click();
     cy.get('.header-buttons > :nth-child(1) > .icon')
       .click();
     cy.contains('Import YAML');
-    // ./fixtures/capd-rke2-provider.yaml
     cy.readFile('./fixtures/capz-helm-values-cm.yaml').then((data) => {
       cy.get('.CodeMirror')
         .then((editor) => {
           data = data.replace(/systempoolCount: 1/g, "systempoolCount: 2")
           data = data.replace(/userpoolCount: 2/g, "userpoolCount: 4")
+          data = data.replace(/replace_location/g, location)
           // workaround; these values need to be re-replaced before applying the scaling changes
-          data = data.replace(/replace_client_id/g, Cypress.env(clientID))
-          data = data.replace(/replace_tenant_id/g, Cypress.env(tenantID))
-          data = data.replace(/replace_subscription_id/g, Cypress.env(subscriptionID))
+          data = data.replace(/replace_client_id/g, clientID)
+          data = data.replace(/replace_tenant_id/g, tenantID)
+          data = data.replace(/replace_subscription_id/g, subscriptionID)
           editor[0].CodeMirror.setValue(data);
         })
     });

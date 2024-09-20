@@ -10,7 +10,7 @@ data:
       kubernetesVersion: v1.28.0
       systempoolCount: 1
       userpoolCount: 2
-      location: centralindia
+      location: replace_location
     azure:
       subscriptionID: replace_subscription_id
       clientID: replace_client_id
