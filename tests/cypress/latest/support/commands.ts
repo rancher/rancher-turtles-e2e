@@ -142,7 +142,8 @@ Cypress.Commands.add('addInfraProvider', (providerType, name, namespace, cloudCr
   cy.checkCAPIMenu();
   cy.contains('Providers').click();
   cy.clickButton('Create');
-  cy.contains(providerType, { matchCase: false }).click();
+  var selector = 'select-icon-grid-' + providerType
+  cy.getBySel(selector).click();
   cy.contains('Provider: Create ' + providerType, { matchCase: false }).should('be.visible');
 
   // TODO: Add variables support after capi-ui-extension/issues/49
@@ -179,7 +180,7 @@ Cypress.Commands.add('addCloudCredsAWS', (name, accessKey, secretKey) => {
   cy.accesMenuSelection('Cluster Management', 'Cloud Credentials');
   cy.contains('API Key').should('be.visible');
   cy.clickButton('Create');
-  cy.contains('Amazon').click();
+  cy.getBySel('subtype-banner-item-aws').click();
   cy.typeValue('Name', name);
   cy.typeValue('Access Key', accessKey);
   cy.typeValue('Secret Key', secretKey, false, false);
@@ -193,7 +194,7 @@ Cypress.Commands.add('addCloudCredsGCP', (name, gcpCredentials) => {
   cy.accesMenuSelection('Cluster Management', 'Cloud Credentials');
   cy.contains('API Key').should('be.visible');
   cy.clickButton('Create');
-  cy.contains('Google').click();
+  cy.getBySel('subtype-banner-item-gcp').click();
   cy.typeValue('Name', name);
   cy.getBySel('text-area-auto-grow').type(gcpCredentials, { log: false });
   cy.clickButton('Create');
@@ -206,7 +207,7 @@ Cypress.Commands.add('addCloudCredsAzure', (name: string, clientID: string, clie
   cy.accesMenuSelection('Cluster Management', 'Cloud Credentials');
   cy.contains('API Key').should('be.visible');
   cy.clickButton('Create');
-  cy.contains('Azure').click();
+  cy.getBySel('subtype-banner-item-azure').click();
   cy.typeValue('Name', name);
   cy.typeValue('Client ID', clientID);
   cy.typeValue('Client Secret', clientSecret, false, false);
@@ -297,14 +298,14 @@ Cypress.Commands.add('patchYamlResource', (clusterName, namespace, resourceKind,
           const patchedNestedObject = _.merge(nestedObject, _.omit(patchObj[key], 'isNestedIn'));
           _.set(yamlObj, key, jsyaml.dump(patchedNestedObject));
         } else if (typeof patchObj[key] === 'object' && !Array.isArray(patchObj[key])) {
-            // If the patch is for an object, recursively apply the patch
-            if (!yamlObj[key]) {
-              yamlObj[key] = {};
-            }
+          // If the patch is for an object, recursively apply the patch
+          if (!yamlObj[key]) {
+            yamlObj[key] = {};
+          }
           applyPatch(yamlObj[key], patchObj[key]);
         } else {
-            // If the patch is for a value, simply set the value in the YAML object
-            _.set(yamlObj, key, patchObj[key]);
+          // If the patch is for a value, simply set the value in the YAML object
+          _.set(yamlObj, key, patchObj[key]);
         }
       });
     }
@@ -315,7 +316,7 @@ Cypress.Commands.add('patchYamlResource', (clusterName, namespace, resourceKind,
     // Set the modified YAML back to the editor
     editor[0].CodeMirror.setValue(patchedYaml);
     cy.clickButton('Save');
-    });
+  });
 
   // Reset the namespace after the operation
   cy.namespaceReset();
