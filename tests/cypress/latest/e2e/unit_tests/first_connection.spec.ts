@@ -20,16 +20,14 @@ Cypress.config();
 describe('First login on Rancher', { tags: '@install' }, () => {
   const password = 'rancherpassword'
 
-  qase(1,
-    it('Log in and accept terms and conditions',
-    {
-      env: {
-        password: password,
-      },
-    }, () => {
-      cypressLib.firstLogin();
-    })
-  );
+  it('Log in and accept terms and conditions',
+  {
+    env: {
+      password: password,
+    },
+  }, () => {
+    cypressLib.firstLogin();
+  })
 
   it('Change Rancher password', () => {
     // Change default password

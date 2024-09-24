@@ -15,7 +15,6 @@ import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 
-// TODO: Align QASE ID's
 Cypress.config();
 describe('Enable CAPI Providers', () => {
   
@@ -42,21 +41,22 @@ describe('Enable CAPI Providers', () => {
     })
 
     kubeadmProviderTypes.forEach(providerType => {
-      it('Create Kubeadm Providers', () => {
-        // TODO: Remove condition after capi-ui-extension/issues/51
-        // Create CAPI Kubeadm providers
-        if (providerType == 'control plane') {
-          const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + 'control-plane' + '-components.yaml'
-          const providerName = kubeadmProvider + '-' + 'control-plane'
-          const namespace = 'capi-kubeadm-control-plane-system'
-          cy.addCustomProvider(providerName, namespace, kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
-        } else {
-          const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + providerType + '-components.yaml'
-          const providerName = kubeadmProvider + '-' + providerType
-          const namespace = 'capi-kubeadm-bootstrap-system'
-          cy.addCustomProvider(providerName, namespace, kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
-        }
-      })
+      qase(27,
+        it('Create Kubeadm Providers', () => {
+          // Create CAPI Kubeadm providers
+          if (providerType == 'control plane') {
+            const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + 'control-plane' + '-components.yaml'
+            const providerName = kubeadmProvider + '-' + 'control-plane'
+            const namespace = 'capi-kubeadm-control-plane-system'
+            cy.addCustomProvider(providerName, namespace, kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
+          } else {
+            const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + providerType + '-components.yaml'
+            const providerName = kubeadmProvider + '-' + providerType
+            const namespace = 'capi-kubeadm-bootstrap-system'
+            cy.addCustomProvider(providerName, namespace, kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
+          }
+        })
+      );
     })
 
     qase(4,
@@ -106,14 +106,16 @@ describe('Enable CAPI Providers', () => {
       })
     );
 
-    it('Create CAPG provider', () => {
-      // Create GCP Infrastructure provider
-      cy.addCloudCredsGCP(googleProvider, Cypress.env('gcp_credentials'));
-      cypressLib.burgerMenuToggle();
-      cy.addInfraProvider('Google', googleProvider, 'capg-system', googleProvider);
-      var statusReady = 'Ready'
-      statusReady = statusReady.concat(' ', googleProvider, ' infrastructure ', googleProvider, ' ', 'v1.7.0')
-      cy.contains(statusReady);
-    })
+    qase(28,
+      it('Create CAPG provider', () => {
+        // Create GCP Infrastructure provider
+        cy.addCloudCredsGCP(googleProvider, Cypress.env('gcp_credentials'));
+        cypressLib.burgerMenuToggle();
+        cy.addInfraProvider('Google', googleProvider, 'capg-system', googleProvider);
+        var statusReady = 'Ready'
+        statusReady = statusReady.concat(' ', googleProvider, ' infrastructure ', googleProvider, ' ', 'v1.7.0')
+        cy.contains(statusReady);
+      })
+    );
   })
 });

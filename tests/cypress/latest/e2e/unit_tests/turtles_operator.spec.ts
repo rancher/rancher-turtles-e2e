@@ -36,7 +36,7 @@ describe('Install Turtles Operator', { tags: '@install' }, () => {
     cypressLib.addRepository('turtles-operator', turtlesHelmRepo, 'helm', 'none');
   })
 
-  qase(2,
+  qase([2, 11],
     it('Install Turtles operator', { retries: 1 }, () => {
       cy.contains('local').click();
 

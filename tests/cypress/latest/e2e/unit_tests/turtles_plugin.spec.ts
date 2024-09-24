@@ -31,7 +31,6 @@ describe('Install CAPI plugin', { tags: '@install' }, () => {
 
   qase(3,
     it('Install CAPI plugin', () => {
-      // TODO: create a function to install any plugin and not elemental only
       cy.contains('Extensions')
         .click();
       cy.contains('CAPI UI');

@@ -42,28 +42,28 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
       }
     })
 
-    qase(31,
-      it('Add CAPD cluster fleet repo - ' + path, () => {
-        cypressLib.checkNavIcon('cluster-management').should('exist');
-        var fullPath = basePath + path
 
-        if (path.includes('clusterclass_autoimport')) {
-          // Add classes fleet repo to fleel-local workspace
-          fullPath = fullPath.concat('/', classesRepo)
-          cy.addFleetGitRepo(classesRepo, repoUrl, branch, fullPath);
-          cy.contains(classesRepo).click();
-          cy.contains('Bundles').should('be.visible');
-          fullPath = fullPath.replace(classesRepo, clustersRepo);
-          cypressLib.burgerMenuToggle();
-        }
+    it('Add CAPD cluster fleet repo - ' + path, () => {
+      cypressLib.checkNavIcon('cluster-management').should('exist');
+      var fullPath = basePath + path
 
-        cy.addFleetGitRepo(clustersRepo, repoUrl, branch, fullPath);
-        cy.contains(clustersRepo).click();
-        cy.contains('Bundles').should('be.visible'); // Wait until the repo details are loaded
-      })
-    );
+      if (path.includes('clusterclass_autoimport')) {
+        // Add classes fleet repo to fleel-local workspace
+        fullPath = fullPath.concat('/', classesRepo)
+        cy.addFleetGitRepo(classesRepo, repoUrl, branch, fullPath);
+        cy.contains(classesRepo).click();
+        cy.contains('Bundles').should('be.visible');
+        fullPath = fullPath.replace(classesRepo, clustersRepo);
+        cypressLib.burgerMenuToggle();
+      }
 
-    qase(32,
+      cy.addFleetGitRepo(clustersRepo, repoUrl, branch, fullPath);
+      cy.contains(clustersRepo).click();
+      cy.contains('Bundles').should('be.visible'); // Wait until the repo details are loaded
+    })
+
+    if (path == 'rke2_namespace_autoimport') { var qase_id = 29 } else { qase_id = 30 }
+    qase(qase_id,
       it('Auto import child CAPD cluster', () => {
         // Check child cluster is created and auto-imported
         cy.goToHome();
@@ -79,16 +79,17 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
 
     // TODO: Refactor for other paths
     if (path.includes('namespace_autoimport')) {
-      it('Install App on imported cluster', { retries: 1 }, () => {
-        // Click on imported CAPD cluster
-        cy.contains(clusterName).click();
+      qase(7,
+        it('Install App on imported cluster', { retries: 1 }, () => {
+          // Click on imported CAPD cluster
+          cy.contains(clusterName).click();
 
-        // Install App
-        cy.installApp('Monitoring', 'cattle-monitoring');
-      })
+          // Install App
+          cy.installApp('Monitoring', 'cattle-monitoring');
+        })
+      );
 
-
-      qase(33,
+      qase(8,
         it('Scale up imported CAPD cluster', () => {
           // Access CAPI cluster
           cy.checkCAPIMenu();
@@ -112,7 +113,7 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
       );
     }
 
-    qase(34,
+    qase(9,
       it('Remove imported CAPD cluster from Rancher Manager', { retries: 1 }, () => {
         // Check cluster is not deleted after removal
         cy.deleteCluster(clusterName);
@@ -124,7 +125,7 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
       })
     );
 
-    qase(35,
+    qase(10,
       it('Delete the CAPD cluster fleet repo(s) - ' + path, () => {
         if (path.includes('clusterclass_autoimport')) {
           // Remove the classes fleet repo
