@@ -18,7 +18,7 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 
 Cypress.config();
 describe('Install Turtles Operator', { tags: '@install' }, () => {
-  const deployment = "rancher-turtles-controller-manager"
+  const deployment = 'rancher-turtles-controller-manager'
 
   beforeEach(() => {
     cy.login();
@@ -29,7 +29,7 @@ describe('Install Turtles Operator', { tags: '@install' }, () => {
   it('Add turtles repo', { retries: 2 }, () => {
     var turtlesHelmRepo = Cypress.env('chartmuseum_repo')
     if (turtlesHelmRepo == undefined) {
-      turtlesHelmRepo = "https://rancher.github.io/turtles/"
+      turtlesHelmRepo = 'https://rancher.github.io/turtles/'
     } else {
       turtlesHelmRepo += ':8080'
     }

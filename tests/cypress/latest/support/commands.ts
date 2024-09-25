@@ -124,7 +124,7 @@ Cypress.Commands.add('addCustomProvider', (name, namespace, providerName, provid
   cy.contains('Custom').click();
 
   // Select provider type
-  cy.contains("Provider type").click();
+  cy.contains('Provider type').click();
   cy.contains(providerType, { matchCase: false }).click();
 
   cy.getBySel('name-ns-description-namespace').type(namespace + '{enter}');
@@ -167,7 +167,7 @@ Cypress.Commands.add('removeCAPIResource', (resourcetype, resourceName) => {
   cy.typeInFilter(resourceName);
   cy.contains(resourceName).should('be.visible');
   cy.getBySel('sortable-table_check_select_all').click();
-  cy.clickButton('Delete');
+  cy.getBySel('sortable-table-promptRemove').click();
   cy.getBySel('prompt-remove-confirm-button').click();
   cy.reload();
   cy.contains(resourcetype).should('be.visible').click();
@@ -372,7 +372,7 @@ Cypress.Commands.add('removeFleetGitRepo', (repoName, noRepoCheck, workspace) =>
   cy.contains(workspace).should('be.visible').click();
   // Click the repo link
   cy.contains(repoName).click();
-  cy.url().should("include", "fleet/fleet.cattle.io.gitrepo/" + workspace + "/" + repoName)
+  cy.url().should('include', 'fleet/fleet.cattle.io.gitrepo/' + workspace + '/' + repoName)
   // Click on the actions menu and select 'Delete' from the menu
   cy.get('.actions .btn.actions').click();
   cy.get('.icon.group-icon.icon-trash').click();

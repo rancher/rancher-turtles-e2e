@@ -6,10 +6,10 @@ Cypress.config();
 describe('Import CAPA EKS', { tags: '@full' }, () => {
   const timeout = 1200000
   const repoName = 'clusters'
-  const clusterName = "turtles-qa-cluster"
+  const clusterName = 'turtles-qa-cluster'
   const branch = 'main'
   const path = '/tests/assets/rancher-turtles-fleet-example/aws_eks'
-  const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
+  const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
 
   beforeEach(() => {
     cy.login();

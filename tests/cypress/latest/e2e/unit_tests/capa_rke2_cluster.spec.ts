@@ -6,10 +6,10 @@ Cypress.config();
 describe('Import CAPA RKE2', { tags: '@full' }, () => {
   const timeout = 1200000
   const repoName = 'clusters'
-  const clusterName = "turtles-qa-rke2-cluster"
+  const clusterName = 'turtles-qa-rke2-cluster'
   const branch = 'main'
   const path = '/tests/assets/rancher-turtles-fleet-example/aws_rke2'
-  const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
+  const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
 
   beforeEach(() => {
     cy.login();

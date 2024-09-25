@@ -20,12 +20,12 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
   const timeout = 300000
   const classesRepo = 'classes'
   const clustersRepo = 'clusters'
-  const clusterName = "cluster1"
-  const className = "quick-start"
-  const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
-  const basePath = "/tests/assets/rancher-turtles-fleet-example/"
+  const clusterName = 'cluster1'
+  const className = 'quick-start'
+  const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
+  const basePath = '/tests/assets/rancher-turtles-fleet-example/'
   const pathNames = ['namespace_autoimport', 'cluster_autoimport', 'clusterclass_autoimport']
-  const branch = "main"
+  const branch = 'main'
 
   beforeEach(() => {
     cy.login();
@@ -97,7 +97,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
         it('Scale the imported CAPD cluster', () => {
           // Access CAPI cluster
           cy.checkCAPIMenu();
-          cy.contains("Machine Deployments").click();
+          cy.contains('Machine Deployments').click();
           cy.getBySel('sortable-table-0-action-button').click();
           cy.contains('Edit YAML')
             .click();
@@ -144,7 +144,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
           // Wait until the following returns no clusters found
           cy.checkCAPIClusterDeleted(clusterName, timeout);
           // Remove the clusterclass
-          cy.removeCAPIResource("Cluster Classes", className);
+          cy.removeCAPIResource('Cluster Classes', className);
         } else {
           // Remove the clusters fleet repo
           cy.removeFleetGitRepo(clustersRepo);
