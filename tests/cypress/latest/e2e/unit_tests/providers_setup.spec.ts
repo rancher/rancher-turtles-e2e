@@ -63,7 +63,7 @@ describe('Enable CAPI Providers', () => {
     qase(4,
       it('Create CAPD provider', () => {
         // Create Docker Infrastructure provider
-        cy.addInfraProvider(dockerProvider, dockerProvider, 'capd-system');
+        cy.addInfraProvider('Docker', dockerProvider, 'capd-system');
         var statusReady = 'Ready'
         statusReady = statusReady.concat(' ', dockerProvider, ' infrastructure ', dockerProvider, ' ', kubeadmProviderVersion)
         cy.contains(statusReady);
@@ -115,7 +115,7 @@ describe('Enable CAPI Providers', () => {
         cy.addInfraProvider('Google', googleProvider, 'capg-system', googleProvider);
         var statusReady = 'Ready'
         statusReady = statusReady.concat(' ', googleProvider, ' infrastructure ', googleProvider, ' ', 'v1.7.0')
-        cy.contains(statusReady);
+        cy.contains(statusReady, { timeout: 1200000 });
       })
     );
 

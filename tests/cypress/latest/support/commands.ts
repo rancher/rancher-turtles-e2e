@@ -151,7 +151,7 @@ Cypress.Commands.add('addInfraProvider', (providerType, name, namespace, cloudCr
   cy.typeValue('Name', name);
 
   // Select Cloud credentials name
-  if (providerType != 'docker') {
+  if (providerType != 'Docker') {
     cy.getBySel('cluster-prov-select-credential').trigger('click');
     cy.contains(cloudCredentials).click();
   }
