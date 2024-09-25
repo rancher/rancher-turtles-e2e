@@ -217,7 +217,6 @@ Cypress.Commands.add('addCloudCredsAzure', (name: string, clientID: string, clie
   cy.contains(name).should('be.visible');
 });
 
-
 // Command to Install App from Charts menu
 // You can optionally provide an array of questions and answer them before the installation starts
 // Example1: cy.installApp('Alerting', 'default', [{ menuEntry: '(None)', checkbox: 'Enable Microsoft Teams' }]);

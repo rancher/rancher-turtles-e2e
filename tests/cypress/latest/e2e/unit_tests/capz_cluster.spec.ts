@@ -7,6 +7,7 @@ describe('Import CAPZ', { tags: '@full' }, () => {
   const timeout = 1200000
   const repoName = 'clusters-capz'
   const clusterName = "turtles-qa-capz"
+  // TODO: To be changed to main before merge
   const branch = 'automate-capz'
   const path = '/tests/assets/rancher-turtles-fleet-example/azure'
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
@@ -66,7 +67,6 @@ describe('Import CAPZ', { tags: '@full' }, () => {
 
     // This config map is currently not deleted at the end of test.
   })
-
 
   qase(21, it('Add CAPZ cluster fleet repo', () => {
     cypressLib.checkNavIcon('cluster-management')
