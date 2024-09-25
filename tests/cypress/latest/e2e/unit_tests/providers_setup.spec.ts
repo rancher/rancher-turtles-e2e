@@ -78,7 +78,7 @@ describe('Enable CAPI Providers', () => {
       const resourceKind = 'configMap';
       const resourceName = 'fleet-addon-config';
       const namespace = 'rancher-turtles-system';
-      const patch = { data: { manifests: { isNestedIn: true, spec: { cluster: { hostNetwork: true, selector: { matchLabels: { cni: 'by-fleet-addon-kindnet' } } } } } } };
+      const patch = { data: { manifests: { isNestedIn: true, spec: { cluster: { hostNetwork: true, selector: { matchLabels: { cni: 'by-fleet-addon-kindnet' }}}}}}};
 
       cy.patchYamlResource(clusterName, namespace, resourceKind, resourceName, patch);
     });
