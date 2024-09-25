@@ -78,7 +78,7 @@ describe('Enable CAPI Providers', () => {
       const resourceKind = 'configMap';
       const resourceName = 'fleet-addon-config';
       const namespace = 'rancher-turtles-system';
-      const patch = { data: { manifests: { isNestedIn: true, spec: { cluster: { hostNetwork: true, selector: { matchLabels: { cni: 'by-fleet-addon-kindnet' }}}}}}};
+      const patch = { data: { manifests: { isNestedIn: true, spec: { cluster: { hostNetwork: true, selector: { matchLabels: { cni: 'by-fleet-addon-kindnet' } } } } } } };
 
       cy.patchYamlResource(clusterName, namespace, resourceKind, resourceName, patch);
     });
@@ -115,7 +115,7 @@ describe('Enable CAPI Providers', () => {
         cy.addInfraProvider('Google', googleProvider, 'capg-system', googleProvider);
         var statusReady = 'Ready'
         statusReady = statusReady.concat(' ', googleProvider, ' infrastructure ', googleProvider, ' ', 'v1.7.0')
-        cy.contains(statusReady, { timeout: 1200000 });
+        cy.contains(statusReady, { timeout: 120000 });
       })
     );
 
@@ -126,7 +126,7 @@ describe('Enable CAPI Providers', () => {
       cy.addInfraProvider('Azure', azureProvider, 'capz-system', azureProvider);
       var statusReady = 'Ready'
       statusReady = statusReady.concat(' ', azureProvider, ' infrastructure ', azureProvider)
-      cy.contains(statusReady, { timeout: 1200000 });
+      cy.contains(statusReady, { timeout: 120000 });
     })
     );
   })
