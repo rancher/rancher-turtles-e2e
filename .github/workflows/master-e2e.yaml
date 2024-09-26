@@ -228,7 +228,7 @@ jobs:
           echo 'Defaults secure_path="/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin"' | sudo tee /etc/sudoers.d/0-custom_secure_path
       - name: Install helm
         run: curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-      # Build rancher-turtles nightly chart
+      # Build rancher-turtles latest chart
       - name: Check out rancher-turtles repo
         uses: actions/checkout@v4
         with:
@@ -282,8 +282,7 @@ jobs:
           echo "rm_version=${RM_VERSION}" >> ${GITHUB_OUTPUT}
       - name: Install Chartmuseum
         run: cd tests && make e2e-install-chartmuseum
-      - name: Cypress tests - Basics
-        # Basics means tests without an extra elemental node needed
+      - name: Cypress tests
         env:
           BROWSER: chrome
           CHARTMUSEUM_REPO: http://${{ needs.create-runner.outputs.public_dns }}
@@ -349,7 +348,7 @@ jobs:
           echo "CertManager Image: ${{ steps.component.outputs.cert_manager_version }}" >> ${GITHUB_STEP_SUMMARY}
           echo "CAPI UI Extension Version: ${{ inputs.capi_ui_version }}" >> ${GITHUB_STEP_SUMMARY}
           if ${{ inputs.ui_account != '' }}; then
-            echo "Elemental UI User: ${{ inputs.ui_account }}" >> ${GITHUB_STEP_SUMMARY}
+            echo "UI User: ${{ inputs.ui_account }}" >> ${GITHUB_STEP_SUMMARY}
           fi
           echo "### Kubernetes" >> ${GITHUB_STEP_SUMMARY}
           echo "K3s on Rancher Manager: ${{ env.INSTALL_K3S_VERSION }}" >> ${GITHUB_STEP_SUMMARY}

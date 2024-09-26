@@ -1,4 +1,4 @@
-module github.com/rancher/elemental/tests
+module github.com/rancher/rancher-turtles-e2e/tests
 
 go 1.20
 

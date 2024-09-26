@@ -1,7 +1,7 @@
 {
   "name": "rancher-turtles-e2e",
   "version": "1.0.0",
-  "description": "Cypress tests to test the Elemental UI",
+  "description": "Cypress tests to test the Turtles UI",
   "main": "index.js",
   "directories": {
     "doc": "docs"
@@ -11,15 +11,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rancher-sandbox/rancher-turtles-e2e.git"
+    "url": "git+https://github.com/rancher/rancher-turtles-e2e.git"
   },
   "keywords": [],
   "author": "Turtle team",
   "license": "Apache License 2.0",
   "bugs": {
-    "url": "https://github.com/rancher-sandbox/rancher-turtles-e2e/issues"
+    "url": "https://github.com/rancher/rancher-turtles-e2e/issues"
   },
-  "homepage": "https://github.com/rancher-sandbox/rancher-turtles-e2e",
+  "homepage": "https://github.com/rancher/rancher-turtles-e2e",
   "dependencies": {
     "@cypress/grep": "^4.1.0",
     "@rancher-ecp-qa/cypress-library": "1.1.0",
