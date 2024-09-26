@@ -12,7 +12,7 @@ describe('Import CAPZ', { tags: '@full' }, () => {
   const path = '/tests/assets/rancher-turtles-fleet-example/azure'
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
   const clientID = Cypress.env("azure_client_id")
-  const clientSecret = Cypress.env("azure_client_secret")
+  const clientSecret = btoa(Cypress.env("azure_client_secret"))
   const subscriptionID = Cypress.env("azure_subscription_id")
   const tenantID = Cypress.env("azure_tenant_id")
   const location = Cypress.env("azure_location")
@@ -46,26 +46,33 @@ describe('Import CAPZ', { tags: '@full' }, () => {
     // This secret is currently not deleted at the end of test.
   })
 
-  it('Create values.yaml ConfigMap', () => {
+
+  it('Create values.yaml Secret', () => {
     cy.contains('local')
       .click();
     cy.get('.header-buttons > :nth-child(1) > .icon')
       .click();
     cy.contains('Import YAML');
-    cy.readFile('./fixtures/capz-helm-values-cm.yaml').then((data) => {
+    var encodedData = ''
+    cy.readFile('./fixtures/capz-helm-values.yaml').then((data) => {
+      data = data.replace(/replace_location/g, location)
+      data = data.replace(/replace_client_id/g, clientID)
+      data = data.replace(/replace_tenant_id/g, tenantID)
+      data = data.replace(/replace_subscription_id/g, subscriptionID)
+      encodedData = btoa(data)
+    })
+
+    cy.readFile('./fixtures/capz-helm-values-secret.yaml').then((data) => {
       cy.get('.CodeMirror')
         .then((editor) => {
-          data = data.replace(/replace_location/g, location)
-          data = data.replace(/replace_client_id/g, clientID)
-          data = data.replace(/replace_tenant_id/g, tenantID)
-          data = data.replace(/replace_subscription_id/g, subscriptionID)
+          data = data.replace(/replace_values/g, encodedData)
           editor[0].CodeMirror.setValue(data);
         })
     });
+
     cy.clickButton('Import');
     cy.clickButton('Close');
 
-    // This config map is currently not deleted at the end of test.
   })
 
   qase(21, it('Add CAPZ cluster fleet repo', () => {
@@ -108,19 +115,28 @@ describe('Import CAPZ', { tags: '@full' }, () => {
     cy.get('.header-buttons > :nth-child(1) > .icon')
       .click();
     cy.contains('Import YAML');
-    cy.readFile('./fixtures/capz-helm-values-cm.yaml').then((data) => {
+
+    var encodedData = ''
+    cy.readFile('./fixtures/capz-helm-values.yaml').then((data) => {
+      data = data.replace(/systempoolCount: 1/g, "systempoolCount: 2")
+      data = data.replace(/userpoolCount: 2/g, "userpoolCount: 4")
+
+      // workaround; these values need to be re-replaced before applying the scaling changes
+      data = data.replace(/replace_location/g, location)
+      data = data.replace(/replace_client_id/g, clientID)
+      data = data.replace(/replace_tenant_id/g, tenantID)
+      data = data.replace(/replace_subscription_id/g, subscriptionID)
+      encodedData = btoa(data)
+    })
+
+    cy.readFile('./fixtures/capz-helm-values-secret.yaml').then((data) => {
       cy.get('.CodeMirror')
         .then((editor) => {
-          data = data.replace(/systempoolCount: 1/g, "systempoolCount: 2")
-          data = data.replace(/userpoolCount: 2/g, "userpoolCount: 4")
-          data = data.replace(/replace_location/g, location)
-          // workaround; these values need to be re-replaced before applying the scaling changes
-          data = data.replace(/replace_client_id/g, clientID)
-          data = data.replace(/replace_tenant_id/g, tenantID)
-          data = data.replace(/replace_subscription_id/g, subscriptionID)
+          data = data.replace(/replace_values/g, encodedData)
           editor[0].CodeMirror.setValue(data);
         })
     });
+
     cy.clickButton('Import');
     cy.clickButton('Close');
 
