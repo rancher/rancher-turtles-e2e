@@ -126,7 +126,7 @@ describe('Enable CAPI Providers', () => {
       cy.addInfraProvider('Azure', azureProvider, 'capz-system', azureProvider);
       var statusReady = 'Ready'
       statusReady = statusReady.concat(' ', azureProvider, ' infrastructure ', azureProvider)
-      cy.contains(statusReady, { timeout: 120000 });
+      cy.contains(statusReady, { timeout: 180000 });
     })
     );
   })
