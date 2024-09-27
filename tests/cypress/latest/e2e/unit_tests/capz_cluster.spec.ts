@@ -7,8 +7,7 @@ describe('Import CAPZ', { tags: '@full' }, () => {
   const timeout = 1200000
   const repoName = 'clusters-capz'
   const clusterName = "turtles-qa-capz"
-  // TODO: To be changed to main before merge
-  const branch = 'automate-capz'
+  const branch = 'main'
   const path = '/tests/assets/rancher-turtles-fleet-example/azure'
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
   const clientID = Cypress.env("azure_client_id")
@@ -170,11 +169,7 @@ describe('Import CAPZ', { tags: '@full' }, () => {
     cy.removeFleetGitRepo(repoName)
     // Wait until the following returns no clusters found
     // This is checked by ensuring the cluster is not available in CAPI menu
-    cypressLib.burgerMenuToggle();
-    cy.checkCAPIMenu();
-    cy.getBySel('button-group-child-1').click();
-    cy.typeInFilter(clusterName);
-    cy.getBySel('sortable-table-0-action-button', { timeout: timeout }).should('not.exist');
+    cy.checkCAPIClusterDeleted(clusterName, timeout);
   })
   );
 
