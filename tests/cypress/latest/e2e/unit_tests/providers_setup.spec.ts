@@ -23,6 +23,7 @@ describe('Enable CAPI Providers', () => {
   const amazonProvider = 'aws'
   const googleProvider = 'gcp'
   const azureProvider = 'azure'
+  const fleetProvider = 'fleet'
   const kubeadmProviderVersion = 'v1.7.3'
   const kubeadmBaseURL = 'https://github.com/kubernetes-sigs/cluster-api/releases/'
   const kubeadmProviderTypes = ['bootstrap', 'control plane']
@@ -88,8 +89,7 @@ describe('Enable CAPI Providers', () => {
       cy.checkCAPIMenu();
       cy.contains('Providers').click();
       var statusReady = 'Ready'
-      // ProviderName is not set for fleet addon hence the empty string, see https://github.com/rancher/turtles/issues/630
-      statusReady = statusReady.concat(' ', 'fleet', ' addon ', '', 'v0.3.1')
+      statusReady = statusReady.concat(' ', fleetProvider, ' addon ', fleetProvider, ' ', 'v0.3.1')
       cy.contains(statusReady).scrollIntoView();
     });
   });
