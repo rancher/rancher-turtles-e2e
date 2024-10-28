@@ -114,7 +114,7 @@ describe('Enable CAPI Providers', () => {
         cypressLib.burgerMenuToggle();
         cy.addInfraProvider('Google', googleProvider, 'capg-system', googleProvider);
         var statusReady = 'Ready'
-        statusReady = statusReady.concat(' ', googleProvider, ' infrastructure ', googleProvider, ' ', 'v1.7.0')
+        statusReady = statusReady.concat(' ', googleProvider, ' infrastructure ', googleProvider, ' ', 'v1.8.0')
         cy.contains(statusReady, { timeout: 120000 });
       })
     );
