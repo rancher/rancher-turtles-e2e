@@ -374,21 +374,15 @@ Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, path, worksp
   cy.clickButton('Next');
   cy.get('button.btn').contains('Previous').should('be.visible');
   cy.clickButton('Create');
+
+  // Navigate to fleet repo
+  cypressLib.burgerMenuToggle();
+  cy.checkFleetGitRepo(repoName, workspace); // Wait until the repo details are loaded
 })
 
 // Command remove Fleet Git Repository
 Cypress.Commands.add('removeFleetGitRepo', (repoName, noRepoCheck, workspace) => {
-  // Go to 'Continuous Delivery' > 'Git Repos'
-  cy.accesMenuSelection('Continuous Delivery', 'Git Repos');
-  // Change the namespace to fleet-local using the dropdown on the top bar
-  cy.contains('fleet-').click();
-  if (!workspace) {
-    workspace = 'fleet-local';
-  }
-  cy.contains(workspace).should('be.visible').click();
-  // Click the repo link
-  cy.contains(repoName).click();
-  cy.url().should('include', 'fleet/fleet.cattle.io.gitrepo/' + workspace + '/' + repoName)
+  cy.checkFleetGitRepo(repoName, workspace);
   // Click on the actions menu and select 'Delete' from the menu
   cy.get('.actions .btn.actions').click();
   cy.get('.icon.group-icon.icon-trash').click();
@@ -401,16 +395,24 @@ Cypress.Commands.add('removeFleetGitRepo', (repoName, noRepoCheck, workspace) =>
 })
 
 // Command forcefully update Fleet Git Repository
-Cypress.Commands.add('forceUpdateFleetGitRepo', (repoName) => {
-  // Go to 'Continuous Delivery' > 'Git Repos'
-  cy.accesMenuSelection('Continuous Delivery', 'Git Repos');
-  // Change the namespace to fleet-local using the dropdown on the top bar
-  cy.contains('fleet-').click();
-  cy.contains('fleet-local').should('be.visible').click();
-  // Click the repo link
-  cy.contains(repoName).click();
-  cy.url().should("include", "fleet/fleet.cattle.io.gitrepo/fleet-local/" + repoName)
+Cypress.Commands.add('forceUpdateFleetGitRepo', (repoName, workspace) => {
+  cy.checkFleetGitRepo(repoName, workspace);
   // Click on the actions menu and select 'Delete' from the menu
   cy.get('.actions .btn.actions').click();
   cy.get('.icon.group-icon.icon-refresh').click();
+})
+
+// Command forcefully update Fleet Git Repository
+Cypress.Commands.add('checkFleetGitRepo', (repoName, workspace) => {
+  // Go to 'Continuous Delivery' > 'Git Repos'
+  cy.accesMenuSelection('Continuous Delivery', 'Git Repos');
+  // Change the workspace using the dropdown on the top bar
+  cy.contains('fleet-').click();
+  if (!workspace) {
+    workspace = 'fleet-local';
+  }
+  cy.contains(workspace).should('be.visible').click();
+  // Click the repo link
+  cy.contains(repoName).click();
+  cy.url().should("include", "fleet/fleet.cattle.io.gitrepo/" + workspace + "/" + repoName)
 })

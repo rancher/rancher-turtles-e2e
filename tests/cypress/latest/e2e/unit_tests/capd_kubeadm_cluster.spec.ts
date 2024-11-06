@@ -49,22 +49,16 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
         // Add cni gitrepo to fleet-default workspace
         // The cni gitrepo is scoped to quick-start class only by fleet.yaml
         cy.addFleetGitRepo('clusterclass-cni', repoUrl, branch, fullPath+'/cni', 'fleet-default');
-        cy.contains('clusterclass-cni').click();
-        cy.contains('Bundles').should('be.visible'); // Wait until the repo details are loaded
         cypressLib.burgerMenuToggle();
 
         // Add classes fleet repo to fleel-local workspace
         fullPath = fullPath.concat('/', classesRepo)
         cy.addFleetGitRepo(classesRepo, repoUrl, branch, fullPath);
-        cy.contains(classesRepo).click();
-        cy.contains('Bundles').should('be.visible');
         fullPath = fullPath.replace(classesRepo, clustersRepo);
         cypressLib.burgerMenuToggle();
       }
 
       cy.addFleetGitRepo(clustersRepo, repoUrl, branch, fullPath);
-      cy.contains(clustersRepo).click();
-      cy.contains('Bundles').should('be.visible'); // Wait until the repo details are loaded
     })
 
     if (path == 'namespace_autoimport') { var qase_id = 6 } else if (path == 'cluster_autoimport') { qase_id = 5 } else { qase_id = 0 }

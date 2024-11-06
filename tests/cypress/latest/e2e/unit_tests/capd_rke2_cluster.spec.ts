@@ -51,15 +51,11 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
         // Add classes fleet repo to fleel-local workspace
         fullPath = fullPath.concat('/', classesRepo)
         cy.addFleetGitRepo(classesRepo, repoUrl, branch, fullPath);
-        cy.contains(classesRepo).click();
-        cy.contains('Bundles').should('be.visible');
         fullPath = fullPath.replace(classesRepo, clustersRepo);
         cypressLib.burgerMenuToggle();
       }
 
       cy.addFleetGitRepo(clustersRepo, repoUrl, branch, fullPath);
-      cy.contains(clustersRepo).click();
-      cy.contains('Bundles').should('be.visible'); // Wait until the repo details are loaded
     })
 
     if (path == 'rke2_namespace_autoimport') { var qase_id = 29 } else { qase_id = 30 }
