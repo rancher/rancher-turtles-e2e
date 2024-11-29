@@ -24,7 +24,7 @@ describe('Enable CAPI Providers', () => {
   const googleProvider = 'gcp'
   const azureProvider = 'azure'
   const fleetProvider = 'fleet'
-  const kubeadmProviderVersion = 'v1.7.7'
+  const kubeadmProviderVersion = 'v1.8.4'
   const kubeadmBaseURL = 'https://github.com/kubernetes-sigs/cluster-api/releases/'
   const kubeadmProviderTypes = ['bootstrap', 'control plane']
   const providerNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system', 'capd-system', 'capa-system', 'capg-system', 'capz-system']
@@ -89,7 +89,7 @@ describe('Enable CAPI Providers', () => {
       cy.checkCAPIMenu();
       cy.contains('Providers').click();
       var statusReady = 'Ready'
-      statusReady = statusReady.concat(' ', fleetProvider, ' addon ', fleetProvider, ' ', 'v0.3.1')
+      statusReady = statusReady.concat(' ', fleetProvider, ' addon ', fleetProvider, ' ', 'v0.4.0')
       cy.contains(statusReady).scrollIntoView();
     });
   });
