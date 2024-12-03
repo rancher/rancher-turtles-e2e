@@ -61,7 +61,7 @@ Cypress.Commands.add('createNamespace', (namespace) => {
   cy.contains('Create Namespace').click();
   cy.typeValue('Name', namespace);
   cy.clickButton('Create');
-  cy.contains('Active' + ' ' + namespace);
+  cy.contains(new RegExp('Active.*' + namespace));
   cy.namespaceReset();
 });
 
@@ -81,17 +81,17 @@ Cypress.Commands.add('namespaceReset', () => {
 // Command to check CAPI cluster Active status
 Cypress.Commands.add('checkCAPIClusterActive', (clusterName) => {
   cy.checkCAPIMenu();
-  cy.contains('Provisioned ' + clusterName, { timeout: 90000 });
+  cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: 90000 });
   cy.contains('Machine Deployments').click();
-  cy.contains('Running ' + clusterName, { timeout: 90000 });
+  cy.contains(new RegExp('Running.*' + clusterName), { timeout: 90000 });
   cy.contains('Machine Sets').click();
-  cy.contains('Active ' + clusterName, { timeout: 90000 });
+  cy.contains(new RegExp('Active.*' + clusterName), { timeout: 90000 });
 });
 
 // Command to check CAPI cluster Provisioned status
 Cypress.Commands.add('checkCAPIClusterProvisioned', (clusterName) => {
   cy.checkCAPIMenu();
-  cy.contains('Provisioned ' + clusterName, { timeout: 90000 });
+  cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: 90000 });
 });
 
 // Command to check CAPI cluster deletion status
@@ -411,7 +411,7 @@ Cypress.Commands.add('checkFleetGitRepo', (repoName, workspace) => {
   if (!workspace) {
     workspace = 'fleet-local';
   }
-  cy.contains(workspace).should('be.visible').click();
+  cy.contains(workspace).click();
   // Click the repo link
   cy.contains(repoName).click();
   cy.url().should("include", "fleet/fleet.cattle.io.gitrepo/" + workspace + "/" + repoName)

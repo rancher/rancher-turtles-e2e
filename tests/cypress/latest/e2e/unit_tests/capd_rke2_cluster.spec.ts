@@ -63,11 +63,11 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
       it('Auto import child CAPD cluster', () => {
         // Check child cluster is created and auto-imported
         cy.goToHome();
-        cy.contains('Pending ' + clusterName, { timeout: timeout });
+        cy.contains(new RegExp('Pending.*' + clusterName), { timeout: timeout });
 
         // Check cluster is Active
         cy.clickButton('Manage');
-        cy.contains('Active ' + clusterName, { timeout: timeout });
+        cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
         // TODO: Check MachineSet unavailable status and use checkCAPIClusterActive
         cy.checkCAPIClusterProvisioned(clusterName);
       })

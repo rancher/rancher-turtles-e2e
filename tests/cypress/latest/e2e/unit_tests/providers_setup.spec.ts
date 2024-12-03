@@ -66,7 +66,7 @@ describe('Enable CAPI Providers', () => {
         // Create Docker Infrastructure provider
         cy.addInfraProvider('Docker', dockerProvider, 'capd-system');
         var statusReady = 'Ready'
-        statusReady = statusReady.concat(' ', dockerProvider, ' infrastructure ', dockerProvider, ' ', kubeadmProviderVersion)
+        statusReady = statusReady.concat(dockerProvider, 'infrastructure', dockerProvider, kubeadmProviderVersion)
         cy.contains(statusReady);
       })
     );
@@ -89,7 +89,7 @@ describe('Enable CAPI Providers', () => {
       cy.checkCAPIMenu();
       cy.contains('Providers').click();
       var statusReady = 'Ready'
-      statusReady = statusReady.concat(' ', fleetProvider, ' addon ', fleetProvider, ' ', 'v0.4.0')
+      statusReady = statusReady.concat(fleetProvider, 'addon', fleetProvider, 'v0.4.0')
       cy.contains(statusReady).scrollIntoView();
     });
   });
@@ -102,7 +102,7 @@ describe('Enable CAPI Providers', () => {
         cypressLib.burgerMenuToggle();
         cy.addInfraProvider('Amazon', amazonProvider, 'capa-system', amazonProvider);
         var statusReady = 'Ready'
-        statusReady = statusReady.concat(' ', amazonProvider, ' infrastructure ', amazonProvider, ' ', 'v2.6.1')
+        statusReady = statusReady.concat(amazonProvider, 'infrastructure', amazonProvider, 'v2.6.1')
         cy.contains(statusReady);
       })
     );
@@ -114,7 +114,7 @@ describe('Enable CAPI Providers', () => {
         cypressLib.burgerMenuToggle();
         cy.addInfraProvider('Google', googleProvider, 'capg-system', googleProvider);
         var statusReady = 'Ready'
-        statusReady = statusReady.concat(' ', googleProvider, ' infrastructure ', googleProvider, ' ', 'v1.8.0')
+        statusReady = statusReady.concat(googleProvider, 'infrastructure', googleProvider, 'v1.8.0')
         cy.contains(statusReady, { timeout: 120000 });
       })
     );
@@ -125,7 +125,7 @@ describe('Enable CAPI Providers', () => {
       cypressLib.burgerMenuToggle();
       cy.addInfraProvider('Azure', azureProvider, 'capz-system', azureProvider);
       var statusReady = 'Ready'
-      statusReady = statusReady.concat(' ', azureProvider, ' infrastructure ', azureProvider)
+      statusReady = statusReady.concat(azureProvider, 'infrastructure', azureProvider)
       cy.contains(statusReady, { timeout: 180000 });
     })
     );

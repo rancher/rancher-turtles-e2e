@@ -1,6 +1,6 @@
 # This workflow calls the master E2E workflow with custom variables
 name: UI-E2E
-run-name: ${{ github.event_name == 'workflow_dispatch' && format('Rancher-`{0}` - `{1}` destroy={2}', inputs.rancher_version, inputs.grep_test_by_tag, inputs.destroy_runner) || github.event_name == 'schedule' && 'UI-E2E on Rancher-latest/devel/2.9' }}
+run-name: ${{ github.event_name == 'workflow_dispatch' && format('Rancher-`{0}` - `{1}` destroy={2}', inputs.rancher_version, inputs.grep_test_by_tag, inputs.destroy_runner) || github.event_name == 'schedule' && 'UI-E2E on Rancher-latest/devel/2.10' }}
 
 on:
   workflow_dispatch:
@@ -15,7 +15,7 @@ on:
         type: boolean
       rancher_version:
         description: Rancher Manager channel/version/head_version to use for installation
-        default: latest/devel/2.9
+        default: latest/devel/2.10
         type: string
       grep_test_by_tag:
         description: Grep tags. For multiple selection separate with spaces. Keep always @install
@@ -45,7 +45,7 @@ jobs:
       cluster_name: cluster-k3s
       destroy_runner: ${{ github.event_name == 'schedule' && true || inputs.destroy_runner }}
       capi_ui_version: dev
-      rancher_version: ${{ inputs.rancher_version || 'latest/devel/2.9' }}
+      rancher_version: ${{ inputs.rancher_version || 'latest/devel/2.10' }}
       qase_run_id: ${{ inputs.qase_run_id || 'auto' }}
       grep_test_by_tag: ${{ inputs.grep_test_by_tag || '@install @short' }}
 

@@ -84,18 +84,18 @@ describe('Import CAPZ', { tags: '@full' }, () => {
     // Go to Cluster Management > CAPI > Clusters and check if the cluster has started provisioning
     cypressLib.burgerMenuToggle();
     cy.checkCAPIMenu();
-    cy.contains('Provisioned ' + clusterName, { timeout: timeout });
+    cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
   })
   );
 
   qase(22, it('Auto import child CAPZ cluster', () => {
     // Check child cluster is created and auto-imported
     cy.goToHome();
-    cy.contains('Pending ' + clusterName);
+    cy.contains(new RegExp('Pending.*' + clusterName));
 
     // Check cluster is Active
     cy.clickButton('Manage');
-    cy.contains('Active ' + clusterName, { timeout: 300000 });
+    cy.contains(new RegExp('Active.*' + clusterName), { timeout: 300000 });
   })
   );
   qase(23, it('Install App on imported cluster', { retries: 1 }, () => {

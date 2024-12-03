@@ -67,7 +67,7 @@ describe('Install Turtles Operator', { tags: '@install' }, () => {
     cy.byLabel('Arguments').as('label')
     cy.get('@label').type(' --insecure-skip-verify=true')
     cy.clickButton('Save');
-    cy.contains('Active' + ' ' + deployment);
+    cy.contains(new RegExp('Active.*' + deployment));
     cy.namespaceReset();
   })
 

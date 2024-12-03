@@ -30,18 +30,18 @@ describe('Import CAPA EKS', { tags: '@full' }, () => {
 
       // Go to Cluster Management > CAPI > Clusters and check if the cluster has started provisioning
       cy.checkCAPIMenu();
-      cy.contains('Provisioned ' + clusterName, { timeout: timeout });
+      cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
     })
   );
 
   it('Auto import child CAPA cluster', () => {
     // Check child cluster is created and auto-imported
     cy.goToHome();
-    cy.contains('Pending ' + clusterName);
+    cy.contains(new RegExp('Pending.*' + clusterName));
 
     // Check cluster is Active
     cy.clickButton('Manage');
-    cy.contains('Active ' + clusterName, { timeout: 300000 });
+    cy.contains(new RegExp('Active.*' + clusterName), { timeout: 300000 });
   })
 
   qase(32,
