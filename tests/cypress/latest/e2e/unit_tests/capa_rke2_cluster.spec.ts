@@ -41,7 +41,7 @@ describe('Import CAPA RKE2', { tags: '@full' }, () => {
     // cy.getBySel('sortable-table-list-container')
 
     // Check cluster is Active
-    cy.clickButton('Manage');
+    cy.searchCluster(clusterName);
     cy.contains(new RegExp('Active.*' + clusterName), { timeout: 300000 });
   })
 

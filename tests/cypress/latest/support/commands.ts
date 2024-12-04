@@ -321,15 +321,18 @@ Cypress.Commands.add('patchYamlResource', (clusterName, namespace, resourceKind,
   cy.namespaceReset();
 });
 
-// Command to remove cluster from Rancher
-Cypress.Commands.add('deleteCluster', (clusterName) => {
+// Command to search cluster in cluster-list
+Cypress.Commands.add('searchCluster', (clusterName) => {
   cy.goToHome();
   cy.clickButton('Manage');
   cy.getBySel('cluster-list').should('be.visible');
-  cy.contains(clusterName);
-
-  cy.viewport(1920, 1080);
   cy.typeInFilter(clusterName);
+});
+
+// Command to remove cluster from Rancher
+Cypress.Commands.add('deleteCluster', (clusterName) => {
+  cy.searchCluster(clusterName);
+  cy.viewport(1920, 1080);
   cy.getBySel('sortable-table_check_select_all').click();
   cy.clickButton('Delete');
   cy.getBySel('prompt-remove-input')

@@ -69,7 +69,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
         cy.contains(new RegExp('Pending.*' + clusterName), { timeout: timeout });
 
         // Check cluster is Active
-        cy.clickButton('Manage');
+        cy.searchCluster(clusterName);
         cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
         // TODO: Check MachineSet unavailable status and use checkCAPIClusterActive
         cy.checkCAPIClusterProvisioned(clusterName);

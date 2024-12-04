@@ -94,7 +94,7 @@ describe('Import CAPZ', { tags: '@full' }, () => {
     cy.contains(new RegExp('Pending.*' + clusterName));
 
     // Check cluster is Active
-    cy.clickButton('Manage');
+    cy.searchCluster(clusterName);
     cy.contains(new RegExp('Active.*' + clusterName), { timeout: 300000 });
   })
   );

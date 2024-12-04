@@ -28,6 +28,7 @@ declare global {
       accesMenuSelection(firstAccessMenu: string, secondAccessMenu?: string): Chainable<Element>;
       installApp(appName: string, namespace: string, questions?: any): Chainable<Element>;
       deleteCluster(clusterName: string): Chainable<Element>;
+      searchCluster(clusterName: string): Chainable<Element>;
       createNamespace(namespace: string): Chainable<Element>;
       setNamespace(namespace: string): Chainable<Element>;
       checkCAPIClusterActive(clustername: string): Chainable<Element>;
