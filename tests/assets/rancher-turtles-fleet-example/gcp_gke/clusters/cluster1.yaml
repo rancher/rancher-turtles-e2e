@@ -1,0 +1,61 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: turtles-qa
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks: [192.168.0.0/16]
+  infrastructureRef:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: GCPManagedCluster
+    name: turtles-qa
+  controlPlaneRef:
+    kind: GCPManagedControlPlane
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    name: turtles-qa-control-plane
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: GCPManagedCluster
+metadata:
+  name: turtles-qa
+spec:
+  project: ei-container-eco
+  region: asia-south2
+  network:
+    name: hosted-providers-ci
+---
+kind: GCPManagedControlPlane
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+metadata:
+  name: turtles-qa-control-plane
+spec:
+  project: ei-container-eco
+  location: asia-south2
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachinePool
+metadata:
+  name: turtles-qa-mp-0
+  annotations:
+    "helm.sh/resource-policy": keep
+spec:
+  clusterName: turtles-qa
+  replicas: 1
+  template:
+    spec:
+      bootstrap:
+        dataSecretName: ""
+      clusterName: turtles-qa
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: GCPManagedMachinePool
+        name: turtles-qa-mp-0
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: GCPManagedMachinePool
+metadata:
+  name: turtles-qa-mp-0
+spec:
+  nodeLocations:
+    - asia-south2-c
