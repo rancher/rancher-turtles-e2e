@@ -215,7 +215,6 @@ jobs:
     needs: [create-runner, pre-qase]
     runs-on: ${{ needs.create-runner.outputs.uuid }}
     env:
-      ARCH: amd64
       CERT_MANAGER_VERSION: ${{ inputs.cert-manager_version }}
       CLUSTER_NAME: ${{ inputs.cluster_name }}
       CLUSTER_NS: fleet-default
@@ -235,7 +234,7 @@ jobs:
       QASE_REPORT: 1
       TAG: 0.0.1
       TURTLES_REPO: rancher/turtles
-      CONTROLLER_IMG: localhost:5000/$TURTLES_REPO-$ARCH
+      CONTROLLER_IMG: localhost:5000/$TURTLES_REPO
     steps:
       - name: Add /usr/local/bin into PATH
         run: |
@@ -257,7 +256,7 @@ jobs:
       # This step builds latest turtles chart and pushes latest turtles docker image to local docker registry
       - name: Make chart
         run: |
-          TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} make docker-build
+          CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} make e2e-image-build
           RELEASE_TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} CONTROLLER_IMAGE_VERSION=v${{ env.TAG }} make build-chart
           docker run -d -p 5000:5000 --name registry registry:2
           docker push ${{ env.CONTROLLER_IMG }}:v${{ env.TAG }}
