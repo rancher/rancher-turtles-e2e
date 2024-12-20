@@ -68,6 +68,10 @@ on:
         description: Rancher Manager channel/version/head_version to use for installation
         default: stable/latest/none
         type: string
+      operator_nightly_chart:
+        description: Install rancher turtles nightly chart
+        required: true
+        type: boolean
       rancher_upgrade:
         description: Rancher Manager channel/version to upgrade to
         type: string
@@ -244,10 +248,12 @@ jobs:
         run: curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
       # Build rancher-turtles latest chart
       - name: Check out rancher-turtles repo
+        if: ${{ inputs.operator_nightly_chart == true }}
         uses: actions/checkout@v4
         with:
           repository: ${{ env.TURTLES_REPO }}
       - name: Install Go
+        if: ${{ inputs.operator_nightly_chart == true }}
         uses: actions/setup-go@v5
         with:
           cache: false
@@ -255,6 +261,7 @@ jobs:
 
       # This step builds latest turtles chart and pushes latest turtles docker image to local docker registry
       - name: Make chart
+        if: ${{ inputs.operator_nightly_chart == true }}
         run: |
           CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} make e2e-image-build
           RELEASE_TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} CONTROLLER_IMAGE_VERSION=v${{ env.TAG }} make build-chart
@@ -262,6 +269,7 @@ jobs:
           docker push ${{ env.CONTROLLER_IMG }}:v${{ env.TAG }}
 
       - name: Copy chart file
+        if: ${{ inputs.operator_nightly_chart == true }}
         run: sudo cp ${{ github.workspace }}/out/package/rancher-turtles-${{ env.TAG }}.tgz ${{ runner.temp }}
 
       - name: Checkout
@@ -272,8 +280,9 @@ jobs:
           cache: false
           go-version-file: tests/go.mod
       - name: Copy chart file for chartmuseum
+        if: ${{ inputs.operator_nightly_chart == true }}
         run: sudo cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
-      - name: Install prerequisite components
+      - name: Install Rancher Manager
         env:
           PUBLIC_DNS: ${{ needs.create-runner.outputs.public_dns }}
           PUBLIC_DOMAIN: bc.googleusercontent.com
@@ -295,11 +304,11 @@ jobs:
           echo "cert_manager_version=${CERT_MANAGER_VERSION}" >> ${GITHUB_OUTPUT}
           echo "rm_version=${RM_VERSION}" >> ${GITHUB_OUTPUT}
       - name: Install Chartmuseum
+        if: ${{ inputs.operator_nightly_chart == true }}
         run: cd tests && make e2e-install-chartmuseum
       - name: Cypress tests
         env:
           BROWSER: chrome
-          CHARTMUSEUM_REPO: http://${{ needs.create-runner.outputs.public_dns }}
           CYPRESS_DOCKER: 'cypress/included:13.6.4'
           CAPI_UI_VERSION: ${{ inputs.capi_ui_version }}
           K8S_UPSTREAM_VERSION: ${{ inputs.upstream_cluster_version }}
@@ -338,6 +347,10 @@ jobs:
             unset QASE_REPORT
             unset QASE_API_TOKEN
             # QASE_RUN_ID is empty string already
+          fi
+
+          if [ ${{ inputs.operator_nightly_chart }} == true ]; then
+            export CHARTMUSEUM_REPO=http://${{ needs.create-runner.outputs.public_dns }}
           fi
           cd tests && make start-cypress-tests
       - name: Upload Cypress screenshots (Basics)

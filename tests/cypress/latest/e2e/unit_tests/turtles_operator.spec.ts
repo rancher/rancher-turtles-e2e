@@ -28,7 +28,8 @@ describe('Install Turtles Operator', { tags: '@install' }, () => {
 
   it('Add turtles repo', { retries: 2 }, () => {
     var turtlesHelmRepo = Cypress.env('chartmuseum_repo')
-    if (turtlesHelmRepo == undefined) {
+    // if the env var is empty or not defined at all; use the normal repo
+    if (turtlesHelmRepo == "" || turtlesHelmRepo == undefined) {
       turtlesHelmRepo = 'https://rancher.github.io/turtles/'
     } else {
       turtlesHelmRepo += ':8080'
