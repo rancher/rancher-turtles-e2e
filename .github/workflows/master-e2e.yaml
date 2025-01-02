@@ -236,7 +236,6 @@ jobs:
       QASE_RUN_ID: ${{ needs.pre-qase.outputs.qase_run_id }}
       # NOTE: this REPORT var is needed for Cypress!
       QASE_REPORT: 1
-      TAG: 0.0.1
       TURTLES_REPO: rancher/turtles
       CONTROLLER_IMG: localhost:5000/$TURTLES_REPO
     steps:
@@ -260,10 +259,13 @@ jobs:
           go-version-file: go.mod
 
       # This step builds latest turtles chart and pushes latest turtles docker image to local docker registry
+      - name: Set date variable
+        run: |
+          echo "TAG=$(date "+%Y.%m.%d")" >> ${GITHUB_ENV}
       - name: Make chart
         if: ${{ inputs.operator_nightly_chart == true }}
         run: |
-          CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} make e2e-image-build
+          TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} make e2e-image-build
           RELEASE_TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} CONTROLLER_IMAGE_VERSION=v${{ env.TAG }} make build-chart
           docker run -d -p 5000:5000 --name registry registry:2
           docker push ${{ env.CONTROLLER_IMG }}:v${{ env.TAG }}
