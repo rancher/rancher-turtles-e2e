@@ -390,6 +390,7 @@ jobs:
           if ${{ inputs.ui_account != '' }}; then
             echo "UI User: ${{ inputs.ui_account }}" >> ${GITHUB_STEP_SUMMARY}
           fi
+          echo "Rancher Turtles Operator Version: ${{ inputs.turtles_operator_version }}" >> ${GITHUB_STEP_SUMMARY}
           echo "### Kubernetes" >> ${GITHUB_STEP_SUMMARY}
           echo "K3s on Rancher Manager: ${{ env.INSTALL_K3S_VERSION }}" >> ${GITHUB_STEP_SUMMARY}
 
