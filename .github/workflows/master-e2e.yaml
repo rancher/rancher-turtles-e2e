@@ -136,24 +136,33 @@ jobs:
       - name: Generate UUID and Runner hostname
         id: generator
         run: |
-          # NOTE: keep the runner name to less than 63 characters!
-          UUID=$(uuidgen)
-          GH_REPO_FULL=${{ github.repository }}
-          GH_REPO=${GH_REPO_FULL#*/}
-          echo "uuid=${UUID//-}" >> ${GITHUB_OUTPUT}
-          echo "runner=${GH_REPO//\//-}-ci-${UUID//-}" >> ${GITHUB_OUTPUT}
+          if [[ ${{ needs.determine-runner.outputs.initial-runner }} == "vsphere" ]]; then
+            echo "uuid=vsphere" >> ${GITHUB_OUTPUT}
+            echo "runner=vsphere" >> ${GITHUB_OUTPUT}
+          else
+            # NOTE: keep the runner name to less than 63 characters!
+            UUID=$(uuidgen)
+            GH_REPO_FULL=${{ github.repository }}
+            GH_REPO=${GH_REPO_FULL#*/}
+            echo "uuid=${UUID//-}" >> ${GITHUB_OUTPUT}
+            echo "runner=${GH_REPO//\//-}-ci-${UUID//-}" >> ${GITHUB_OUTPUT}
+          fi
       - name: Authenticate to GCP
+        if: ${{ needs.determine-runner.outputs.initial-runner }} != "vsphere"
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.gcp_credentials }}
       - name: Setup gcloud
+        if: ${{ needs.determine-runner.outputs.initial-runner }} != "vsphere"
         uses: google-github-actions/setup-gcloud@v2
       - name: Create runner
+        if: ${{ needs.determine-runner.outputs.initial-runner }} != "vsphere"
         run: |
           gcloud compute instances create ${{ steps.generator.outputs.runner }} \
             --source-instance-template ${{ inputs.runner_template }} \
             --zone ${{ inputs.zone }}
       - name: Create GCP secrets
+        if: ${{ needs.determine-runner.outputs.initial-runner }} != "vsphere"
         run: |
           echo -n ${{ secrets.pat_token }} \
             | gcloud secrets create PAT_TOKEN_${{ steps.generator.outputs.uuid }} --ttl="36000s" --quiet --data-file=-
@@ -162,18 +171,22 @@ jobs:
       - name: Get public dns name in GCP
         id: dns
         run: |
-          for ((i=0; i<10; i++)); do
-            PUBLIC_IP=$(gcloud compute instances list --format="value(EXTERNAL_IP)" \
-              --filter="name=${{ steps.generator.outputs.runner }}" 2> /dev/null)
-            [[ -n "${PUBLIC_IP}" ]] && break
-            sleep 2
-          done
-          PUBLIC_DNS=$(dig -x ${PUBLIC_IP} +short 2> /dev/null | sed 's/\.$//')
-          echo "public_dns=${PUBLIC_DNS}" >> ${GITHUB_OUTPUT}
-          # Raise an error if either IP and/or DNS are empty
-          if [[ -z "${PUBLIC_IP}" || -z "${PUBLIC_DNS}" ]]; then
-            echo "PUBLIC_IP and/or PUBLIC_DNS are empty!" >&2
-            false
+          if [[ ${{ needs.determine-runner.outputs.initial-runner }} == "vsphere" ]]; then
+            echo "public_dns=10.124.138.151.nip.io" >> ${GITHUB_OUTPUT}
+          else
+            for ((i=0; i<10; i++)); do
+              PUBLIC_IP=$(gcloud compute instances list --format="value(EXTERNAL_IP)" \
+                --filter="name=${{ steps.generator.outputs.runner }}" 2> /dev/null)
+              [[ -n "${PUBLIC_IP}" ]] && break
+              sleep 2
+            done
+            PUBLIC_DNS=$(dig -x ${PUBLIC_IP} +short 2> /dev/null | sed 's/\.$//')
+            echo "public_dns=${PUBLIC_DNS}" >> ${GITHUB_OUTPUT}
+            # Raise an error if either IP and/or DNS are empty
+            if [[ -z "${PUBLIC_IP}" || -z "${PUBLIC_DNS}" ]]; then
+              echo "PUBLIC_IP and/or PUBLIC_DNS are empty!" >&2
+              false
+            fi
           fi
 
   pre-qase:
@@ -412,7 +425,7 @@ jobs:
           echo "K3s on Rancher Manager: ${{ env.INSTALL_K3S_VERSION }}" >> ${GITHUB_STEP_SUMMARY}
 
   delete-runner:
-    if: ${{ always() }}
+    if: ${{ always() && ${{ needs.determine-runner.outputs.initial-runner }} != "vsphere" }}
     needs: [create-runner, e2e]
     runs-on: ubuntu-latest
     steps:
