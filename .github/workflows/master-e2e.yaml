@@ -425,7 +425,7 @@ jobs:
           echo "K3s on Rancher Manager: ${{ env.INSTALL_K3S_VERSION }}" >> ${GITHUB_STEP_SUMMARY}
 
   delete-runner:
-    if: ${{ always() && ${{ needs.determine-runner.outputs.initial-runner }} != "vsphere" }}
+    if: ${{ always() && needs.determine-runner.outputs.initial-runner != "vsphere" }}
     needs: [create-runner, e2e]
     runs-on: ubuntu-latest
     steps:
