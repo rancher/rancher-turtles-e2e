@@ -123,6 +123,7 @@ jobs:
       
   create-runner:
     # if: "!contains(github.event.inputs.grep_test_by_tag, '@vsphere')"
+    needs: determine-runner
     runs-on: ${{ needs.determine-runner.outputs.initial-runner }}
     outputs:
       uuid: ${{ steps.generator.outputs.uuid }}
@@ -175,19 +176,9 @@ jobs:
             false
           fi
 
-##  connect-vsphere-runner:
-##    if: contains(github.event.inputs.grep_test_by_tag, '@vsphere')
-##    runs-on: vsphere
-##    outputs:
-##      uuid: ${{ steps.generator.outputs.uuid }}
-##      runner: ${{ steps.generator.outputs.runner }}
-##    steps:
-##      -run: |
-##        echo "Connecting to vSphere runner"
-##        echo "Doing my stuff on vsphere runner"
-
   pre-qase:
-    runs-on: ubuntu-latest
+    needs: determine-runner
+    runs-on: ${{ needs.determine-runner.outputs.initial-runner }}
     env:
       QASE_API_TOKEN: ${{ secrets.QASE_API_TOKEN }}
       QASE_PROJECT_CODE: RT
@@ -448,7 +439,7 @@ jobs:
   post-qase:
     if: ${{ always() && needs.pre-qase.outputs.qase_run_id != '' }}
     needs: [e2e, pre-qase]
-    runs-on: ubuntu-latest
+    runs-on: ${{ needs.determine-runner.outputs.initial-runner }}
     env:
       QASE_API_TOKEN: ${{ secrets.qase_api_token }}
       QASE_PROJECT_CODE: RT
@@ -484,7 +475,7 @@ jobs:
   declare-cancelled:
     if: ${{ always() && contains(needs.e2e.result, 'cancelled') }}
     needs: e2e
-    runs-on: ubuntu-latest
+    runs-on: ${{ needs.determine-runner.outputs.initial-runner }}
     steps:
       - name: Specify in summary if something has been cancelled
         run: echo "# TEST CANCELLED!" >> ${GITHUB_STEP_SUMMARY}
