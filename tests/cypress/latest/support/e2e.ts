@@ -26,7 +26,7 @@ declare global {
       forceUpdateFleetGitRepo(repoName: string, workspace?: string): Chainable<Element>;
       checkFleetGitRepo(repoName: string, workspace?: string): Chainable<Element>;
       accesMenuSelection(firstAccessMenu: string, secondAccessMenu?: string): Chainable<Element>;
-      installApp(appName: string, namespace: string, questions?: any): Chainable<Element>;
+      installApp(appName: string, namespace: string, version: string, questions?: any): Chainable<Element>;
       deleteCluster(clusterName: string): Chainable<Element>;
       searchCluster(clusterName: string): Chainable<Element>;
       createNamespace(namespace: string): Chainable<Element>;

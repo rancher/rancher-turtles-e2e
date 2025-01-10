@@ -17,6 +17,9 @@ on:
         description: Rancher Manager channel/version/head_version to use for installation
         default: latest/devel/2.10
         type: string
+      turtles_operator_version:
+        description: Rancher Turtles operator version to test
+        type: string
       grep_test_by_tag:
         description: Grep tags. For multiple selection separate with spaces. Keep always @install
         required: true
@@ -53,4 +56,5 @@ jobs:
       qase_run_id: ${{ inputs.qase_run_id || 'auto' }}
       grep_test_by_tag: ${{ inputs.grep_test_by_tag || '@install @short' }}
       operator_nightly_chart: ${{ inputs.operator_nightly_chart == true || (github.event_name == 'schedule' && true) }}
+      turtles_operator_version: ${{ inputs.turtles_operator_version }}
 

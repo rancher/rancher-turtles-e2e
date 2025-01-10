@@ -221,11 +221,16 @@ Cypress.Commands.add('addCloudCredsAzure', (name: string, clientID: string, clie
 // You can optionally provide an array of questions and answer them before the installation starts
 // Example1: cy.installApp('Alerting', 'default', [{ menuEntry: '(None)', checkbox: 'Enable Microsoft Teams' }]);
 // Example2: cy.installApp('Rancher Turtles', 'rancher-turtles-system', [{ menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Seamless integration with Fleet and CAPI'},{ menuEntry: 'Rancher webhook cleanup settings', inputBoxTitle: 'Webhook Cleanup Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.28.0'}]);
-Cypress.Commands.add('installApp', (appName, namespace, questions) => {
+Cypress.Commands.add('installApp', (appName, version, namespace, questions) => {
   cy.get('.nav').contains('Apps').click();
   cy.contains('Featured Charts').should('be.visible');
   cy.contains(appName, { timeout: 60000 }).click();
   cy.contains('Charts: ' + appName);
+
+  if (version != undefined && version != "") {
+    cy.contains(version).click();
+    cy.url().should("contain", version)
+  }
   cy.clickButton('Install');
   cy.contains('.outer-container > .header', appName);
   cy.clickButton('Next');

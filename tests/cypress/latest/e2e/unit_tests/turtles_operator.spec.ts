@@ -26,6 +26,20 @@ describe('Install Turtles Operator', { tags: '@install' }, () => {
     cypressLib.burgerMenuToggle();
   });
 
+  it("Change helm charts to Include Prerelease Versions", () => {
+    // this test should be run before the turtles repository is added; so that it can fetch the prereleased versions
+
+    // toggle the navigation menu to a close
+    cypressLib.burgerMenuToggle();
+
+    cy.getBySel('nav_header_showUserMenu').click();
+    cy.contains('Preferences').click();
+    cy.contains("Include Prerelease Versions").click();
+    cy.reload();
+    // check that the prerelease version is selected by ensuring it does not have `bg-disabled` class
+    cy.contains("Include Prerelease Versions").should('not.have.class', 'bg-disabled');
+  })
+
   it('Add turtles repo', { retries: 2 }, () => {
     var turtlesHelmRepo = Cypress.env('chartmuseum_repo')
     // if the env var is empty or not defined at all; use the normal repo
@@ -45,7 +59,10 @@ describe('Install Turtles Operator', { tags: '@install' }, () => {
       const questions = [
         { menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Seamless integration with Fleet and CAPI' }
       ];
-      cy.installApp('Rancher Turtles', 'rancher-turtles-system', questions);
+
+      var turtlesVersion = Cypress.env('turtles_operator_version')
+
+      cy.installApp('Rancher Turtles', turtlesVersion, 'rancher-turtles-system', questions);
     })
   );
 
