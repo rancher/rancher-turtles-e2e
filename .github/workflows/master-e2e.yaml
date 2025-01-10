@@ -107,8 +107,23 @@ on:
         type: string
 
 jobs:
-  create-runner:
+  determine-runner:
     runs-on: ubuntu-latest
+    outputs:
+      initial-runner: ${{ steps.set-runner.outputs.initial-runner }}
+    steps:
+      - name: Set Runner
+        id: set-runner
+        run: |
+          if [[ "${{ inputs.grep_test_by_tag }}" == *"@vsphere"* ]]; then
+            echo "initial-runner=vsphere" >> $GITHUB_OUTPUT
+          else
+            echo "initial-runner=ubuntu-latest" >> $GITHUB_OUTPUT
+          fi
+      
+  create-runner:
+    # if: "!contains(github.event.inputs.grep_test_by_tag, '@vsphere')"
+    runs-on: ${{ needs.determine-runner.outputs.initial-runner }}
     outputs:
       uuid: ${{ steps.generator.outputs.uuid }}
       runner: ${{ steps.generator.outputs.runner }}
@@ -159,6 +174,17 @@ jobs:
             echo "PUBLIC_IP and/or PUBLIC_DNS are empty!" >&2
             false
           fi
+
+##  connect-vsphere-runner:
+##    if: contains(github.event.inputs.grep_test_by_tag, '@vsphere')
+##    runs-on: vsphere
+##    outputs:
+##      uuid: ${{ steps.generator.outputs.uuid }}
+##      runner: ${{ steps.generator.outputs.runner }}
+##    steps:
+##      -run: |
+##        echo "Connecting to vSphere runner"
+##        echo "Doing my stuff on vsphere runner"
 
   pre-qase:
     runs-on: ubuntu-latest
