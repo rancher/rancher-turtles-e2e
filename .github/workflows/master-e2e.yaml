@@ -148,21 +148,21 @@ jobs:
             echo "runner=${GH_REPO//\//-}-ci-${UUID//-}" >> ${GITHUB_OUTPUT}
           fi
       - name: Authenticate to GCP
-        if: ${{ needs.determine-runner.outputs.initial-runner }} != "vsphere"
+        if: ${{ needs.determine-runner.outputs.initial-runner != 'vsphere' }}
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.gcp_credentials }}
       - name: Setup gcloud
-        if: ${{ needs.determine-runner.outputs.initial-runner }} != "vsphere"
+        if: ${{ needs.determine-runner.outputs.initial-runner != 'vsphere' }}
         uses: google-github-actions/setup-gcloud@v2
       - name: Create runner
-        if: ${{ needs.determine-runner.outputs.initial-runner }} != "vsphere"
+        if: ${{ needs.determine-runner.outputs.initial-runner != 'vsphere' }}
         run: |
           gcloud compute instances create ${{ steps.generator.outputs.runner }} \
             --source-instance-template ${{ inputs.runner_template }} \
             --zone ${{ inputs.zone }}
       - name: Create GCP secrets
-        if: ${{ needs.determine-runner.outputs.initial-runner }} != "vsphere"
+        if: ${{ needs.determine-runner.outputs.initial-runner != 'vsphere' }}
         run: |
           echo -n ${{ secrets.pat_token }} \
             | gcloud secrets create PAT_TOKEN_${{ steps.generator.outputs.uuid }} --ttl="36000s" --quiet --data-file=-
