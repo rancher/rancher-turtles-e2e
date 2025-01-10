@@ -62,6 +62,12 @@ describe('Install Turtles Operator', { tags: '@install' }, () => {
 
       var turtlesVersion = Cypress.env('turtles_operator_version')
 
+      // if operator nightly chart is to be used, ignore the turtles version
+      var turtlesHelmRepo = Cypress.env('chartmuseum_repo')
+      if (turtlesHelmRepo != "" && turtlesHelmRepo != undefined) {
+        turtlesVersion = ""
+      }
+
       cy.installApp('Rancher Turtles', turtlesVersion, 'rancher-turtles-system', questions);
     })
   );
