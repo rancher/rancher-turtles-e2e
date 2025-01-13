@@ -500,6 +500,7 @@ jobs:
     steps:
       - name: Cleanup vsphere runner
         run: |
+          # do not exit on failure
           set +e
           # uninstall chartmuseum
           sudo systemctl stop chartmuseum

@@ -12,12 +12,12 @@ Description=Chartmuseum server
 
 [Service]
 Type=simple
-User=gh-runner
+User=$(logname)
 Group=users
 
 Environment=DEBUG=1
 Environment=STORAGE=local
-Environment=STORAGE_LOCAL_ROOTDIR=/home/gh-runner/charts
+Environment=STORAGE_LOCAL_ROOTDIR=/home/$(logname)/charts
 
 WorkingDirectory=/tmp
 ExecStart=/usr/local/bin/chartmuseum --port=8080
@@ -27,6 +27,8 @@ WantedBy=multi-user.target
 EOF
 
 # Download and install chartmuseum
+# Due to GH API rate limiting, we need to specify the chartmuseum version
+export DESIRED_VERSION=v0.16.2
 curl https://raw.githubusercontent.com/helm/chartmuseum/main/scripts/get-chartmuseum | bash
 
 # Start chartmuseum
