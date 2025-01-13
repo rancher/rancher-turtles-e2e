@@ -500,5 +500,16 @@ jobs:
     steps:
       - name: Cleanup vsphere runner
         run: |
+          # uninstall chartmuseum
+          helm plugin uninstall cm-push
+          sudo systemctl stop chartmuseum
+          sudo rm /etc/systemd/system/chartmuseum.service
+          sudo systemctl daemon-reload
+          sudo rm /usr/local/bin/chartmuseum
+          # delete registry container
+          registry_id=$(docker ps -a -q -f name=registry)
+          [ -n "${registry_id}" ] && docker stop $registry_id
+          [ -n "${registry_id}" ] && docker rm $registry_id
           docker system prune --all --volumes --force || true
+          # destroy k3s cluster
           /usr/local/bin/k3s-killall.sh && /usr/local/bin/k3s-uninstall.sh || true
