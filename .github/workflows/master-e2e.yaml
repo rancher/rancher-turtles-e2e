@@ -494,7 +494,7 @@ jobs:
         run: echo "# TEST CANCELLED!" >> ${GITHUB_STEP_SUMMARY}
 
   cleanup-vsphere-runner:
-    if: ${{ always() && needs.determine-runner.outputs.initial-runner == 'vsphere && inputs.destroy_runner == true }}
+    if: ${{ always() && needs.determine-runner.outputs.initial-runner == 'vsphere' && inputs.destroy_runner == true }}
     needs: [create-runner, e2e]
     runs-on: vsphere
     steps:
