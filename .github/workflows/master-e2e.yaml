@@ -492,3 +492,13 @@ jobs:
     steps:
       - name: Specify in summary if something has been cancelled
         run: echo "# TEST CANCELLED!" >> ${GITHUB_STEP_SUMMARY}
+
+  cleanup-vsphere-runner:
+    if: ${{ always() && needs.determine-runner.outputs.initial-runner == 'vsphere && inputs.destroy_runner == true }}
+    needs: [create-runner, e2e]
+    runs-on: vsphere
+    steps:
+      - name: Cleanup vsphere runner
+        run: |
+          docker system prune --all --volumes --force || true
+          /usr/local/bin/k3s-killall.sh && /usr/local/bin/k3s-uninstall.sh || true
