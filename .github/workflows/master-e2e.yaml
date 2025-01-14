@@ -172,7 +172,7 @@ jobs:
         id: dns
         run: |
           if [[ ${{ needs.determine-runner.outputs.initial-runner }} == "vsphere" ]]; then
-            echo "public_dns=10.124.138.151.nip.io" >> ${GITHUB_OUTPUT}
+            echo "public_dns=10.124.139.236.nip.io" >> ${GITHUB_OUTPUT}
           else
             for ((i=0; i<10; i++)); do
               PUBLIC_IP=$(gcloud compute instances list --format="value(EXTERNAL_IP)" \
