@@ -57,7 +57,6 @@ describe('Install Turtles Operator', { tags: '@install' }, () => {
 
       // Used for enabling fleet-addon feature within Rancher Turtles installation
       const questions = [
-        { menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Seamless integration with Fleet and CAPI' },
         { menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Enable Agent TLS Mode' }
       ];
 
