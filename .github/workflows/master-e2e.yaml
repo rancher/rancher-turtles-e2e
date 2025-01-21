@@ -206,7 +206,6 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          cache-dependency-path: tests/go.sum
           go-version-file: tests/go.mod
       - name: Create/Export Qase Run
         id: qase
@@ -288,7 +287,6 @@ jobs:
         if: ${{ inputs.operator_nightly_chart == true }}
         uses: actions/setup-go@v5
         with:
-          cache: false
           go-version-file: go.mod
 
       # This step builds latest turtles chart and pushes latest turtles docker image to local docker registry
@@ -312,7 +310,6 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@v5
         with:
-          cache: false
           go-version-file: tests/go.mod
       - name: Copy chart file for chartmuseum
         if: ${{ inputs.operator_nightly_chart == true }}
@@ -466,7 +463,6 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          cache-dependency-path: tests/go.sum
           go-version-file: tests/go.mod
       - name: Finalize Qase Run and publish Results
         if: ${{ always() && !contains(needs.e2e.result, 'cancelled') }}
