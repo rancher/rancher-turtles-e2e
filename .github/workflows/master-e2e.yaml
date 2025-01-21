@@ -505,9 +505,11 @@ jobs:
           sudo rm /usr/local/bin/chartmuseum
           sudo helm plugin uninstall cm-push
           # delete registry container
-          registry_id=$(docker ps -a -q -f name=registry)
-          [ -n "${registry_id}" ] && docker stop $registry_id
-          [ -n "${registry_id}" ] && docker rm $registry_id
+          # registry_id=$(docker ps -a -q -f name=registry)
+          # [ -n "${registry_id}" ] && docker stop $registry_id
+          # [ -n "${registry_id}" ] && docker rm $registry_id
+          # Stop all docker containers
+          docker stop $(docker ps --all --quiet)
           docker system prune --all --volumes --force
           # destroy k3s cluster
           /usr/local/bin/k3s-killall.sh
