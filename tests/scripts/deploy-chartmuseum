@@ -17,7 +17,7 @@ Group=users
 
 Environment=DEBUG=1
 Environment=STORAGE=local
-Environment=STORAGE_LOCAL_ROOTDIR=/home/$(logname)/charts
+Environment=STORAGE_LOCAL_ROOTDIR=/home/$(whoami)/charts
 
 WorkingDirectory=/tmp
 ExecStart=/usr/local/bin/chartmuseum --port=8080
