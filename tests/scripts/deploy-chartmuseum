@@ -5,6 +5,9 @@
 
 set -e -x
 
+# Set the caller as the user that will run the service
+CALLER=${SUDO_USER:-$(whoami)}
+
 # Create a systemctl file for chartmuseum
 cat > /etc/systemd/system/chartmuseum.service << EOF
 [Unit]
@@ -12,12 +15,12 @@ Description=Chartmuseum server
 
 [Service]
 Type=simple
-User=$(logname)
+User=${CALLER}
 Group=users
 
 Environment=DEBUG=1
 Environment=STORAGE=local
-Environment=STORAGE_LOCAL_ROOTDIR=/home/$(whoami)/charts
+Environment=STORAGE_LOCAL_ROOTDIR=/home/${CALLER}/charts
 
 WorkingDirectory=/tmp
 ExecStart=/usr/local/bin/chartmuseum --port=8080
@@ -34,7 +37,7 @@ curl https://raw.githubusercontent.com/helm/chartmuseum/main/scripts/get-chartmu
 # Start chartmuseum
 systemctl start chartmuseum
 
-# Download and install helm-push plugin
+# Download and install helm-push plugin and do not fail if exists
 helm plugin install https://github.com/chartmuseum/helm-push.git || true
 
 # Create a local helm repo
