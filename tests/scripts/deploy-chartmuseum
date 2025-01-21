@@ -35,7 +35,7 @@ curl https://raw.githubusercontent.com/helm/chartmuseum/main/scripts/get-chartmu
 systemctl start chartmuseum
 
 # Download and install helm-push plugin
-helm plugin install https://github.com/chartmuseum/helm-push.git
+helm plugin install https://github.com/chartmuseum/helm-push.git || true
 
 # Create a local helm repo
 helm repo add chartmuseum http://localhost:8080
