@@ -103,7 +103,7 @@ describe('Enable CAPI Providers', () => {
         cypressLib.burgerMenuToggle();
         cy.addInfraProvider('Amazon', amazonProvider, 'capa-system', amazonProvider);
         var statusReady = 'Ready'
-        statusReady = statusReady.concat(amazonProvider, 'infrastructure', amazonProvider, 'v2.6.1')
+        statusReady = statusReady.concat(amazonProvider, 'infrastructure', amazonProvider, 'v2.7.1')
         cy.contains(statusReady);
       })
     );
@@ -115,7 +115,7 @@ describe('Enable CAPI Providers', () => {
         cypressLib.burgerMenuToggle();
         cy.addInfraProvider('Google', googleProvider, 'capg-system', googleProvider);
         var statusReady = 'Ready'
-        statusReady = statusReady.concat(googleProvider, 'infrastructure', googleProvider, 'v1.8.0')
+        statusReady = statusReady.concat(googleProvider, 'infrastructure', googleProvider, 'v1.8.1')
         cy.contains(statusReady, { timeout: 120000 });
       })
     );
