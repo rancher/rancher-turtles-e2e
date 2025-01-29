@@ -386,11 +386,13 @@ jobs:
           echo "Rancher Manager Image: ${{ steps.component.outputs.rm_version }}" >> ${GITHUB_STEP_SUMMARY}
           echo "Rancher Manager Version: ${{ inputs.rancher_version }}" >> ${GITHUB_STEP_SUMMARY}
           echo "CertManager Image: ${{ steps.component.outputs.cert_manager_version }}" >> ${GITHUB_STEP_SUMMARY}
-          echo "CAPI UI Extension Version: ${{ inputs.capi_ui_version }}" >> ${GITHUB_STEP_SUMMARY}
+          UI_VERSION=$(helm list -n cattle-ui-plugin-system -o json 2> /dev/null |  jq -r '.[] | .chart')
+          TURTLES_VERSION=$(helm list -n rancher-turtles-system -o json 2> /dev/null | jq -r '.[] | .chart')
+          echo "CAPI UI Extension Version: $UI_VERSION" >> ${GITHUB_STEP_SUMMARY}
+          echo "Rancher Turtles Operator Version: $TURTLES_VERSION" >> ${GITHUB_STEP_SUMMARY}
           if ${{ inputs.ui_account != '' }}; then
             echo "UI User: ${{ inputs.ui_account }}" >> ${GITHUB_STEP_SUMMARY}
           fi
-          echo "Rancher Turtles Operator Version: ${{ inputs.turtles_operator_version }}" >> ${GITHUB_STEP_SUMMARY}
           echo "### Kubernetes" >> ${GITHUB_STEP_SUMMARY}
           echo "K3s on Rancher Manager: ${{ env.INSTALL_K3S_VERSION }}" >> ${GITHUB_STEP_SUMMARY}
 
