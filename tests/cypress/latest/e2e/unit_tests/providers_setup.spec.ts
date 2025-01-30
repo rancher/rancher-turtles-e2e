@@ -90,7 +90,9 @@ describe('Enable CAPI Providers', () => {
       cy.checkCAPIMenu();
       cy.contains('Providers').click();
       var statusReady = 'Ready'
-      statusReady = statusReady.concat(fleetProvider, 'addon', fleetProvider, 'v0.4.0')
+      // In nightly builds, the fleet version is v0.5.0
+      const fleetVersion = Cypress.env('chartmuseum_repo') !== '' ? 'v0.5.0' : 'v0.4.0';
+      statusReady = statusReady.concat(fleetProvider, 'addon', fleetProvider, fleetVersion);
       cy.contains(statusReady).scrollIntoView();
     });
   });
