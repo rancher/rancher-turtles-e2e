@@ -50,7 +50,7 @@ describe('Import CAPA EKS', { tags: '@full' }, () => {
       cy.contains(clusterName).click();
 
       // Install App
-      cy.installApp('Monitoring', 'cattle-monitoring');
+      cy.checkApp('Install', 'Monitoring', 'cattle-monitoring');
     })
   );
 

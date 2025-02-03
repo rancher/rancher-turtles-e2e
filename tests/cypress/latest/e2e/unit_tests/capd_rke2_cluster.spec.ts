@@ -26,6 +26,7 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
   const basePath = '/tests/assets/rancher-turtles-fleet-example/'
   const pathNames = ['rke2_namespace_autoimport', 'rke2_clusterclass_autoimport']
   const branch = 'main'
+  const questions = [{ menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Enable Agent TLS Mode' }];
 
   beforeEach(() => {
     cy.login();
@@ -81,7 +82,7 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
           cy.contains(clusterName).click();
 
           // Install App
-          cy.installApp('Monitoring', 'cattle-monitoring');
+          cy.checkApp('Install', 'Monitoring', 'cattle-monitoring');
         })
       );
 
@@ -105,6 +106,20 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
           cy.contains('Machine Deployments').click();
           cy.get('.content > .count', { timeout: timeout }).should('have.text', '2');
           cy.checkCAPIClusterProvisioned(clusterName);
+        })
+      );
+
+      qase(41,
+        it('Update chart and check cluster status', () => {
+          cy.contains('local').click();
+          cy.checkApp('Update', 'Rancher Turtles', 'rancher-turtles-system', '', questions);
+          cy.searchCluster(clusterName);
+          // Enable Agent TLS Mode again
+          cy.checkApp('Update', 'Rancher Turtles', 'rancher-turtles-system', '', questions);
+
+          // Check cluster is Active
+          cy.searchCluster(clusterName);
+          cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
         })
       );
     }
