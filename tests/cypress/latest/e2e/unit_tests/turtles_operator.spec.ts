@@ -67,7 +67,7 @@ describe('Install Turtles Operator', { tags: '@install' }, () => {
         turtlesVersion = ""
       }
 
-      cy.installApp('Rancher Turtles', 'rancher-turtles-system', turtlesVersion, questions);
+      cy.checkChart('Install', 'Rancher Turtles', 'rancher-turtles-system', turtlesVersion, questions);
     })
   );
 });

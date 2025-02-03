@@ -26,6 +26,7 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
   const basePath = '/tests/assets/rancher-turtles-fleet-example/'
   const pathNames = ['rke2_namespace_autoimport', 'rke2_clusterclass_autoimport']
   const branch = 'main'
+  const questions = [{ menuEntry: 'Rancher Turtles Features Settings', inputBoxTitle: 'Kubectl Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.31.0' }];
 
   beforeEach(() => {
     cy.login();
@@ -80,8 +81,8 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
           // Click on imported CAPD cluster
           cy.contains(clusterName).click();
 
-          // Install App
-          cy.installApp('Monitoring', 'cattle-monitoring');
+          // Install Chart
+          cy.checkChart('Install', 'Monitoring', 'cattle-monitoring');
         })
       );
 
@@ -105,6 +106,17 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
           cy.contains('Machine Deployments').click();
           cy.get('.content > .count', { timeout: timeout }).should('have.text', '2');
           cy.checkCAPIClusterProvisioned(clusterName);
+        })
+      );
+
+      qase(41,
+        it('Update chart and check cluster status', () => {
+          cy.contains('local').click();
+          cy.checkChart('Update', 'Rancher Turtles', 'rancher-turtles-system', '', questions);
+
+          // Check cluster is Active
+          cy.searchCluster(clusterName);
+          cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
         })
       );
     }

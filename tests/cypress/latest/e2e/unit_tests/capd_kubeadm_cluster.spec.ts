@@ -82,8 +82,8 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
         it('Install App on imported cluster', { retries: 1 }, () => {
           // Click on imported CAPD cluster
           cy.contains(clusterName).click();
-          // Install App
-          cy.installApp('Monitoring', 'cattle-monitoring');
+          // Install Chart
+          cy.checkChart('Install', 'Monitoring', 'cattle-monitoring');
         })
       );
 

@@ -50,8 +50,8 @@ describe('Import CAPA RKE2', { tags: '@full' }, () => {
       // Click on imported CAPA cluster
       cy.contains(clusterName).click();
 
-      // Install App
-      cy.installApp('Monitoring', 'cattle-monitoring');
+      // Install Chart
+      cy.checkChart('Install', 'Monitoring', 'cattle-monitoring');
     })
   );
 

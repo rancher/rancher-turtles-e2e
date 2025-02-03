@@ -217,29 +217,33 @@ Cypress.Commands.add('addCloudCredsAzure', (name: string, clientID: string, clie
   cy.contains(name).should('be.visible');
 });
 
-// Command to Install App from Charts menu
+// Command to Install or Update App from Charts menu
+// Opration types: Install, Update
 // You can optionally provide an array of questions and answer them before the installation starts
-// Example1: cy.installApp('Alerting', 'default', [{ menuEntry: '(None)', checkbox: 'Enable Microsoft Teams' }]);
-// Example2: cy.installApp('Rancher Turtles', 'rancher-turtles-system', [{ menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Seamless integration with Fleet and CAPI'},{ menuEntry: 'Rancher webhook cleanup settings', inputBoxTitle: 'Webhook Cleanup Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.28.0'}]);
-Cypress.Commands.add('installApp', (appName, namespace, version, questions) => {
+// Example1: cy.checkChart('Alerting', 'default', [{ menuEntry: '(None)', checkbox: 'Enable Microsoft Teams' }]);
+// Example2: cy.checkChart('Rancher Turtles', 'rancher-turtles-system', [{ menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Seamless integration with Fleet and CAPI'},{ menuEntry: 'Rancher webhook cleanup settings', inputBoxTitle: 'Webhook Cleanup Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.28.0'}]);
+Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, questions) => {
   cy.get('.nav').contains('Apps').click();
   cy.contains('Featured Charts').should('be.visible');
-  cy.contains(appName, { timeout: 60000 }).click();
-  cy.contains('Charts: ' + appName);
+  cy.contains(chartName, { timeout: 60000 }).click();
+  cy.contains('Charts: ' + chartName);
 
   if (version != undefined && version != "") {
     cy.contains(version).click();
     cy.url().should("contain", version)
   }
-  cy.clickButton('Install');
-  cy.contains('.outer-container > .header', appName);
+  cy.clickButton(operation);
+  // During update, Chart name changes to App name
+  if (operation == "Install") {
+    cy.contains('.outer-container > .header', chartName);
+  }
   cy.clickButton('Next');
 
   // Used for entering questions and answering them
   if (questions != undefined) {
     // Some apps like Alerting show questions page directly so no further action needed here
     // Some other apps like Turtles have a 'Customize install settings' checkbox or its variant which needs to be clicked
-    if (appName == 'Rancher Turtles') {
+    if (chartName == 'Rancher Turtles' && operation == "Install") {
       cy.contains('Customize install settings').should('be.visible').click();
     }
 
@@ -254,7 +258,7 @@ Cypress.Commands.add('installApp', (appName, namespace, version, questions) => {
     });
   }
 
-  cy.clickButton('Install');
+  cy.clickButton(operation);
 
   // Close the shell to avoid conflict
   cy.get('.closer').click();

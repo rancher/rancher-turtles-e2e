@@ -51,8 +51,8 @@ describe('Import CAPG GKE', { tags: '@full' }, () => {
       // Click on imported CAPG cluster
       cy.contains(clusterName).click();
 
-      // Install App
-      cy.installApp('Monitoring', 'cattle-monitoring');
+      // Install Chart
+      cy.checkChart('Install', 'Monitoring', 'cattle-monitoring');
     })
   );
 
