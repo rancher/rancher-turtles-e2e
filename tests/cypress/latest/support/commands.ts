@@ -218,7 +218,7 @@ Cypress.Commands.add('addCloudCredsAzure', (name: string, clientID: string, clie
 });
 
 // Command to Install or Update App from Charts menu
-// Opration types: Install, Update
+// Operation types: Install, Update
 // You can optionally provide an array of questions and answer them before the installation starts
 // Example1: cy.checkChart('Alerting', 'default', [{ menuEntry: '(None)', checkbox: 'Enable Microsoft Teams' }]);
 // Example2: cy.checkChart('Rancher Turtles', 'rancher-turtles-system', [{ menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Seamless integration with Fleet and CAPI'},{ menuEntry: 'Rancher webhook cleanup settings', inputBoxTitle: 'Webhook Cleanup Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.28.0'}]);
