@@ -1,6 +1,6 @@
 # This workflow calls the master E2E workflow with custom variables
 name: UI-E2E
-run-name: ${{ github.event_name == 'workflow_dispatch' && format('Rancher-`{0}` - `{1}` destroy={2} nightly={3}', inputs.rancher_version, inputs.grep_test_by_tag, inputs.destroy_runner, inputs.operator_nightly_chart) || github.event_name == 'schedule' && 'UI-E2E on Rancher-latest/devel/2.10' }}
+run-name: ${{ github.event_name == 'workflow_dispatch' && format('Rancher-`{0}` - `{1}` destroy={2} dev={3}', inputs.rancher_version, inputs.grep_test_by_tag, inputs.destroy_runner, inputs.operator_dev_chart) || github.event_name == 'schedule' && 'UI-E2E on Rancher-latest/devel/2.10' }}
 
 on:
   workflow_dispatch:
@@ -25,8 +25,8 @@ on:
         required: true
         type: string
         default: '@install @short @full'
-      operator_nightly_chart:
-        description: Install rancher turtles nightly chart
+      operator_dev_chart:
+        description: Install rancher turtles dev chart
         default: true
         type: boolean
   schedule:
@@ -55,6 +55,6 @@ jobs:
       rancher_version: ${{ inputs.rancher_version || 'latest/devel/2.10' }}
       qase_run_id: ${{ inputs.qase_run_id || 'auto' }}
       grep_test_by_tag: ${{ inputs.grep_test_by_tag || '@install @short' }}
-      operator_nightly_chart: ${{ inputs.operator_nightly_chart == true || (github.event_name == 'schedule' && true) }}
+      operator_dev_chart: ${{ inputs.operator_dev_chart == true || (github.event_name == 'schedule' && true) }}
       turtles_operator_version: ${{ inputs.turtles_operator_version }}
 
