@@ -57,8 +57,7 @@ on:
         default: true
         type: boolean
       capi_ui_version:
-        description: Version of the capi ui which will be installed (dev/stable)
-        default: dev
+        description: Version of the capi-ui-extension which will be installed
         type: string
       rancher_log_collector:
         description: URL of the Rancher log collector script

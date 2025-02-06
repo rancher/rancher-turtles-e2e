@@ -9,24 +9,27 @@ on:
         description: Qase run ID where the results will be reported (auto|none|existing_run_id)
         default: none
         type: string
-      destroy_runner:
-        description: Destroy the auto-generated self-hosted runner
-        default: true
-        type: boolean
       rancher_version:
         description: Rancher Manager channel/version/head_version to use for installation
         default: latest/devel/2.10
         type: string
       turtles_operator_version:
-        description: Rancher Turtles operator version to test
+        description: Rancher Turtles operator version to test (eg. 0.16.0)
+        type: string
+      capi_ui_version:
+        description: Version of the capi-ui-extension to test (eg. 0.8.1)
         type: string
       grep_test_by_tag:
-        description: Grep tags. For multiple selection separate with spaces. Keep always @install
+        description: Test tags. For multiple selection separate with spaces. Keep always @install
         required: true
         type: string
-        default: '@install @short @full'
+        default: '@install @short'
       operator_dev_chart:
         description: Install rancher turtles dev chart
+        default: true
+        type: boolean
+      destroy_runner:
+        description: Destroy the auto-generated self-hosted runner
         default: true
         type: boolean
   schedule:
@@ -51,7 +54,7 @@ jobs:
       test_description: "CI/Manual - UI - Deployment test with Standard K3s"
       cluster_name: cluster-k3s
       destroy_runner: ${{ github.event_name == 'schedule' && true || inputs.destroy_runner }}
-      capi_ui_version: dev
+      capi_ui_version: ${{ inputs.capi_ui_version }}
       rancher_version: ${{ inputs.rancher_version || 'latest/devel/2.10' }}
       qase_run_id: ${{ inputs.qase_run_id || 'auto' }}
       grep_test_by_tag: ${{ inputs.grep_test_by_tag || '@install @short' }}
