@@ -333,9 +333,8 @@ jobs:
           TURTLES_OPERATOR_VERSION: ${{inputs.turtles_operator_version}}
           SPEC: |
             e2e/unit_tests/first_connection.spec.ts
-            e2e/unit_tests/user.spec.ts
             e2e/unit_tests/turtles_operator.spec.ts
-            e2e/unit_tests/turtles_plugin.spec.ts
+            e2e/unit_tests/turtles_extension.spec.ts
             e2e/unit_tests/menu.spec.ts
             e2e/unit_tests/providers_setup.spec.ts
             e2e/unit_tests/capd_kubeadm_cluster.spec.ts

@@ -24,14 +24,13 @@ describe('Enable CAPI Providers', () => {
   const googleProvider = 'gcp'
   const azureProvider = 'azure'
   const fleetProvider = 'fleet'
-  const kubeadmProviderVersion = 'v1.9.4'
+  const kubeadmProviderVersion = 'v1.9.5'
   const kubeadmBaseURL = 'https://github.com/kubernetes-sigs/cluster-api/releases/'
   const kubeadmProviderTypes = ['bootstrap', 'control plane']
   const providerNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system', 'capd-system', 'capa-system', 'capg-system', 'capz-system']
 
   beforeEach(() => {
     cy.login();
-    cy.goToHome();
     cypressLib.burgerMenuToggle();
   });
 

@@ -23,9 +23,9 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
   const clusterName = 'cluster1'
   const className = 'quick-start'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
-  const basePath = '/tests/assets/rancher-turtles-fleet-example/'
-  const pathNames = ['rke2_namespace_autoimport', 'rke2_clusterclass_autoimport']
-  const branch = 'main'
+  const basePath = '/tests/assets/rancher-turtles-fleet-example/capd/rke2/'
+  const pathNames = ['clusters', 'clusterclass']
+  const branch = 'fleet-example'
   const questions = [{ menuEntry: 'Rancher Turtles Features Settings', inputBoxTitle: 'Kubectl Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.31.0' }];
 
   beforeEach(() => {
@@ -36,19 +36,18 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
   pathNames.forEach((path) => {
 
     it('Setup the namespace for importing', () => {
-      if (path.includes('namespace_autoimport')) {
+      if (path.includes('clusters')) {
         cy.namespaceAutoImport('Enable');
       } else {
         cy.namespaceAutoImport('Disable');
       }
     })
 
-
     it('Add CAPD cluster fleet repo - ' + path, () => {
       cypressLib.checkNavIcon('cluster-management').should('exist');
       var fullPath = basePath + path
 
-      if (path.includes('clusterclass_autoimport')) {
+      if (path.includes('clusterclass')) {
         // Add classes fleet repo to fleel-local workspace
         fullPath = fullPath.concat('/', classesRepo)
         cy.addFleetGitRepo(classesRepo, repoUrl, branch, fullPath);
@@ -59,7 +58,7 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
       cy.addFleetGitRepo(clustersRepo, repoUrl, branch, fullPath);
     })
 
-    if (path == 'rke2_namespace_autoimport') { var qase_id = 29 } else { qase_id = 30 }
+    if (path == 'clusters') { var qase_id = 29 } else { qase_id = 30 }
     qase(qase_id,
       it('Auto import child CAPD cluster', () => {
         // Check child cluster is created and auto-imported
@@ -74,8 +73,7 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
       })
     );
 
-    // TODO: Refactor for other paths
-    if (path.includes('namespace_autoimport')) {
+    if (path.includes('clusters')) {
       qase(7,
         it('Install App on imported cluster', { retries: 1 }, () => {
           // Click on imported CAPD cluster
@@ -135,7 +133,7 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
 
     qase(10,
       it('Delete the CAPD cluster fleet repo(s) - ' + path, () => {
-        if (path.includes('clusterclass_autoimport')) {
+        if (path.includes('clusterclass')) {
           // Remove the classes fleet repo
           cy.removeFleetGitRepo(classesRepo, true);
           // Remove the clusters fleet repo

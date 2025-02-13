@@ -21,12 +21,13 @@ describe('Create CAPD', { tags: '@short' }, () => {
   const classesRepo = 'classes'
   const clusterName = 'cluster1'
   const className = 'quick-start'
+  const classPath = '/clusterclass/classes'
   const k8sVersion = 'v1.30.3'
   const machineName = 'default-worker'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
-  const basePath = '/tests/assets/rancher-turtles-fleet-example/'
-  const pathNames = ['clusterclass_autoimport'] // TODO: Add rke2_clusterclass_autoimport (capi-ui-extension/issues/121)
-  const branch = 'main'
+  const basePath = '/tests/assets/rancher-turtles-fleet-example/capd/'
+  const pathNames = ['kubeadm'] // TODO: Add rke2_clusterclass_autoimport (capi-ui-extension/issues/121)
+  const branch = 'fleet-example'
 
   beforeEach(() => {
     cy.login();
@@ -34,7 +35,7 @@ describe('Create CAPD', { tags: '@short' }, () => {
   });
 
   pathNames.forEach((path) => {
-    if (path.includes('clusterclass_autoimport')) {
+    if (path.includes('kubeadm')) {
       var podCIDR = '192.168.0.0/16'
       var serviceCIDR = '10.128.0.0/12'
     }
@@ -43,7 +44,7 @@ describe('Create CAPD', { tags: '@short' }, () => {
       cypressLib.checkNavIcon('cluster-management').should('exist');
       var fullPath = basePath + path
       // Add classes fleet repo to fleel-local workspace
-      fullPath = fullPath.concat('/', classesRepo)
+      fullPath = fullPath.concat('/', classPath)
       cy.addFleetGitRepo(classesRepo, repoUrl, branch, fullPath);
     })
 

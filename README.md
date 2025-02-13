@@ -24,7 +24,7 @@ What tests are doing:
 ### Running the test
 1. `cd tests/cypress/latest`
 2. Install Cypress and its dependencies: `npm install`
-3. Export the following ENV VAR: `RANCHER_URL` (format: `<FQDN>/dashboard`), `RANCHER_PASSWORD`, `RANCHER_USER`, `CYPRESS_TAGS=main`, and provider specific env var:
+3. Export the following ENV VAR: `RANCHER_URL` (format: `https://<FQDN>/dashboard`), `RANCHER_PASSWORD`, `RANCHER_USER`, `CYPRESS_TAGS=main`, and provider specific env var:
     1. CAPA - `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
     2. CAPG - `GCP_CREDENTIALS`
     3. CAPZ - `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, `AZURE_SUBSCRIPTION_ID`, and `AZURE_LOCATION`.
@@ -39,7 +39,7 @@ Currently, we divide our tests by tags (`short`, `full`,...). Aside of this we h
 Specs with `short` tag are local (docker) based tests and with `full` tag are cloud providers based tests.
 
 # Running tests using Cypress grep
-We have implemented tags for more precise selection of tests using a Cypress pluging called [cypress-grep](https://github.com/cypress-io/cypress/tree/develop/npm/grep)
+We have implemented tags for more precise selection of tests using a Cypress plugin called [cypress-grep](https://github.com/cypress-io/cypress/tree/develop/npm/grep)
 
 Note: the title can be either at `describe`, `context` or `it` level.
 

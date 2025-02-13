@@ -17,11 +17,10 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 
 Cypress.config();
-describe('Install CAPI plugin', { tags: '@install' }, () => {
+describe('Install CAPI extension', { tags: '@install' }, () => {
 
   beforeEach(() => {
     cy.login();
-    cy.reload();
     cypressLib.burgerMenuToggle();
   });
 
@@ -30,7 +29,7 @@ describe('Install CAPI plugin', { tags: '@install' }, () => {
   })
 
   qase(3,
-    it('Install CAPI plugin', () => {
+    it('Install CAPI extension', () => {
       cy.contains('Extensions')
         .click();
       cy.contains('CAPI UI');

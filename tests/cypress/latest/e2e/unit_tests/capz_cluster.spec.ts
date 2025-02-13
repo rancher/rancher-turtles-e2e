@@ -11,8 +11,8 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
   const machineName = 'default-system'
   const k8sVersion = 'v1.30.0'
   const podCIDR = '192.168.0.0/16'
-  const branch = 'main'
-  const path = '/tests/assets/rancher-turtles-fleet-example/azure'
+  const branch = 'fleet-example'
+  const path = '/tests/assets/rancher-turtles-fleet-example/capz/aks'
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
   const clientID = Cypress.env("azure_client_id")
   const clientSecret = btoa(Cypress.env("azure_client_secret"))
@@ -30,7 +30,7 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
   })
 
   it('Create azure cluster identity Secret', () => {
-    //  Creating this secret seperately and not as a part of the helmchart ensures that the cluster is deleted successfully
+    //  Creating this secret separately and not as a part of the helmchart ensures that the cluster is deleted successfully
     cy.contains('local')
       .click();
     cy.get('.header-buttons > :nth-child(1) > .icon')
