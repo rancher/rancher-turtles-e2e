@@ -1,0 +1,65 @@
+{{- $cluster_name := printf "%s-%s" .Values.clustername_prefix (randAlphaNum 4) | lower -}}
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: {{ $cluster_name }}
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks: [192.168.0.0/16]
+  infrastructureRef:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: GCPManagedCluster
+    name: {{ $cluster_name }}
+  controlPlaneRef:
+    kind: GCPManagedControlPlane
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    name: {{ $cluster_name }}-control-plane
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: GCPManagedCluster
+metadata:
+  name: {{ $cluster_name }}
+spec:
+  project: ei-container-eco
+  region: {{ .Values.region }}
+  network:
+    name: hosted-providers-ci
+---
+kind: GCPManagedControlPlane
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+metadata:
+  name: {{ $cluster_name }}-control-plane
+spec:
+  project: ei-container-eco
+  location: {{ .Values.region }}
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachinePool
+metadata:
+  name: {{ $cluster_name }}-mp-0
+  annotations:
+    "helm.sh/resource-policy": keep
+spec:
+  clusterName: {{ $cluster_name }}
+  replicas: {{ .Values.worker_replicas }}
+  template:
+    spec:
+      bootstrap:
+        dataSecretName: ""
+      clusterName: {{ $cluster_name }}
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: GCPManagedMachinePool
+        name: {{ $cluster_name }}-mp-0
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: GCPManagedMachinePool
+metadata:
+  name: {{ $cluster_name }}-mp-0
+  annotations:
+    "helm.sh/resource-policy": keep
+spec:
+  nodeLocations:
+    - {{ .Values.region }}-c

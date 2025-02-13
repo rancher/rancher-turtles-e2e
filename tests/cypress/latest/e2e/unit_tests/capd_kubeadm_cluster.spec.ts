@@ -23,9 +23,9 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
   const clusterName = 'cluster1'
   const className = 'quick-start'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
-  const basePath = '/tests/assets/rancher-turtles-fleet-example/'
-  const pathNames = ['namespace_autoimport', 'cluster_autoimport', 'clusterclass_autoimport']
-  const branch = 'main'
+  const basePath = '/tests/assets/rancher-turtles-fleet-example/capd/kubeadm/'
+  const pathNames = ['clusters', 'clusterclass']
+  const branch = 'fleet-example'
 
   beforeEach(() => {
     cy.login();
@@ -34,7 +34,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
 
   pathNames.forEach((path) => {
     it('Setup the namespace for importing', () => {
-      if (path.includes('namespace_autoimport')) {
+      if (path.includes('clusters')) {
         cy.namespaceAutoImport('Enable');
       } else {
         cy.namespaceAutoImport('Disable');
@@ -45,7 +45,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
       cypressLib.checkNavIcon('cluster-management').should('exist');
       var fullPath = basePath + path
 
-      if (path.includes('clusterclass_autoimport')) {
+      if (path.includes('clusterclass')) {
         // Add cni gitrepo to fleet-default workspace
         // The cni gitrepo is scoped to quick-start class only by fleet.yaml
         cy.addFleetGitRepo('clusterclass-cni', repoUrl, branch, fullPath+'/cni', 'fleet-default');
@@ -61,7 +61,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
       cy.addFleetGitRepo(clustersRepo, repoUrl, branch, fullPath);
     })
 
-    if (path == 'namespace_autoimport') { var qase_id = 6 } else if (path == 'cluster_autoimport') { qase_id = 5 } else { qase_id = 0 }
+    if (path == 'clusters') { var qase_id = 6 } else { qase_id = 5 }
     qase(qase_id,
       it('Auto import child CAPD cluster', () => {
         // Check child cluster is created and auto-imported
@@ -77,7 +77,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
     );
 
     // fleet-addon provider checks (for rancher dev/2.10.3 and up)
-    if (path.includes('clusterclass_autoimport')) {
+    if (path.includes('clusterclass')) {
       qase(42,
         it('Check if cluster is registered in Fleet only once', () => {
           cypressLib.accesMenu('Continuous Delivery');
@@ -105,8 +105,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
       )
     }
 
-    // TODO: Refactor for other paths
-    if (path.includes('namespace_autoimport')) {
+    if (path.includes('clusters')) {
       qase(7,
         it('Install App on imported cluster', { retries: 1 }, () => {
           // Click on imported CAPD cluster
@@ -154,7 +153,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
 
     qase(10,
       it('Delete the CAPD cluster fleet repo(s) - ' + path, () => {
-        if (path.includes('clusterclass_autoimport')) {
+        if (path.includes('clusterclass')) {
           // Remove the cni fleet repo from fleet-default workspace
           cy.removeFleetGitRepo('clusterclass-cni', true, 'fleet-default');
           // Remove the classes fleet repo

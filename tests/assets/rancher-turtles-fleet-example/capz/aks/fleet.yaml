@@ -1,0 +1,12 @@
+namespace: default
+
+helm:
+  chart: ./capz-aks-helmchart
+  valuesFrom:
+    - secretKeyRef:
+        name: azure-creds-secret
+        namespace: default
+        key: values.yaml
+  values:
+    clustername_prefix: turtles-qa-capz-aks
+    clusterclassname_prefix: capz-aks-class

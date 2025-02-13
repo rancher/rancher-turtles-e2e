@@ -41,7 +41,7 @@ Tests tagged with `short` are local (docker-based) tests, while those tagged wit
 Tests tagged with `full` are cloud provider-based tests. The `install` tag is used for initial setup tests.
 
 # Running tests using Cypress grep
-We have implemented tags for more precise selection of tests using a Cypress pluging called [cypress-grep](https://github.com/cypress-io/cypress/tree/develop/npm/grep)
+We have implemented tags for more precise selection of tests using a Cypress plugin called [cypress-grep](https://github.com/cypress-io/cypress/tree/develop/npm/grep)
 
 Note: the title can be either at `describe`, `context` or `it` level.
 

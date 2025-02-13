@@ -7,8 +7,8 @@ describe('Import CAPV', { tags: '@vsphere' }, () => {
   const timeout = 1200000
   const repoName = 'clusters-capv'
   const clusterName = "turtles-qa-capv-rke2"
-  const branch = 'main'
-  const path = '/tests/assets/rancher-turtles-fleet-example/vsphere_rke2'
+  const branch = 'fleet-example'
+  const path = '/tests/assets/rancher-turtles-fleet-example/capv/rke2'
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
   const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
 

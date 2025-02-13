@@ -1,0 +1,9 @@
+namespace: default
+
+helm:
+  chart: ./capg-gke-helmchart
+  values:
+    clustername_prefix: turtles-qa-capg-gke
+    region: asia-south2
+    worker_replicas: 1
+

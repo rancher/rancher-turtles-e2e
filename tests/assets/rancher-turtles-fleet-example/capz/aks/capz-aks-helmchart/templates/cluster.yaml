@@ -1,0 +1,125 @@
+{{- $cluster_name := printf "%s-%s" .Values.clustername_prefix (randAlphaNum 4) | lower -}}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: AzureClusterIdentity
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  labels:
+    clusterctl.cluster.x-k8s.io/move-hierarchy: "true"
+  name: cluster-identity
+spec:
+  allowedNamespaces: {}
+  clientID: "{{ .Values.azure.clientID }}"
+  clientSecret:
+    name: cluster-identity-secret
+    namespace: default
+  tenantID: "{{ .Values.azure.tenantID }}"
+  type: ServicePrincipal
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: AzureManagedCluster
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  name: {{ $cluster_name }}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: AzureManagedControlPlane
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  name: {{ $cluster_name }}
+spec:
+  identityRef:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: AzureClusterIdentity
+    name: cluster-identity
+  location: "{{ .Values.cluster.location }}"
+  resourceGroupName: {{ $cluster_name }}
+  nodeResourceGroupName: {{ $cluster_name }}-nodes
+  sshPublicKey: null
+  subscriptionID: "{{ .Values.azure.subscriptionID }}"
+  version: "{{ .Values.cluster.kubernetesVersion }}"
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: AzureManagedMachinePool
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  name: {{ $cluster_name }}-pool0
+spec:
+  mode: System
+  name: pool0
+  sku: Standard_D2s_v3
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: AzureManagedMachinePool
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  name: {{ $cluster_name }}-pool1
+spec:
+  mode: User
+  name: pool1
+  sku: Standard_D2s_v3
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: {{ $cluster_name }}
+spec:
+  clusterNetwork:
+    services:
+      cidrBlocks:
+        - 192.168.0.0/16
+  controlPlaneRef:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: AzureManagedControlPlane
+    name: {{ $cluster_name }}
+  infrastructureRef:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: AzureManagedCluster
+    name: {{ $cluster_name }}
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachinePool
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  name: {{ $cluster_name }}-pool0
+spec:
+  clusterName: {{ $cluster_name }}
+  replicas: {{ .Values.cluster.systempoolCount | int }}
+  template:
+    metadata: {}
+    spec:
+      bootstrap:
+        dataSecretName: ""
+      clusterName: {{ $cluster_name }}
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: AzureManagedMachinePool
+        name: {{ $cluster_name }}-pool0
+      version: "{{ .Values.cluster.kubernetesVersion }}"
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachinePool
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  name: {{ $cluster_name }}-pool1
+spec:
+  clusterName: {{ $cluster_name }}
+  replicas: {{ .Values.cluster.userpoolCount | int }}
+  template:
+    metadata: {}
+    spec:
+      bootstrap:
+        dataSecretName: ""
+      clusterName: {{ $cluster_name }}
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: AzureManagedMachinePool
+        name: {{ $cluster_name }}-pool1
+      version: "{{ .Values.cluster.kubernetesVersion }}"

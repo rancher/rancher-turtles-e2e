@@ -1,0 +1,9 @@
+namespace: default
+
+helm:
+  chart: ./capa-eks-helmchart
+  values:
+    clustername_prefix: turtles-qa-capa-eks
+    region: ap-south-2
+    version: v1.30
+
