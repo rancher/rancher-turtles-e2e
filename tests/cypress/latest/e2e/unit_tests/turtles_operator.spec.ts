@@ -21,7 +21,6 @@ describe('Install Turtles Operator', { tags: '@install' }, () => {
 
   beforeEach(() => {
     cy.login();
-    cy.reload();
     cypressLib.burgerMenuToggle();
   });
 

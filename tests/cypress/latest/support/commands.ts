@@ -129,6 +129,23 @@ Cypress.Commands.add('createCAPICluster', (className, clusterName, machineName, 
   cy.clickButton('Create');
 });
 
+// Command to check CAPI cluster presence under CAPI Menu
+Cypress.Commands.add('checkCAPICluster', (clusterName) => {
+  cy.checkCAPIMenu();
+  cy.getBySel('button-group-child-1').click();
+  cy.typeInFilter(clusterName);
+  cy.getBySel('sortable-cell-0-1', { timeout: 90000 }).should('exist');
+});
+
+// Command to check CAPI cluster presence under CAPI Menu
+Cypress.Commands.add('checkCAPIClusterClass', (className) => {
+  cy.checkCAPIMenu();
+  cy.contains('Cluster Classes').click();
+  cy.getBySel('button-group-child-1').click();
+  cy.typeInFilter(className);
+  cy.getBySel('sortable-cell-0-1').should('exist');
+});
+
 // Command to check CAPI cluster Active status
 Cypress.Commands.add('checkCAPIClusterActive', (clusterName) => {
   cy.checkCAPIMenu();
@@ -140,9 +157,16 @@ Cypress.Commands.add('checkCAPIClusterActive', (clusterName) => {
 });
 
 // Command to check CAPI cluster Provisioned status
-Cypress.Commands.add('checkCAPIClusterProvisioned', (clusterName) => {
+Cypress.Commands.add('checkCAPIClusterProvisioned', (clusterName, timeout) => {
   cy.checkCAPIMenu();
-  cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: 90000 });
+  cy.getBySel('button-group-child-1').click();
+  cy.typeInFilter(clusterName);
+  if (timeout != undefined) {
+    timeout = timeout
+  } else {
+    timeout = 90000
+  }
+  cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
 });
 
 // Command to check CAPI cluster deletion status
@@ -212,19 +236,25 @@ Cypress.Commands.add('addInfraProvider', (providerType, name, namespace, cloudCr
 });
 
 // Command to delete CAPI resource
-Cypress.Commands.add('removeCAPIResource', (resourcetype, resourceName) => {
+Cypress.Commands.add('removeCAPIResource', (resourcetype, resourceName, timeout) => {
   // Navigate to CAPI Menu
   cy.checkCAPIMenu();
-  cy.contains(resourcetype).click();
-  cy.viewport(1920, 1080);
+  if (resourcetype != 'Clusters') {
+    cy.contains(resourcetype).click();
+  }
+  cy.getBySel('button-group-child-1').click();
   cy.typeInFilter(resourceName);
-  cy.contains(resourceName).should('be.visible');
+  cy.getBySel('sortable-cell-0-1').should('exist');
+  cy.viewport(1920, 1080);
   cy.getBySel('sortable-table_check_select_all').click();
   cy.getBySel('sortable-table-promptRemove').click();
   cy.getBySel('prompt-remove-confirm-button').click();
-  cy.reload();
-  cy.contains(resourcetype).should('be.visible').click();
-  cy.contains(resourceName).should('not.exist');
+  cy.typeInFilter(resourceName);
+  if (timeout != undefined) {
+    cy.getBySel('sortable-cell-0-1', { timeout: timeout }).should('not.exist');
+  } else {
+    cy.getBySel('sortable-cell-0-1').should('not.exist');
+  }
 });
 
 // Command to add AWS Cloud Credentials
@@ -478,33 +508,6 @@ Cypress.Commands.add('deleteCluster', (clusterName) => {
   cy.contains(clusterName).should('not.exist');
 });
 
-// Command to remove CAPI cluster
-Cypress.Commands.add('deleteCAPICluster', (clusterName, timeout) => {
-  // Navigate to Cluster Menu
-  cy.checkCAPIMenu();
-  cy.getBySel('button-group-child-1').click();
-  cy.viewport(1920, 1080);
-  cy.typeInFilter(clusterName);
-  cy.getBySel('sortable-table_check_select_all').click();
-  cy.clickButton('Delete');
-  cy.getBySel('prompt-remove-confirm-button').click();
-  cy.contains(clusterName, { timeout: timeout }).should('not.exist');
-});
-
-// Command to remove CAPI clusterclass
-Cypress.Commands.add('deleteCAPIClusterClass', (className) => {
-  // Navigate to Cluster Menu
-  cy.checkCAPIMenu();
-  cy.contains('Cluster Classes').click();
-  cy.getBySel('button-group-child-1').click();
-  cy.viewport(1920, 1080);
-  cy.typeInFilter(className);
-  cy.getBySel('sortable-table_check_select_all').click();
-  cy.clickButton('Delete');
-  cy.getBySel('prompt-remove-confirm-button').click();
-  cy.contains(className).should('not.exist');
-});
-
 // Command to type in Filter input
 Cypress.Commands.add('typeInFilter', (text) => {
   cy.get('.input-sm')
@@ -524,6 +527,7 @@ Cypress.Commands.add('goToHome', () => {
 // Command add Fleet Git Repository
 Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, path, workspace) => {
   cy.accesMenuSelection('Continuous Delivery', 'Git Repos');
+  cy.getBySel('masthead-create').should('be.visible');
   cy.contains('fleet-').click();
   if (!workspace) {
     workspace = 'fleet-local';
@@ -569,10 +573,11 @@ Cypress.Commands.add('forceUpdateFleetGitRepo', (repoName, workspace) => {
   cy.get('.icon.group-icon.icon-refresh').click();
 })
 
-// Command forcefully update Fleet Git Repository
+// Command to check Fleet Git Repository
 Cypress.Commands.add('checkFleetGitRepo', (repoName, workspace) => {
   // Go to 'Continuous Delivery' > 'Git Repos'
   cy.accesMenuSelection('Continuous Delivery', 'Git Repos');
+  cy.getBySel('masthead-create').should('be.visible');
   // Change the workspace using the dropdown on the top bar
   cy.contains('fleet-').click();
   if (!workspace) {

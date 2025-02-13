@@ -4,15 +4,16 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 
 Cypress.config();
 describe('Import/Create CAPZ', { tags: '@full' }, () => {
+  var clusterName: string, className: string
   const timeout = 1200000
-  const repoName = 'clusters-capz'
-  const clusterName = "turtles-qa-capz"
-  const className = 'quick-start'
+  const repoName = 'clusters-capz-aks'
+  const clusterNamePrefix = 'turtles-qa-capz-aks' // as per fleet values
+  const classNamePrefix = 'capz-aks-class'
   const machineName = 'default-system'
   const k8sVersion = 'v1.30.0'
   const podCIDR = '192.168.0.0/16'
   const branch = 'main'
-  const path = '/tests/assets/rancher-turtles-fleet-example/azure'
+  const path = '/tests/assets/rancher-turtles-fleet-example/capz/aks'
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
   const clientID = Cypress.env("azure_client_id")
   const clientSecret = btoa(Cypress.env("azure_client_secret"))
@@ -30,7 +31,7 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
   })
 
   it('Create azure cluster identity Secret', () => {
-    //  Creating this secret seperately and not as a part of the helmchart ensures that the cluster is deleted successfully
+    //  Creating this secret separately and not as a part of the helmchart ensures that the cluster is deleted successfully
     cy.contains('local')
       .click();
     cy.get('.header-buttons > :nth-child(1) > .icon')
@@ -78,21 +79,33 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
 
   })
 
-  qase(21, it('Add CAPZ cluster fleet repo', () => {
+  qase(21, it('Add CAPZ cluster fleet repo and get cluster name', () => {
     cypressLib.checkNavIcon('cluster-management')
       .should('exist');
 
     // Add CAPZ fleet repository
     cy.addFleetGitRepo(repoName, repoUrl, branch, path);
+    // Check CAPI cluster using its name prefix
+    cy.checkCAPICluster(clusterNamePrefix);
 
-    // Go to Cluster Management > CAPI > Clusters and check if the cluster has started provisioning
-    cypressLib.burgerMenuToggle();
-    cy.checkCAPIMenu();
-    cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
+    // Get the cluster name by its prefix and use it across the test
+    cy.getBySel('sortable-cell-0-1').then(($cell) => {
+      clusterName = $cell.text();
+      cy.log('CAPI Cluster Name:', clusterName);
+    });
+
+    cy.checkCAPIClusterClass(classNamePrefix);
+    // Get the class name by its prefix and use it across the test
+    cy.getBySel('sortable-cell-0-1').then(($cell) => {
+      className = $cell.text();
+    });
   })
   );
 
   qase(22, it('Auto import child CAPZ cluster', () => {
+    // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+    cy.checkCAPIClusterProvisioned(clusterName, timeout);
+
     // Check child cluster is created and auto-imported
     cy.goToHome();
     cy.contains(new RegExp('Pending.*' + clusterName));
@@ -165,7 +178,7 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
     cy.checkCAPIClusterProvisioned(clusterName);
 
     // Delete CAPI cluster created from Fleet
-    cy.deleteCAPICluster(clusterName, timeout);
+    cy.removeCAPIResource('Clusters', clusterName, timeout);
   })
   );
 
@@ -184,11 +197,12 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
   qase(26, it('Delete the CAPZ cluster fleet repo', () => {
 
     // Remove the fleet git repo
-    cy.removeFleetGitRepo(repoName)
+    cy.removeFleetGitRepo(repoName, true);
     // Wait until the following returns no clusters found
     // This is checked by ensuring the cluster is not available in CAPI menu
     cy.checkCAPIClusterDeleted(clusterName, timeout);
-    cy.deleteCAPIClusterClass(className);
+    // Remove the clusterclass
+    cy.removeCAPIResource('Cluster Classes', className);
   })
   );
 

@@ -19,3 +19,42 @@ jobs:
           regions: ap-south-2
           commit: true
           ignore-tag: janitor-ignore
+
+  gcp-janitor:
+    name: gcp-janitor
+    runs-on: ubuntu-latest
+    steps:
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+        
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        
+      - name: Cleanup
+        continue-on-error: true
+        run: |
+          # Get the GKE clusters by prefix
+          for cl in $(gcloud container clusters list --location asia-south2 --filter="name:turtles-qa-capg-gke" --format json | jq -r ".[] | .name" 2> /dev/null); do
+           echo "Deleting GKE cluster: $cl"
+           gcloud container clusters delete --location asia-south2 $cl --async --quiet
+          done
+
+  azure-janitor:
+    name: azure-janitor
+    runs-on: ubuntu-latest
+    steps:
+     - name: Login to Azure
+       uses: azure/login@v2.2.0
+       with:
+         creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+     - name: Cleanup
+       continue-on-error: true
+       run: |
+         # Get the AKS clusters by prefix
+         for rg in $(az group list --query "[?starts_with(name,'turtles-qa-capz-aks')].name" | jq -r ".[]" 2> /dev/null); do
+           echo "Deleting AKS resource group: $rg"
+           az group delete --name $rg --yes
+         done

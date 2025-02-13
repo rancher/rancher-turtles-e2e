@@ -33,7 +33,6 @@ describe('Enable CAPI Providers', () => {
 
   beforeEach(() => {
     cy.login();
-    cy.goToHome();
     cypressLib.burgerMenuToggle();
   });
 

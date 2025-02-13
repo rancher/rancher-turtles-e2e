@@ -13,8 +13,6 @@ limitations under the License.
 */
 
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-
 
 Cypress.config();
 describe('First login on Rancher', { tags: '@install' }, () => {

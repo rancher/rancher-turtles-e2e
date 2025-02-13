@@ -4,11 +4,12 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 
 Cypress.config();
 describe('Import CAPG GKE', { tags: '@full' }, () => {
+  var clusterName: string
   const timeout = 1200000
-  const repoName = 'clusters'
-  const clusterName = 'turtles-qa'
+  const repoName = 'clusters-capg-gke'
+  const clusterNamePrefix = 'turtles-qa-capg-gke' // as per fleet values
   const branch = 'main'
-  const path = '/tests/assets/rancher-turtles-fleet-example/gcp_gke'
+  const path = '/tests/assets/rancher-turtles-fleet-example/capg/gke'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
 
   beforeEach(() => {
@@ -21,22 +22,29 @@ describe('Import CAPG GKE', { tags: '@full' }, () => {
   })
 
   qase(34,
-    it('Add CAPG cluster fleet repo', () => {
+    it('Add CAPG cluster fleet repo and get cluster name', () => {
       cypressLib.checkNavIcon('cluster-management')
         .should('exist');
 
       // Add CAPG fleet repository
       cy.addFleetGitRepo(repoName, repoUrl, branch, path);
+      // Check CAPI cluster using its name prefix
+      cy.checkCAPICluster(clusterNamePrefix);
 
-      // Go to Cluster Management > CAPI > Clusters and check if the cluster has started provisioning
-      cy.checkCAPIMenu();
-      cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
+      // Get the cluster name by its prefix and use it across the test
+      cy.getBySel('sortable-cell-0-1').then(($cell) => {
+        clusterName = $cell.text();
+        cy.log('CAPI Cluster Name:', clusterName);
+      });
     })
   );
 
   qase(36,
     it('Auto import child CAPG cluster', () => {
-      // Check child cluster is created  and auto-imported
+      // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+      cy.checkCAPIClusterProvisioned(clusterName, timeout);
+
+      // Check child cluster is created and auto-imported
       cy.goToHome();
       cy.contains(new RegExp('Pending.*' + clusterName));
 
@@ -73,7 +81,7 @@ describe('Import CAPG GKE', { tags: '@full' }, () => {
     it('Delete the CAPG cluster fleet repo', () => {
 
       // Remove the fleet git repo
-      cy.removeFleetGitRepo(repoName)
+      cy.removeFleetGitRepo(repoName, true);
       // Wait until the following returns no clusters found
       // This is checked by ensuring the cluster is not available in CAPI menu
       cy.checkCAPIClusterDeleted(clusterName, timeout);

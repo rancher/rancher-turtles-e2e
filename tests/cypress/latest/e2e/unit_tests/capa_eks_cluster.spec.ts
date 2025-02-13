@@ -4,11 +4,12 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 
 Cypress.config();
 describe('Import CAPA EKS', { tags: '@full' }, () => {
+  var clusterName: string
   const timeout = 1200000
-  const repoName = 'clusters'
-  const clusterName = 'turtles-qa-cluster'
+  const repoName = 'clusters-capa-eks'
+  const clusterNamePrefix = 'turtles-qa-capa-eks' // as per fleet values
   const branch = 'main'
-  const path = '/tests/assets/rancher-turtles-fleet-example/aws_eks'
+  const path = '/tests/assets/rancher-turtles-fleet-example/capa/eks'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
 
   beforeEach(() => {
@@ -21,20 +22,27 @@ describe('Import CAPA EKS', { tags: '@full' }, () => {
   })
 
   qase(14,
-    it('Add CAPA cluster fleet repo', () => {
+    it('Add CAPA cluster fleet repo and get cluster name', () => {
       cypressLib.checkNavIcon('cluster-management')
         .should('exist');
 
       // Add CAPA fleet repository
       cy.addFleetGitRepo(repoName, repoUrl, branch, path);
+      // Check CAPI cluster using its name prefix
+      cy.checkCAPICluster(clusterNamePrefix);
 
-      // Go to Cluster Management > CAPI > Clusters and check if the cluster has started provisioning
-      cy.checkCAPIMenu();
-      cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
+      // Get the cluster name by its prefix and use it across the test
+      cy.getBySel('sortable-cell-0-1').then(($cell) => {
+        clusterName = $cell.text();
+        cy.log('CAPI Cluster Name:', clusterName);
+      });
     })
   );
 
   it('Auto import child CAPA cluster', () => {
+    // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+    cy.checkCAPIClusterProvisioned(clusterName, timeout);
+
     // Check child cluster is created and auto-imported
     cy.goToHome();
     cy.contains(new RegExp('Pending.*' + clusterName));
@@ -71,7 +79,7 @@ describe('Import CAPA EKS', { tags: '@full' }, () => {
     it('Delete the CAPA cluster fleet repo', () => {
 
       // Remove the fleet git repo
-      cy.removeFleetGitRepo(repoName)
+      cy.removeFleetGitRepo(repoName, true);
       // Wait until the following returns no clusters found
       // This is checked by ensuring the cluster is not available in CAPI menu
       cy.checkCAPIClusterDeleted(clusterName, timeout);
