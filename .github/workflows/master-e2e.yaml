@@ -340,6 +340,7 @@ jobs:
             e2e/unit_tests/providers_setup.spec.ts
             e2e/unit_tests/capd_kubeadm_cluster.spec.ts
             e2e/unit_tests/capd_rke2_cluster.spec.ts
+            e2e/unit_tests/capd_clusterclass_ui_cluster.spec.ts
             e2e/unit_tests/capa_rke2_cluster.spec.ts
             e2e/unit_tests/capa_eks_cluster.spec.ts
             e2e/unit_tests/capz_cluster.spec.ts

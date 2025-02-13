@@ -21,6 +21,8 @@ declare global {
     interface Chainable {
       // Functions declared in commands.ts
       namespaceAutoImport(mode: string): Chainable<Element>;
+      setAutoImport(mode: string): Chainable<Element>;
+      clusterAutoImport(clusterName: string, mode: string): Chainable<Element>;
       addFleetGitRepo(repoName: string, repoUrl: string, branch: string, path: string, workspace?: string): Chainable<Element>;
       removeFleetGitRepo(repoName: string, noRepoCheck?: boolean, workspace?: string): Chainable<Element>;
       forceUpdateFleetGitRepo(repoName: string, workspace?: string): Chainable<Element>;
@@ -28,9 +30,11 @@ declare global {
       accesMenuSelection(firstAccessMenu: string, secondAccessMenu?: string): Chainable<Element>;
       checkChart(operation: string, chartName: string, namespace: string, version?: string, questions?: any): Chainable<Element>;
       deleteCluster(clusterName: string): Chainable<Element>;
+      deleteCAPICluster(clusterName: string): Chainable<Element>;
       searchCluster(clusterName: string): Chainable<Element>;
       createNamespace(namespace: string): Chainable<Element>;
       setNamespace(namespace: string): Chainable<Element>;
+      createCAPICluster(className: string, clusterName: string, k8sVersion: string, podCIDR: string, serviceCIDR: string): Chainable<Element>;
       checkCAPIClusterActive(clustername: string): Chainable<Element>;
       checkCAPIClusterProvisioned(clustername: string): Chainable<Element>;
       checkCAPIClusterDeleted(clustername: string, timeout: number): Chainable<Element>;
@@ -62,6 +66,10 @@ Cypress.on('uncaught:exception', (err, runnable, promise) => {
   if (promise) {
     return false;
   }
+  // Workaround for capi-ui-extension/issues/124
+  // returning false here prevents Cypress from
+  // failing the test
+  return false
 });
 
 require('cypress-dark');

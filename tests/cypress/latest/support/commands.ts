@@ -36,9 +36,14 @@ Cypress.Commands.add('namespaceAutoImport', (mode) => {
 
   // Select default namespace
   cy.setNamespace('Project: Default');
-  cy.getBySel('sortable-table-0-action-button').click();
+  cy.setAutoImport(mode);
+  cy.namespaceReset();
+});
 
+// Command to set CAPI Auto-import from Menu
+Cypress.Commands.add('setAutoImport', (mode) => {
   // If the desired mode is already in place, then simply reload the page.
+  cy.getBySel('sortable-table-0-action-button').click();
   cy.get('.list-unstyled.menu').then(($list) => {
     if ($list.text().includes(mode + ' CAPI Auto-Import')) {
       cy.contains(mode + ' CAPI Auto-Import').click();
@@ -47,7 +52,15 @@ Cypress.Commands.add('namespaceAutoImport', (mode) => {
       cy.reload();
     }
   })
-  cy.namespaceReset();
+});
+
+// Command to set Auto-import on CAPI cluster
+Cypress.Commands.add('clusterAutoImport', (clusterName, mode) => {
+  // Navigate to Cluster Menu
+  cy.checkCAPIMenu();
+  cy.getBySel('button-group-child-1').click();
+  cy.typeInFilter(clusterName);
+  cy.setAutoImport(mode);
 });
 
 // Command to create namespace
@@ -76,6 +89,36 @@ Cypress.Commands.add('setNamespace', (namespace) => {
 // Command to reset namespace selection to default 'Only User Namespaces'
 Cypress.Commands.add('namespaceReset', () => {
   cy.setNamespace('Only User Namespaces');
+});
+
+// Command to create CAPI cluster from Clusterclass (ui-extn: v0.8.2)
+Cypress.Commands.add('createCAPICluster', (className, clusterName, k8sVersion, podCIDR, serviceCIDR) => {
+  // Navigate to Classes Menu
+  cy.checkCAPIMenu();
+  cy.contains('Cluster Classes').click();
+  cy.typeInFilter(className);
+  cy.contains(className).should('be.visible');
+  cy.getBySel('sortable-table-0-action-button').click();
+
+  // Create Cluster from Classes Menu
+  cy.contains('Create Cluster').click();
+  cy.contains('Cluster: Create').should('be.visible');
+  cy.typeValue('Cluster Name', clusterName);
+  cy.typeValue('Kubernetes Version', k8sVersion);
+
+  // Networking details, Workaround for capi-ui-extension/issues/123
+  cy.typeValue('Service Domain', 'cluster.local');
+  cy.getBySel('remove-item-0').click();
+  cy.getBySel('array-list-button').click({ multiple: true });
+  cy.get(':nth-child(1) > :nth-child(1) > [data-testid="array-list-box0"] > .value > .labeled-input').type(podCIDR);
+  cy.get(':nth-child(2) > :nth-child(1) > [data-testid="array-list-box0"] > .value > .labeled-input').type(serviceCIDR);
+  
+  // Machine Deployment/Pool details
+  cy.typeValue('Name', 'md-0');
+  cy.get('.vs__selected-options').click();
+  cy.contains('default-worker').click();
+  cy.clickButton('Next');
+  cy.clickButton('Create');
 });
 
 // Command to check CAPI cluster Active status
@@ -108,6 +151,7 @@ Cypress.Commands.add('checkCAPIMenu', () => {
   cypressLib.burgerMenuToggle();
   cypressLib.accesMenu('Cluster Management');
   cy.get('.header').contains('CAPI').click();
+  cy.wait(2000);
   cy.contains('.nav', 'Clusters')
   cy.contains('.nav', 'Machine Deployments')
   cy.contains('.nav', 'Machine Sets')
@@ -181,7 +225,7 @@ Cypress.Commands.add('addCloudCredsAWS', (name, accessKey, secretKey) => {
   cy.contains('API Key').should('be.visible');
   cy.clickButton('Create');
   cy.getBySel('subtype-banner-item-aws').click();
-  cy.typeValue('Name', name);
+  cy.typeValue('Credential Name', name);
   cy.typeValue('Access Key', accessKey);
   cy.typeValue('Secret Key', secretKey, false, false);
   cy.clickButton('Create');
@@ -195,7 +239,7 @@ Cypress.Commands.add('addCloudCredsGCP', (name, gcpCredentials) => {
   cy.contains('API Key').should('be.visible');
   cy.clickButton('Create');
   cy.getBySel('subtype-banner-item-gcp').click();
-  cy.typeValue('Name', name);
+  cy.typeValue('Credential Name', name);
   cy.getBySel('text-area-auto-grow').type(gcpCredentials, { log: false });
   cy.clickButton('Create');
   cy.contains('API Key').should('be.visible');
@@ -208,7 +252,7 @@ Cypress.Commands.add('addCloudCredsAzure', (name: string, clientID: string, clie
   cy.contains('API Key').should('be.visible');
   cy.clickButton('Create');
   cy.getBySel('subtype-banner-item-azure').click();
-  cy.typeValue('Name', name);
+  cy.typeValue('Credential Name', name);
   cy.typeValue('Client ID', clientID);
   cy.typeValue('Client Secret', clientSecret, false, false);
   cy.typeValue('Subscription ID', subscriptionID);
@@ -346,6 +390,19 @@ Cypress.Commands.add('deleteCluster', (clusterName) => {
   cy.clickButton('Delete');
   cy.getBySel('prompt-remove-input')
     .type(clusterName);
+  cy.getBySel('prompt-remove-confirm-button').click();
+  cy.contains(clusterName).should('not.exist');
+});
+
+// Command to remove CAPI cluster
+Cypress.Commands.add('deleteCAPICluster', (clusterName) => {
+  // Navigate to Cluster Menu
+  cy.checkCAPIMenu();
+  cy.getBySel('button-group-child-1').click();
+  cy.typeInFilter(clusterName);
+  cy.viewport(1920, 1080);
+  cy.getBySel('sortable-table_check_select_all').click();
+  cy.clickButton('Delete');
   cy.getBySel('prompt-remove-confirm-button').click();
   cy.contains(clusterName).should('not.exist');
 });
