@@ -76,6 +76,35 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
       })
     );
 
+    // fleet-addon provider checks (for rancher dev/2.10.3 and up)
+    if (path.includes('clusterclass_autoimport')) {
+      qase(42,
+        it('Check if cluster is registered in Fleet only once', () => {
+          cypressLib.accesMenu('Continuous Delivery');
+          cy.contains('Dashboard').should('be.visible');
+          cypressLib.accesMenu('Clusters');
+          cy.fleetNamespaceToggle('fleet-default');
+          // Verify the cluster is registered and Active
+          cy.verifyTableRow(0, 'Active', clusterName );
+          // Make sure there is only one registered cluster in fleet (there should be one table row)
+          cy.get('table.sortable-table').find('tbody tr').should('have.length', 1);
+        })
+      )
+      qase(43,
+        it('Check if annotation for externally-managed cluster is set', () => {
+          cy.searchCluster(clusterName)
+          // click three dots menu and click View YAML
+          cy.getBySel('sortable-table-0-action-button').click();
+          cy.contains('View YAML').click();
+          const annotation = 'provisioning.cattle.io/externally-managed: \'true\'';
+          cy.get('.CodeMirror').then((editor) => {
+            var text = editor[0].CodeMirror.getValue();
+            expect(text).to.include(annotation);
+          });
+        })
+      )
+    }
+
     // TODO: Refactor for other paths
     if (path.includes('namespace_autoimport')) {
       qase(7,

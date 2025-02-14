@@ -428,3 +428,43 @@ Cypress.Commands.add('checkFleetGitRepo', (repoName, workspace) => {
   cy.contains(repoName).click();
   cy.url().should("include", "fleet/fleet.cattle.io.gitrepo/" + workspace + "/" + repoName)
 })
+
+// Fleet namespace toggle
+Cypress.Commands.add('fleetNamespaceToggle', (toggleOption='local') => {
+  cy.contains('fleet-').click();
+  cy.contains(toggleOption).should('be.visible').click();
+});
+
+
+// Verify textvalues in table giving the row number
+// More items can be added with new ".and"
+Cypress.Commands.add('verifyTableRow', (rowNumber, expectedText1, expectedText2) => {
+  // Adding small wait to give time for things to settle a bit
+  // Could not find a better way to wait, but can be improved
+  cy.wait(1000)
+  // Ensure table is loaded and visible
+  cy.contains('tr.main-row[data-testid="sortable-table-0-row"]').should('not.be.empty', { timeout: 25000 });
+  cy.get(`table > tbody > tr.main-row[data-testid="sortable-table-${rowNumber}-row"]`, { timeout: 60000 }).should(($row) => {
+    // Replace whitespaces by a space and trim the string for both expected texts
+    const text = $row.text().replace(/\s+/g, ' ').trim();
+
+    // Check if expectedTextX is a regular expression or a string and perform the assertion
+    if (expectedText1) {
+      // If expectedText1 is provided, perform the check
+      if (expectedText1 instanceof RegExp) {
+        expect(text).to.match(expectedText1);
+      } else {
+        expect(text).to.include(expectedText1);
+      }
+    }
+
+    if (expectedText2) {
+      // If expectedText2 is provided, perform the check
+      if (expectedText2 instanceof RegExp) {
+        expect(text).to.match(expectedText2);
+      } else {
+        expect(text).to.include(expectedText2);
+      }
+    }
+  });
+});

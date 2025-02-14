@@ -25,6 +25,8 @@ declare global {
       removeFleetGitRepo(repoName: string, noRepoCheck?: boolean, workspace?: string): Chainable<Element>;
       forceUpdateFleetGitRepo(repoName: string, workspace?: string): Chainable<Element>;
       checkFleetGitRepo(repoName: string, workspace?: string): Chainable<Element>;
+      fleetNamespaceToggle(toggleOption: string): Chainable<Element>;
+      verifyTableRow(rowNumber: number, expectedText1?: string|RegExp, expectedText2?: string|RegExp): Chainable<Element>;
       accesMenuSelection(firstAccessMenu: string, secondAccessMenu?: string): Chainable<Element>;
       checkChart(operation: string, chartName: string, namespace: string, version?: string, questions?: any): Chainable<Element>;
       deleteCluster(clusterName: string): Chainable<Element>;
