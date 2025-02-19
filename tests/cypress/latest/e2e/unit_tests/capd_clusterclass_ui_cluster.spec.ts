@@ -22,6 +22,7 @@ describe('Create CAPD', { tags: '@short' }, () => {
   const clusterName = 'cluster1'
   const className = 'quick-start'
   const k8sVersion = 'v1.30.3'
+  const machineName = 'default-worker'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const basePath = '/tests/assets/rancher-turtles-fleet-example/'
   const pathNames = ['clusterclass_autoimport'] // TODO: Add rke2_clusterclass_autoimport (capi-ui-extension/issues/121)
@@ -61,9 +62,9 @@ describe('Create CAPD', { tags: '@short' }, () => {
       cy.clickButton('Close')
     })
 
-    qase(99, // TODO: Fix Qase ID
+    qase(44,
       it('Create child CAPD cluster from Clusterclass', () => {
-        cy.createCAPICluster(className, clusterName, k8sVersion, podCIDR, serviceCIDR);
+        cy.createCAPICluster(className, clusterName, machineName, k8sVersion, podCIDR, serviceCIDR);
         cy.checkCAPIClusterActive(clusterName);
         cy.clusterAutoImport(clusterName, 'Enable');
         // Check child cluster is auto-imported
@@ -92,7 +93,7 @@ describe('Create CAPD', { tags: '@short' }, () => {
 
 
     it('Delete the CAPI cluster and fleet repo', () => {
-      cy.deleteCAPICluster(clusterName);
+      cy.deleteCAPICluster(clusterName, timeout);
 
       // Remove the classes fleet repo
       cypressLib.burgerMenuToggle();

@@ -32,11 +32,12 @@ declare global {
       accesMenuSelection(firstAccessMenu: string, secondAccessMenu?: string): Chainable<Element>;
       checkChart(operation: string, chartName: string, namespace: string, version?: string, questions?: any): Chainable<Element>;
       deleteCluster(clusterName: string): Chainable<Element>;
-      deleteCAPICluster(clusterName: string): Chainable<Element>;
+      deleteCAPICluster(clusterName: string, timeout: number): Chainable<Element>;
+      deleteCAPIClusterClass(className: string): Chainable<Element>;
       searchCluster(clusterName: string): Chainable<Element>;
       createNamespace(namespace: string): Chainable<Element>;
       setNamespace(namespace: string): Chainable<Element>;
-      createCAPICluster(className: string, clusterName: string, k8sVersion: string, podCIDR: string, serviceCIDR: string): Chainable<Element>;
+      createCAPICluster(className: string, clusterName: string, machineName: string, k8sVersion: string, podCIDR: string, serviceCIDR?: string): Chainable<Element>;
       checkCAPIClusterActive(clustername: string): Chainable<Element>;
       checkCAPIClusterProvisioned(clustername: string): Chainable<Element>;
       checkCAPIClusterDeleted(clustername: string, timeout: number): Chainable<Element>;

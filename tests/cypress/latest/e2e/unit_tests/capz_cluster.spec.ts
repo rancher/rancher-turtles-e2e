@@ -3,10 +3,14 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 
 Cypress.config();
-describe('Import CAPZ', { tags: '@full' }, () => {
+describe('Import/Create CAPZ', { tags: '@full' }, () => {
   const timeout = 1200000
   const repoName = 'clusters-capz'
   const clusterName = "turtles-qa-capz"
+  const className = 'quick-start'
+  const machineName = 'default-system'
+  const k8sVersion = 'v1.30.0'
+  const podCIDR = '192.168.0.0/16'
   const branch = 'main'
   const path = '/tests/assets/rancher-turtles-fleet-example/azure'
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
@@ -150,7 +154,7 @@ describe('Import CAPZ', { tags: '@full' }, () => {
   })
   );
 
-  qase(25, it('Remove imported CAPZ cluster from Rancher Manager', { retries: 1 }, () => {
+  qase(25, it('Remove imported CAPZ cluster from Rancher Manager and Delete the CAPZ cluster', { retries: 1 }, () => {
 
     // Check cluster is not deleted after removal
     cy.deleteCluster(clusterName);
@@ -159,6 +163,21 @@ describe('Import CAPZ', { tags: '@full' }, () => {
     // This is checked by ensuring the cluster is not available in navigation menu
     cy.contains(clusterName).should('not.exist');
     cy.checkCAPIClusterProvisioned(clusterName);
+
+    // Delete CAPI cluster created from Fleet
+    cy.deleteCAPICluster(clusterName, timeout);
+  })
+  );
+
+  qase(44, it('Create CAPZ from Clusterclass', () => {
+    // Create cluster from Clusterclass UI
+    cy.createCAPICluster(className, clusterName, machineName, k8sVersion, podCIDR);
+    cy.checkCAPIMenu();
+    cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
+
+    // Check child cluster is auto-imported
+    cy.searchCluster(clusterName);
+    cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
   })
   );
 
@@ -169,6 +188,7 @@ describe('Import CAPZ', { tags: '@full' }, () => {
     // Wait until the following returns no clusters found
     // This is checked by ensuring the cluster is not available in CAPI menu
     cy.checkCAPIClusterDeleted(clusterName, timeout);
+    cy.deleteCAPIClusterClass(className);
   })
   );
 

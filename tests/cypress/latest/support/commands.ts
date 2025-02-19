@@ -92,7 +92,7 @@ Cypress.Commands.add('namespaceReset', () => {
 });
 
 // Command to create CAPI cluster from Clusterclass (ui-extn: v0.8.2)
-Cypress.Commands.add('createCAPICluster', (className, clusterName, k8sVersion, podCIDR, serviceCIDR) => {
+Cypress.Commands.add('createCAPICluster', (className, clusterName, machineName, k8sVersion, podCIDR, serviceCIDR) => {
   // Navigate to Classes Menu
   cy.checkCAPIMenu();
   cy.contains('Cluster Classes').click();
@@ -110,13 +110,21 @@ Cypress.Commands.add('createCAPICluster', (className, clusterName, k8sVersion, p
   cy.typeValue('Service Domain', 'cluster.local');
   cy.getBySel('remove-item-0').click();
   cy.getBySel('array-list-button').click({ multiple: true });
-  cy.get(':nth-child(1) > :nth-child(1) > [data-testid="array-list-box0"] > .value > .labeled-input').type(podCIDR);
-  cy.get(':nth-child(2) > :nth-child(1) > [data-testid="array-list-box0"] > .value > .labeled-input').type(serviceCIDR);
-  
+  const inputID = ' > :nth-child(1) > [data-testid="array-list-box0"] > '
+
+  // podCIDR details
+  cy.get(':nth-child(1)' + inputID + '.value > .labeled-input').type(podCIDR);
+  // serviceCIDR details
+  if (serviceCIDR != undefined) {
+    cy.get(':nth-child(2)' + inputID + '.value > .labeled-input').type(serviceCIDR);
+  } else {
+    cy.get(':nth-child(2)' + inputID + '.remove').click();
+  }
+
   // Machine Deployment/Pool details
   cy.typeValue('Name', 'md-0');
   cy.get('.vs__selected-options').click();
-  cy.contains('default-worker').click();
+  cy.contains(machineName).click();
   cy.clickButton('Next');
   cy.clickButton('Create');
 });
@@ -395,16 +403,30 @@ Cypress.Commands.add('deleteCluster', (clusterName) => {
 });
 
 // Command to remove CAPI cluster
-Cypress.Commands.add('deleteCAPICluster', (clusterName) => {
+Cypress.Commands.add('deleteCAPICluster', (clusterName, timeout) => {
   // Navigate to Cluster Menu
   cy.checkCAPIMenu();
   cy.getBySel('button-group-child-1').click();
-  cy.typeInFilter(clusterName);
   cy.viewport(1920, 1080);
+  cy.typeInFilter(clusterName);
   cy.getBySel('sortable-table_check_select_all').click();
   cy.clickButton('Delete');
   cy.getBySel('prompt-remove-confirm-button').click();
-  cy.contains(clusterName).should('not.exist');
+  cy.contains(clusterName, { timeout: timeout }).should('not.exist');
+});
+
+// Command to remove CAPI clusterclass
+Cypress.Commands.add('deleteCAPIClusterClass', (className) => {
+  // Navigate to Cluster Menu
+  cy.checkCAPIMenu();
+  cy.contains('Cluster Classes').click();
+  cy.getBySel('button-group-child-1').click();
+  cy.viewport(1920, 1080);
+  cy.typeInFilter(className);
+  cy.getBySel('sortable-table_check_select_all').click();
+  cy.clickButton('Delete');
+  cy.getBySel('prompt-remove-confirm-button').click();
+  cy.contains(className).should('not.exist');
 });
 
 // Command to type in Filter input

@@ -1,6 +1,6 @@
 cluster:
   name: turtles-qa-capz
-  kubernetesVersion: v1.28.0
+  kubernetesVersion: v1.30.0
   systempoolCount: 1
   userpoolCount: 2
   location: replace_location
