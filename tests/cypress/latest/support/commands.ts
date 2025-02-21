@@ -269,6 +269,22 @@ Cypress.Commands.add('addCloudCredsAzure', (name: string, clientID: string, clie
   cy.contains(name).should('be.visible');
 });
 
+// Command to add VMware vsphere Cloud Credentials
+Cypress.Commands.add('addCloudCredsVMware', (name: string, vsphere_username: string, vsphere_password: string, vsphere_server: string, vsphere_server_port: string) => {
+  cy.accesMenuSelection('Cluster Management', 'Cloud Credentials');
+  cy.contains('API Key').should('be.visible');
+  cy.clickButton('Create');
+  cy.getBySel('subtype-banner-item-vmwarevsphere').click();
+  cy.typeValue('Credential Name', name);
+  cy.typeValue('vCenter or ESXi Server', vsphere_server);
+  cy.typeValue('Port', vsphere_server_port);
+  cy.typeValue('Username', vsphere_username);
+  cy.typeValue('Password', vsphere_password, false, false);
+  cy.clickButton('Create');
+  cy.contains('API Key').should('be.visible');
+  cy.contains(name).should('be.visible');
+});
+
 // Command to Install or Update App from Charts menu
 // Operation types: Install, Update
 // You can optionally provide an array of questions and answer them before the installation starts

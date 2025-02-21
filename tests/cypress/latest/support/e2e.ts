@@ -49,6 +49,7 @@ declare global {
       addCloudCredsAWS(name: string, accessKey: string, secretKey: string): Chainable<Element>;
       addCloudCredsGCP(name: string, gcpCredentials: string): Chainable<Element>;
       addCloudCredsAzure(name: string, clientID: string, clientSecret: string, subscriptionID: string): Chainable<Element>;
+      addCloudCredsVMware(name: string, vsphere_username: string, vsphere_password: string, vsphere_server: string, vsphere_server_port: string): Chainable<Element>;
       typeInFilter(text: string): Chainable<Element>;
       goToHome(): Chainable<Element>;
       patchYamlResource(clusterName: string, namespace: string, resourceKind: string, resourceName: string, patch: object): Chainable<Element>;

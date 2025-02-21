@@ -24,10 +24,12 @@ describe('Enable CAPI Providers', () => {
   const googleProvider = 'gcp'
   const azureProvider = 'azure'
   const fleetProvider = 'fleet'
+  const vsphereProvider = 'vsphere'
   const kubeadmProviderVersion = 'v1.9.4'
   const kubeadmBaseURL = 'https://github.com/kubernetes-sigs/cluster-api/releases/'
   const kubeadmProviderTypes = ['bootstrap', 'control plane']
   const providerNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system', 'capd-system', 'capa-system', 'capg-system', 'capz-system']
+  const vsphereProviderNamespace = 'capv-system'
 
   beforeEach(() => {
     cy.login();
@@ -93,6 +95,32 @@ describe('Enable CAPI Providers', () => {
       cy.contains(statusReady).scrollIntoView();
     });
   });
+
+context('vSphere provider', { tags: '@vsphere' }, () => {
+    it('Create CAPI Providers Namespace - ' + vsphereProviderNamespace, () => {
+      cy.createNamespace(vsphereProviderNamespace);
+    })
+    qase(40,
+      it('Create CAPV provider', () => {
+        // Create vsphere Infrastructure provider
+        // See capv_rke2_cluster.spec.ts for more details about `vsphere_secrets_json_base64` structure
+        const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
+        // Decode the base64 encoded secret and make json object
+        const vsphere_secrets_json = JSON.parse(Buffer.from(vsphere_secrets_json_base64, 'base64').toString('utf-8'))
+        // Access keys from the json object
+        const vsphereUsername = vsphere_secrets_json.vsphere_username;
+        const vspherePassword = vsphere_secrets_json.vsphere_password;
+        const vsphereServer = vsphere_secrets_json.vsphere_server;
+        const vspherePort = '443';
+        cy.addCloudCredsVMware(vsphereProvider, vsphereUsername, vspherePassword, vsphereServer, vspherePort);
+        cypressLib.burgerMenuToggle();
+        cy.addInfraProvider('vsphere', vsphereProvider, vsphereProviderNamespace, vsphereProvider);
+        var statusReady = 'Ready'
+        statusReady = statusReady.concat(vsphereProvider, 'infrastructure', vsphereProvider, 'v1.12.0')
+        cy.contains(statusReady);
+      })
+    );
+  })
 
   context('Cloud Providers', { tags: '@full' }, () => {
     qase(13,

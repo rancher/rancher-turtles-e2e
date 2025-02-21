@@ -33,6 +33,7 @@ on:
         default: true
         type: boolean
   schedule:
+    - cron: '0 3 * * *'
     - cron: '0 4 * * *'
 
 jobs:
@@ -50,6 +51,8 @@ jobs:
       azure_location: ${{ secrets.AZURE_LOCATION }}
       qase_api_token: ${{ secrets.QASE_API_TOKEN }}
       rancher_password: ${{ secrets.RANCHER_PASSWORD }}
+      vsphere_secrets_json_base64: ${{ secrets.VSPHERE_SECRETS_JSON_BASE64 }}
+      vsphere_endpoints_list: ${{ secrets.VSPHERE_ENDPOINTS_LIST }}
     with:
       test_description: "CI/Manual - UI - Deployment test with Standard K3s"
       cluster_name: cluster-k3s
@@ -57,7 +60,6 @@ jobs:
       capi_ui_version: ${{ inputs.capi_ui_version }}
       rancher_version: ${{ inputs.rancher_version || 'latest/devel/2.10' }}
       qase_run_id: ${{ inputs.qase_run_id || 'auto' }}
-      grep_test_by_tag: ${{ inputs.grep_test_by_tag || '@install @short' }}
+      grep_test_by_tag: ${{ inputs.grep_test_by_tag || (github.event.schedule == '0 3 * * *' && '@install @short') || (github.event.schedule == '0 4 * * *' && '@install @vsphere') }}
       operator_dev_chart: ${{ inputs.operator_dev_chart == true || (github.event_name == 'schedule' && true) }}
       turtles_operator_version: ${{ inputs.turtles_operator_version }}
-
