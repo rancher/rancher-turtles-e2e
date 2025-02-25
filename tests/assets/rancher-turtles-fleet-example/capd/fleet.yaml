@@ -1,0 +1,6 @@
+namespace: default
+
+helm:
+  chart: ./namespace_autoimport
+  values:
+    cluster_prefix: capd

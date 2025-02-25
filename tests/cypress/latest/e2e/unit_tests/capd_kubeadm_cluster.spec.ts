@@ -20,12 +20,12 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
   const timeout = 300000
   const classesRepo = 'classes'
   const clustersRepo = 'clusters'
-  const clusterName = 'cluster1'
+  const clusterNamePrefix = 'capd'
   const className = 'quick-start'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
-  const basePath = '/tests/assets/rancher-turtles-fleet-example/'
-  const pathNames = ['namespace_autoimport', 'cluster_autoimport', 'clusterclass_autoimport']
-  const branch = 'main'
+  const basePath = '/tests/assets/rancher-turtles-fleet-example/capd/'
+  const pathNames = ['namespace_autoimport']
+  const branch = 'fleet-test'
 
   beforeEach(() => {
     cy.login();
@@ -43,7 +43,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
 
     it('Add cluster fleet repo(s) - ' + path, () => {
       cypressLib.checkNavIcon('cluster-management').should('exist');
-      var fullPath = basePath + path
+      var fullPath = basePath
 
       if (path.includes('clusterclass_autoimport')) {
         // Add cni gitrepo to fleet-default workspace
@@ -66,13 +66,13 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
       it('Auto import child CAPD cluster', () => {
         // Check child cluster is created and auto-imported
         cy.goToHome();
-        cy.contains(new RegExp('Pending.*' + clusterName), { timeout: timeout });
+        cy.contains(new RegExp('Pending.*' + clusterNamePrefix), { timeout: timeout });
 
         // Check cluster is Active
-        cy.searchCluster(clusterName);
-        cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+        cy.searchCluster(clusterNamePrefix);
+        cy.contains(new RegExp('Active.*' + clusterNamePrefix), { timeout: timeout });
         // TODO: Check MachineSet unavailable status and use checkCAPIClusterActive
-        cy.checkCAPIClusterProvisioned(clusterName);
+        cy.checkCAPIClusterProvisioned(clusterNamePrefix);
       })
     );
 
@@ -85,14 +85,14 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
           cypressLib.accesMenu('Clusters');
           cy.fleetNamespaceToggle('fleet-default');
           // Verify the cluster is registered and Active
-          cy.verifyTableRow(0, 'Active', clusterName );
+          cy.verifyTableRow(0, 'Active', clusterNamePrefix );
           // Make sure there is only one registered cluster in fleet (there should be one table row)
           cy.get('table.sortable-table').find('tbody tr').should('have.length', 1);
         })
       )
       qase(43,
         it('Check if annotation for externally-managed cluster is set', () => {
-          cy.searchCluster(clusterName)
+          cy.searchCluster(clusterNamePrefix)
           // click three dots menu and click View YAML
           cy.getBySel('sortable-table-0-action-button').click();
           cy.contains('View YAML').click();
@@ -110,7 +110,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
       qase(7,
         it('Install App on imported cluster', { retries: 1 }, () => {
           // Click on imported CAPD cluster
-          cy.contains(clusterName).click();
+          cy.contains(clusterNamePrefix).click();
           // Install Chart
           cy.checkChart('Install', 'Monitoring', 'cattle-monitoring');
         })
@@ -135,7 +135,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
           // Check CAPI cluster status
           cy.contains('Machine Deployments').click();
           cy.get('.content > .count', { timeout: timeout }).should('have.text', '3');
-          cy.checkCAPIClusterProvisioned(clusterName);
+          cy.checkCAPIClusterProvisioned(clusterNamePrefix);
         })
       );
     }
@@ -143,12 +143,12 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
     qase(9,
       it('Remove imported CAPD cluster from Rancher Manager', { retries: 1 }, () => {
         // Check cluster is not deleted after removal
-        cy.deleteCluster(clusterName);
+        cy.deleteCluster(clusterNamePrefix);
         cy.goToHome();
         // kubectl get clusters.cluster.x-k8s.io
         // This is checked by ensuring the cluster is not available in navigation menu
-        cy.contains(clusterName).should('not.exist');
-        cy.checkCAPIClusterProvisioned(clusterName);
+        cy.contains(clusterNamePrefix).should('not.exist');
+        cy.checkCAPIClusterProvisioned(clusterNamePrefix);
       })
     );
 
@@ -165,7 +165,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
           cy.removeFleetGitRepo(clustersRepo);
           
           // Wait until the following returns no clusters found
-          cy.checkCAPIClusterDeleted(clusterName, timeout);
+          cy.checkCAPIClusterDeleted(clusterNamePrefix, timeout);
           // Remove the clusterclass
           cy.removeCAPIResource('Cluster Classes', className);
         } else {
@@ -174,13 +174,13 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
 
           // Wait until the following returns no clusters found
           // This is checked by ensuring the cluster is not available in CAPI menu
-          cy.checkCAPIClusterDeleted(clusterName, timeout);
+          cy.checkCAPIClusterDeleted(clusterNamePrefix, timeout);
         }
 
         // Ensure the cluster is not available in navigation menu
         cy.getBySel('side-menu').then(($menu) => {
-          if ($menu.text().includes(clusterName)) {
-            cy.deleteCluster(clusterName);
+          if ($menu.text().includes(clusterNamePrefix)) {
+            cy.deleteCluster(clusterNamePrefix);
           }
         })
       })
