@@ -14,10 +14,11 @@ docker network create \
     --gateway=172.19.0.1 \
     --opt "com.docker.network.bridge.enable_ip_masquerade"="true" \
     --opt "com.docker.network.driver.mtu"="1500" \
-    kind
+    kind || true
 
-# Start Cypress tests with docker
-docker run -v $PWD:/workdir -w /workdir \
+# Start Cypress tests with docker - only root or user with uid 1000 is working
+docker run --init -v $PWD:/workdir -w /workdir \
+    --user 1000:$(id -g) \
     -e CYPRESS_TAGS=$CYPRESS_TAGS \
     -e CAPI_UI_VERSION=$CAPI_UI_VERSION \
     -e CHARTMUSEUM_REPO=$CHARTMUSEUM_REPO \
@@ -34,6 +35,7 @@ docker run -v $PWD:/workdir -w /workdir \
     -e AZURE_CLIENT_SECRET=$AZURE_CLIENT_SECRET \
     -e AZURE_SUBSCRIPTION_ID=$AZURE_SUBSCRIPTION_ID \
     -e AZURE_LOCATION=$AZURE_LOCATION \
+    -e VSPHERE_SECRETS_JSON_BASE64=$VSPHERE_SECRETS_JSON_BASE64 \
     -e GCP_CREDENTIALS="$GCP_CREDENTIALS" \
     -e RANCHER_USER=$RANCHER_USER \
     -e UI_ACCOUNT=$UI_ACCOUNT \

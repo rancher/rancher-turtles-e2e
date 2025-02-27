@@ -47,7 +47,7 @@ describe('Install Turtles Operator', { tags: '@install' }, () => {
     } else {
       turtlesHelmRepo += ':8080'
     }
-    cypressLib.addRepository('turtles-operator', turtlesHelmRepo, 'helm', 'none');
+    cy.addRepository('turtles-operator', turtlesHelmRepo, 'helm', 'none');
   })
 
   qase([2, 11],

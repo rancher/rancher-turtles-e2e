@@ -1,0 +1,9 @@
+namespace: default
+
+helm:
+  chart: ./capv-rke2-helmchart
+  valuesFrom:
+    - secretKeyRef:
+        name: capv-helm-values
+        namespace: default
+        key: values.yaml

@@ -269,6 +269,58 @@ Cypress.Commands.add('addCloudCredsAzure', (name: string, clientID: string, clie
   cy.contains(name).should('be.visible');
 });
 
+// Command to add VMware vsphere Cloud Credentials
+Cypress.Commands.add('addCloudCredsVMware', (name: string, vsphere_username: string, vsphere_password: string, vsphere_server: string, vsphere_server_port: string) => {
+  cy.accesMenuSelection('Cluster Management', 'Cloud Credentials');
+  cy.contains('API Key').should('be.visible');
+  cy.clickButton('Create');
+  cy.getBySel('subtype-banner-item-vmwarevsphere').click();
+  cy.typeValue('Credential Name', name);
+  cy.typeValue('vCenter or ESXi Server', vsphere_server);
+  cy.typeValue('Port', vsphere_server_port);
+  cy.typeValue('Username', vsphere_username);
+  cy.typeValue('Password', vsphere_password, false, false);
+  cy.clickButton('Create');
+  cy.contains('API Key').should('be.visible');
+  cy.contains(name).should('be.visible');
+});
+
+Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: string, repositoryType: string, repositoryBranch: string) => {
+  cy.contains('local')
+    .click();
+    cy.clickNavMenu(['Apps', 'Repositories'])
+  // Make sure we are in the 'Repositories' screen (test failed here before)
+  // Test fails sporadically here, screen stays in pending state forever
+  // Ensuring "Loading..." overlay screen is not present.
+  cy.contains('Loading...', {timeout: 35000}).should('not.exist');
+  cy.contains('header', 'Repositories')
+    .should('be.visible');
+  cy.contains('Create')
+    .should('be.visible');
+
+  cy.clickButton('Create');
+  cy.contains('Repository: Create')
+    .should('be.visible');
+  cy.typeValue('Name', repositoryName);
+  if (repositoryType === 'git') {
+    cy.contains('Git repository')
+      .click();
+    cy.typeValue('Git Repo URL', repositoryURL);
+    cy.typeValue('Git Branch', repositoryBranch);
+  } else {
+    cy.typeValue('Index URL', repositoryURL);
+  }
+  cy.clickButton('Create');
+  // Make sure the repo is active before leaving
+  cy.wait(1000);
+  cy.typeInFilter(repositoryName);
+  cy.getBySel('sortable-table-0-action-button').click();
+  cy.wait(1000);
+  cy.get('.icon.group-icon.icon-refresh').click();
+  cy.wait(1000);
+  cy.contains(new RegExp('Active.*'+repositoryName));
+});
+
 // Command to Install or Update App from Charts menu
 // Operation types: Install, Update
 // You can optionally provide an array of questions and answer them before the installation starts
@@ -317,6 +369,30 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
 
   // Select app namespace
   cy.setNamespace(namespace);
+
+  // Rancher pod restarts during Turtles installation
+  // Poll /dashboard/about until it returns HTTP 200 and then reload the page
+  if (chartName == 'Rancher Turtles') {
+    cy.wait(7000); // Should be enough time for Rancher pod to start restarting
+    const checkApiStatus = (retries = 20) => {
+      cy.request({
+        url: '/about',
+        failOnStatusCode: false,
+        timeout: 30000,
+      }).then((response) => {
+        if (response.status !== 200 && retries > 0) {
+          cy.wait(5000);
+          checkApiStatus(retries - 1);
+        } else {
+          expect(response.status).to.eq(200);
+          // Once /dashboard/about is back, reload the page
+          cy.wait(5000);
+          cy.reload();
+        }
+      });
+    };
+    checkApiStatus();
+  }
 
   // Resource should be deployed (green badge)
   cy.get('.outlet').contains('Deployed', { timeout: 180000 });

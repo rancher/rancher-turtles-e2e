@@ -15,6 +15,7 @@ limitations under the License.
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
+import { timers } from 'cypress/types/jquery';
 
 Cypress.config();
 describe('Install CAPI plugin', { tags: '@install' }, () => {
@@ -25,8 +26,8 @@ describe('Install CAPI plugin', { tags: '@install' }, () => {
     cypressLib.burgerMenuToggle();
   });
 
-  it('Add capi-ui repo', { retries: 2 }, () => {
-    cypressLib.addRepository('capi-ui', 'https://github.com/rancher/capi-ui-extension.git', 'git', 'gh-pages')
+  it('Add capi-ui repo', () => {
+    cy.addRepository('capi-ui', 'https://github.com/rancher/capi-ui-extension.git', 'git', 'gh-pages')
   })
 
   qase(3,

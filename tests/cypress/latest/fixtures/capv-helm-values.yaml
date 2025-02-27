@@ -1,0 +1,21 @@
+vsphere:
+  server: replace_vsphere_server
+  username: replace_vsphere_username
+  password: replace_vsphere_password
+  datacenter: replace_vsphere_datacenter
+  datastore: replace_vsphere_datastore
+  network: replace_vsphere_network
+  resource_pool: replace_vsphere_resource_pool
+  folder: replace_vsphere_folder
+  template: replace_vsphere_template
+  ssh_authorized_key: replace_vsphere_ssh_authorized_key
+  tls_thumbprint: replace_vsphere_tls_thumbprint
+
+cluster:
+  name: turtles-qa-capv-rke2
+  namespace: default
+  rke2_version: v1.30.3+rke2r1
+  control_plane_endpoint_ip: replace_cluster_control_plane_endpoint_ip
+  control_plane_machine_count: 1
+  worker_machine_count: 1
+  cpi_image_k8s_version: v1.31.0
