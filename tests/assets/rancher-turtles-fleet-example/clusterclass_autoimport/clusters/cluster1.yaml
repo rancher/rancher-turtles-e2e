@@ -17,6 +17,7 @@ spec:
       - 10.128.0.0/12
   topology:
     class: quick-start
+    classNamespace: quick-start
     controlPlane:
       metadata: {}
       replicas: 1
