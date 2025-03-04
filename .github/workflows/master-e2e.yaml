@@ -155,6 +155,13 @@ jobs:
             echo "uuid=${UUID//-}" >> ${GITHUB_OUTPUT}
             echo "runner=${GH_REPO//\//-}-ci-${UUID//-}" >> ${GITHUB_OUTPUT}
           fi
+      - name: Cleanup vsphere runner if needed
+        if: ${{ needs.determine-runner.outputs.initial-runner == 'vsphere' }}
+        run: |
+          # Cleanup vsphere runner if needed but do not delete github.workspace
+          if [ -f /usr/local/bin/k3s ]; then
+            cd tests && make vsphere-runner-cleanup
+          fi
       - name: Authenticate to GCP
         if: ${{ needs.determine-runner.outputs.initial-runner != 'vsphere' }}
         uses: google-github-actions/auth@v2
@@ -525,20 +532,6 @@ jobs:
     runs-on: vsphere
     steps:
       - name: Cleanup vsphere runner
-        run: |
-          # do not exit on failure
-          set +e
-          # uninstall chartmuseum
-          sudo systemctl stop chartmuseum
-          sudo rm /etc/systemd/system/chartmuseum.service
-          sudo systemctl daemon-reload
-          sudo rm /usr/local/bin/chartmuseum
-          sudo helm plugin uninstall cm-push
-          # Stop all docker containers and remove everything
-          docker stop $(docker ps --all --quiet)
-          docker system prune --all --volumes --force
-          # destroy k3s cluster
-          /usr/local/bin/k3s-killall.sh
-          /usr/local/bin/k3s-uninstall.sh
-          # Delete all files in the workspace
-          [ -n "${{ github.workspace }}" ] && rm -r "${{ github.workspace }}"/*
+        env:
+          WORKSPACE: ${{ github.workspace }}
+        run: cd tests && make vsphere-runner-cleanup

@@ -24,3 +24,6 @@ e2e-install-rancher: deps
 
 start-cypress-tests:
 	@./scripts/start-cypress-tests
+
+vsphere-runner-cleanup:
+	@./scripts/vsphere-runner-cleanup.sh
