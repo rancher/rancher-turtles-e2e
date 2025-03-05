@@ -484,8 +484,8 @@ jobs:
 
   post-qase:
     if: ${{ always() && needs.pre-qase.outputs.qase_run_id != '' }}
-    needs: [create-runner, e2e, pre-qase]
-    runs-on: ${{ needs.create-runner.outputs.uuid }}
+    needs: [determine-runner, e2e, pre-qase]
+    runs-on: ${{ needs.determine-runner.outputs.initial-runner }}
     env:
       QASE_API_TOKEN: ${{ secrets.qase_api_token }}
       QASE_PROJECT_CODE: RT
