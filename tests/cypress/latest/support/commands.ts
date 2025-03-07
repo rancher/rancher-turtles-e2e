@@ -329,6 +329,11 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
 Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, questions) => {
   cy.get('.nav').contains('Apps').click();
   cy.contains('Featured Charts').should('be.visible');
+
+  // Refresh existing Repositories
+  cy.get('.icon.icon-lg.icon-refresh').click();
+  cy.get('.icon.icon-lg.icon-checkmark', { timeout: 60000 }).should('be.visible');
+
   cy.contains(chartName, { timeout: 60000 }).click();
   cy.contains('Charts: ' + chartName);
 
