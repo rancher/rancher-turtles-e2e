@@ -211,8 +211,7 @@ jobs:
           fi
 
   pre-qase:
-    needs: determine-runner
-    runs-on: ${{ needs.determine-runner.outputs.initial-runner }}
+    runs-on: ubuntu-latest
     env:
       QASE_API_TOKEN: ${{ secrets.QASE_API_TOKEN }}
       QASE_PROJECT_CODE: RT
@@ -484,8 +483,8 @@ jobs:
 
   post-qase:
     if: ${{ always() && needs.pre-qase.outputs.qase_run_id != '' }}
-    needs: [determine-runner, e2e, pre-qase]
-    runs-on: ${{ needs.determine-runner.outputs.initial-runner }}
+    needs: [e2e, pre-qase]
+    runs-on: ubuntu-latest
     env:
       QASE_API_TOKEN: ${{ secrets.qase_api_token }}
       QASE_PROJECT_CODE: RT
@@ -520,8 +519,8 @@ jobs:
   # Just to signify that something has been cancelled and it's not useful to check the test
   declare-cancelled:
     if: ${{ always() && contains(needs.e2e.result, 'cancelled') }}
-    needs: [create-runner, e2e]
-    runs-on: ${{ needs.create-runner.outputs.uuid }}
+    needs: e2e
+    runs-on: ubuntu-latest
     steps:
       - name: Specify in summary if something has been cancelled
         run: echo "# TEST CANCELLED!" >> ${GITHUB_STEP_SUMMARY}
