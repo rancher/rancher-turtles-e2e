@@ -1,9 +1,0 @@
-namespace: default
-
-helm:
-  chart: ./azure-capz-helmchart
-  valuesFrom:
-    - secretKeyRef:
-        name: azure-creds-secret
-        namespace: default
-        key: values.yaml

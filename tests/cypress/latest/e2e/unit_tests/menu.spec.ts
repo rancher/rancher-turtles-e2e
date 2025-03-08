@@ -19,7 +19,6 @@ Cypress.config();
 describe('Menu testing', { tags: '@install' }, () => {
   beforeEach(() => {
     cy.login();
-    cy.goToHome();
     cypressLib.burgerMenuToggle();
   });
 
