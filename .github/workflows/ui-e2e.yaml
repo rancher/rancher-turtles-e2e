@@ -1,6 +1,14 @@
 # This workflow calls the master E2E workflow with custom variables
 name: UI-E2E
-run-name: ${{ github.event_name == 'workflow_dispatch' && format('Rancher-`{0}` - `{1}` destroy={2} dev={3}', inputs.rancher_version, inputs.grep_test_by_tag, inputs.destroy_runner, inputs.operator_dev_chart) || github.event_name == 'schedule' && 'UI-E2E on Rancher-latest/devel/2.10' }}
+run-name: >-
+  ${{ github.event_name == 'workflow_dispatch' &&
+      format('Rancher-`{0}` - `{1}` destroy={2} dev={3}',
+             inputs.rancher_version, inputs.grep_test_by_tag,
+             inputs.destroy_runner, inputs.operator_dev_chart) ||
+      github.event_name == 'schedule' &&
+      (github.event.schedule == '0 3 * * *' && 'Nightly e2e job for `@short`' ||
+       github.event.schedule == '0 4 * * *' && 'Nightly e2e job for `@vsphere`' ||
+       'Unknown scheduled job') }}
 
 on:
   workflow_dispatch:
