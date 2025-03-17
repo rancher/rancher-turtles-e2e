@@ -24,7 +24,9 @@ describe('Enable CAPI Providers', () => {
   const googleProvider = 'gcp'
   const azureProvider = 'azure'
   const fleetProvider = 'fleet'
+  const fleetProviderVersion = 'v0.6.1'
   const vsphereProvider = 'vsphere'
+  const vsphereProviderVersion = 'v1.12.0'
   const kubeadmProviderVersion = 'v1.9.5'
   const kubeadmBaseURL = 'https://github.com/kubernetes-sigs/cluster-api/releases/'
   const kubeadmProviderTypes = ['bootstrap', 'control plane']
@@ -90,7 +92,7 @@ describe('Enable CAPI Providers', () => {
       cy.checkCAPIMenu();
       cy.contains('Providers').click();
       var statusReady = 'Ready'
-      statusReady = statusReady.concat(fleetProvider, 'addon', fleetProvider, 'v0.6.0');
+      statusReady = statusReady.concat(fleetProvider, 'addon', fleetProvider, fleetProviderVersion);
       cy.contains(statusReady).scrollIntoView();
     });
   });
@@ -115,7 +117,7 @@ context('vSphere provider', { tags: '@vsphere' }, () => {
         cypressLib.burgerMenuToggle();
         cy.addInfraProvider('vsphere', vsphereProvider, vsphereProviderNamespace, vsphereProvider);
         var statusReady = 'Ready'
-        statusReady = statusReady.concat(vsphereProvider, 'infrastructure', vsphereProvider, 'v1.12.0')
+        statusReady = statusReady.concat(vsphereProvider, 'infrastructure', vsphereProvider, vsphereProviderVersion)
         cy.contains(statusReady);
       })
     );
