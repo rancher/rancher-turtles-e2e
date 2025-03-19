@@ -14,6 +14,7 @@ limitations under the License.
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
+import { skipDeletionTest } from '~/support/utils';
 
 Cypress.config();
 describe('Create CAPD', { tags: '@short' }, () => {
@@ -82,31 +83,31 @@ describe('Create CAPD', { tags: '@short' }, () => {
       cy.checkChart('Install', 'Monitoring', 'cattle-monitoring');
     })
 
-    it('Remove CAPD cluster from Rancher Manager', { retries: 1 }, () => {
-      // Check cluster is not deleted after removal
-      cy.deleteCluster(clusterName);
-      cy.goToHome();
-      // kubectl get clusters.cluster.x-k8s.io
-      // This is checked by ensuring the cluster is not available in navigation menu
-      cy.contains(clusterName).should('not.exist');
-      cy.checkCAPIClusterProvisioned(clusterName);
-    })
-
-
-    it('Delete the CAPI cluster and fleet repo', () => {
-      cy.removeCAPIResource('Clusters', clusterName, timeout);
-
-      // Remove the classes fleet repo
-      cypressLib.burgerMenuToggle();
-      cy.removeFleetGitRepo(classesRepo, true);
-          
-      // Ensure the cluster is not available in navigation menu
-      cy.getBySel('side-menu').then(($menu) => {
-        if ($menu.text().includes(clusterName)) {
-          cy.deleteCluster(clusterName);
-        }
+    if (!skipDeletionTest) {
+      it('Remove CAPD cluster from Rancher Manager', { retries: 1 }, () => {
+        // Check cluster is not deleted after removal
+        cy.deleteCluster(clusterName);
+        cy.goToHome();
+        // kubectl get clusters.cluster.x-k8s.io
+        // This is checked by ensuring the cluster is not available in navigation menu
+        cy.contains(clusterName).should('not.exist');
+        cy.checkCAPIClusterProvisioned(clusterName);
       })
-    })
 
+      it('Delete the CAPI cluster and fleet repo', () => {
+        cy.removeCAPIResource('Clusters', clusterName, timeout);
+
+        // Remove the classes fleet repo
+        cypressLib.burgerMenuToggle();
+        cy.removeFleetGitRepo(classesRepo, true);
+
+        // Ensure the cluster is not available in navigation menu
+        cy.getBySel('side-menu').then(($menu) => {
+          if ($menu.text().includes(clusterName)) {
+            cy.deleteCluster(clusterName);
+          }
+        })
+      })
+    }
   })
 });

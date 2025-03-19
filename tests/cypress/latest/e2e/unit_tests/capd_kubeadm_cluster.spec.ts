@@ -14,6 +14,7 @@ limitations under the License.
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
+import { skipDeletionTest } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
@@ -48,7 +49,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
       if (path.includes('clusterclass')) {
         // Add cni gitrepo to fleet-default workspace
         // The cni gitrepo is scoped to quick-start class only by fleet.yaml
-        cy.addFleetGitRepo('clusterclass-cni', repoUrl, branch, fullPath+'/cni', 'fleet-default');
+        cy.addFleetGitRepo('clusterclass-cni', repoUrl, branch, fullPath + '/cni', 'fleet-default');
         cypressLib.burgerMenuToggle();
 
         // Add classes fleet repo to fleel-local workspace
@@ -85,7 +86,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
           cypressLib.accesMenu('Clusters');
           cy.fleetNamespaceToggle('fleet-default');
           // Verify the cluster is registered and Active
-          cy.verifyTableRow(0, 'Active', clusterName );
+          cy.verifyTableRow(0, 'Active', clusterName);
           // Make sure there is only one registered cluster in fleet (there should be one table row)
           cy.get('table.sortable-table').find('tbody tr').should('have.length', 1);
         })
@@ -129,7 +130,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
               text = text.replace(/replicas: 2/g, 'replicas: 3');
               editor[0].CodeMirror.setValue(text);
               cy.clickButton('Save');
-          })
+            })
 
           // Check CAPI cluster status
           cy.contains('Machine Deployments').click();
@@ -139,51 +140,52 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
       );
     }
 
-    qase(9,
-      it('Remove imported CAPD cluster from Rancher Manager', { retries: 1 }, () => {
-        // Check cluster is not deleted after removal
-        cy.deleteCluster(clusterName);
-        cy.goToHome();
-        // kubectl get clusters.cluster.x-k8s.io
-        // This is checked by ensuring the cluster is not available in navigation menu
-        cy.contains(clusterName).should('not.exist');
-        cy.checkCAPIClusterProvisioned(clusterName);
-      })
-    );
-
-    qase(10,
-      it('Delete the CAPD cluster fleet repo(s) - ' + path, () => {
-        if (path.includes('clusterclass')) {
-          // Remove the cni fleet repo from fleet-default workspace
-          cy.removeFleetGitRepo('clusterclass-cni', true, 'fleet-default');
-          // Remove the classes fleet repo
-          cypressLib.burgerMenuToggle();
-          cy.removeFleetGitRepo(classesRepo, true);
-          // Remove the clusters fleet repo
-          cypressLib.burgerMenuToggle();
-          cy.removeFleetGitRepo(clustersRepo);
-          
-          // Wait until the following returns no clusters found
-          cy.checkCAPIClusterDeleted(clusterName, timeout);
-          // Remove the clusterclass
-          cy.removeCAPIResource('Cluster Classes', className);
-        } else {
-          // Remove the clusters fleet repo
-          cy.removeFleetGitRepo(clustersRepo);
-
-          // Wait until the following returns no clusters found
-          // This is checked by ensuring the cluster is not available in CAPI menu
-          cy.checkCAPIClusterDeleted(clusterName, timeout);
-        }
-
-        // Ensure the cluster is not available in navigation menu
-        cy.getBySel('side-menu').then(($menu) => {
-          if ($menu.text().includes(clusterName)) {
-            cy.deleteCluster(clusterName);
-          }
+    if (!skipDeletionTest) {
+      qase(9,
+        it('Remove imported CAPD cluster from Rancher Manager', { retries: 1 }, () => {
+          // Check cluster is not deleted after removal
+          cy.deleteCluster(clusterName);
+          cy.goToHome();
+          // kubectl get clusters.cluster.x-k8s.io
+          // This is checked by ensuring the cluster is not available in navigation menu
+          cy.contains(clusterName).should('not.exist');
+          cy.checkCAPIClusterProvisioned(clusterName);
         })
-      })
-    );
+      );
 
+      qase(10,
+        it('Delete the CAPD cluster fleet repo(s) - ' + path, () => {
+          if (path.includes('clusterclass')) {
+            // Remove the cni fleet repo from fleet-default workspace
+            cy.removeFleetGitRepo('clusterclass-cni', true, 'fleet-default');
+            // Remove the classes fleet repo
+            cypressLib.burgerMenuToggle();
+            cy.removeFleetGitRepo(classesRepo, true);
+            // Remove the clusters fleet repo
+            cypressLib.burgerMenuToggle();
+            cy.removeFleetGitRepo(clustersRepo);
+
+            // Wait until the following returns no clusters found
+            cy.checkCAPIClusterDeleted(clusterName, timeout);
+            // Remove the clusterclass
+            cy.removeCAPIResource('Cluster Classes', className);
+          } else {
+            // Remove the clusters fleet repo
+            cy.removeFleetGitRepo(clustersRepo);
+
+            // Wait until the following returns no clusters found
+            // This is checked by ensuring the cluster is not available in CAPI menu
+            cy.checkCAPIClusterDeleted(clusterName, timeout);
+          }
+
+          // Ensure the cluster is not available in navigation menu
+          cy.getBySel('side-menu').then(($menu) => {
+            if ($menu.text().includes(clusterName)) {
+              cy.deleteCluster(clusterName);
+            }
+          })
+        })
+      );
+    }
   })
 });

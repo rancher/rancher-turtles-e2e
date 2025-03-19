@@ -19,3 +19,7 @@ export const isRancherManagerVersion = (version: string) => {
 export const isUIVersion = (version: string) => {
   return (new RegExp(version)).test(Cypress.env("capi_ui_version"));
 }
+
+export const skipDeletionTest = () => {
+  return Boolean(Cypress.env("skip_deletion_test"));
+}

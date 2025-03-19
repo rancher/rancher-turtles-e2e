@@ -1,6 +1,7 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
+import { skipDeletionTest } from '~/support/utils';
 
 Cypress.config();
 describe('Import/Create CAPZ', { tags: '@full' }, () => {
@@ -194,16 +195,18 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
   })
   );
 
-  qase(26, it('Delete the CAPZ cluster fleet repo', () => {
+  if (!skipDeletionTest) {
+    qase(26, it('Delete the CAPZ cluster fleet repo', () => {
 
-    // Remove the fleet git repo
-    cy.removeFleetGitRepo(repoName, true);
-    // Wait until the following returns no clusters found
-    // This is checked by ensuring the cluster is not available in CAPI menu
-    cy.checkCAPIClusterDeleted(clusterName, timeout);
-    // Remove the clusterclass
-    cy.removeCAPIResource('Cluster Classes', className);
-  })
-  );
+      // Remove the fleet git repo
+      cy.removeFleetGitRepo(repoName, true);
+      // Wait until the following returns no clusters found
+      // This is checked by ensuring the cluster is not available in CAPI menu
+      cy.checkCAPIClusterDeleted(clusterName, timeout);
+      // Remove the clusterclass
+      cy.removeCAPIResource('Cluster Classes', className);
+    })
+    );
+  }
 
 });

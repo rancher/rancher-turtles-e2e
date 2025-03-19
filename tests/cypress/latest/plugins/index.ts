@@ -48,6 +48,7 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   config.env.azure_client_secret = process.env.AZURE_CLIENT_SECRET
   config.env.azure_subscription_id = process.env.AZURE_SUBSCRIPTION_ID
   config.env.azure_location = process.env.AZURE_LOCATION
+  config.env.skip_deletion_test = process.env.SKIP_DELETION_TEST
   // VMware vSphere
   config.env.vsphere_secrets_json_base64 = process.env.VSPHERE_SECRETS_JSON_BASE64
 

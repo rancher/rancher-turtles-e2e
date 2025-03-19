@@ -110,6 +110,9 @@ on:
       turtles_operator_version:
         description: Turtles Operator Version; only to be used when dev chart is set to false; default - latest stable version
         type: string
+      skip_deletion_test:
+        description: Skip deletion tests to retain the clusters
+        type: boolean
 
 jobs:
   determine-runner:
@@ -390,6 +393,7 @@ jobs:
           QASE_RUN_ID: ${{ needs.pre-qase.outputs.qase_run_id }}
           GREPTAGS: ${{ inputs.grep_test_by_tag }}
           TURTLES_OPERATOR_VERSION: ${{inputs.turtles_operator_version}}
+          SKIP_DELETION_TEST: ${{ inputs.skip_deletion_test }}
           SPEC: |
             e2e/unit_tests/first_connection.spec.ts
             e2e/unit_tests/turtles_operator.spec.ts

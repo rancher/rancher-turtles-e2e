@@ -1,6 +1,7 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
+import { skipDeletionTest } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPG GKE', { tags: '@full' }, () => {
@@ -64,28 +65,29 @@ describe('Import CAPG GKE', { tags: '@full' }, () => {
     })
   );
 
-  qase(38,
-    it('Remove imported CAPG cluster from Rancher Manager', { retries: 1 }, () => {
+  if (!skipDeletionTest) {
+    qase(38,
+      it('Remove imported CAPG cluster from Rancher Manager', { retries: 1 }, () => {
 
-      // Check cluster is not deleted after removal
-      cy.deleteCluster(clusterName);
-      cy.goToHome();
-      // kubectl get clusters.cluster.x-k8s.io
-      // This is checked by ensuring the cluster is not available in navigation menu
-      cy.contains(clusterName).should('not.exist');
-      cy.checkCAPIClusterProvisioned(clusterName);
-    })
-  );
+        // Check cluster is not deleted after removal
+        cy.deleteCluster(clusterName);
+        cy.goToHome();
+        // kubectl get clusters.cluster.x-k8s.io
+        // This is checked by ensuring the cluster is not available in navigation menu
+        cy.contains(clusterName).should('not.exist');
+        cy.checkCAPIClusterProvisioned(clusterName);
+      })
+    );
 
-  qase(39,
-    it('Delete the CAPG cluster fleet repo', () => {
+    qase(39,
+      it('Delete the CAPG cluster fleet repo', () => {
 
-      // Remove the fleet git repo
-      cy.removeFleetGitRepo(repoName, true);
-      // Wait until the following returns no clusters found
-      // This is checked by ensuring the cluster is not available in CAPI menu
-      cy.checkCAPIClusterDeleted(clusterName, timeout);
-    })
-  );
-
+        // Remove the fleet git repo
+        cy.removeFleetGitRepo(repoName, true);
+        // Wait until the following returns no clusters found
+        // This is checked by ensuring the cluster is not available in CAPI menu
+        cy.checkCAPIClusterDeleted(clusterName, timeout);
+      })
+    );
+  }
 });

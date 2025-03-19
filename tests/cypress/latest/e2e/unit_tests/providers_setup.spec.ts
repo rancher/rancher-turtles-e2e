@@ -50,11 +50,13 @@ describe('Enable CAPI Providers', () => {
         it('Create Kubeadm Providers', () => {
           // Create CAPI Kubeadm providers
           if (providerType == 'control plane') {
+            // https://github.com/kubernetes-sigs/cluster-api/releases/v1.9.5/control-plane-components.yaml
             const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + 'control-plane' + '-components.yaml'
             const providerName = kubeadmProvider + '-' + 'control-plane'
             const namespace = 'capi-kubeadm-control-plane-system'
             cy.addCustomProvider(providerName, namespace, kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
           } else {
+            // https://github.com/kubernetes-sigs/cluster-api/releases/v1.9.5/bootstrap-components.yaml
             const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + providerType + '-components.yaml'
             const providerName = kubeadmProvider + '-' + providerType
             const namespace = 'capi-kubeadm-bootstrap-system'
@@ -97,7 +99,7 @@ describe('Enable CAPI Providers', () => {
     });
   });
 
-context('vSphere provider', { tags: '@vsphere' }, () => {
+  context('vSphere provider', { tags: '@vsphere' }, () => {
     it('Create CAPI Providers Namespace - ' + vsphereProviderNamespace, () => {
       cy.createNamespace(vsphereProviderNamespace);
     })

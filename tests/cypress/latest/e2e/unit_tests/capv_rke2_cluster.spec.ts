@@ -1,6 +1,7 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
+import { skipDeletionTest } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPV', { tags: '@vsphere' }, () => {
@@ -166,21 +167,23 @@ describe('Import CAPV', { tags: '@vsphere' }, () => {
     cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
   })
 
-  it('Remove imported CAPV cluster from Rancher Manager', { retries: 1 }, () => {
-    // Check cluster is not deleted after removal
-    cy.deleteCluster(clusterName);
-    cy.goToHome();
-    // kubectl get clusters.cluster.x-k8s.io
-    // This is checked by ensuring the cluster is not available in navigation menu
-    cy.contains(clusterName).should('not.exist');
-    cy.checkCAPIClusterProvisioned(clusterName);
-  })
+  if (!skipDeletionTest) {
+    it('Remove imported CAPV cluster from Rancher Manager', { retries: 1 }, () => {
+      // Check cluster is not deleted after removal
+      cy.deleteCluster(clusterName);
+      cy.goToHome();
+      // kubectl get clusters.cluster.x-k8s.io
+      // This is checked by ensuring the cluster is not available in navigation menu
+      cy.contains(clusterName).should('not.exist');
+      cy.checkCAPIClusterProvisioned(clusterName);
+    })
 
-  it('Delete the CAPV cluster fleet repo', () => {
-    // Remove the fleet git repo
-    cy.removeFleetGitRepo(repoName)
-    // Wait until the following returns no clusters found
-    // This is checked by ensuring the cluster is not available in CAPI menu
-    cy.checkCAPIClusterDeleted(clusterName, timeout);
-  })
+    it('Delete the CAPV cluster fleet repo', () => {
+      // Remove the fleet git repo
+      cy.removeFleetGitRepo(repoName)
+      // Wait until the following returns no clusters found
+      // This is checked by ensuring the cluster is not available in CAPI menu
+      cy.checkCAPIClusterDeleted(clusterName, timeout);
+    })
+  }
 });

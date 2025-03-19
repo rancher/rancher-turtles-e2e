@@ -1,6 +1,7 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
+import { skipDeletionTest } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPA RKE2', { tags: '@full' }, () => {
@@ -62,25 +63,27 @@ describe('Import CAPA RKE2', { tags: '@full' }, () => {
     })
   );
 
-  qase(15,
-    it('Remove imported CAPA cluster from Rancher Manager', { retries: 1 }, () => {
-      // Check cluster is not deleted after removal
-      cy.deleteCluster(clusterName);
-      cy.goToHome();
-      // kubectl get clusters.cluster.x-k8s.io
-      // This is checked by ensuring the cluster is not available in navigation menu
-      cy.contains(clusterName).should('not.exist');
-      cy.checkCAPIClusterProvisioned(clusterName);
-    })
-  );
+  if (!skipDeletionTest) {
+    qase(15,
+      it('Remove imported CAPA cluster from Rancher Manager', { retries: 1 }, () => {
+        // Check cluster is not deleted after removal
+        cy.deleteCluster(clusterName);
+        cy.goToHome();
+        // kubectl get clusters.cluster.x-k8s.io
+        // This is checked by ensuring the cluster is not available in navigation menu
+        cy.contains(clusterName).should('not.exist');
+        cy.checkCAPIClusterProvisioned(clusterName);
+      })
+    );
 
-  qase(16,
-    it('Delete the CAPA cluster fleet repo', () => {
-      // Remove the fleet git repo
-      cy.removeFleetGitRepo(repoName, true);
-      // Wait until the following returns no clusters found
-      // This is checked by ensuring the cluster is not available in CAPI menu
-      cy.checkCAPIClusterDeleted(clusterName, timeout);
-    })
-  );
+    qase(16,
+      it('Delete the CAPA cluster fleet repo', () => {
+        // Remove the fleet git repo
+        cy.removeFleetGitRepo(repoName, true);
+        // Wait until the following returns no clusters found
+        // This is checked by ensuring the cluster is not available in CAPI menu
+        cy.checkCAPIClusterDeleted(clusterName, timeout);
+      })
+    );
+  }
 });
