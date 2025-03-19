@@ -28,7 +28,7 @@ on:
         description: Version of the capi-ui-extension to test (eg. 0.8.1)
         type: string
       grep_test_by_tag:
-        description: Test tags. For multiple selection separate with spaces. Keep always @install
+        description: Test tags. For multiple selection separate with spaces (Available options - @install, @short, @full, @vsphere). Keep always @install
         required: true
         type: string
         default: '@install @short'

@@ -30,7 +30,8 @@ describe('Enable CAPI Providers', () => {
   const kubeadmProviderVersion = 'v1.9.5'
   const kubeadmBaseURL = 'https://github.com/kubernetes-sigs/cluster-api/releases/'
   const kubeadmProviderTypes = ['bootstrap', 'control plane']
-  const providerNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system', 'capd-system', 'capa-system', 'capg-system', 'capz-system']
+  const providerNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system', 'capd-system']
+  const cloudProviderNamespaces = ['capa-system', 'capg-system', 'capz-system']
   const vsphereProviderNamespace = 'capv-system'
 
   beforeEach(() => {
@@ -126,6 +127,13 @@ describe('Enable CAPI Providers', () => {
   })
 
   context('Cloud Providers', { tags: '@full' }, () => {
+
+    cloudProviderNamespaces.forEach(namespace => {
+      it('Create CAPI Cloud Providers Namespaces - ' + namespace, () => {
+        cy.createNamespace(namespace);
+      })
+    })
+
     qase(13,
       it('Create CAPA provider', () => {
         // Create AWS Infrastructure provider
