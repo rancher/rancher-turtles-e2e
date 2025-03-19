@@ -121,14 +121,18 @@ metadata:
 spec:
   agentConfig:
     airGapped: true
-  infrastructureRef:
-    apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
-    kind: AWSMachineTemplate
-    name: {{ $cluster_name }}-control-plane
-  nodeDrainTimeout: 2m
+    kubelet:
+      extraArgs:
+      - --cloud-provider=external
+  machineTemplate:
+    infrastructureRef:
+      apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+      kind: AWSMachineTemplate
+      name: {{ $cluster_name }}-control-plane
+    nodeDrainTimeout: 2m
   preRKE2Commands:
   - sudo hostnamectl set-hostname $(curl -s http://169.254.169.254/1.0/meta-data/hostname)
-  replicas: {{ .Values.cp_replicas }}
+  replicas: {{ .Values.cp_machine_count }}
   rolloutStrategy:
     rollingUpdate:
       maxSurge: 1
@@ -165,7 +169,7 @@ metadata:
     "helm.sh/resource-policy": keep
 spec:
   clusterName: {{ $cluster_name }}
-  replicas: {{ .Values.worker_replicas }}
+  replicas: {{ .Values.worker_machine_count }}
   selector:
     matchLabels:
       cluster.x-k8s.io/cluster-name: {{ $cluster_name }}
@@ -210,6 +214,9 @@ spec:
     spec:
       agentConfig:
         airGapped: true
+        kubelet:
+          extraArgs:
+          - --cloud-provider=external
       preRKE2Commands:
       - sudo hostnamectl set-hostname $(curl -s http://169.254.169.254/1.0/meta-data/hostname)
 ---
@@ -217,7 +224,6 @@ apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
 kind: AWSClusterControllerIdentity
 metadata:
   name: default
-  namespace: default
 spec:
   allowedNamespaces: {}
 ---

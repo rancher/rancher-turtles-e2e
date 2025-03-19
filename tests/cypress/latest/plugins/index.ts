@@ -43,6 +43,7 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   config.env.aws_access_key = process.env.AWS_ACCESS_KEY_ID;
   config.env.aws_secret_key = process.env.AWS_SECRET_ACCESS_KEY;
   config.env.gcp_credentials = process.env.GCP_CREDENTIALS;
+  config.env.gcp_project = process.env.GCP_PROJECT;
   config.env.azure_tenant_id = process.env.AZURE_TENANT_ID
   config.env.azure_client_id = process.env.AZURE_CLIENT_ID
   config.env.azure_client_secret = process.env.AZURE_CLIENT_SECRET

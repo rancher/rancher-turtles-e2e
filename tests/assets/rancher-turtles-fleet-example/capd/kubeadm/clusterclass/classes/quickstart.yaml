@@ -4,6 +4,14 @@ metadata:
   name: quick-start
 spec:
   controlPlane:
+    machineHealthCheck:
+      unhealthyConditions:
+        - status: Unknown
+          timeout: 300s
+          type: Ready
+        - status: "False"
+          timeout: 300s
+          type: Ready
     machineInfrastructure:
       ref:
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -190,18 +198,26 @@ spec:
         type: object
   workers:
     machineDeployments:
-    - class: default-worker
-      template:
-        bootstrap:
-          ref:
-            apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
-            kind: KubeadmConfigTemplate
-            name: quick-start-default-worker-bootstraptemplate
-        infrastructure:
-          ref:
-            apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-            kind: DockerMachineTemplate
-            name: quick-start-default-worker-machinetemplate
+      - class: default-worker
+        machineHealthCheck:
+          unhealthyConditions:
+            - status: Unknown
+              timeout: 300s
+              type: Ready
+            - status: "False"
+              timeout: 300s
+              type: Ready
+        template:
+          bootstrap:
+            ref:
+              apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+              kind: KubeadmConfigTemplate
+              name: quick-start-default-worker-bootstraptemplate
+          infrastructure:
+            ref:
+              apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+              kind: DockerMachineTemplate
+              name: quick-start-default-worker-machinetemplate
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: DockerClusterTemplate
@@ -228,10 +244,10 @@ spec:
         clusterConfiguration:
           apiServer:
             certSANs:
-            - localhost
-            - 127.0.0.1
-            - 0.0.0.0
-            - host.docker.internal
+              - localhost
+              - 127.0.0.1
+              - 0.0.0.0
+              - host.docker.internal
           controllerManager:
             extraArgs:
               enable-hostpath-provisioner: "true"
@@ -248,8 +264,8 @@ spec:
   template:
     spec:
       extraMounts:
-      - containerPath: /var/run/docker.sock
-        hostPath: /var/run/docker.sock
+        - containerPath: /var/run/docker.sock
+          hostPath: /var/run/docker.sock
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: DockerMachineTemplate
@@ -259,8 +275,8 @@ spec:
   template:
     spec:
       extraMounts:
-      - containerPath: /var/run/docker.sock
-        hostPath: /var/run/docker.sock
+        - containerPath: /var/run/docker.sock
+          hostPath: /var/run/docker.sock
 ---
 apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
 kind: KubeadmConfigTemplate

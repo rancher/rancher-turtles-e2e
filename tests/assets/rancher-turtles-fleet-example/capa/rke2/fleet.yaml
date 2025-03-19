@@ -8,6 +8,6 @@ helm:
     sshKeyName: turtles-qa-rke2
     version: v1.30.2+rke2r1
     ami_id: ami-0f702c4f61dc991d7
-    cp_replicas: 1
-    worker_replicas: 1
+    cp_machine_count: 1
+    worker_machine_count: 1
 

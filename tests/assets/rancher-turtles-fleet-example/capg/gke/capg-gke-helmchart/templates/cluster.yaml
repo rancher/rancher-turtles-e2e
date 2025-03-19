@@ -22,7 +22,7 @@ kind: GCPManagedCluster
 metadata:
   name: {{ $cluster_name }}
 spec:
-  project: ei-container-eco
+  project: {{ .Values.gcp.gcpProject }}
   region: {{ .Values.region }}
   network:
     name: hosted-providers-ci
@@ -32,7 +32,8 @@ apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 metadata:
   name: {{ $cluster_name }}-control-plane
 spec:
-  project: ei-container-eco
+  clusterName: {{ $cluster_name }}
+  project: {{ .Values.gcp.gcpProject }}
   location: {{ .Values.region }}
 ---
 apiVersion: cluster.x-k8s.io/v1beta1
@@ -43,7 +44,7 @@ metadata:
     "helm.sh/resource-policy": keep
 spec:
   clusterName: {{ $cluster_name }}
-  replicas: {{ .Values.worker_replicas }}
+  replicas: {{ .Values.worker_machine_count }}
   template:
     spec:
       bootstrap:
