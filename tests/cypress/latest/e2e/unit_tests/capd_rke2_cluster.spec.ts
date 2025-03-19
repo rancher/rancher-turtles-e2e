@@ -120,49 +120,47 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
       );
     }
 
-    if (!skipDeletionTest) {
-      qase(9,
-        it('Remove imported CAPD cluster from Rancher Manager', { retries: 1 }, () => {
-          // Check cluster is not deleted after removal
-          cy.deleteCluster(clusterName);
-          cy.goToHome();
-          // kubectl get clusters.cluster.x-k8s.io
-          // This is checked by ensuring the cluster is not available in navigation menu
-          cy.contains(clusterName).should('not.exist');
-          cy.checkCAPIClusterProvisioned(clusterName);
-        })
-      );
+    qase(9,
+      it('Remove imported CAPD cluster from Rancher Manager', { retries: 1 }, () => {
+        // Check cluster is not deleted after removal
+        cy.deleteCluster(clusterName);
+        cy.goToHome();
+        // kubectl get clusters.cluster.x-k8s.io
+        // This is checked by ensuring the cluster is not available in navigation menu
+        cy.contains(clusterName).should('not.exist');
+        cy.checkCAPIClusterProvisioned(clusterName);
+      })
+    );
 
-      qase(10,
-        it('Delete the CAPD cluster fleet repo(s) - ' + path, () => {
-          if (path.includes('clusterclass')) {
-            // Remove the classes fleet repo
-            cy.removeFleetGitRepo(classesRepo, true);
-            // Remove the clusters fleet repo
-            cypressLib.burgerMenuToggle();
-            cy.removeFleetGitRepo(clustersRepo);
+    qase(10,
+      it('Delete the CAPD cluster fleet repo(s) - ' + path, () => {
+        if (path.includes('clusterclass')) {
+          // Remove the classes fleet repo
+          cy.removeFleetGitRepo(classesRepo, true);
+          // Remove the clusters fleet repo
+          cypressLib.burgerMenuToggle();
+          cy.removeFleetGitRepo(clustersRepo);
 
-            // Wait until the following returns no clusters found
-            cy.checkCAPIClusterDeleted(clusterName, timeout);
-            // Remove the clusterclass
-            cy.removeCAPIResource('Cluster Classes', className);
-          } else {
-            // Remove the clusters fleet repo
-            cy.removeFleetGitRepo(clustersRepo);
+          // Wait until the following returns no clusters found
+          cy.checkCAPIClusterDeleted(clusterName, timeout);
+          // Remove the clusterclass
+          cy.removeCAPIResource('Cluster Classes', className);
+        } else {
+          // Remove the clusters fleet repo
+          cy.removeFleetGitRepo(clustersRepo);
 
-            // Wait until the following returns no clusters found
-            // This is checked by ensuring the cluster is not available in CAPI menu
-            cy.checkCAPIClusterDeleted(clusterName, timeout);
+          // Wait until the following returns no clusters found
+          // This is checked by ensuring the cluster is not available in CAPI menu
+          cy.checkCAPIClusterDeleted(clusterName, timeout);
+        }
+
+        // Ensure the cluster is not available in navigation menu
+        cy.getBySel('side-menu').then(($menu) => {
+          if ($menu.text().includes(clusterName)) {
+            cy.deleteCluster(clusterName);
           }
-
-          // Ensure the cluster is not available in navigation menu
-          cy.getBySel('side-menu').then(($menu) => {
-            if ($menu.text().includes(clusterName)) {
-              cy.deleteCluster(clusterName);
-            }
-          })
         })
-      );
-    }
+      })
+    );
   })
 });
