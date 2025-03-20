@@ -28,7 +28,7 @@ on:
         description: Version of the capi-ui-extension to test (eg. 0.8.1)
         type: string
       grep_test_by_tag:
-        description: Test tags. For multiple selection separate with spaces (Available options - @install, @short, @full, @vsphere). Keep always @install
+        description: Test tags. For multiple selection separate with spaces (Available options - @install [@short @full|@vsphere]). Keep always @install
         required: true
         type: string
         default: '@install @short'
@@ -40,8 +40,8 @@ on:
         description: Destroy the auto-generated self-hosted runner
         default: true
         type: boolean
-      skip_deletion_test:
-        description: Skip Deletion tests to retain the clusters
+      skip_cluster_delete:
+        description: Skip CAPI cluster and fleet repo deletion tests
         default: false
         type: boolean
   schedule:
@@ -75,4 +75,4 @@ jobs:
       grep_test_by_tag: ${{ inputs.grep_test_by_tag || (github.event.schedule == '0 3 * * *' && '@install @short') || (github.event.schedule == '0 4 * * *' && '@install @vsphere') }}
       operator_dev_chart: ${{ inputs.operator_dev_chart == true || (github.event_name == 'schedule' && true) }}
       turtles_operator_version: ${{ inputs.turtles_operator_version }}
-      skip_deletion_test: ${{ inputs.skip_deletion_test }}
+      skip_cluster_delete: ${{ inputs.skip_cluster_delete }}

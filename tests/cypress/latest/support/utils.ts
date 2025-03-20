@@ -21,5 +21,5 @@ export const isUIVersion = (version: string) => {
 }
 
 export const skipDeletionTest = () => {
-  return Boolean(Cypress.env("skip_deletion_test"));
+  return Boolean(Cypress.env("skip_cluster_delete"));
 }
