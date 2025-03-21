@@ -1,7 +1,6 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipDeletionTest } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPA EKS', { tags: '@full' }, () => {
@@ -63,7 +62,7 @@ describe('Import CAPA EKS', { tags: '@full' }, () => {
     })
   );
 
-  if (!skipDeletionTest) {
+  if (Cypress.env("skip_cluster_delete") == "false") {
     qase(15,
       it('Remove imported CAPA cluster from Rancher Manager', { retries: 1 }, () => {
 

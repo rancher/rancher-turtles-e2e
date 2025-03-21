@@ -1,7 +1,5 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipDeletionTest } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPV', { tags: '@vsphere' }, () => {
@@ -167,7 +165,7 @@ describe('Import CAPV', { tags: '@vsphere' }, () => {
     cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
   })
 
-  if (!skipDeletionTest) {
+  if (Cypress.env("skip_cluster_delete") == "false") {
     it('Remove imported CAPV cluster from Rancher Manager', { retries: 1 }, () => {
       // Check cluster is not deleted after removal
       cy.deleteCluster(clusterName);
