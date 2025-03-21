@@ -13,7 +13,7 @@ spec:
   clientID: "{{ .Values.azure.clientID }}"
   clientSecret:
     name: cluster-identity-secret
-    namespace: default
+    namespace: capz-system
   tenantID: "{{ .Values.azure.tenantID }}"
   type: ServicePrincipal
 ---
@@ -70,9 +70,9 @@ metadata:
   name: {{ $cluster_name }}
 spec:
   clusterNetwork:
-    services:
+    pods:
       cidrBlocks:
-        - 192.168.0.0/16
+      - 192.168.0.0/16
   controlPlaneRef:
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: AzureManagedControlPlane

@@ -2,8 +2,13 @@ namespace: default
 
 helm:
   chart: ./capg-gke-helmchart
+  valuesFrom:
+    - secretKeyRef:
+        name: google-project-secret
+        namespace: capg-system
+        key: values.yaml
   values:
     clustername_prefix: turtles-qa-capg-gke
     region: asia-south2
-    worker_replicas: 1
+    worker_machine_count: 1
 

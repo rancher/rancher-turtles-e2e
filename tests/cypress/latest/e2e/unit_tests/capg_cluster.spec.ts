@@ -12,11 +12,37 @@ describe('Import CAPG GKE', { tags: '@full' }, () => {
   const branch = 'main'
   const path = '/tests/assets/rancher-turtles-fleet-example/capg/gke'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
+  const gcpProject = Cypress.env("gcp_project")
 
   beforeEach(() => {
     cy.login();
     cypressLib.burgerMenuToggle();
   });
+
+  it('Create values.yaml Secret', () => {
+    cy.contains('local')
+      .click();
+    cy.get('.header-buttons > :nth-child(1) > .icon')
+      .click();
+    cy.contains('Import YAML');
+    var encodedData = ''
+    cy.readFile('./fixtures/capg-helm-values.yaml').then((data) => {
+      data = data.replace(/replace_gcp_project/g, gcpProject)
+      encodedData = btoa(data)
+    })
+
+    cy.readFile('./fixtures/capg-helm-values-secret.yaml').then((data) => {
+      cy.get('.CodeMirror')
+        .then((editor) => {
+          data = data.replace(/replace_values/g, encodedData)
+          editor[0].CodeMirror.setValue(data);
+        })
+    });
+
+    cy.clickButton('Import');
+    cy.clickButton('Close');
+
+  })
 
   it('Setup the namespace for importing', () => {
     cy.namespaceAutoImport('Enable');

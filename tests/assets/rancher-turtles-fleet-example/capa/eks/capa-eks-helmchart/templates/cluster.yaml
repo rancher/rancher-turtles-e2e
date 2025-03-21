@@ -9,13 +9,19 @@ spec:
     pods:
       cidrBlocks: ["192.168.0.0/16"]
   infrastructureRef:
-    kind: AWSManagedControlPlane
-    apiVersion: controlplane.cluster.x-k8s.io/v1beta2
-    name: {{ $cluster_name }}-control-plane
+    kind: AWSManagedCluster
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+    name: {{ $cluster_name }}
   controlPlaneRef:
     kind: AWSManagedControlPlane
     apiVersion: controlplane.cluster.x-k8s.io/v1beta2
     name: {{ $cluster_name }}-control-plane
+---
+kind: AWSManagedCluster
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+metadata:
+  name: {{ $cluster_name }}
+spec: {}
 ---
 kind: AWSManagedControlPlane
 apiVersion: controlplane.cluster.x-k8s.io/v1beta2
@@ -31,6 +37,7 @@ metadata:
   name: {{ $cluster_name }}-pool-0
 spec:
   clusterName: {{ $cluster_name }}
+  replicas: {{ .Values.worker_machine_count }}
   template:
     spec:
       clusterName: {{ $cluster_name }}

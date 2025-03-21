@@ -13,6 +13,8 @@ apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
   name: cluster1
+  annotations:
+    cluster-api.cattle.io/upstream-system-agent: "true"
 spec:
   clusterNetwork:
     pods:
@@ -54,15 +56,29 @@ spec:
       maxSurge: 1
     type: RollingUpdate
   serverConfig:
+    cloudProviderName: external
     cni: calico
     kubeAPIServer:
       extraArgs:
       - --anonymous-auth=true
     disableComponents:
       pluginComponents:
-      - rke2-ingress-nginx
+        - rke2-ingress-nginx
       kubernetesComponents:
       - cloudController
+    etcd:
+      backupConfig:
+        scheduleCron: '*/5 * * * *'
+        retention: "1"
+  agentConfig:
+    nodeAnnotations:
+      test: "true"
+  machineTemplate:
+    infrastructureRef:
+      apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+      kind: DockerMachineTemplate
+      name:  cluster1-control-plane
+    nodeDrainTimeout: 30s
   infrastructureRef:
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: DockerMachineTemplate
@@ -84,6 +100,7 @@ apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
 kind: RKE2ConfigTemplate
 metadata:
   name: cluster1-md-0
+spec: {}
 ---
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: MachineDeployment
@@ -95,7 +112,7 @@ spec:
   clusterName: cluster1
   replicas: 1
   selector:
-    matchLabels: null
+    cluster.x-k8s.io/cluster-name: cluster1
   template:
     spec:
       bootstrap:

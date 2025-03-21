@@ -6,4 +6,5 @@ helm:
     clustername_prefix: turtles-qa-capa-eks
     region: ap-south-2
     version: v1.30
+    worker_machine_count: 1
 

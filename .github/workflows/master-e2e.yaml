@@ -8,6 +8,9 @@ on:
       gcp_credentials:
         description: Credentials to use to connect
         required: true
+      gcp_project:
+        description: GCP Project name details
+        required: true
       pat_token:
         # A token is needed to be able to add runner on the repo, maybe this can be changed later
         # This token is linked to a personal account
@@ -384,6 +387,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
           GCP_CREDENTIALS: ${{ secrets.gcp_credentials }}
+          GCP_PROJECT: ${{ secrets.gcp_project }}
           AZURE_CLIENT_SECRET: ${{ secrets.azure_client_secret }}
           AZURE_CLIENT_ID: ${{ secrets.azure_client_id }}
           AZURE_TENANT_ID: ${{ secrets.azure_tenant_id }}
