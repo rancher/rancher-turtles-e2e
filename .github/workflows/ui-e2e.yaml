@@ -75,4 +75,4 @@ jobs:
       grep_test_by_tag: ${{ inputs.grep_test_by_tag || (github.event.schedule == '0 3 * * *' && '@install @short') || (github.event.schedule == '0 4 * * *' && '@install @vsphere') }}
       operator_dev_chart: ${{ inputs.operator_dev_chart == true || (github.event_name == 'schedule' && true) }}
       turtles_operator_version: ${{ inputs.turtles_operator_version }}
-      skip_cluster_delete: ${{ inputs.skip_cluster_delete }}
+      skip_cluster_delete: ${{ inputs.skip_cluster_delete || (github.event_name == 'schedule' && false) }}
