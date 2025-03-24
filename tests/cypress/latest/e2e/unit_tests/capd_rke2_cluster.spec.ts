@@ -14,7 +14,7 @@ limitations under the License.
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipDeletionTest } from '~/support/utils';
+import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPD RKE2', { tags: '@short' }, () => {
