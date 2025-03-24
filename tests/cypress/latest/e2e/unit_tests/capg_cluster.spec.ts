@@ -1,6 +1,7 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
+import { skipDeletionTest } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPG GKE', { tags: '@full' }, () => {
@@ -64,7 +65,7 @@ describe('Import CAPG GKE', { tags: '@full' }, () => {
     })
   );
 
-  if (Cypress.env("skip_cluster_delete") == "false") {
+  if (skipDeletionTest) {
     qase(38,
       it('Remove imported CAPG cluster from Rancher Manager', { retries: 1 }, () => {
 

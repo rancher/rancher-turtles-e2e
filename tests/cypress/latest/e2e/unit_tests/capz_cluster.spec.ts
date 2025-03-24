@@ -1,6 +1,7 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
+import { skipDeletionTest } from '~/support/utils';
 
 Cypress.config();
 describe('Import/Create CAPZ', { tags: '@full' }, () => {
@@ -194,7 +195,7 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
   })
   );
 
-  if (Cypress.env("skip_cluster_delete") == "false") {
+  if (skipDeletionTest) {
     qase(26, it('Delete the CAPZ cluster fleet repo', () => {
 
       // Remove the fleet git repo
