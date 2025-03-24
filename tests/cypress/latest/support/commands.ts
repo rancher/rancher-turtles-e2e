@@ -101,10 +101,7 @@ Cypress.Commands.add('namespaceReset', () => {
 // Command to create CAPI cluster from Clusterclass (ui-extn: v0.8.2)
 Cypress.Commands.add('createCAPICluster', (className, clusterName, machineName, k8sVersion, podCIDR, serviceCIDR) => {
   // Navigate to Classes Menu
-  cy.checkCAPIMenu();
-  cy.contains('Cluster Classes').click();
-  cy.typeInFilter(className);
-  cy.contains(className).should('be.visible');
+  cy.checkCAPIClusterClass(className);
   cy.getBySel('sortable-table-0-action-button').click();
 
   // Create Cluster from Classes Menu
@@ -181,7 +178,7 @@ Cypress.Commands.add('checkCAPIClusterDeleted', (clusterName, timeout) => {
   cy.checkCAPIMenu();
   cy.getBySel('button-group-child-1').click();
   cy.typeInFilter(clusterName);
-  cy.getBySel('sortable-table-0-action-button', { timeout: timeout }).should('not.exist');
+  cy.getBySel('sortable-cell-0-1', { timeout: timeout }).should('not.exist');
 });
 
 // Command to check CAPI Menu is visible

@@ -1,23 +1,23 @@
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: ClusterClass
 metadata:
-  name: quick-start
+  name: capd-rke2-class
 spec:
   controlPlane:
     ref:
       apiVersion: controlplane.cluster.x-k8s.io/v1beta1
       kind: RKE2ControlPlaneTemplate
-      name: quick-start-control-plane
+      name: capd-rke2-class-control-plane
     machineInfrastructure:
       ref:
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: DockerMachineTemplate
-        name: quick-start-control-plane
+        name: capd-rke2-class-control-plane
   infrastructure:
     ref:
       apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
       kind: DockerClusterTemplate
-      name: quick-start-cluster
+      name: capd-rke2-class-cluster
   workers:
     machineDeployments:
     - class: default-worker
@@ -26,12 +26,12 @@ spec:
           ref:
             apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
             kind: RKE2ConfigTemplate
-            name: quick-start-default-worker-bootstraptemplate
+            name: capd-rke2-class-default-worker-bootstraptemplate
         infrastructure:
           ref:
             apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
             kind: DockerMachineTemplate
-            name: quick-start-default-worker-machinetemplate
+            name: capd-rke2-class-default-worker-machinetemplate
   variables:
     - name: dockerKindImage
       required: true
@@ -130,7 +130,7 @@ data:
       {{- end}}
 kind: ConfigMap
 metadata:
-  name: quick-start-lb-config
+  name: capd-rke2-class-lb-config
   namespace: default
   annotations:
     "helm.sh/resource-policy": keep
@@ -138,7 +138,7 @@ metadata:
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: DockerClusterTemplate
 metadata:
-  name: quick-start-cluster
+  name: capd-rke2-class-cluster
 spec:
   template:
     metadata:
@@ -147,19 +147,19 @@ spec:
     spec:
       loadBalancer:
         customHAProxyConfigTemplateRef:
-          name: quick-start-lb-config
+          name: capd-rke2-class-lb-config
 ---
 kind: RKE2ControlPlaneTemplate
 apiVersion: controlplane.cluster.x-k8s.io/v1beta1
 metadata:
-  name: quick-start-control-plane
+  name: capd-rke2-class-control-plane
 spec:
   template:
     spec:
       infrastructureRef:
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: DockerMachineTemplate
-        name: quick-start-control-plane
+        name: capd-rke2-class-control-plane
       serverConfig:
         cni: calico
         kubeAPIServer:
@@ -178,7 +178,7 @@ spec:
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: DockerMachineTemplate
 metadata:
-  name: quick-start-control-plane
+  name: capd-rke2-class-control-plane
 spec:
   template:
     spec:
@@ -191,7 +191,7 @@ spec:
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: DockerMachineTemplate
 metadata:
-  name: quick-start-default-worker-machinetemplate
+  name: capd-rke2-class-default-worker-machinetemplate
 spec:
   template:
     spec:
@@ -204,7 +204,8 @@ spec:
 apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
 kind: RKE2ConfigTemplate
 metadata:
-  name: quick-start-default-worker-bootstraptemplate
+  name: capd-rke2-class-default-worker-bootstraptemplate
 spec:
   template:
     spec: {}
+

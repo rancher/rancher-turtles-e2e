@@ -1,17 +1,17 @@
 apiVersion: addons.cluster.x-k8s.io/v1beta1
 kind: ClusterResourceSet
 metadata:
-  name: quick-start-crs-0
+  name: capd-class-crs-0
   namespace: fleet-default
 spec:
   clusterSelector:
     matchLabels:
-      # cni: quick-start-crs-0
+      # cni: capd-class-crs-0
       # Workaround for capi-ui-extension/issues/122
-      cluster.x-k8s.io/cluster-name: cluster1
+      topology.cluster.x-k8s.io/owned: ""
   resources:
   - kind: ConfigMap
-    name: cni-quick-start-crs-0
+    name: cni-capd-class-crs-0
   strategy: ApplyOnce
 ---
 apiVersion: v1
@@ -135,5 +135,5 @@ data:
                 path: /lib/modules
 kind: ConfigMap
 metadata:
-  name: cni-quick-start-crs-0
+  name: cni-capd-class-crs-0
   namespace: fleet-default

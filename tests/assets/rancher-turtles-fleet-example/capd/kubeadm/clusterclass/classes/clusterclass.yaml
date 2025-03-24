@@ -1,7 +1,7 @@
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: ClusterClass
 metadata:
-  name: quick-start
+  name: capd-kubeadm-class
 spec:
   controlPlane:
     machineHealthCheck:
@@ -16,16 +16,16 @@ spec:
       ref:
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: DockerMachineTemplate
-        name: quick-start-control-plane
+        name: capd-kubeadm-class-control-plane
     ref:
       apiVersion: controlplane.cluster.x-k8s.io/v1beta1
       kind: KubeadmControlPlaneTemplate
-      name: quick-start-control-plane
+      name: capd-kubeadm-class-control-plane
   infrastructure:
     ref:
       apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
       kind: DockerClusterTemplate
-      name: quick-start-cluster
+      name: capd-kubeadm-class-cluster
   patches:
   - definitions:
     - jsonPatches:
@@ -212,17 +212,17 @@ spec:
             ref:
               apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
               kind: KubeadmConfigTemplate
-              name: quick-start-default-worker-bootstraptemplate
+              name: capd-kubeadm-class-default-worker-bootstraptemplate
           infrastructure:
             ref:
               apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
               kind: DockerMachineTemplate
-              name: quick-start-default-worker-machinetemplate
+              name: capd-kubeadm-class-default-worker-machinetemplate
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: DockerClusterTemplate
 metadata:
-  name: quick-start-cluster
+  name: capd-kubeadm-class-cluster
 spec:
   template:
     metadata:
@@ -233,7 +233,7 @@ spec:
 apiVersion: controlplane.cluster.x-k8s.io/v1beta1
 kind: KubeadmControlPlaneTemplate
 metadata:
-  name: quick-start-control-plane
+  name: capd-kubeadm-class-control-plane
 spec:
   template:
     metadata:
@@ -259,7 +259,7 @@ spec:
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: DockerMachineTemplate
 metadata:
-  name: quick-start-control-plane
+  name: capd-kubeadm-class-control-plane
 spec:
   template:
     spec:
@@ -270,7 +270,7 @@ spec:
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: DockerMachineTemplate
 metadata:
-  name: quick-start-default-worker-machinetemplate
+  name: capd-kubeadm-class-default-worker-machinetemplate
 spec:
   template:
     spec:
@@ -281,7 +281,7 @@ spec:
 apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
 kind: KubeadmConfigTemplate
 metadata:
-  name: quick-start-default-worker-bootstraptemplate
+  name: capd-kubeadm-class-default-worker-bootstraptemplate
 spec:
   template:
     spec:

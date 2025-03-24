@@ -1,7 +1,9 @@
+{{- $cluster_name := printf "%s-%s" .Values.clustername_prefix (randAlphaNum 4) | lower -}}
+---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: DockerCluster
 metadata:
-  name: cluster1
+  name: {{ $cluster_name }}
   annotations:
     "helm.sh/resource-policy": keep
 spec:
@@ -27,8 +29,8 @@ apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
   labels:
-    cni: cluster1-crs-0
-  name: cluster1
+    cni: {{ $cluster_name }}-crs-0
+  name: {{ $cluster_name }}
 spec:
   clusterNetwork:
     pods:
@@ -41,16 +43,16 @@ spec:
   controlPlaneRef:
     apiVersion: controlplane.cluster.x-k8s.io/v1beta1
     kind: KubeadmControlPlane
-    name: cluster1-control-plane
+    name: {{ $cluster_name }}-control-plane
   infrastructureRef:
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: DockerCluster
-    name: cluster1
+    name: {{ $cluster_name }}
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: DockerMachineTemplate
 metadata:
-  name: cluster1-control-plane
+  name: {{ $cluster_name }}-control-plane
 spec:
   template:
     spec:
@@ -61,7 +63,7 @@ spec:
 apiVersion: controlplane.cluster.x-k8s.io/v1beta1
 kind: KubeadmControlPlane
 metadata:
-  name: cluster1-control-plane
+  name: {{ $cluster_name }}-control-plane
   annotations:
     "helm.sh/resource-policy": keep
 spec:
@@ -90,14 +92,14 @@ spec:
     infrastructureRef:
       apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
       kind: DockerMachineTemplate
-      name: cluster1-control-plane
+      name: {{ $cluster_name }}-control-plane
   replicas: 1
   version: v1.30.3
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: DockerMachineTemplate
 metadata:
-  name: cluster1-md-0
+  name: {{ $cluster_name }}-md-0
 spec:
   template:
     spec:
@@ -108,7 +110,7 @@ spec:
 apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
 kind: KubeadmConfigTemplate
 metadata:
-  name: cluster1-md-0
+  name: {{ $cluster_name }}-md-0
 spec:
   template:
     spec:
@@ -121,11 +123,11 @@ spec:
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: MachineDeployment
 metadata:
-  name: cluster1-md-0
+  name: {{ $cluster_name }}-md-0
   annotations:
     "helm.sh/resource-policy": keep
 spec:
-  clusterName: cluster1
+  clusterName: {{ $cluster_name }}
   replicas: 2
   selector:
     matchLabels: null
@@ -135,26 +137,26 @@ spec:
         configRef:
           apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
           kind: KubeadmConfigTemplate
-          name: cluster1-md-0
-      clusterName: cluster1
+          name: {{ $cluster_name }}-md-0
+      clusterName: {{ $cluster_name }}
       failureDomain: fd4
       infrastructureRef:
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: DockerMachineTemplate
-        name: cluster1-md-0
+        name: {{ $cluster_name }}-md-0
       version: v1.30.3
 ---
 apiVersion: addons.cluster.x-k8s.io/v1beta1
 kind: ClusterResourceSet
 metadata:
-  name: cluster1-crs-0
+  name: {{ $cluster_name }}-crs-0
 spec:
   clusterSelector:
     matchLabels:
-      cni: cluster1-crs-0
+      cni: {{ $cluster_name }}-crs-0
   resources:
   - kind: ConfigMap
-    name: cni-cluster1-crs-0
+    name: {{ $cluster_name }}-cni-crs-0
   strategy: ApplyOnce
 ---
 apiVersion: v1
@@ -278,4 +280,4 @@ data:
                 path: /lib/modules
 kind: ConfigMap
 metadata:
-  name: cni-cluster1-crs-0
+  name: {{ $cluster_name }}-cni-crs-0

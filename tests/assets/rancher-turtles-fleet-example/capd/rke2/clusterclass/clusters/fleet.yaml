@@ -3,3 +3,7 @@ dependsOn:
   - selector:
       matchLabels:
         classes: "true"
+
+helm:
+  values:
+    clustername_prefix: capd-rke2-class-cluster
