@@ -23,8 +23,8 @@ describe('Enable CAPI Providers', () => {
   const amazonProvider = 'aws'
   const googleProvider = 'gcp'
   const azureProvider = 'azure'
-  const fleetProvider = 'fleet'
-  const fleetProviderVersion = 'v0.7.0'
+  const fleetProvider = 'rancher-fleet'
+  const fleetProviderVersion = 'v0.7.1'
   const vsphereProvider = 'vsphere'
   const vsphereProviderVersion = 'v1.12.0'
   const kubeadmProviderVersion = 'v1.9.5'
@@ -141,7 +141,7 @@ describe('Enable CAPI Providers', () => {
         cypressLib.burgerMenuToggle();
         cy.addInfraProvider('Amazon', amazonProvider, 'capa-system', amazonProvider);
         var statusReady = 'Ready'
-        statusReady = statusReady.concat(amazonProvider, 'infrastructure', amazonProvider, 'v2.7.1')
+        statusReady = statusReady.concat(amazonProvider, 'infrastructure', amazonProvider, 'v2.8.1')
         cy.contains(statusReady);
       })
     );
@@ -153,7 +153,7 @@ describe('Enable CAPI Providers', () => {
         cypressLib.burgerMenuToggle();
         cy.addInfraProvider('Google', googleProvider, 'capg-system', googleProvider);
         var statusReady = 'Ready'
-        statusReady = statusReady.concat(googleProvider, 'infrastructure', googleProvider, 'v1.8.1')
+        statusReady = statusReady.concat(googleProvider, 'infrastructure', googleProvider, 'v1.9.0')
         cy.contains(statusReady, { timeout: 120000 });
       })
     );
