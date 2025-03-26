@@ -465,7 +465,7 @@ jobs:
 
   delete-runner:
     if: ${{ always() && needs.create-runner.result == 'success' && needs.create-runner.outputs.uuid != 'vsphere' }}
-    needs: [create-runner, e2e]
+    needs: [create-runner]
     runs-on: ubuntu-latest
     steps:
       # actions/checkout MUST come before auth
