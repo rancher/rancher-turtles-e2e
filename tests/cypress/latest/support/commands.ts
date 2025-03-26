@@ -375,7 +375,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
   cy.clickButton(operation);
   // During update, Chart name changes to App name
   if (operation == "Install") {
-    cy.contains('.outer-container > .header', chartName);
+    cy.contains('.chart-header', chartName);
   }
   cy.clickButton('Next');
 
