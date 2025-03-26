@@ -18,6 +18,7 @@ import 'cypress-file-upload';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import jsyaml from 'js-yaml';
 import _ from 'lodash';
+import { isRancherManagerVersion } from './utils';
 
 // Generic commands
 // Go to specific Sub Menu from Access Menu
@@ -318,11 +319,11 @@ Cypress.Commands.add('addCloudCredsVMware', (name: string, vsphere_username: str
 Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: string, repositoryType: string, repositoryBranch: string) => {
   cy.contains('local')
     .click();
-    cy.clickNavMenu(['Apps', 'Repositories'])
+  cy.clickNavMenu(['Apps', 'Repositories'])
   // Make sure we are in the 'Repositories' screen (test failed here before)
   // Test fails sporadically here, screen stays in pending state forever
   // Ensuring "Loading..." overlay screen is not present.
-  cy.contains('Loading...', {timeout: 35000}).should('not.exist');
+  cy.contains('Loading...', { timeout: 35000 }).should('not.exist');
   cy.contains('header', 'Repositories')
     .should('be.visible');
   cy.contains('Create')
@@ -348,7 +349,7 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
   cy.wait(1000);
   cy.get('.icon.group-icon.icon-refresh').click();
   cy.wait(1000);
-  cy.contains(new RegExp('Active.*'+repositoryName));
+  cy.contains(new RegExp('Active.*' + repositoryName));
 });
 
 // Command to Install or Update App from Charts menu
@@ -541,6 +542,12 @@ Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, path, worksp
   cy.clickButton('Add Repository');
   cy.contains('Git Repo:').should('be.visible');
   cy.typeValue('Name', repoName);
+
+  if (isRancherManagerVersion("2.11")) {
+    cy.clickButton("Next");
+    cy.get('button.btn').contains('Previous').should('be.visible');
+  }
+
   cy.typeValue('Repository URL', repoUrl);
   cy.typeValue('Branch Name', branch);
   cy.clickButton('Add Path');
@@ -549,6 +556,12 @@ Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, path, worksp
   })
   cy.clickButton('Next');
   cy.get('button.btn').contains('Previous').should('be.visible');
+
+  if (isRancherManagerVersion("2.11")) {
+    cy.clickButton("Next");
+    cy.get('button.btn').contains('Previous').should('be.visible');
+  }
+
   cy.clickButton('Create');
 
   // Navigate to fleet repo
@@ -595,7 +608,7 @@ Cypress.Commands.add('checkFleetGitRepo', (repoName, workspace) => {
 })
 
 // Fleet namespace toggle
-Cypress.Commands.add('fleetNamespaceToggle', (toggleOption='local') => {
+Cypress.Commands.add('fleetNamespaceToggle', (toggleOption = 'local') => {
   cy.contains('fleet-').click();
   cy.contains(toggleOption).should('be.visible').click();
 });
