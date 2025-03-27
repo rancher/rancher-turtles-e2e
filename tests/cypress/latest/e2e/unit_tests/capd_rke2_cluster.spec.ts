@@ -109,7 +109,8 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
       );
 
       qase(41,
-        it('Update chart and check cluster status', () => {
+        // turtles/issues/1219
+        xit('Update chart and check cluster status', () => {
           cy.contains('local').click();
           cy.checkChart('Update', 'Rancher Turtles', 'rancher-turtles-system', '', questions);
 

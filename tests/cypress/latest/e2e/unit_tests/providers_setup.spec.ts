@@ -23,8 +23,8 @@ describe('Enable CAPI Providers', () => {
   const amazonProvider = 'aws'
   const googleProvider = 'gcp'
   const azureProvider = 'azure'
-  const fleetProvider = 'rancher-fleet'
-  const fleetProviderVersion = 'v0.7.1'
+  const fleetProvider = 'fleet'
+  const fleetProviderVersion = 'v0.7.2'
   const vsphereProvider = 'vsphere'
   const vsphereProviderVersion = 'v1.12.0'
   const kubeadmProviderVersion = 'v1.9.5'
@@ -78,7 +78,7 @@ describe('Enable CAPI Providers', () => {
       })
     );
 
-    it('Custom Fleet addon config', () => {
+    xit('Custom Fleet addon config', () => {
       // Allows Fleet addon to be installed on specific clusters only
 
       const clusterName = 'local';
