@@ -181,7 +181,8 @@ jobs:
         run: |
           gcloud compute instances create ${{ steps.generator.outputs.runner }} \
             --source-instance-template ${{ inputs.runner_template }} \
-            --zone ${{ inputs.zone }}
+            --zone ${{ inputs.zone }} \
+            --labels=owner=${{ github.actor }},team=highlander-qa
       - name: Create GCP secrets
         if: ${{ needs.determine-runner.outputs.initial-runner != 'vsphere' }}
         run: |
