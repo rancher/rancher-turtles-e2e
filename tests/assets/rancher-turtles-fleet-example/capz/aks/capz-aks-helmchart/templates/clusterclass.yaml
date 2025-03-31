@@ -1,10 +1,12 @@
 {{- $class_name := printf "%s-%s" .Values.clusterclassname_prefix (randAlphaNum 4) | lower -}}
 {{- $cluster_name := printf "%s-%s" .Values.clustername_prefix (randAlphaNum 4) | lower -}}
+{{- $namespace := printf "%s" .Values.namespace -}}
 ---
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: ClusterClass
 metadata:
   name: {{ $class_name }}
+  namespace: {{ $namespace }}
 spec:
   controlPlane:
     ref:
@@ -47,11 +49,9 @@ apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: AzureManagedControlPlaneTemplate
 metadata:
   name: {{ $cluster_name }}-control-plane
+  namespace: {{ $namespace }}
 spec:
   template:
-    metadata:
-      annotations:
-         "helm.sh/resource-policy": keep
     spec:
       identityRef:
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -59,7 +59,6 @@ spec:
         name: cluster-identity
       location: "{{ .Values.cluster.location }}"
       resourceGroupName: {{ $cluster_name }}
-      sshPublicKey: null
       subscriptionID: "{{ .Values.azure.subscriptionID }}"
       version: "{{ .Values.cluster.kubernetesVersion }}"
 ---
@@ -67,17 +66,16 @@ apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: AzureManagedClusterTemplate
 metadata:
   name: {{ $cluster_name }}
+  namespace: {{ $namespace }}
 spec:
   template:
-    metadata:
-      annotations:
-         "helm.sh/resource-policy": keep
     spec: {}
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: AzureManagedMachinePoolTemplate
 metadata:
   name: {{ $cluster_name }}-pool0
+  namespace: {{ $namespace }}
 spec:
   template:
     spec:
@@ -89,6 +87,7 @@ apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: AzureManagedMachinePoolTemplate
 metadata:
   name: {{ $cluster_name }}-pool1
+  namespace: {{ $namespace }}
 spec:
   template:
     spec:
@@ -100,6 +99,7 @@ apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
 kind: RKE2ConfigTemplate
 metadata:
   name: {{ $cluster_name }}-pool0
+  namespace: {{ $namespace }}
 spec:
   template:
     spec: {}
@@ -108,6 +108,25 @@ apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
 kind: RKE2ConfigTemplate
 metadata:
   name: {{ $cluster_name }}-pool1
+  namespace: {{ $namespace }}
 spec:
   template:
     spec: {}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: AzureClusterIdentity
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  labels:
+    clusterctl.cluster.x-k8s.io/move-hierarchy: "true"
+  name: cluster-identity
+  namespace: {{ $namespace }}
+spec:
+  allowedNamespaces: {}
+  clientID:  "{{ .Values.cluster.clientID }}"
+  clientSecret:
+    name: cluster-identity-secret
+    namespace: capz-system
+  tenantID:  "{{ .Values.cluster.tenantID }}"
+  type: ServicePrincipal
