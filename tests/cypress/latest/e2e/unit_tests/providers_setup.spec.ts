@@ -24,7 +24,7 @@ describe('Enable CAPI Providers', () => {
   const googleProvider = 'gcp'
   const azureProvider = 'azure'
   const fleetProvider = 'fleet'
-  const fleetProviderVersion = 'v0.7.2'
+  const fleetProviderVersion = 'v0.7.4'
   const vsphereProvider = 'vsphere'
   const vsphereProviderVersion = 'v1.12.0'
   const kubeadmProviderVersion = 'v1.9.5'
@@ -78,7 +78,7 @@ describe('Enable CAPI Providers', () => {
       })
     );
 
-    xit('Custom Fleet addon config', () => {
+    it('Custom Fleet addon config', () => {
       // Allows Fleet addon to be installed on specific clusters only
 
       const clusterName = 'local';
