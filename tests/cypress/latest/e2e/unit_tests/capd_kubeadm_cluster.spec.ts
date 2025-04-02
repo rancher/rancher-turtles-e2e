@@ -84,8 +84,6 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
           cy.contains('Dashboard').should('be.visible');
           cypressLib.accesMenu('Clusters');
           cy.fleetNamespaceToggle('fleet-default');
-          // To close the fleetNamespace dropdown, we click on the table
-          cy.get('table.sortable-table').click();
           // Verify the cluster is registered and Active
           const rowNumber = 0
           cy.verifyTableRow(rowNumber, 'Active', clusterName);
