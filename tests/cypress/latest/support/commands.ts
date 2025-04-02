@@ -615,7 +615,7 @@ Cypress.Commands.add('checkFleetGitRepo', (repoName, workspace) => {
 
 // Fleet namespace toggle
 Cypress.Commands.add('fleetNamespaceToggle', (toggleOption = 'local') => {
-  cy.contains('fleet-').click();
+  cy.getBySel('workspace-switcher').click();
   cy.contains(toggleOption).should('be.visible').click();
 });
 

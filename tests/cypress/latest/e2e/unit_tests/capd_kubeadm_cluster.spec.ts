@@ -14,7 +14,7 @@ limitations under the License.
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
+import { isRancherManagerVersion } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
@@ -85,10 +85,13 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
           cy.contains('Dashboard').should('be.visible');
           cypressLib.accesMenu('Clusters');
           cy.fleetNamespaceToggle('fleet-default');
+          // To close the fleetNamespace dropdown, we click on the table
+          cy.get('table.sortable-table').click();
           // Verify the cluster is registered and Active
-          cy.verifyTableRow(0, 'Active', clusterName);
+          const rowNumber = 0
+          cy.verifyTableRow(rowNumber, 'Active', clusterName);
           // Make sure there is only one registered cluster in fleet (there should be one table row)
-          cy.get('table.sortable-table').find('tbody tr').should('have.length', 1);
+          cy.get('table.sortable-table').find(`tbody tr[data-testid="sortable-table-${rowNumber}-row"]`).should('have.length', 1);
         })
       )
       qase(43,
