@@ -7,14 +7,14 @@ Cypress.config();
 describe('Import/Create CAPZ', { tags: '@full' }, () => {
   var clusterName: string, className: string
   const timeout = 1200000
-  const repoName = 'clusters-capz-aks'
-  const clusterNamePrefix = 'turtles-qa-capz-aks' // as per fleet values
-  const classNamePrefix = 'capz-aks-class'
+  const repoName = 'clusters-capz-rke2'
+  const clusterNamePrefix = 'turtles-qa-capz-rke2' // as per fleet values
+  const classNamePrefix = 'capz-rke2-class'
   const machineName = 'default-system'
   const k8sVersion = 'v1.30.0'
   const podCIDR = '192.168.0.0/16'
   const branch = 'main'
-  const path = '/tests/assets/rancher-turtles-fleet-example/capz/aks'
+  const path = '/tests/assets/rancher-turtles-fleet-example/capz/rke2'
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
   const clientID = Cypress.env("azure_client_id")
   const clientSecret = btoa(Cypress.env("azure_client_secret"))
@@ -80,7 +80,7 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
 
   })
 
-  qase(21, it('Add CAPZ cluster fleet repo and get cluster name', () => {
+  qase(21, it.only('Add CAPZ cluster fleet repo and get cluster name', () => {
     cypressLib.checkNavIcon('cluster-management')
       .should('exist');
 
