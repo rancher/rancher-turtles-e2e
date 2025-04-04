@@ -1,7 +1,9 @@
+{{- $cluster_name := printf "%s-%s" .Values.clustername_prefix (randAlphaNum 4) | lower -}}
+---
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
-  name: cluster1
+  name: {{ $cluster_name }}
   namespace: default
   labels:
     cni: by-fleet-addon-kindnet
@@ -16,7 +18,7 @@ spec:
       cidrBlocks:
       - 10.128.0.0/12
   topology:
-    class: quick-start
+    class: capd-kubeadm-class
     controlPlane:
       metadata: {}
       replicas: 1

@@ -1,4 +1,4 @@
-# This will target the cni fleet bundle to the clusterGroup: quick-start only
+# This will target the cni fleet bundle to the clusterGroup: capd-kubeadm-class only
 # The bundle will bypass and ignore the default target from GitRepo
 overrideTargets:
-  - clusterGroup: quick-start
+  - clusterGroup: capd-kubeadm-class

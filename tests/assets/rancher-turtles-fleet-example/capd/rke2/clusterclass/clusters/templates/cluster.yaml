@@ -1,8 +1,9 @@
+{{- $cluster_name := printf "%s-%s" .Values.clustername_prefix (randAlphaNum 4) | lower -}}
 ---
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
-  name: cluster1
+  name: {{ $cluster_name }}
   namespace: default
   labels:
     cluster-api.cattle.io/rancher-auto-import: "true"
@@ -16,7 +17,7 @@ spec:
       cidrBlocks:
       - 10.46.0.0/16
   topology:
-    class: quick-start
+    class: capd-rke2-class
     version: v1.30.3+rke2r1
     controlPlane:
       metadata: {}

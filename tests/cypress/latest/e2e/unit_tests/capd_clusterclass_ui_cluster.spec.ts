@@ -13,6 +13,7 @@ limitations under the License.
 
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
+import * as randomstring from "randomstring";
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
 
@@ -20,8 +21,9 @@ Cypress.config();
 describe('Create CAPD', { tags: '@short' }, () => {
   const timeout = 300000
   const classesRepo = 'classes'
-  const clusterName = 'cluster1'
-  const className = 'quick-start'
+  const className = 'capd-kubeadm-class'
+  const clusterNamePrefix = className + '-cluster'
+  const clusterName = clusterNamePrefix + randomstring.generate({ length: 4, capitalization: "lowercase" })
   const classPath = '/clusterclass/classes'
   const k8sVersion = 'v1.30.3'
   const machineName = 'default-worker'
@@ -41,13 +43,15 @@ describe('Create CAPD', { tags: '@short' }, () => {
       var serviceCIDR = '10.128.0.0/12'
     }
 
-    it('Add classes fleet repo', () => {
-      cypressLib.checkNavIcon('cluster-management').should('exist');
-      var fullPath = basePath + path
-      // Add classes fleet repo to fleel-local workspace
-      fullPath = fullPath.concat('/', classPath)
-      cy.addFleetGitRepo(classesRepo, repoUrl, branch, fullPath);
-    })
+    if (skipClusterDeletion) {
+      it('Add classes fleet repo', () => {
+        cypressLib.checkNavIcon('cluster-management').should('exist');
+        var fullPath = basePath + path
+        // Add classes fleet repo to fleet-local workspace
+        fullPath = fullPath.concat('/', classPath)
+        cy.addFleetGitRepo(className, repoUrl, branch, fullPath);
+      })
+    }
 
     it('Create Kindnet configmap', () => {
       cy.contains('local').click();
@@ -83,30 +87,32 @@ describe('Create CAPD', { tags: '@short' }, () => {
       cy.checkChart('Install', 'Monitoring', 'cattle-monitoring');
     })
 
-    it('Remove CAPD cluster from Rancher Manager', { retries: 1 }, () => {
-      // Check cluster is not deleted after removal
-      cy.deleteCluster(clusterName);
-      cy.goToHome();
-      // kubectl get clusters.cluster.x-k8s.io
-      // This is checked by ensuring the cluster is not available in navigation menu
-      cy.contains(clusterName).should('not.exist');
-      cy.checkCAPIClusterProvisioned(clusterName);
-    })
 
-    it('Delete the CAPI cluster and fleet repo', () => {
-      cy.removeCAPIResource('Clusters', clusterName, timeout);
-
-      // Remove the classes fleet repo
-      cypressLib.burgerMenuToggle();
-      cy.removeFleetGitRepo(classesRepo, true);
-
-      // Ensure the cluster is not available in navigation menu
-      cy.getBySel('side-menu').then(($menu) => {
-        if ($menu.text().includes(clusterName)) {
-          cy.deleteCluster(clusterName);
-        }
+    if (skipClusterDeletion) {
+      it('Remove CAPD cluster from Rancher Manager', { retries: 1 }, () => {
+        // Check cluster is not deleted after removal
+        cy.deleteCluster(clusterName);
+        cy.goToHome();
+        // kubectl get clusters.cluster.x-k8s.io
+        // This is checked by ensuring the cluster is not available in navigation menu
+        cy.contains(clusterName).should('not.exist');
+        cy.checkCAPIClusterProvisioned(clusterName);
       })
-    })
 
+      it('Delete the CAPI cluster and fleet repo', () => {
+        cy.removeCAPIResource('Clusters', clusterName, timeout);
+
+        // Remove the classes fleet repo
+        cypressLib.burgerMenuToggle();
+        cy.removeFleetGitRepo(className, true);
+
+        // Ensure the cluster is not available in navigation menu
+        cy.getBySel('side-menu').then(($menu) => {
+          if ($menu.text().includes(clusterName)) {
+            cy.deleteCluster(clusterName);
+          }
+        })
+      })
+    }
   })
 });

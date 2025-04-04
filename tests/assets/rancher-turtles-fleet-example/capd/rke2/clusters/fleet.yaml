@@ -1,22 +1,13 @@
 namespace: default
 
+helm:
+  values:
+    clustername_prefix: capd-rke2-cluster
+
 diff:
   comparePatches:
-  - apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-    kind: DockerCluster
-    name: cluster1
+  - apiVersion: cluster.x-k8s.io/v1beta1
+    kind: MachineDeployment
     namespace: default
-    operations:
-    - {"op":"remove", "path":"/spec/loadBalancer"}
-  - apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-    kind: DockerMachineTemplate
-    name: cluster1-control-plane
-    namespace: default
-    operations:
-    - {"op":"remove", "path":"/spec/template/spec/bootstrapTimeout"}
-  - apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-    kind: DockerMachineTemplate
-    name: cluster1-md-0
-    namespace: default
-    operations:
-    - {"op":"remove", "path":"/spec/template/spec/bootstrapTimeout"}
+    jsonPointers:
+    - "/spec/selector"
