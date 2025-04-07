@@ -29,6 +29,7 @@ declare global {
       checkFleetGitRepo(repoName: string, workspace?: string): Chainable<Element>;
       fleetNamespaceToggle(toggleOption: string): Chainable<Element>;
       verifyTableRow(rowNumber: number, expectedText1?: string|RegExp, expectedText2?: string|RegExp): Chainable<Element>;
+      waitForAllRowsInState(desiredState: string, timeout?: number): Chainable<Element>;
       accesMenuSelection(firstAccessMenu: string, secondAccessMenu?: string): Chainable<Element>;
       checkChart(operation: string, chartName: string, namespace: string, version?: string, questions?: any): Chainable<Element>;
       deleteCluster(clusterName: string): Chainable<Element>;

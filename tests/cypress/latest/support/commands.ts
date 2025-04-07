@@ -348,11 +348,7 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
   // Make sure the repo is active before leaving
   cy.wait(1000);
   cy.typeInFilter(repositoryName);
-  cy.getBySel('sortable-table-0-action-button').click();
-  cy.wait(1000);
-  cy.get('.icon.group-icon.icon-refresh').click();
-  cy.wait(1000);
-  cy.contains(new RegExp('Active.*' + repositoryName));
+  cy.contains(new RegExp('Active.*' + repositoryName), { timeout: 120000 } );
 });
 
 // Command to Install or Update App from Charts menu
@@ -362,14 +358,38 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
 // Example2: cy.checkChart('Rancher Turtles', 'rancher-turtles-system', [{ menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Seamless integration with Fleet and CAPI'},{ menuEntry: 'Rancher webhook cleanup settings', inputBoxTitle: 'Webhook Cleanup Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.28.0'}]);
 Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, questions) => {
   cy.get('.nav').contains('Apps').click();
+
+  // Select All Repositries and click Action/Refresh
+  cy.get('.nav').contains('Repositories').click();
+  cy.waitForAllRowsInState('Active');
+  cy.wait(500);
+  cy.get('div.checkbox-outer-container.check').click();
+  cy.wait(500);
+  cy.contains('Refresh').click();
+  cy.waitForAllRowsInState('Active');
+  cy.wait(1000);
+
+  cy.get('.nav').contains('Charts').click();
   cy.contains('Featured Charts').should('be.visible');
 
-  // Refresh existing Repositories
-  cy.get('.icon.icon-lg.icon-refresh').click();
-  cy.get('.icon.icon-lg.icon-checkmark', { timeout: 60000 }).should('be.visible');
-
-  cy.contains(chartName, { timeout: 60000 }).click();
-  cy.contains('Charts: ' + chartName);
+  const findChart = (retries = 10) => {
+    cy.contains(chartName, { timeout: 10000 }).then($el => {
+      if ($el.length) {
+        // Chart found, proceed with click
+        cy.wrap($el).click();
+        cy.contains('Charts: ' + chartName);
+      } else if (retries > 0) {
+        // Chart not found, refresh and try again
+        cy.get('.icon.icon-lg.icon-refresh').click();
+        cy.get('.icon.icon-lg.icon-checkmark', { timeout: 60000 }).should('be.visible');
+        findChart(retries - 1);
+      } else {
+        // Max attempts reached, fail the test
+        throw new Error(`Chart ${chartName} not found`);
+      }
+    });
+  };
+  findChart();
 
   if (version != undefined && version != "") {
     cy.contains(version).click();
@@ -403,16 +423,19 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
 
   cy.clickButton(operation);
 
-  // Close the shell to avoid conflict
-  cy.get('.closer').click();
-
-  // Select app namespace
-  cy.setNamespace(namespace);
+  // Close the shell when installing Turtles as rancher is getting restarted
+  if (chartName == 'Rancher Turtles') {
+    cy.get('.closer').click();
+  } else {
+    // Wait for both CRD and main helm chart to be installed
+    cy.contains(new RegExp('SUCCESS: helm .*crd.*tgz.*SUCCESS: helm .*tgz'), { timeout: 240000 }).should('be.visible');
+    cy.get('.closer').click();
+  }
 
   // Rancher pod restarts during Turtles installation
   // Poll /dashboard/about until it returns HTTP 200 and then reload the page
   if (chartName == 'Rancher Turtles') {
-    cy.wait(7000); // Should be enough time for Rancher pod to start restarting
+    cy.wait(7000); // Should be enough time to start restarting Rancher
     const checkApiStatus = (retries = 20) => {
       cy.request({
         url: '/about',
@@ -433,9 +456,18 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
     checkApiStatus();
   }
 
-  // Resource should be deployed (green badge)
-  cy.get('.outlet').contains('Deployed', { timeout: 180000 });
-  cy.namespaceReset();
+  if (operation == 'Install') {
+    // All resources (usually an App and its CRD) in the namespaces are deployed (green badge)
+    cy.contains('Installed Apps').should('be.visible');
+    cy.setNamespace(namespace);
+    cy.waitForAllRowsInState('Deployed', 180000);
+    cy.namespaceReset();
+  }
+
+  if (operation == 'Update') {
+    cy.contains(new RegExp('Installed App:.*Deployed'), { timeout: 120000 }).should('be.visible');
+    cy.waitForAllRowsInState('Active', 120000);
+  }
 });
 
 // Command for patching generic YAML resources
@@ -647,5 +679,22 @@ Cypress.Commands.add('verifyTableRow', (rowNumber, expectedText1, expectedText2)
         expect(text).to.include(expectedText2);
       }
     }
+  });
+});
+
+// Wait until all the rows in the table on current page are in the same State
+Cypress.Commands.add('waitForAllRowsInState', (desiredState, timeout = 120000) => {
+  cy.get('table > tbody > tr', { timeout }).should(($rows) => {
+    // Make sure there is at least one row
+    expect($rows.length).to.be.greaterThan(0);
+    const allInDesiredState = $rows.toArray().every((row) => {
+      return Cypress.$(row)
+        // Look for all Status table cells recognized by "^sortable-cell-.*-0$" attribute
+        .find('td[data-testid^="sortable-cell-"][data-testid$="-0"]')
+        .text()
+        .trim() === desiredState;
+    });
+    // Assert that all displayed Status cells are in the desired state
+    expect(allInDesiredState).to.be.true;
   });
 });

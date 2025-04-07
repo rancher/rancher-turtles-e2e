@@ -78,7 +78,6 @@ describe('Import CAPV', { tags: '@vsphere' }, () => {
 
     cy.clickButton('Import');
     cy.clickButton('Close');
-
   })
 
   it('Add CAPV cluster fleet repo', () => {
@@ -105,8 +104,11 @@ describe('Import CAPV', { tags: '@vsphere' }, () => {
   })
 
   it('Install App on imported cluster', { retries: 1 }, () => {
+    // Sometimes the cluster icon is not active yet, so we need to wait a bit
+    cy.wait(1000);
     // Click on imported CAPV cluster
     cy.contains(clusterName).click();
+    cy.contains('Cluster Dashboard').should('exist');
 
     // Install Chart
     cy.checkChart('Install', 'Monitoring', 'cattle-monitoring');
@@ -174,7 +176,7 @@ describe('Import CAPV', { tags: '@vsphere' }, () => {
       // kubectl get clusters.cluster.x-k8s.io
       // This is checked by ensuring the cluster is not available in navigation menu
       cy.contains(clusterName).should('not.exist');
-      cy.checkCAPIClusterProvisioned(clusterName);
+      cy.checkCAPIClusterProvisioned(clusterName, timeout);
     })
 
     it('Delete the CAPV cluster fleet repo', () => {
