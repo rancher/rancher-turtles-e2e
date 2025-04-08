@@ -5,22 +5,20 @@ import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
 describe('Import/Create CAPZ', { tags: '@full' }, () => {
-  var clusterName: string, className: string
+  var clusterName: string
   const timeout = 1200000
   const repoName = 'clusters-capz-aks'
   const clusterNamePrefix = 'turtles-qa-capz-aks' // as per fleet values
-  const classNamePrefix = 'capz-aks-class'
-  const machineName = 'default-system'
+  const branch = 'capz-refactor'
   const k8sVersion = 'v1.30.0'
-  const podCIDR = '192.168.0.0/16'
-  const branch = 'main'
-  const path = '/tests/assets/rancher-turtles-fleet-example/capz/aks'
+  const path = ['/tests/assets/rancher-turtles-fleet-example/capz/aks/clusters']
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
   const clientID = Cypress.env("azure_client_id")
   const clientSecret = btoa(Cypress.env("azure_client_secret"))
   const subscriptionID = Cypress.env("azure_subscription_id")
   const tenantID = Cypress.env("azure_tenant_id")
   const location = Cypress.env("azure_location")
+  const namespace = 'capz-system'
 
   beforeEach(() => {
     cy.login();
@@ -31,53 +29,12 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
     cy.namespaceAutoImport('Enable');
   })
 
-  it('Create azure cluster identity Secret', () => {
-    //  Creating this secret separately and not as a part of the helmchart ensures that the cluster is deleted successfully
-    cy.contains('local')
-      .click();
-    cy.get('.header-buttons > :nth-child(1) > .icon')
-      .click();
-    cy.contains('Import YAML');
-    cy.readFile('./fixtures/capz-client-secret.yaml').then((data) => {
-      cy.get('.CodeMirror')
-        .then((editor) => {
-          data = data.replace(/replace_client_secret/g, clientSecret)
-          editor[0].CodeMirror.setValue(data);
-        })
-    });
-    cy.clickButton('Import');
-    cy.clickButton('Close');
-
-    // This secret is currently not deleted at the end of test.
+  it('Create values.yaml Secret', () => {
+    cy.createCAPZValuesSecret(location, clientID, tenantID, subscriptionID, k8sVersion);
   })
 
-
-  it('Create values.yaml Secret', () => {
-    cy.contains('local')
-      .click();
-    cy.get('.header-buttons > :nth-child(1) > .icon')
-      .click();
-    cy.contains('Import YAML');
-    var encodedData = ''
-    cy.readFile('./fixtures/capz-helm-values.yaml').then((data) => {
-      data = data.replace(/replace_location/g, location)
-      data = data.replace(/replace_client_id/g, clientID)
-      data = data.replace(/replace_tenant_id/g, tenantID)
-      data = data.replace(/replace_subscription_id/g, subscriptionID)
-      encodedData = btoa(data)
-    })
-
-    cy.readFile('./fixtures/capz-helm-values-secret.yaml').then((data) => {
-      cy.get('.CodeMirror')
-        .then((editor) => {
-          data = data.replace(/replace_values/g, encodedData)
-          editor[0].CodeMirror.setValue(data);
-        })
-    });
-
-    cy.clickButton('Import');
-    cy.clickButton('Close');
-
+  it('Create AzureClusterIdentity', () => {
+    cy.createAzureClusterIdentity(clientSecret, clientID, tenantID);
   })
 
   qase(21, it('Add CAPZ cluster fleet repo and get cluster name', () => {
@@ -93,12 +50,6 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
     cy.getBySel('sortable-cell-0-1').then(($cell) => {
       clusterName = $cell.text();
       cy.log('CAPI Cluster Name:', clusterName);
-    });
-
-    cy.checkCAPIClusterClass(classNamePrefix);
-    // Get the class name by its prefix and use it across the test
-    cy.getBySel('sortable-cell-0-1').then(($cell) => {
-      className = $cell.text();
     });
   })
   );
@@ -183,18 +134,6 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
   })
   );
 
-  qase(44, it('Create CAPZ from Clusterclass', () => {
-    // Create cluster from Clusterclass UI
-    cy.createCAPICluster(className, clusterName, machineName, k8sVersion, podCIDR);
-    cy.checkCAPIMenu();
-    cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
-
-    // Check child cluster is auto-imported
-    cy.searchCluster(clusterName);
-    cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
-  })
-  );
-
   if (skipClusterDeletion) {
     qase(26, it('Delete the CAPZ cluster fleet repo', () => {
 
@@ -203,8 +142,11 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
       // Wait until the following returns no clusters found
       // This is checked by ensuring the cluster is not available in CAPI menu
       cy.checkCAPIClusterDeleted(clusterName, timeout);
-      // Remove the clusterclass
-      cy.removeCAPIResource('Cluster Classes', className);
+
+      // Delete secret and AzureClusterIdentity
+      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "azure-creds-secret", namespace)
+      cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', 'default')
+      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "cluster-identity-secret", namespace)
     })
     );
   }

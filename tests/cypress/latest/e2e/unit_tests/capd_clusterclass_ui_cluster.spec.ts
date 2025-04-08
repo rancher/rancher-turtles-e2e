@@ -24,7 +24,6 @@ describe('Create CAPD', { tags: '@short' }, () => {
   const clusterNamePrefix = className + '-cluster'
   const clusterName = clusterNamePrefix + randomstring.generate({ length: 4, capitalization: "lowercase" })
   const k8sVersion = 'v1.30.3'
-  const machineName = 'default-worker'
   const pathNames = ['kubeadm'] // TODO: Add rke2 path (capi-ui-extension/issues/121)
 
   beforeEach(() => {
@@ -55,7 +54,8 @@ describe('Create CAPD', { tags: '@short' }, () => {
 
     qase(44,
       it('Create child CAPD cluster from Clusterclass', () => {
-        cy.createCAPICluster(className, clusterName, machineName, k8sVersion, podCIDR, serviceCIDR);
+        const machines: Record<string, string> = { 'md-0': 'default-worker' }
+        cy.createCAPICluster(className, clusterName, machines, k8sVersion, podCIDR, serviceCIDR);
         cy.checkCAPIClusterActive(clusterName);
         cy.clusterAutoImport(clusterName, 'Enable');
         // Check child cluster is auto-imported

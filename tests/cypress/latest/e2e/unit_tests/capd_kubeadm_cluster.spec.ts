@@ -56,7 +56,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
         // Add cni gitrepo to fleet-default workspace
         // The cni gitrepo is scoped to docker-kubeadm-example only by fleet.yaml
         cypressLib.burgerMenuToggle();
-        cy.addFleetGitRepo(clustersRepoName+'-cni', repoUrl, branch, basePath + 'cni', 'fleet-default');
+        cy.addFleetGitRepo(clustersRepoName + '-cni', repoUrl, branch, basePath + 'cni', 'fleet-default');
       }
 
       if (path == clustersPath) {
@@ -171,7 +171,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
         it('Delete the CAPD fleet repo - ' + path, () => {
           if (path == classClustersPath && isRancherManagerVersion("2.10")) {
             // Remove the cni fleet repo
-            cy.removeFleetGitRepo(clustersRepoName+'-cni', 'fleet-default');
+            cy.removeFleetGitRepo(clustersRepoName + '-cni', 'fleet-default');
             cypressLib.burgerMenuToggle();
           }
           // Remove the clusters fleet repo

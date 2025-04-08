@@ -22,9 +22,10 @@ import { isRancherManagerVersion } from './utils';
 
 // Generic commands
 // Go to specific Sub Menu from Access Menu
-Cypress.Commands.add('accesMenuSelection', (firstAccessMenu, secondAccessMenu) => {
-  cypressLib.accesMenu(firstAccessMenu);
-  cypressLib.accesMenu(secondAccessMenu);
+Cypress.Commands.add('accesMenuSelection', (menuPaths: string[]) => {
+  menuPaths.forEach((path) => {
+    cypressLib.accesMenu(path);
+  })
 });
 
 // Command to set CAPI Auto-import on default namespace
@@ -99,7 +100,7 @@ Cypress.Commands.add('namespaceReset', () => {
 });
 
 // Command to create CAPI cluster from Clusterclass (ui-extn: v0.8.2)
-Cypress.Commands.add('createCAPICluster', (className, clusterName, machineName, k8sVersion, podCIDR, serviceCIDR) => {
+Cypress.Commands.add('createCAPICluster', (className, clusterName, machines, k8sVersion, podCIDR, serviceCIDR, extraVariables) => {
   // Navigate to Classes Menu
   cy.checkCAPIClusterClass(className);
   cy.getBySel('sortable-table-0-action-button').click();
@@ -126,12 +127,43 @@ Cypress.Commands.add('createCAPICluster', (className, clusterName, machineName, 
   }
 
   // Machine Deployment/Pool details
-  cy.typeValue('Name', 'md-0');
-  cy.get('.vs__selected-options').click();
-  cy.contains(machineName).click();
+  Object.entries(machines).forEach(([key, value], index, array) => {
+    cy.get('h2').contains('Workers').parents('div.block').within(() => {
+      cy.getBySel(`array-list-box${index}`).within(() => {
+        cy.typeValue('Name', key);
+        cy.get('.vs__selected-options').click();
+      })
+    })
+    // The options list is located somewhere outside the <body> block; so it needs to be called outside the above block.
+    cy.contains(value).click();
+    // Ensure there are more entries to be made before clicking the `Add` button.
+    const isLast = index === array.length - 1;
+    if (!isLast) {
+      cy.get('h2').contains('Workers').parents('div.block').within(() => {
+        cy.clickButton('Add');
+      })
+    }
+  })
+
   cy.clickButton('Next');
+
+  if (extraVariables) {
+    extraVariables.forEach((variable) => {
+      if (variable.type == "string") {
+        cy.typeValue(variable.name, variable.value);
+      }
+      if (variable.type == 'dropdown') {
+        cy.get(`div[title=${variable.name}]`).click();
+        cy.contains(variable.value).click();
+      }
+    })
+  }
   cy.clickButton('Create');
+  // Add a check to ensure there are no errors
+  cy.wait(3000)
+  cy.get('div[id=cru-errors]').should('not.exist');
 });
+
 
 // Command to check CAPI cluster presence under CAPI Menu
 Cypress.Commands.add('checkCAPICluster', (clusterName) => {
@@ -147,7 +179,7 @@ Cypress.Commands.add('checkCAPIClusterClass', (className) => {
   cy.contains('Cluster Classes').click();
   cy.getBySel('button-group-child-1').click();
   cy.typeInFilter(className);
-  cy.getBySel('sortable-cell-0-1').should('exist');
+  cy.waitForAllRowsInState('Active');
 });
 
 // Command to check CAPI cluster Active status
@@ -267,7 +299,7 @@ Cypress.Commands.add('removeCAPIResource', (resourcetype, resourceName, timeout)
 
 // Command to add AWS Cloud Credentials
 Cypress.Commands.add('addCloudCredsAWS', (name, accessKey, secretKey) => {
-  cy.accesMenuSelection('Cluster Management', 'Cloud Credentials');
+  cy.accesMenuSelection(['Cluster Management', 'Cloud Credentials']);
   cy.contains('API Key').should('be.visible');
   cy.clickButton('Create');
   cy.getBySel('subtype-banner-item-aws').click();
@@ -281,7 +313,7 @@ Cypress.Commands.add('addCloudCredsAWS', (name, accessKey, secretKey) => {
 
 // Command to add GCP Cloud Credentials
 Cypress.Commands.add('addCloudCredsGCP', (name, gcpCredentials) => {
-  cy.accesMenuSelection('Cluster Management', 'Cloud Credentials');
+  cy.accesMenuSelection(['Cluster Management', 'Cloud Credentials']);
   cy.contains('API Key').should('be.visible');
   cy.clickButton('Create');
   cy.getBySel('subtype-banner-item-gcp').click();
@@ -294,7 +326,7 @@ Cypress.Commands.add('addCloudCredsGCP', (name, gcpCredentials) => {
 
 // Command to add Azure Cloud Credentials
 Cypress.Commands.add('addCloudCredsAzure', (name: string, clientID: string, clientSecret: string, subscriptionID: string) => {
-  cy.accesMenuSelection('Cluster Management', 'Cloud Credentials');
+  cy.accesMenuSelection(['Cluster Management', 'Cloud Credentials']);
   cy.contains('API Key').should('be.visible');
   cy.clickButton('Create');
   cy.getBySel('subtype-banner-item-azure').click();
@@ -309,7 +341,7 @@ Cypress.Commands.add('addCloudCredsAzure', (name: string, clientID: string, clie
 
 // Command to add VMware vsphere Cloud Credentials
 Cypress.Commands.add('addCloudCredsVMware', (name: string, vsphere_username: string, vsphere_password: string, vsphere_server: string, vsphere_server_port: string) => {
-  cy.accesMenuSelection('Cluster Management', 'Cloud Credentials');
+  cy.accesMenuSelection(['Cluster Management', 'Cloud Credentials']);
   cy.contains('API Key').should('be.visible');
   cy.clickButton('Create');
   cy.getBySel('subtype-banner-item-vmwarevsphere').click();
@@ -352,7 +384,7 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
   // Make sure the repo is active before leaving
   cy.wait(1000);
   cy.typeInFilter(repositoryName);
-  cy.contains(new RegExp('Active.*' + repositoryName), { timeout: 120000 } );
+  cy.contains(new RegExp('Active.*' + repositoryName), { timeout: 150000 });
 });
 
 // Command to Install or Update App from Charts menu
@@ -377,25 +409,28 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
   cy.contains('Featured Charts').should('be.visible');
 
   const findChart = (retries = 10) => {
-    cy.contains(chartName, { timeout: 10000 }).then($el => {
-      if ($el.length) {
-        // Chart found, proceed with click
-        cy.wrap($el).click();
-        cy.contains('Charts: ' + chartName);
-      } else if (retries > 0) {
-        // Chart not found, refresh and try again
-        cy.get('.icon.icon-lg.icon-refresh').click();
-        cy.get('.icon.icon-lg.icon-checkmark', { timeout: 60000 }).should('be.visible');
-        findChart(retries - 1);
-      } else {
-        // Max attempts reached, fail the test
-        throw new Error(`Chart ${chartName} not found`);
-      }
-    });
+    cy.typeInFilter(chartName);
+    cy.getBySel('chart-selection-grid').within(() => {
+      cy.contains(chartName, { timeout: 10000 }).then($el => {
+        if ($el.length) {
+          // Chart found, proceed with click
+          cy.wrap($el).click();
+        } else if (retries > 0) {
+          // Chart not found, refresh and try again
+          cy.get('.icon.icon-lg.icon-refresh').click();
+          cy.get('.icon.icon-lg.icon-checkmark', { timeout: 60000 }).should('be.visible');
+          findChart(retries - 1);
+        } else {
+          // Max attempts reached, fail the test
+          throw new Error(`Chart ${chartName} not found`);
+        }
+      });
+    })
+    cy.contains('Charts: ' + chartName);
   };
   findChart();
 
-  if (version != undefined && version != "") {
+  if (version && version != "") {
     cy.contains(version).click();
     cy.url().should("contain", version)
   }
@@ -407,7 +442,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
   cy.clickButton('Next');
 
   // Used for entering questions and answering them
-  if (questions != undefined) {
+  if (questions) {
     // Some apps like Alerting show questions page directly so no further action needed here
     // Some other apps like Turtles have a 'Customize install settings' checkbox or its variant which needs to be clicked
     if (chartName == 'Rancher Turtles' && operation == "Install") {
@@ -570,8 +605,8 @@ Cypress.Commands.add('goToHome', () => {
 
 // Fleet commands
 // Command add Fleet Git Repository
-Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, path, workspace, targetNamespace) => {
-  cy.accesMenuSelection('Continuous Delivery', 'Git Repos');
+Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, paths, workspace, targetNamespace) => {
+  cy.accesMenuSelection(['Continuous Delivery', 'Git Repos']);
   cy.getBySel('masthead-create').should('be.visible');
   cy.contains('fleet-').click();
   if (!workspace) {
@@ -589,9 +624,13 @@ Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, path, worksp
 
   cy.typeValue('Repository URL', repoUrl);
   cy.typeValue('Branch Name', branch);
-  cy.clickButton('Add Path');
-  cy.getBySel('gitRepo-paths').within(($gitRepoPaths) => {
-    cy.getBySel('input-0').type(path);
+  var index: number = 0
+  paths.forEach((path) => {
+    cy.clickButton('Add Path');
+    cy.getBySel('gitRepo-paths').within(() => {
+      cy.getBySel('input-' + index).type(path);
+      index++;
+    })
   })
   cy.clickButton('Next');
   cy.get('button.btn').contains('Previous').should('be.visible');
@@ -629,14 +668,15 @@ Cypress.Commands.add('forceUpdateFleetGitRepo', (repoName, workspace) => {
   cy.get('.actions .btn.actions').click();
   cy.get('.icon.group-icon.icon-refresh').click();
   if (isRancherManagerVersion("2.11")) {
-   cy.clickButton('Update')
+    cy.clickButton('Update')
   }
 })
 
 // Command to check Fleet Git Repository
 Cypress.Commands.add('checkFleetGitRepo', (repoName, workspace) => {
   // Go to 'Continuous Delivery' > 'Git Repos'
-  cy.accesMenuSelection('Continuous Delivery', 'Git Repos');
+  cy.burgerMenuOperate('open');
+  cy.accesMenuSelection(['Continuous Delivery', 'Git Repos']);
   cy.getBySel('masthead-create').should('be.visible');
   // Change the workspace using the dropdown on the top bar
   cy.contains('fleet-').click();
@@ -647,6 +687,10 @@ Cypress.Commands.add('checkFleetGitRepo', (repoName, workspace) => {
   // Click the repo link
   cy.contains(repoName).click();
   cy.url().should("include", "fleet/fleet.cattle.io.gitrepo/" + workspace + "/" + repoName)
+  // Ensure there are no errors after waiting for a few seconds
+  cy.wait(5000);
+  cy.get('.badge-state.masthead-state').should("not.contain", "Err Applied");
+
 })
 
 // Fleet namespace toggle
@@ -691,7 +735,7 @@ Cypress.Commands.add('verifyTableRow', (rowNumber, expectedText1, expectedText2)
 
 // Wait until all the rows in the table on current page are in the same State
 Cypress.Commands.add('waitForAllRowsInState', (desiredState, timeout = 120000) => {
-  cy.get('table > tbody > tr', { timeout }).should(($rows) => {
+  cy.get('table > tbody > tr.main-row', { timeout }).should(($rows) => {
     // Make sure there is at least one row
     expect($rows.length).to.be.greaterThan(0);
     const allInDesiredState = $rows.toArray().every((row) => {
@@ -705,3 +749,36 @@ Cypress.Commands.add('waitForAllRowsInState', (desiredState, timeout = 120000) =
     expect(allInDesiredState).to.be.true;
   });
 });
+
+Cypress.Commands.add('burgerMenuOperate', (operation: 'open' | 'close') => {
+  const isOpen = operation === 'open';
+  const selector = isOpen ? 'menu-open' : 'menu-close';
+  cy.getBySel('side-menu').then(($el) => {
+    if (!$el.hasClass(selector)) {
+      cypressLib.burgerMenuToggle();
+    };
+  });
+  cy.get('.side-menu.' + selector).should('exist');
+});
+
+
+Cypress.Commands.add('deleteKubernetesResource', (clusterName = 'local', resourcePath: string[], resourceName: string, namespace?: string) => {
+  cy.burgerMenuOperate('open');
+  cy.accesMenuSelection([clusterName])
+  cy.getBySel('header').get('.cluster-name').contains(clusterName);
+
+  if (namespace) {
+    cy.setNamespace(namespace);
+  }
+
+  cy.accesMenuSelection(resourcePath);
+
+  cy.typeInFilter(resourceName);
+  cy.getBySel('sortable-cell-0-1').should('exist');
+  cy.viewport(1920, 1080);
+  cy.getBySel('sortable-table_check_select_all').click();
+  cy.getBySel('sortable-table-promptRemove').click();
+  cy.getBySel('prompt-remove-confirm-button').click();
+  cy.typeInFilter(resourceName);
+  cy.getBySel('sortable-cell-0-1').should('not.exist');
+})
