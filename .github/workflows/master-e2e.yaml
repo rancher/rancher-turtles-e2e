@@ -378,7 +378,7 @@ jobs:
       - name: Cypress tests
         env:
           BROWSER: chrome
-          CYPRESS_DOCKER: 'cypress/included:13.6.4'
+          CYPRESS_DOCKER: 'cypress/included:14.2.1'
           CAPI_UI_VERSION: ${{ inputs.capi_ui_version }}
           K8S_UPSTREAM_VERSION: ${{ inputs.upstream_cluster_version }}
           RANCHER_VERSION: ${{ steps.component.outputs.rm_version }}

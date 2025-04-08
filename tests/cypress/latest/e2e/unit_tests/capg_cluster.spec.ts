@@ -109,7 +109,7 @@ describe('Import CAPG GKE', { tags: '@full' }, () => {
       it('Delete the CAPG cluster fleet repo', () => {
 
         // Remove the fleet git repo
-        cy.removeFleetGitRepo(repoName, true);
+        cy.removeFleetGitRepo(repoName);
         // Wait until the following returns no clusters found
         // This is checked by ensuring the cluster is not available in CAPI menu
         cy.checkCAPIClusterDeleted(clusterName, timeout);

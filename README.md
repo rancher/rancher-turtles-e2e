@@ -9,9 +9,10 @@ What tests are doing:
 4. Test the Turtles menu, namespaces import features
 5. Perform CAPI setup prerequisites
 6. Create & Import CAPI cluster using fleet by cluster, namespace annotation
-7. Install App on imported CAPI cluster
-8. Scale the imported CAPI cluster
-9. Remove & Delete the imported CAPI cluster
+7. Create & Import CAPI cluster using ClusterClass UI
+8. Install App on imported CAPI cluster
+9. Scale the imported CAPI cluster
+10. Remove & Delete the imported CAPI cluster
 
 
 ## Running the tests locally
@@ -19,7 +20,7 @@ What tests are doing:
 ### Pre-requisites
 1. Install Rancher.
 2. Install Rancher Turtles operator.
-3. Install CAPI UI Extensions.
+3. Install CAPI UI Extension.
 
 ### Running the test
 1. `cd tests/cypress/latest`
@@ -38,7 +39,7 @@ The Cypress GUI should now be visible.
 # Test structure
 We categorize our tests using tags such as `short`, `full`, `vsphere`, and `install`. 
 Tests tagged with `short` are local (docker-based) tests, while those tagged with `vsphere` are specific to vSphere.
-Tests tagged with `full` are cloud provider-based tests. The `install` tag is used for initial setup tests.
+Tests tagged with `full` are cloud provider-based tests. The `install` tag is used for initial setup tests ('install' tag is also to be included in setup tests title).
 
 # Running tests using Cypress grep
 We have implemented tags for more precise selection of tests using a Cypress plugin called [cypress-grep](https://github.com/cypress-io/cypress/tree/develop/npm/grep)

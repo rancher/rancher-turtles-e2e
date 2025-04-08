@@ -210,8 +210,12 @@ Cypress.Commands.add('addCustomProvider', (name, namespace, providerName, provid
   cy.getBySel('name-ns-description-namespace').type(namespace + '{enter}');
   cy.typeValue('Name', name);
   cy.typeValue('Provider', providerName);
-  cy.typeValue('Version', version);
-  cy.typeValue('URL', url);
+  if (version != undefined) {
+    cy.typeValue('Version', version);
+  }
+  if (url != undefined) {
+    cy.typeValue('URL', url);
+  }
   cy.clickButton('Create');
   cy.contains('Providers').should('be.visible');
 });
@@ -573,17 +577,13 @@ Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, path, worksp
 })
 
 // Command remove Fleet Git Repository
-Cypress.Commands.add('removeFleetGitRepo', (repoName, noRepoCheck, workspace) => {
+Cypress.Commands.add('removeFleetGitRepo', (repoName, workspace) => {
   cy.checkFleetGitRepo(repoName, workspace);
   // Click on the actions menu and select 'Delete' from the menu
   cy.get('.actions .btn.actions').click();
   cy.get('.icon.group-icon.icon-trash').click();
   cypressLib.confirmDelete();
-  if (noRepoCheck == true) {
-    cy.contains(repoName).should('not.exist');
-  } else {
-    cy.contains('No repositories have been added').should('be.visible');
-  }
+  cy.contains(repoName).should('not.exist');
 })
 
 // Command forcefully update Fleet Git Repository

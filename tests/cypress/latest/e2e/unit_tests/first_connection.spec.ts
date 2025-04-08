@@ -15,7 +15,7 @@ limitations under the License.
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 
 Cypress.config();
-describe('First login on Rancher', { tags: '@install' }, () => {
+describe('First login on Rancher - @install', { tags: '@install' }, () => {
   const password = 'rancherpassword'
 
   it('Log in and accept terms and conditions',

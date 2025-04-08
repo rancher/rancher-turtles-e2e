@@ -15,10 +15,9 @@ limitations under the License.
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { timers } from 'cypress/types/jquery';
 
 Cypress.config();
-describe('Install CAPI extension', { tags: '@install' }, () => {
+describe('Install CAPI extension - @install', { tags: '@install' }, () => {
 
   beforeEach(() => {
     cy.login();

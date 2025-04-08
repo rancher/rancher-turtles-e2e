@@ -177,10 +177,10 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
         it('Delete the CAPD cluster fleet repo(s) - ' + path, () => {
           if (path.includes('clusterclass')) {
             // Remove the cni fleet repo from fleet-default workspace
-            cy.removeFleetGitRepo(classesRepoName+'-cni', true, 'fleet-default');
+            cy.removeFleetGitRepo(classesRepoName+'-cni', 'fleet-default');
             // Remove the classes fleet repo
             cypressLib.burgerMenuToggle();
-            cy.removeFleetGitRepo(classesRepoName, true);
+            cy.removeFleetGitRepo(classesRepoName);
             // Remove the clusters fleet repo
             cypressLib.burgerMenuToggle();
             cy.removeFleetGitRepo(clustersRepoName);

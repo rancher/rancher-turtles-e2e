@@ -155,7 +155,7 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
         it('Delete the CAPD cluster fleet repo(s) - ' + path, () => {
           if (path.includes('clusterclass')) {
             // Remove the classes fleet repo
-            cy.removeFleetGitRepo(classesRepoName, true);
+            cy.removeFleetGitRepo(classesRepoName);
             // Remove the clusters fleet repo
             cypressLib.burgerMenuToggle();
             cy.removeFleetGitRepo(clustersRepoName);

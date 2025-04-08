@@ -13,6 +13,7 @@ limitations under the License.
 */
 
 import './commands';
+import yaml from 'js-yaml';
 
 declare global {
   // In Cypress functions should be declared with 'namespace'
@@ -24,7 +25,7 @@ declare global {
       setAutoImport(mode: string): Chainable<Element>;
       clusterAutoImport(clusterName: string, mode: string): Chainable<Element>;
       addFleetGitRepo(repoName: string, repoUrl: string, branch: string, path: string, workspace?: string): Chainable<Element>;
-      removeFleetGitRepo(repoName: string, noRepoCheck?: boolean, workspace?: string): Chainable<Element>;
+      removeFleetGitRepo(repoName: string, workspace?: string): Chainable<Element>;
       forceUpdateFleetGitRepo(repoName: string, workspace?: string): Chainable<Element>;
       checkFleetGitRepo(repoName: string, workspace?: string): Chainable<Element>;
       fleetNamespaceToggle(toggleOption: string): Chainable<Element>;
@@ -85,3 +86,25 @@ require('@rancher-ecp-qa/cypress-library');
 // @ts-ignore
 import registerCypressGrep from '@cypress/grep'
 registerCypressGrep()
+
+// Abort on first failure in @install tests
+const resultFile = './fixtures/runtime_test_result.yaml'
+beforeEach(() => {
+  cy.readFile(resultFile).then((data) => {
+    const content = yaml.load(data)
+    const result = content['test_result']
+    cy.log('Previous Test Result: ' + result);
+    if (result == 'failed') {
+      cy.log('Stopping test run - previous test(s) have failed')
+      Cypress.stop()
+    }
+  });
+});
+
+afterEach(function () {
+  if (this.currentTest?.state == 'failed' && this.currentTest?.fullTitle?.().includes('@install')) {
+    const result = { test_result: this.currentTest?.state };
+    const data = yaml.dump(result);
+    cy.writeFile(resultFile, data);
+  }
+})

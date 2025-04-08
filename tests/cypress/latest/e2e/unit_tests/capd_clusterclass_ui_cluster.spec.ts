@@ -104,7 +104,7 @@ describe('Create CAPD', { tags: '@short' }, () => {
 
         // Remove the classes fleet repo
         cypressLib.burgerMenuToggle();
-        cy.removeFleetGitRepo(className, true);
+        cy.removeFleetGitRepo(className);
 
         // Ensure the cluster is not available in navigation menu
         cy.getBySel('side-menu').then(($menu) => {

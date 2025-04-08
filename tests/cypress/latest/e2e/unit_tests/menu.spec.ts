@@ -16,7 +16,7 @@ import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 
 Cypress.config();
-describe('Menu testing', { tags: '@install' }, () => {
+describe('Menu testing - @install', { tags: '@install' }, () => {
   beforeEach(() => {
     cy.login();
     cypressLib.burgerMenuToggle();
