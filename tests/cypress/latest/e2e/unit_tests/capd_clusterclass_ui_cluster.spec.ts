@@ -20,7 +20,6 @@ import { skipClusterDeletion } from '~/support/utils';
 Cypress.config();
 describe('Create CAPD', { tags: '@short' }, () => {
   const timeout = 300000
-  const classesRepo = 'classes'
   const className = 'capd-kubeadm-class'
   const clusterNamePrefix = className + '-cluster'
   const clusterName = clusterNamePrefix + randomstring.generate({ length: 4, capitalization: "lowercase" })
