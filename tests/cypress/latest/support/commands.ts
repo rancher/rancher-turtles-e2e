@@ -608,6 +608,9 @@ Cypress.Commands.add('checkFleetGitRepo', (repoName, workspace) => {
   // Click the repo link
   cy.contains(repoName).click();
   cy.url().should("include", "fleet/fleet.cattle.io.gitrepo/" + workspace + "/" + repoName)
+  // Ensure there are no errors
+  cy.get('.badge-state .masthead-state').should("not.contain", "Err Applied");
+
 })
 
 // Fleet namespace toggle
