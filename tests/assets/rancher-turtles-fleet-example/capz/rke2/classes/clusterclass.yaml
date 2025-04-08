@@ -2,9 +2,6 @@ apiVersion: cluster.x-k8s.io/v1beta1
 kind: ClusterClass
 metadata:
   name: azure-rke2-example
-  labels:  # TODO: to test if this works. If not, change it to a common label in cni and ccm as well
-    cni: calico
-    cloud-provider: azure
 spec:
   controlPlane:
     ref:
@@ -60,7 +57,6 @@ spec:
             - uksouth
             - westeurope
             - westus2
-            - centralindia
     - name: resourceGroup
       required: true
       schema:
@@ -87,7 +83,7 @@ spec:
         openAPIV3Schema:
           description: "The image name"
           type: string
-          default: "capi-ubun2-2404"          
+          default: "capi-ubun2-2404"
     - name: vmSize
       required: true
       schema:
@@ -95,6 +91,79 @@ spec:
           description: "The VM size used by machines."
           type: string
           default: "Standard_D2s_v3"
+  patches:
+    - name: azureClusterTemplate
+      definitions:
+        - selector:
+            apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+            kind: AzureClusterTemplate
+            matchResources:
+              infrastructureCluster: true
+          jsonPatches:
+            - op: add
+              path: "/spec/template/spec/subscriptionID"
+              valueFrom:
+                variable: subscriptionID
+            - op: add
+              path: "/spec/template/spec/location"
+              valueFrom:
+                variable: location
+            - op: add
+              path: "/spec/template/spec/resourceGroup"
+              valueFrom:
+                variable: resourceGroup
+            - op: add
+              path: "/spec/template/spec/identityRef/name"
+              valueFrom:
+                variable: azureClusterIdentityName
+            - op: add
+              path: "/spec/template/spec/networkSpec/vnet/name"
+              valueFrom:
+                variable: builtin.cluster.name
+    - name: azureMachineTemplate
+      definitions:
+        - selector:
+            apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+            kind: RKE2ControlPlaneTemplate
+            matchResources:
+              controlPlane: true
+          jsonPatches:
+            - op: add
+              path: /spec/template/spec/files/-
+              valueFrom:
+                template: |
+                  contentFrom:
+                    secret:
+                      key: control-plane-azure.json
+                      name: "{{ .builtin.controlPlane.machineTemplate.infrastructureRef.name }}-azure-json"
+                  owner: root:root
+                  path: /etc/kubernetes/azure.json
+                  permissions: "0644"
+        - selector:
+            apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+            kind: AzureMachineTemplate
+            matchResources:
+              controlPlane: true
+              machineDeploymentClass:
+                names:
+                  - rke2-default-worker
+          jsonPatches:
+            - op: add
+              path: "/spec/template/spec/image/computeGallery/gallery"
+              valueFrom:
+                variable: imageGallery
+            - op: add
+              path: "/spec/template/spec/image/computeGallery/name"
+              valueFrom:
+                variable: imageName
+            - op: replace
+              path: /spec/template/spec/image/computeGallery/version
+              valueFrom:
+                template: '{{ trimPrefix "v" (trimSuffix "+rke2r1" .builtin.cluster.topology.version) }}'
+            - op: add
+              path: "/spec/template/spec/vmSize"
+              valueFrom:
+                variable: vmSize
 ---
 apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
 kind: RKE2ConfigTemplate
@@ -117,12 +186,12 @@ spec:
         name: cluster-identity
       networkSpec:
         subnets:
-        - name: control-plane-subnet
-          role: control-plane
-        - name: node-subnet
-          natGateway:
-            name: node-natgateway
-          role: node
+          - name: control-plane-subnet
+            role: control-plane
+          - name: node-subnet
+            natGateway:
+              name: node-natgateway
+            role: node
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1beta1
 kind: RKE2ControlPlaneTemplate
@@ -131,22 +200,24 @@ metadata:
 spec:
   template:
     spec:
-      infrastructureRef:
-        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-        kind: AzureMachineTemplate
-        name: rke2-control-plane
-      serverConfig:
-        cni: calico
-        kubeAPIServer:
-          extraArgs:
-          - --anonymous-auth=true
-        disableComponents:
-          kubernetesComponents:
-          - cloudController
       rolloutStrategy:
         type: "RollingUpdate"
         rollingUpdate:
           maxSurge: 1
+      agentConfig: {}
+      serverConfig:
+        cni: none
+        cloudProviderName: external
+        disableComponents:
+          kubernetesComponents:
+            - cloudController
+        kubeAPIServer:
+          extraArgs:
+            - --anonymous-auth=true
+      files:
+        - owner: root:root
+          path: /etc/kubernetes/azure.json
+          permissions: "0644"
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: AzureMachineTemplate
@@ -156,7 +227,7 @@ spec:
   template:
     spec:
       image:
-        computeGallery: 
+        computeGallery:
           gallery: "TO_BE_REPLACED_BY_PATCH"
           name: "TO_BE_REPLACED_BY_PATCH"
           version: "TO_BE_REPLACED_BY_PATCH"
@@ -172,7 +243,7 @@ spec:
   template:
     spec:
       image:
-        computeGallery: 
+        computeGallery:
           gallery: "TO_BE_REPLACED_BY_PATCH"
           name: "TO_BE_REPLACED_BY_PATCH"
           version: "TO_BE_REPLACED_BY_PATCH"
