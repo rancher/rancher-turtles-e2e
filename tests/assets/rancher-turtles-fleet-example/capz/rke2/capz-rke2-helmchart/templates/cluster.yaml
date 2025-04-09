@@ -1,0 +1,56 @@
+{{- $cluster_name := printf "%s" .Values.clustername_prefix -}}
+{{- $class_name := printf "%s" .Values.clusterclassname_prefix -}}
+{{- $namespace := printf "%s" .Values.namespace -}}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: AzureClusterIdentity
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  labels:
+    clusterctl.cluster.x-k8s.io/move-hierarchy: "true"
+  name: cluster-identity
+  namespace: {{ $namespace }}
+spec:
+  allowedNamespaces: {}
+  clientID: "{{ .Values.cluster.clientID }}"
+  clientSecret:
+    name: cluster-identity-secret
+    namespace: capz-system
+  tenantID:  "{{ .Values.cluster.tenantID }}"
+  type: ServicePrincipal
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  labels:
+    cloud-provider: azure
+  name: {{ $cluster_name }}
+  namespace: {{ $namespace }}
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+      - 10.96.0.0/12
+    services:
+      cidrBlocks:
+      - 10.244.0.0/16
+  topology:
+    class: {{ $class_name }}
+    controlPlane:
+      replicas: 3
+    variables:
+    - name: subscriptionID
+      value: "{{ .Values.cluster.subscriptionID }}"
+    - name: location
+      value: "{{ .Values.cluster.location }}"
+    - name: resourceGroup
+      value:  {{ $cluster_name }}
+    - name: azureClusterIdentityName
+      value: cluster-identity
+    version: "{{ .Values.cluster.kubernetesVersion }}"
+    workers:
+      machineDeployments:
+      - class: {{ $cluster_name }}-default-worker
+        name: md-0
+        replicas: 3

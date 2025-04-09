@@ -1,23 +1,6 @@
 {{- $cluster_name := printf "%s-%s" .Values.clustername_prefix (randAlphaNum 4) | lower -}}
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-kind: AzureClusterIdentity
-metadata:
-  annotations:
-    "helm.sh/resource-policy": keep
-  labels:
-    clusterctl.cluster.x-k8s.io/move-hierarchy: "true"
-  name: cluster-identity
-spec:
-  allowedNamespaces: {}
-  clientID: "{{ .Values.azure.clientID }}"
-  clientSecret:
-    name: cluster-identity-secret
-    namespace: capz-system
-  tenantID: "{{ .Values.azure.tenantID }}"
-  type: ServicePrincipal
----
-apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: AzureManagedCluster
 metadata:
   annotations:
