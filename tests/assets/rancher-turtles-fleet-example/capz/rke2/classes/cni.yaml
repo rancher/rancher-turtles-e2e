@@ -20,17 +20,16 @@ spec:
               encapsulation: VXLAN${- end}
   diff:
     comparePatches:
-    - apiVersion: operator.tigera.io/v1
-      kind: Installation
-      name: default
-      operations:
-      - {"op":"remove", "path":"/spec/kubernetesProvider"}
+      - apiVersion: operator.tigera.io/v1
+        kind: Installation
+        name: default
+        operations:
+          - { "op": "remove", "path": "/spec/kubernetesProvider" }
   targets:
-  - clusterSelector:
-      matchLabels:
-        cni: calico
-      matchExpressions:
-      - key: clusterclass-name.fleet.addons.cluster.x-k8s.io
-        operator: In
-        values: [azure-rke2-class]
-        
+    - clusterSelector:
+        matchLabels:
+          cni: calico
+        matchExpressions:
+          - key: clusterclass-name.fleet.addons.cluster.x-k8s.io
+            operator: In
+            values: [capz-rke2-class]
