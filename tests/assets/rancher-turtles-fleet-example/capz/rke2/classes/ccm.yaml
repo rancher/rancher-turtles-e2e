@@ -18,10 +18,10 @@ spec:
           node-role.kubernetes.io/control-plane: "true"
   insecureSkipTLSVerify: true
   targets:
-  - clusterSelector:
-      matchLabels:
-        cloud-provider: azure
-      matchExpressions:
-      - key: clusterclass-name.fleet.addons.cluster.x-k8s.io
-        operator: In
-        values: [azure-rke2-class]
+    - clusterSelector:
+        matchLabels:
+          cloud-provider: azure
+        matchExpressions:
+          - key: clusterclass-name.fleet.addons.cluster.x-k8s.io
+            operator: In
+            values: [capz-rke2-class]

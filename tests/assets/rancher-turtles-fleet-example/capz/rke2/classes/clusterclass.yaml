@@ -1,18 +1,18 @@
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: ClusterClass
 metadata:
-  name: azure-rke2-example
+  name: capz-rke2-class
 spec:
   controlPlane:
     ref:
       apiVersion: controlplane.cluster.x-k8s.io/v1beta1
       kind: RKE2ControlPlaneTemplate
-      name: rke2-control-plane
+      name: capz-rke2-class-control-plane
     machineInfrastructure:
       ref:
         kind: AzureMachineTemplate
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-        name: rke2-control-plane
+        name: capz-rke2-class-control-plane
   infrastructure:
     ref:
       apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
@@ -20,18 +20,18 @@ spec:
       name: azure-cluster
   workers:
     machineDeployments:
-      - class: rke2-default-worker
+      - class: capz-rke2-class-default-worker
         template:
           bootstrap:
             ref:
               apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
               kind: RKE2ConfigTemplate
-              name: rke2-default-worker-bootstrap
+              name: capz-rke2-class-default-worker-bootstrap
           infrastructure:
             ref:
               apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
               kind: AzureMachineTemplate
-              name: rke2-default-worker
+              name: capz-rke2-class-default-worker
   variables:
     - name: subscriptionID
       required: true
@@ -146,7 +146,7 @@ spec:
               controlPlane: true
               machineDeploymentClass:
                 names:
-                  - rke2-default-worker
+                  - capz-rke2-class-default-worker
           jsonPatches:
             - op: add
               path: "/spec/template/spec/image/computeGallery/gallery"
@@ -168,7 +168,7 @@ spec:
 apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
 kind: RKE2ConfigTemplate
 metadata:
-  name: rke2-default-worker-bootstrap
+  name: capz-rke2-class-default-worker-bootstrap
 spec:
   template:
     spec: {}
@@ -196,7 +196,7 @@ spec:
 apiVersion: controlplane.cluster.x-k8s.io/v1beta1
 kind: RKE2ControlPlaneTemplate
 metadata:
-  name: rke2-control-plane
+  name: capz-rke2-class-control-plane
 spec:
   template:
     spec:
@@ -222,7 +222,7 @@ spec:
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: AzureMachineTemplate
 metadata:
-  name: rke2-control-plane
+  name: capz-rke2-class-control-plane
 spec:
   template:
     spec:
@@ -238,7 +238,7 @@ spec:
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: AzureMachineTemplate
 metadata:
-  name: rke2-default-worker
+  name: capz-rke2-class-default-worker
 spec:
   template:
     spec:
