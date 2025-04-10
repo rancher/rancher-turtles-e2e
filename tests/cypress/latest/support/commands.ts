@@ -466,7 +466,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
 
   if (operation == 'Update') {
     cy.contains(new RegExp('Installed App:.*Deployed'), { timeout: 120000 }).should('be.visible');
-    cy.waitForAllRowsInState('Active', 120000);
+    cy.waitForAllRowsInState('Active');
   }
 });
 
