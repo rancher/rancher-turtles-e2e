@@ -621,7 +621,7 @@ Cypress.Commands.add('removeFleetGitRepo', (repoName, workspace) => {
 // Command forcefully update Fleet Git Repository
 Cypress.Commands.add('forceUpdateFleetGitRepo', (repoName, workspace) => {
   cy.checkFleetGitRepo(repoName, workspace);
-  // Click on the actions menu and select 'Delete' from the menu
+  // Click on the actions menu and select 'Force Update' from the menu
   cy.get('.actions .btn.actions').click();
   cy.get('.icon.group-icon.icon-refresh').click();
   if (isRancherManagerVersion("2.11")) {
