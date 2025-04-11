@@ -25,7 +25,7 @@ describe('Install CAPI extension - @install', { tags: '@install' }, () => {
   });
 
   it('Add capi-ui repo', () => {
-    cy.addRepository('capi-ui', 'https://github.com/rancher/capi-ui-extension.git', 'git', 'gh-pages')
+    cy.addRepository('capi-ui', 'https://rancher.github.io/capi-ui-extension', 'http', 'none')
   })
 
   qase(3,

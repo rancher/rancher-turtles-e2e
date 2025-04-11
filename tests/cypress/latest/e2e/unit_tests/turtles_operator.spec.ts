@@ -46,7 +46,7 @@ describe('Install Turtles Operator - @install', { tags: '@install' }, () => {
     } else {
       turtlesHelmRepo += ':8080'
     }
-    cy.addRepository('turtles-operator', turtlesHelmRepo, 'helm', 'none');
+    cy.addRepository('turtles-operator', turtlesHelmRepo, 'http', 'none');
   })
 
   qase([2, 11],
