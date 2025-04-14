@@ -21,7 +21,19 @@ describe('Import/Create CAPZ RKE2', { tags: '@full' }, () => {
     const tenantID = Cypress.env("azure_tenant_id")
     const location = "westeurope" // the community image for provisioning Azure VM is only available in certain locations
     const clusterClassManifestURL = 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/examples/clusterclasses/azure/clusterclass-rke2-example.yaml'
-    const supportingHelmApps = ['https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/examples/applications/ccm/azure/helm-chart.yaml', 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/examples/applications/cni/calico/helm-chart.yaml']
+
+    type App = {
+        name: string;
+        path: string;
+    }
+    var supportingHelmApps: App[]
+    if (isRancherManagerVersion('2.11')) {
+        supportingHelmApps = [{ name: "calico-cni", path: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/examples/applications/cni/calico/helm-chart.yaml' },
+        { name: "azure-ccm", path: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/examples/applications/ccm/azure/helm-chart.yaml' }]
+    } else {
+        supportingHelmApps = [{ name: "calico-cni", path: '/tests/assets/rancher-turtles-fleet-example/cni' },
+        { name: "azure-ccm", path: '/tests/assets/rancher-turtles-fleet-example/ccm' }]
+    }
 
     beforeEach(() => {
         cy.login();
@@ -54,17 +66,20 @@ describe('Import/Create CAPZ RKE2', { tags: '@full' }, () => {
     it('Add CNI and CCM definitions', () => {
         if (isRancherManagerVersion('2.11')) {
             supportingHelmApps.forEach((app) => {
-                cy.exec('kubectl apply -f ' + app).its('code').should('eq', 0)
+                cy.exec('kubectl apply -f ' + app.path).its('code').should('eq', 0)
             })
 
             // Navigate to `local` cluster, More Resources > Fleet > Helm Apps and ensure the charts are active.
             cy.contains('local').click();
             cy.accesMenuSelection(['More Resources', 'Fleet', 'HelmApps']);
-            const appNames = ["azure-ccm", "calico-cni"]
-            appNames.forEach((app) => {
-                cy.typeInFilter(app);
+            supportingHelmApps.forEach((app) => {
+                cy.typeInFilter(app.name);
                 cy.getBySel('sortable-cell-0-0').should('contain.text', 'Active');
                 cy.getBySel('sortable-cell-0-1').should('exist');
+            })
+        } else {
+            supportingHelmApps.forEach((app) => {
+                cy.addFleetGitRepo(app.name, repoUrl, branch, app.path)
             })
         }
     })
@@ -128,7 +143,11 @@ describe('Import/Create CAPZ RKE2', { tags: '@full' }, () => {
             // Remove the CNI and CCM apps
             if (isRancherManagerVersion('2.11')) {
                 supportingHelmApps.forEach((app) => {
-                    cy.exec('kubectl delete -f ' + app).its('code').should('eq', 0)
+                    cy.exec('kubectl delete -f ' + app.path).its('code').should('eq', 0)
+                })
+            } else {
+                supportingHelmApps.forEach((app) => {
+                    cy.removeFleetGitRepo(app.name)
                 })
             }
             // Delete secret and AzureClusterIdentity

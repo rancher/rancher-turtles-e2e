@@ -18,6 +18,7 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
   const subscriptionID = Cypress.env("azure_subscription_id")
   const tenantID = Cypress.env("azure_tenant_id")
   const location = Cypress.env("azure_location")
+  const namespace = 'capz-system'
 
   beforeEach(() => {
     cy.login();
@@ -141,6 +142,11 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
       // Wait until the following returns no clusters found
       // This is checked by ensuring the cluster is not available in CAPI menu
       cy.checkCAPIClusterDeleted(clusterName, timeout);
+
+      // Delete secret and AzureClusterIdentity
+      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "azure-creds-secret", namespace)
+      cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', 'default')
+      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "cluster-identity-secret", namespace)
     })
     );
   }

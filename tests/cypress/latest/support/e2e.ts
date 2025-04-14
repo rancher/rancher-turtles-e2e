@@ -15,7 +15,6 @@ limitations under the License.
 import './commands';
 import yaml from 'js-yaml';
 import './capz_support';
-import './kubectl_support';
 
 declare global {
   // In Cypress functions should be declared with 'namespace'
