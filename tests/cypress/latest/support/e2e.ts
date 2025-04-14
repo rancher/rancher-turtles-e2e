@@ -15,6 +15,7 @@ limitations under the License.
 import './commands';
 import yaml from 'js-yaml';
 import './capz_support';
+import './kubectl_support';
 
 declare global {
   // In Cypress functions should be declared with 'namespace'
@@ -32,7 +33,7 @@ declare global {
       fleetNamespaceToggle(toggleOption: string): Chainable<Element>;
       verifyTableRow(rowNumber: number, expectedText1?: string | RegExp, expectedText2?: string | RegExp): Chainable<Element>;
       waitForAllRowsInState(desiredState: string, timeout?: number): Chainable<Element>;
-      accesMenuSelection(firstAccessMenu: string, secondAccessMenu?: string): Chainable<Element>;
+      accesMenuSelection(menuPaths: string[]): Chainable<Element>; burgerMenuOperate(operation: 'open' | 'close'): Chainable<Element>;
       checkChart(operation: string, chartName: string, namespace: string, version?: string, questions?: any): Chainable<Element>;
       deleteCluster(clusterName: string): Chainable<Element>;
       searchCluster(clusterName: string): Chainable<Element>;
@@ -57,9 +58,9 @@ declare global {
       typeInFilter(text: string): Chainable<Element>;
       goToHome(): Chainable<Element>;
       patchYamlResource(clusterName: string, namespace: string, resourceKind: string, resourceName: string, patch: object): Chainable<Element>;
-      createAzureClusterIdentitySecret(clientSecret: string): Chainable<Element>;
-      createCAPZValuesSecret(location: string, clientID: string, tenantID: string, subscriptionID: string): Chainable<Element>;
-      createAzureClusterIdentity(clientID: string, tenantID: string): Chainable<Element>;
+      createCAPZValuesSecret(location: string, clientID: string, tenantID: string, subscriptionID: string, version: string, registrationMethod?: string, userpoolCount?: number, systempoolCount?: number): Chainable<Element>;
+      createAzureClusterIdentity(clientSecret: string, clientID: string, tenantID: string): Chainable<Element>;
+      deleteKubernetesResource(clusterName: string, resourcePath: string[], resourceName: string, namespace?: string): Chainable<Element>;
     }
   }
 }

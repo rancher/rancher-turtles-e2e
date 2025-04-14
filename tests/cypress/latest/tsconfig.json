@@ -24,6 +24,7 @@
     },
     "types": [
       "@types/node",
+      "@types/cypress",
       "@nuxt/types",
       "cypress",
       "cy-verify-downloads",

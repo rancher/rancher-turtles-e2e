@@ -10,6 +10,7 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
   const repoName = 'clusters-capz-aks'
   const clusterNamePrefix = 'turtles-qa-capz-aks' // as per fleet values
   const branch = 'capz-refactor'
+  const k8sVersion = 'v1.30.0'
   const path = '/tests/assets/rancher-turtles-fleet-example/capz/aks/clusters'
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
   const clientID = Cypress.env("azure_client_id")
@@ -27,16 +28,12 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
     cy.namespaceAutoImport('Enable');
   })
 
-  it('Create azure cluster identity Secret', () => {
-    cy.createAzureClusterIdentitySecret(clientSecret);
-  })
-
   it('Create values.yaml Secret', () => {
-    cy.createCAPZValuesSecret(location, clientID, tenantID, subscriptionID);
+    cy.createCAPZValuesSecret(location, clientID, tenantID, subscriptionID, k8sVersion);
   })
 
   it('Create AzureClusterIdentity', () => {
-    cy.createAzureClusterIdentity(clientID, tenantID);
+    cy.createAzureClusterIdentity(clientSecret, clientID, tenantID);
   })
 
   qase(21, it('Add CAPZ cluster fleet repo and get cluster name', () => {

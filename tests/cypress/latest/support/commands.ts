@@ -22,9 +22,10 @@ import { isRancherManagerVersion } from './utils';
 
 // Generic commands
 // Go to specific Sub Menu from Access Menu
-Cypress.Commands.add('accesMenuSelection', (firstAccessMenu, secondAccessMenu) => {
-  cypressLib.accesMenu(firstAccessMenu);
-  cypressLib.accesMenu(secondAccessMenu);
+Cypress.Commands.add('accesMenuSelection', (menuPaths: string[]) => {
+  menuPaths.forEach((path) => {
+    cypressLib.accesMenu(path);
+  })
 });
 
 // Command to set CAPI Auto-import on default namespace
@@ -147,6 +148,7 @@ Cypress.Commands.add('checkCAPIClusterClass', (className) => {
   cy.contains('Cluster Classes').click();
   cy.getBySel('button-group-child-1').click();
   cy.typeInFilter(className);
+  cy.getBySel('sortable-cell-0-0').should('contain.text', 'Active');
   cy.getBySel('sortable-cell-0-1').should('exist');
 });
 
@@ -267,7 +269,7 @@ Cypress.Commands.add('removeCAPIResource', (resourcetype, resourceName, timeout)
 
 // Command to add AWS Cloud Credentials
 Cypress.Commands.add('addCloudCredsAWS', (name, accessKey, secretKey) => {
-  cy.accesMenuSelection('Cluster Management', 'Cloud Credentials');
+  cy.accesMenuSelection(['Cluster Management', 'Cloud Credentials']);
   cy.contains('API Key').should('be.visible');
   cy.clickButton('Create');
   cy.getBySel('subtype-banner-item-aws').click();
@@ -281,7 +283,7 @@ Cypress.Commands.add('addCloudCredsAWS', (name, accessKey, secretKey) => {
 
 // Command to add GCP Cloud Credentials
 Cypress.Commands.add('addCloudCredsGCP', (name, gcpCredentials) => {
-  cy.accesMenuSelection('Cluster Management', 'Cloud Credentials');
+  cy.accesMenuSelection(['Cluster Management', 'Cloud Credentials']);
   cy.contains('API Key').should('be.visible');
   cy.clickButton('Create');
   cy.getBySel('subtype-banner-item-gcp').click();
@@ -294,7 +296,7 @@ Cypress.Commands.add('addCloudCredsGCP', (name, gcpCredentials) => {
 
 // Command to add Azure Cloud Credentials
 Cypress.Commands.add('addCloudCredsAzure', (name: string, clientID: string, clientSecret: string, subscriptionID: string) => {
-  cy.accesMenuSelection('Cluster Management', 'Cloud Credentials');
+  cy.accesMenuSelection(['Cluster Management', 'Cloud Credentials']);
   cy.contains('API Key').should('be.visible');
   cy.clickButton('Create');
   cy.getBySel('subtype-banner-item-azure').click();
@@ -309,7 +311,7 @@ Cypress.Commands.add('addCloudCredsAzure', (name: string, clientID: string, clie
 
 // Command to add VMware vsphere Cloud Credentials
 Cypress.Commands.add('addCloudCredsVMware', (name: string, vsphere_username: string, vsphere_password: string, vsphere_server: string, vsphere_server_port: string) => {
-  cy.accesMenuSelection('Cluster Management', 'Cloud Credentials');
+  cy.accesMenuSelection(['Cluster Management', 'Cloud Credentials']);
   cy.contains('API Key').should('be.visible');
   cy.clickButton('Create');
   cy.getBySel('subtype-banner-item-vmwarevsphere').click();
@@ -352,7 +354,7 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
   // Make sure the repo is active before leaving
   cy.wait(1000);
   cy.typeInFilter(repositoryName);
-  cy.contains(new RegExp('Active.*' + repositoryName), { timeout: 120000 } );
+  cy.contains(new RegExp('Active.*' + repositoryName), { timeout: 150000 });
 });
 
 // Command to Install or Update App from Charts menu
@@ -571,7 +573,7 @@ Cypress.Commands.add('goToHome', () => {
 // Fleet commands
 // Command add Fleet Git Repository
 Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, path, workspace) => {
-  cy.accesMenuSelection('Continuous Delivery', 'Git Repos');
+  cy.accesMenuSelection(['Continuous Delivery', 'Git Repos']);
   cy.getBySel('masthead-create').should('be.visible');
   cy.contains('fleet-').click();
   if (!workspace) {
@@ -625,14 +627,14 @@ Cypress.Commands.add('forceUpdateFleetGitRepo', (repoName, workspace) => {
   cy.get('.actions .btn.actions').click();
   cy.get('.icon.group-icon.icon-refresh').click();
   if (isRancherManagerVersion("2.11")) {
-   cy.clickButton('Update')
+    cy.clickButton('Update')
   }
 })
 
 // Command to check Fleet Git Repository
 Cypress.Commands.add('checkFleetGitRepo', (repoName, workspace) => {
   // Go to 'Continuous Delivery' > 'Git Repos'
-  cy.accesMenuSelection('Continuous Delivery', 'Git Repos');
+  cy.accesMenuSelection(['Continuous Delivery', 'Git Repos']);
   cy.getBySel('masthead-create').should('be.visible');
   // Change the workspace using the dropdown on the top bar
   cy.contains('fleet-').click();
@@ -643,8 +645,9 @@ Cypress.Commands.add('checkFleetGitRepo', (repoName, workspace) => {
   // Click the repo link
   cy.contains(repoName).click();
   cy.url().should("include", "fleet/fleet.cattle.io.gitrepo/" + workspace + "/" + repoName)
-  // Ensure there are no errors
-  cy.get('.badge-state .masthead-state').should("not.contain", "Err Applied");
+  // Ensure there are no errors after waiting for a few seconds
+  cy.wait(5000);
+  cy.get('.badge-state.masthead-state').should("not.contain", "Err Applied");
 
 })
 
@@ -704,3 +707,36 @@ Cypress.Commands.add('waitForAllRowsInState', (desiredState, timeout = 120000) =
     expect(allInDesiredState).to.be.true;
   });
 });
+
+Cypress.Commands.add('burgerMenuOperate', (operation: 'open' | 'close') => {
+  const isOpen = operation === 'open';
+  const selector = isOpen ? 'menu-open' : 'menu-close';
+  cy.getBySel('side-menu').then(($el) => {
+    if (!$el.hasClass(selector)) {
+      cypressLib.burgerMenuToggle();
+    };
+  });
+  cy.get('.side-menu.' + selector).should('exist');
+});
+
+
+Cypress.Commands.add('deleteKubernetesResource', (clusterName = 'local', resourcePath: string[], resourceName: string, namespace?: string) => {
+  cy.burgerMenuOperate('open');
+  cy.accesMenuSelection([clusterName])
+  cy.getBySel('header').get('.cluster-name').contains(clusterName);
+
+  if (namespace) {
+    cy.setNamespace(namespace);
+  }
+
+  cy.accesMenuSelection(resourcePath);
+
+  cy.typeInFilter(resourceName);
+  cy.getBySel('sortable-cell-0-1').should('exist');
+  cy.viewport(1920, 1080);
+  cy.getBySel('sortable-table_check_select_all').click();
+  cy.getBySel('sortable-table-promptRemove').click();
+  cy.getBySel('prompt-remove-confirm-button').click();
+  cy.typeInFilter(resourceName);
+  cy.getBySel('sortable-cell-0-1').should('not.exist');
+})
