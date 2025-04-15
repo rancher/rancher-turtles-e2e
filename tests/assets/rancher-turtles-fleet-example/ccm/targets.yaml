@@ -1,0 +1,12 @@
+targets:
+  - clusterSelector:
+      matchLabels:
+        cloud-provider: azure
+      matchExpressions:
+        - key: clusterclass-name.fleet.addons.cluster.x-k8s.io
+          operator: In
+          values:
+            - azure-rke2-example
+            - vsphere-kubeadm-example
+            - docker-kubeadm-example
+            - docker-rke2-example
