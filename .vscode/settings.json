@@ -1,0 +1,5 @@
+{
+    "yaml.schemas": {
+        "https://raw.githubusercontent.com/dcermak/vscode-rke-cluster-config/main/schemas/cluster.yml.json": "file:///home/cpinjani/go/src/github.com/rancher/rancher-turtles-e2e/tests/assets/rancher-turtles-fleet-example/temp-cluster/cluster.yaml"
+    }
+}
