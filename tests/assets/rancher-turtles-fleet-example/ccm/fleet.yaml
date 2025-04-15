@@ -2,7 +2,7 @@ helm:
   releaseName: cloud-provider-azure
   repo: https://raw.githubusercontent.com/kubernetes-sigs/cloud-provider-azure/master/helm/repo
   chart: cloud-provider-azure
-  templateValues:
+  values:
     infra: |-
       clusterName: ${ .ClusterValues.Cluster.metadata.name }
     cloudControllerManager: |-

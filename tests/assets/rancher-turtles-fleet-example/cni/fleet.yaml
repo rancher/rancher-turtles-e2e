@@ -2,7 +2,7 @@ helm:
   releaseName: projectcalico
   repo: https://docs.tigera.io/calico/charts
   chart: tigera-operator
-  templateValues:
+  values:
     installation: |-
       cni:
         type: Calico
