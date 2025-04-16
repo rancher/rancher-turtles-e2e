@@ -15,6 +15,7 @@ limitations under the License.
 import './commands';
 import yaml from 'js-yaml';
 import './capz_support';
+import { ClusterClassVariablesInput } from './structs';
 
 declare global {
   // In Cypress functions should be declared with 'namespace'
@@ -57,17 +58,12 @@ declare global {
       typeInFilter(text: string): Chainable<Element>;
       goToHome(): Chainable<Element>;
       patchYamlResource(clusterName: string, namespace: string, resourceKind: string, resourceName: string, patch: object): Chainable<Element>;
+      // Functions declared in capz_support.js
       createCAPZValuesSecret(location: string, clientID: string, tenantID: string, subscriptionID: string, version: string, registrationMethod?: string, userpoolCount?: number, systempoolCount?: number): Chainable<Element>;
       createAzureClusterIdentity(clientSecret: string, clientID: string, tenantID: string): Chainable<Element>;
       deleteKubernetesResource(clusterName: string, resourcePath: string[], resourceName: string, namespace?: string): Chainable<Element>;
     }
   }
-}
-
-type ClusterClassVariablesInput = {
-  name: string
-  value: string
-  type: 'string' | 'dropdown'
 }
 
 // TODO handle redirection errors better?

@@ -4,7 +4,7 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import * as randomstring from "randomstring";
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
-import { ClusterClassVariablesInput } from '~/support/e2e';
+import { ClusterClassVariablesInput } from '~/support/structs';
 
 Cypress.config();
 describe('Import/Create CAPZ', { tags: '@full' }, () => {
@@ -13,7 +13,6 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
   const className = 'azure-aks-example'
   const clusterNamePrefix = className
   const clusterName = clusterNamePrefix + randomstring.generate({ length: 4, capitalization: "lowercase" })
-  const machineName = 'default-system'
   const k8sVersion = 'v1.31.1'
   const podCIDR = '192.168.0.0/16'
   const branch = 'capz-refactor'
