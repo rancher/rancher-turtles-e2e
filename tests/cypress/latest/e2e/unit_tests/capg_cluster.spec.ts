@@ -10,7 +10,7 @@ describe('Import CAPG GKE', { tags: '@full' }, () => {
   const repoName = 'clusters-capg-gke'
   const clusterNamePrefix = 'turtles-qa-capg-gke' // as per fleet values
   const branch = 'main'
-  const path = '/tests/assets/rancher-turtles-fleet-example/capg/gke'
+  const path = ['/tests/assets/rancher-turtles-fleet-example/capg/gke']
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const gcpProject = Cypress.env("gcp_project")
 

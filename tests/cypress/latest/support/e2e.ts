@@ -25,7 +25,7 @@ declare global {
       namespaceAutoImport(mode: string): Chainable<Element>;
       setAutoImport(mode: string): Chainable<Element>;
       clusterAutoImport(clusterName: string, mode: string): Chainable<Element>;
-      addFleetGitRepo(repoName: string, repoUrl: string, branch: string, path: string, workspace?: string): Chainable<Element>;
+      addFleetGitRepo(repoName: string, repoUrl: string, branch: string, paths: string[], workspace?: string): Chainable<Element>;
       removeFleetGitRepo(repoName: string, workspace?: string): Chainable<Element>;
       forceUpdateFleetGitRepo(repoName: string, workspace?: string): Chainable<Element>;
       checkFleetGitRepo(repoName: string, workspace?: string): Chainable<Element>;
@@ -38,7 +38,7 @@ declare global {
       searchCluster(clusterName: string): Chainable<Element>;
       createNamespace(namespace: string): Chainable<Element>;
       setNamespace(namespace: string): Chainable<Element>;
-      createCAPICluster(className: string, clusterName: string, machineName: string, k8sVersion: string, podCIDR: string, serviceCIDR?: string): Chainable<Element>;
+      createCAPICluster(className: string, clusterName: string, machines: Record<string, string>, k8sVersion: string, podCIDR: string, serviceCIDR?: string, extraVariables?: ClusterClassVariablesInput[]): Chainable<Element>;
       checkCAPICluster(clustername: string): Chainable<Element>;
       checkCAPIClusterClass(classname: string): Chainable<Element>;
       checkCAPIClusterActive(clustername: string): Chainable<Element>;
@@ -62,6 +62,12 @@ declare global {
       deleteKubernetesResource(clusterName: string, resourcePath: string[], resourceName: string, namespace?: string): Chainable<Element>;
     }
   }
+}
+
+type ClusterClassVariablesInput = {
+  name: string
+  value: string
+  type: 'string' | 'dropdown'
 }
 
 // TODO handle redirection errors better?

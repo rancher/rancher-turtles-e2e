@@ -100,7 +100,7 @@ Cypress.Commands.add('namespaceReset', () => {
 });
 
 // Command to create CAPI cluster from Clusterclass (ui-extn: v0.8.2)
-Cypress.Commands.add('createCAPICluster', (className, clusterName, machineName, k8sVersion, podCIDR, serviceCIDR) => {
+Cypress.Commands.add('createCAPICluster', (className, clusterName, machines, k8sVersion, podCIDR, serviceCIDR, extraVariables) => {
   // Navigate to Classes Menu
   cy.checkCAPIClusterClass(className);
   cy.getBySel('sortable-table-0-action-button').click();
@@ -127,12 +127,37 @@ Cypress.Commands.add('createCAPICluster', (className, clusterName, machineName, 
   }
 
   // Machine Deployment/Pool details
-  cy.typeValue('Name', 'md-0');
-  cy.get('.vs__selected-options').click();
-  cy.contains(machineName).click();
+  var counter: number = 0;
+  Object.entries(machines).forEach(([key, value]) => {
+    cy.get('h2').contains('Workers').parents('div.block').within(() => {
+      cy.getBySel(`array-list-box${counter}`).within(() => {
+        cy.typeValue('Name', key);
+        cy.get('.vs__selected-options').click();
+      })
+    })
+    cy.contains(value).click();
+    cy.get('h2').contains('Workers').parents('div.block').within(() => {
+      cy.clickButton('Add');
+      counter++;
+    })
+  })
+
   cy.clickButton('Next');
+
+  if (extraVariables) {
+    extraVariables.forEach((variable) => {
+      if (variable.type == "string") {
+        cy.typeValue(variable.name, variable.value);
+      }
+      if (variable.type == 'dropdown') {
+        cy.get(`div[title=${variable.name}]`).click();
+        cy.contains(variable.value).click();
+      }
+    })
+  }
   cy.clickButton('Create');
 });
+
 
 // Command to check CAPI cluster presence under CAPI Menu
 Cypress.Commands.add('checkCAPICluster', (clusterName) => {
@@ -572,7 +597,7 @@ Cypress.Commands.add('goToHome', () => {
 
 // Fleet commands
 // Command add Fleet Git Repository
-Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, path, workspace) => {
+Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, paths, workspace) => {
   cy.accesMenuSelection(['Continuous Delivery', 'Git Repos']);
   cy.getBySel('masthead-create').should('be.visible');
   cy.contains('fleet-').click();
@@ -591,9 +616,13 @@ Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, path, worksp
 
   cy.typeValue('Repository URL', repoUrl);
   cy.typeValue('Branch Name', branch);
-  cy.clickButton('Add Path');
-  cy.getBySel('gitRepo-paths').within(($gitRepoPaths) => {
-    cy.getBySel('input-0').type(path);
+  var index: number = 0
+  paths.forEach((path) => {
+    cy.clickButton('Add Path');
+    cy.getBySel('gitRepo-paths').within(() => {
+      cy.getBySel('input-' + index).type(path);
+      index++;
+    })
   })
   cy.clickButton('Next');
   cy.get('button.btn').contains('Previous').should('be.visible');
@@ -634,6 +663,7 @@ Cypress.Commands.add('forceUpdateFleetGitRepo', (repoName, workspace) => {
 // Command to check Fleet Git Repository
 Cypress.Commands.add('checkFleetGitRepo', (repoName, workspace) => {
   // Go to 'Continuous Delivery' > 'Git Repos'
+  cy.burgerMenuOperate('open');
   cy.accesMenuSelection(['Continuous Delivery', 'Git Repos']);
   cy.getBySel('masthead-create').should('be.visible');
   // Change the workspace using the dropdown on the top bar

@@ -1,7 +1,7 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { isRancherManagerVersion, skipClusterDeletion } from '~/support/utils';
+import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
 describe('Import/Create CAPZ RKE2', { tags: '@full' }, () => {
@@ -13,36 +13,20 @@ describe('Import/Create CAPZ RKE2', { tags: '@full' }, () => {
     const registrationMethod = "internal-first"
     const k8sVersion = "v1.31.1+rke2r1"
     const branch = 'capz-refactor'
-    const path = '/tests/assets/rancher-turtles-fleet-example/capz/rke2/classes'
+    const path = ['/tests/assets/rancher-turtles-fleet-example/capz/rke2/classes']
     const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
     const clientID = Cypress.env("azure_client_id")
     const clientSecret = btoa(Cypress.env("azure_client_secret"))
     const subscriptionID = Cypress.env("azure_subscription_id")
     const tenantID = Cypress.env("azure_tenant_id")
     const location = "westeurope" // the community image for provisioning Azure VM is only available in certain locations
-    const clusterClassManifestURL = 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/examples/clusterclasses/azure/clusterclass-rke2-example.yaml'
-
-    type App = {
-        name: string;
-        path: string;
-    }
-    var supportingHelmApps: App[]
-    if (isRancherManagerVersion('2.11')) {
-        supportingHelmApps = [{ name: "calico-cni", path: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/examples/applications/cni/calico/helm-chart.yaml' },
-        { name: "azure-ccm", path: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/examples/applications/ccm/azure/helm-chart.yaml' }]
-    } else {
-        supportingHelmApps = [{ name: "calico-cni", path: '/tests/assets/rancher-turtles-fleet-example/cni' },
-        { name: "azure-ccm", path: '/tests/assets/rancher-turtles-fleet-example/ccm' }]
-    }
-
+    const clusterClassFleetRepoURL = 'https://github.com/rancher/turtles'
+    const ccPaths = ['/examples/clusterclasses/azure', '/examples/applications/cni/calico', '/examples/applications/ccm/azure']
+    const clusterClassRepoName = "azure-clusterclasses"
     beforeEach(() => {
         cy.login();
         cypressLib.burgerMenuToggle();
     });
-
-    it('Ensure KUBECONFIG is set', () => {
-        expect(Cypress.env("kubeconfig")).to.not.be.undefined;
-    })
 
     it('Setup the namespace for importing', () => {
         cy.namespaceAutoImport('Enable');
@@ -56,33 +40,22 @@ describe('Import/Create CAPZ RKE2', { tags: '@full' }, () => {
         cy.createAzureClusterIdentity(clientSecret, clientID, tenantID)
     })
 
-    qase(21, it('Add CAPZ RKE2 ClusterClass', () => {
-        cy.exec('kubectl apply -f ' + clusterClassManifestURL).its('code').should('eq', 0);
+    qase(21, it('Add CAPZ RKE2 ClusterClass, Calico CNI and Azure CCM Fleet Repo', () => {
+        cy.addFleetGitRepo(clusterClassRepoName, clusterClassFleetRepoURL, "main", ccPaths)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(className);
+
+        // Navigate to `local` cluster, More Resources > Fleet > Helm Apps and ensure the charts are active.
+        cy.burgerMenuOperate('open');
+        cy.contains('local').click();
+        cy.accesMenuSelection(['More Resources', 'Fleet', 'HelmApps']);
+        ["azure-ccm", "calico-cni"].forEach((app) => {
+            cy.typeInFilter(app);
+            cy.getBySel('sortable-cell-0-0').should('contain.text', 'Active');
+            cy.getBySel('sortable-cell-0-1').should('exist');
+        })
     })
     );
-
-    it('Add CNI and CCM definitions', () => {
-        if (isRancherManagerVersion('2.11')) {
-            supportingHelmApps.forEach((app) => {
-                cy.exec('kubectl apply -f ' + app.path).its('code').should('eq', 0)
-            })
-
-            // Navigate to `local` cluster, More Resources > Fleet > Helm Apps and ensure the charts are active.
-            cy.contains('local').click();
-            cy.accesMenuSelection(['More Resources', 'Fleet', 'HelmApps']);
-            supportingHelmApps.forEach((app) => {
-                cy.typeInFilter(app.name);
-                cy.getBySel('sortable-cell-0-0').should('contain.text', 'Active');
-                cy.getBySel('sortable-cell-0-1').should('exist');
-            })
-        } else {
-            supportingHelmApps.forEach((app) => {
-                cy.addFleetGitRepo(app.name, repoUrl, branch, app.path)
-            })
-        }
-    })
 
     it('Add GitRepo for clusterclass cluster and get cluster name', () => {
         cy.addFleetGitRepo(repoName, repoUrl, branch, path);
@@ -136,20 +109,9 @@ describe('Import/Create CAPZ RKE2', { tags: '@full' }, () => {
             // This is checked by ensuring the cluster is not available in CAPI menu
             cy.checkCAPIClusterDeleted(clusterName, timeout);
 
-            // Remove the clusterclass; the return code might be 0; might have to check for something else; removing the clusterclass might also suffice; it deletes all the related resources
-            // `failOnNonZeroExit` is required because when the CC is deleted, it automatically deletes all the supporting resources and they are not found later when kubectl actually tries to delete them
-            cy.exec('kubectl delete -f ' + clusterClassManifestURL, { failOnNonZeroExit: false });
+            // Remove the clusterclass repo
+            cy.removeFleetGitRepo(clusterClassRepoName);
 
-            // Remove the CNI and CCM apps
-            if (isRancherManagerVersion('2.11')) {
-                supportingHelmApps.forEach((app) => {
-                    cy.exec('kubectl delete -f ' + app.path).its('code').should('eq', 0)
-                })
-            } else {
-                supportingHelmApps.forEach((app) => {
-                    cy.removeFleetGitRepo(app.name)
-                })
-            }
             // Delete secret and AzureClusterIdentity
             cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "azure-creds-secret", namespace)
             cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', 'default')

@@ -54,16 +54,16 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
       if (path.includes('clusterclass')) {
         // Add cni gitrepo to fleet-default workspace
         // The cni gitrepo is scoped to capd-kubeadm-class only by fleet.yaml
-        cy.addFleetGitRepo(classesRepoName+'-cni', repoUrl, branch, fullPath + '/cni', 'fleet-default');
+        cy.addFleetGitRepo(classesRepoName + '-cni', repoUrl, branch, [fullPath + '/cni'], 'fleet-default');
         cypressLib.burgerMenuToggle();
 
         // Add classes fleet repo path to fleel-local workspace
         fullPath = fullPath.concat('/' + classesPath)
-        cy.addFleetGitRepo(classesRepoName, repoUrl, branch, fullPath);
+        cy.addFleetGitRepo(classesRepoName, repoUrl, branch, [fullPath]);
         fullPath = fullPath.replace(classesPath, clustersPath);
         cypressLib.burgerMenuToggle();
       }
-      cy.addFleetGitRepo(clustersRepoName, repoUrl, branch, fullPath);
+      cy.addFleetGitRepo(clustersRepoName, repoUrl, branch, [fullPath]);
 
       if (path.includes(clustersPath)) {
         clusterPrefix = clusterNamePrefix
@@ -177,7 +177,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
         it('Delete the CAPD cluster fleet repo(s) - ' + path, () => {
           if (path.includes('clusterclass')) {
             // Remove the cni fleet repo from fleet-default workspace
-            cy.removeFleetGitRepo(classesRepoName+'-cni', 'fleet-default');
+            cy.removeFleetGitRepo(classesRepoName + '-cni', 'fleet-default');
             // Remove the classes fleet repo
             cypressLib.burgerMenuToggle();
             cy.removeFleetGitRepo(classesRepoName);

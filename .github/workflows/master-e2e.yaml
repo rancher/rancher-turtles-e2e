@@ -413,6 +413,7 @@ jobs:
             e2e/unit_tests/capa_rke2_cluster.spec.ts
             e2e/unit_tests/capa_eks_cluster.spec.ts
             e2e/unit_tests/capz_cluster.spec.ts
+            e2e/unit_tests/capz_aks_clusterclass.spec.ts
             e2e/unit_tests/capg_cluster.spec.ts
           UI_ACCOUNT: ${{ inputs.ui_account }}
           UPGRADE_OS_CHANNEL: ${{ inputs.upgrade_os_channel }}
@@ -426,6 +427,10 @@ jobs:
 
           if [ ${{ inputs.operator_dev_chart }} == true ]; then
             export CHARTMUSEUM_REPO=http://${{ needs.create-runner.outputs.public_dns }}
+          fi
+
+          if [ ${{ inputs.rancher_version }} == *"2.11"*]; then
+            export SPEC="${SPEC}\n$e2e/unit_tests/capz_rke2_clusterclass.spec.ts"
           fi
           cd tests && make start-cypress-tests
       - name: Upload Cypress screenshots (Basics)
