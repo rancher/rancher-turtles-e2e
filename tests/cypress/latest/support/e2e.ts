@@ -24,7 +24,7 @@ declare global {
       namespaceAutoImport(mode: string): Chainable<Element>;
       setAutoImport(mode: string): Chainable<Element>;
       clusterAutoImport(clusterName: string, mode: string): Chainable<Element>;
-      addFleetGitRepo(repoName: string, repoUrl: string, branch: string, path: string, workspace?: string): Chainable<Element>;
+      addFleetGitRepo(repoName: string, repoUrl: string, branch: string, path: string, workspace?: string, targetNamespace?: string): Chainable<Element>;
       removeFleetGitRepo(repoName: string, workspace?: string): Chainable<Element>;
       forceUpdateFleetGitRepo(repoName: string, workspace?: string): Chainable<Element>;
       checkFleetGitRepo(repoName: string, workspace?: string): Chainable<Element>;

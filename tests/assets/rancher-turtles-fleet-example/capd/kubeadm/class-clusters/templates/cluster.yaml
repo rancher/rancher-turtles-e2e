@@ -4,9 +4,9 @@ apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
   name: {{ $cluster_name }}
-  namespace: default
   labels:
-    cni: by-fleet-addon-kindnet
+    cni: by-fleet-addon-kindnet # label for v2.10
+    cni: calico # label for v2.11
     cluster-api.cattle.io/rancher-auto-import: "true"
 spec:
   clusterNetwork:
@@ -18,7 +18,8 @@ spec:
       cidrBlocks:
       - 10.128.0.0/12
   topology:
-    class: capd-kubeadm-class
+    class: docker-kubeadm-example
+    classNamespace: fleet-default
     controlPlane:
       metadata: {}
       replicas: 1

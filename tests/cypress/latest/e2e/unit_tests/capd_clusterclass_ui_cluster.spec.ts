@@ -20,17 +20,12 @@ import { skipClusterDeletion } from '~/support/utils';
 Cypress.config();
 describe('Create CAPD', { tags: '@short' }, () => {
   const timeout = 300000
-  const classesRepo = 'classes'
-  const className = 'capd-kubeadm-class'
+  const className = 'docker-kubeadm-example'
   const clusterNamePrefix = className + '-cluster'
   const clusterName = clusterNamePrefix + randomstring.generate({ length: 4, capitalization: "lowercase" })
-  const classPath = '/clusterclass/classes'
   const k8sVersion = 'v1.30.3'
   const machineName = 'default-worker'
-  const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
-  const basePath = '/tests/assets/rancher-turtles-fleet-example/capd/'
   const pathNames = ['kubeadm'] // TODO: Add rke2 path (capi-ui-extension/issues/121)
-  const branch = 'main'
 
   beforeEach(() => {
     cy.login();
@@ -41,16 +36,6 @@ describe('Create CAPD', { tags: '@short' }, () => {
     if (path.includes('kubeadm')) {
       var podCIDR = '192.168.0.0/16'
       var serviceCIDR = '10.128.0.0/12'
-    }
-
-    if (skipClusterDeletion) {
-      it('Add classes fleet repo', () => {
-        cypressLib.checkNavIcon('cluster-management').should('exist');
-        var fullPath = basePath + path
-        // Add classes fleet repo to fleet-local workspace
-        fullPath = fullPath.concat('/', classPath)
-        cy.addFleetGitRepo(className, repoUrl, branch, fullPath);
-      })
     }
 
     it('Create Kindnet configmap', () => {
@@ -89,7 +74,7 @@ describe('Create CAPD', { tags: '@short' }, () => {
 
 
     if (skipClusterDeletion) {
-      it('Remove CAPD cluster from Rancher Manager', { retries: 1 }, () => {
+      it('Remove CAPD cluster from Rancher Manager & Delete the CAPI cluster', { retries: 1 }, () => {
         // Check cluster is not deleted after removal
         cy.deleteCluster(clusterName);
         cy.goToHome();
@@ -97,15 +82,8 @@ describe('Create CAPD', { tags: '@short' }, () => {
         // This is checked by ensuring the cluster is not available in navigation menu
         cy.contains(clusterName).should('not.exist');
         cy.checkCAPIClusterProvisioned(clusterName);
-      })
 
-      it('Delete the CAPI cluster and fleet repo', () => {
         cy.removeCAPIResource('Clusters', clusterName, timeout);
-
-        // Remove the classes fleet repo
-        cypressLib.burgerMenuToggle();
-        cy.removeFleetGitRepo(className);
-
         // Ensure the cluster is not available in navigation menu
         cy.getBySel('side-menu').then(($menu) => {
           if ($menu.text().includes(clusterName)) {

@@ -14,10 +14,14 @@ limitations under the License.
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
+import { isRancherManagerVersion } from '~/support/utils';
 
 Cypress.config();
 describe('Enable CAPI Providers', () => {
   const statusReady = 'Ready'
+  const branch = 'main'
+  const turtlesRepoUrl = 'https://github.com/rancher/turtles.git'
+
   // Providers names
   const kubeadmProvider = 'kubeadm'
   const dockerProvider = 'docker'
@@ -85,6 +89,20 @@ describe('Enable CAPI Providers', () => {
         cy.contains(readyStatus);
       })
     );
+
+    it('Add Docker Clusterclass fleet repo', () => {
+      // Add upstream docker classes repo to fleet-default workspace
+      cy.addFleetGitRepo('docker-clusterclasses', turtlesRepoUrl, branch, 'examples/clusterclasses/docker', '', 'fleet-default');
+      cy.checkCAPIClusterClass(dockerProvider);
+    });
+
+    if (isRancherManagerVersion("2.11")) {
+      // CNI to be used across all specs
+      it('Add CNI fleet repo', () => {
+        // Add upstream cni repo to fleet-default workspace
+        cy.addFleetGitRepo('cni-calico', turtlesRepoUrl, branch, 'examples/applications/cni/calico', '', 'fleet-default');
+      });
+    }
 
     xit('Custom Fleet addon config', () => {
       // Skipped as we are unable to install Monitoring app on clusters without cattle-fleet-system namespace

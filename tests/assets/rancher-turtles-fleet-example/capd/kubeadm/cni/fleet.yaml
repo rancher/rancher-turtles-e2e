@@ -1,0 +1,4 @@
+# This will target the cni fleet bundle to the clusterGroup: docker-kubeadm-example only
+# The bundle will bypass and ignore the default target from GitRepo
+overrideTargets:
+  - clusterGroup: docker-kubeadm-example

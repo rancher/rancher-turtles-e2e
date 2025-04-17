@@ -570,7 +570,7 @@ Cypress.Commands.add('goToHome', () => {
 
 // Fleet commands
 // Command add Fleet Git Repository
-Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, path, workspace) => {
+Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, path, workspace, targetNamespace) => {
   cy.accesMenuSelection('Continuous Delivery', 'Git Repos');
   cy.getBySel('masthead-create').should('be.visible');
   cy.contains('fleet-').click();
@@ -595,6 +595,10 @@ Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, path, worksp
   })
   cy.clickButton('Next');
   cy.get('button.btn').contains('Previous').should('be.visible');
+
+  if (targetNamespace) {
+    cy.typeValue('Target Namespace', targetNamespace);
+  }
 
   if (isRancherManagerVersion("2.11")) {
     cy.clickButton("Next");

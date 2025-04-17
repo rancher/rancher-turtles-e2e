@@ -1,17 +1,16 @@
 apiVersion: addons.cluster.x-k8s.io/v1beta1
 kind: ClusterResourceSet
 metadata:
-  name: capd-class-crs-0
+  name: docker-kubeadm-example-crs-0
   namespace: fleet-default
 spec:
   clusterSelector:
     matchLabels:
-      # cni: capd-class-crs-0
       # Workaround for capi-ui-extension/issues/122
       topology.cluster.x-k8s.io/owned: ""
   resources:
   - kind: ConfigMap
-    name: cni-capd-class-crs-0
+    name: cni-docker-kubeadm-example-crs-0
   strategy: ApplyOnce
 ---
 apiVersion: v1
@@ -135,5 +134,5 @@ data:
                 path: /lib/modules
 kind: ConfigMap
 metadata:
-  name: cni-capd-class-crs-0
+  name: cni-docker-kubeadm-example-crs-0
   namespace: fleet-default

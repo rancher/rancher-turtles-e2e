@@ -15,19 +15,20 @@ import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
+import { isRancherManagerVersion } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
   var clusterName: string, clusterPrefix: string
   const timeout = 300000
-  const classesPath = 'classes'
+  const namePrefix = 'docker-kubeadm-'
   const clustersPath = 'clusters'
-  const className = 'capd-kubeadm-class'
-  const clusterNamePrefix = 'capd-kubeadm-cluster' // as per fleet values
-  const classClusterNamePrefix = className + '-cluster' // as per fleet values
+  const classClustersPath = 'class-' + clustersPath
+  const className = namePrefix + 'example'
+  const clusterNamePrefix = namePrefix + 'cluster' // as per fleet values
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const basePath = '/tests/assets/rancher-turtles-fleet-example/capd/kubeadm/'
-  const pathNames = [clustersPath, 'clusterclass']
+  const pathNames = [clustersPath, classClustersPath]
   const branch = 'main'
 
   beforeEach(() => {
@@ -36,39 +37,32 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
   });
 
   pathNames.forEach((path) => {
-    const clustersRepoName = clusterNamePrefix + path
-    const classesRepoName = classClusterNamePrefix + path
+    const clustersRepoName = namePrefix + path
 
     it('Setup the namespace for importing', () => {
-      if (path.includes(clustersPath)) {
+      if (path == clustersPath) {
         cy.namespaceAutoImport('Enable');
       } else {
         cy.namespaceAutoImport('Disable');
       }
     })
 
-    it('Add CAPD cluster fleet repo(s) - ' + path + ' and get cluster name', () => {
+    it('Add CAPD cluster fleet repo - ' + path + ' and get cluster name', () => {
       cypressLib.checkNavIcon('cluster-management').should('exist');
       var fullPath = basePath + path
-
-      if (path.includes('clusterclass')) {
-        // Add cni gitrepo to fleet-default workspace
-        // The cni gitrepo is scoped to capd-kubeadm-class only by fleet.yaml
-        cy.addFleetGitRepo(classesRepoName+'-cni', repoUrl, branch, fullPath + '/cni', 'fleet-default');
-        cypressLib.burgerMenuToggle();
-
-        // Add classes fleet repo path to fleel-local workspace
-        fullPath = fullPath.concat('/' + classesPath)
-        cy.addFleetGitRepo(classesRepoName, repoUrl, branch, fullPath);
-        fullPath = fullPath.replace(classesPath, clustersPath);
-        cypressLib.burgerMenuToggle();
-      }
       cy.addFleetGitRepo(clustersRepoName, repoUrl, branch, fullPath);
 
-      if (path.includes(clustersPath)) {
+      if (path == classClustersPath && isRancherManagerVersion("2.10")) {
+        // Add cni gitrepo to fleet-default workspace
+        // The cni gitrepo is scoped to docker-kubeadm-example only by fleet.yaml
+        cypressLib.burgerMenuToggle();
+        cy.addFleetGitRepo(clustersRepoName+'-cni', repoUrl, branch, basePath + 'cni', 'fleet-default');
+      }
+
+      if (path == clustersPath) {
         clusterPrefix = clusterNamePrefix
       } else {
-        clusterPrefix = classClusterNamePrefix
+        clusterPrefix = className
       }
       // Check CAPI cluster using its name prefix
       cy.checkCAPICluster(clusterPrefix);
@@ -95,7 +89,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
     );
 
     // fleet-addon provider checks (for rancher dev/2.10.3 and up)
-    if (path.includes('clusterclass')) {
+    if (path == classClustersPath) {
       qase(42,
         it('Check if cluster is registered in Fleet only once', () => {
           cypressLib.accesMenu('Continuous Delivery');
@@ -124,7 +118,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
       )
     }
 
-    if (path.includes(clustersPath)) {
+    if (path == clustersPath) {
       qase(7,
         it('Install App on imported cluster', { retries: 1 }, () => {
           // Click on imported CAPD cluster
@@ -174,29 +168,18 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
       );
 
       qase(10,
-        it('Delete the CAPD cluster fleet repo(s) - ' + path, () => {
-          if (path.includes('clusterclass')) {
-            // Remove the cni fleet repo from fleet-default workspace
-            cy.removeFleetGitRepo(classesRepoName+'-cni', 'fleet-default');
-            // Remove the classes fleet repo
+        it('Delete the CAPD fleet repo - ' + path, () => {
+          if (path == classClustersPath && isRancherManagerVersion("2.10")) {
+            // Remove the cni fleet repo
+            cy.removeFleetGitRepo(clustersRepoName+'-cni', 'fleet-default');
             cypressLib.burgerMenuToggle();
-            cy.removeFleetGitRepo(classesRepoName);
-            // Remove the clusters fleet repo
-            cypressLib.burgerMenuToggle();
-            cy.removeFleetGitRepo(clustersRepoName);
-
-            // Wait until the following returns no clusters found
-            cy.checkCAPIClusterDeleted(clusterName, timeout);
-            // Remove the clusterclass
-            cy.removeCAPIResource('Cluster Classes', className);
-          } else {
-            // Remove the clusters fleet repo
-            cy.removeFleetGitRepo(clustersRepoName);
-
-            // Wait until the following returns no clusters found
-            // This is checked by ensuring the cluster is not available in CAPI menu
-            cy.checkCAPIClusterDeleted(clusterName, timeout);
           }
+          // Remove the clusters fleet repo
+          cy.removeFleetGitRepo(clustersRepoName);
+
+          // Wait until the following returns no clusters found
+          // This is checked by ensuring the cluster is not available in CAPI menu
+          cy.checkCAPIClusterDeleted(clusterName, timeout);
 
           // Ensure the cluster is not available in navigation menu
           cy.getBySel('side-menu').then(($menu) => {
