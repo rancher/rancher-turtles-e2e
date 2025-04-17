@@ -2,7 +2,7 @@ namespace: default
 
 helm:
   values:
-    clustername_prefix: capd-kubeadm-cluster
+    clustername_prefix: docker-kubeadm-cluster
 
 diff:
   comparePatches:

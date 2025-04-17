@@ -2,7 +2,7 @@ namespace: default
 
 helm:
   values:
-    clustername_prefix: capd-rke2-cluster
+    clustername_prefix: docker-rke2-cluster
 
 diff:
   comparePatches:

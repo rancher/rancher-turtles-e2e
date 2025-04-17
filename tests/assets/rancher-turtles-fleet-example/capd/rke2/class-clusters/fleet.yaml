@@ -1,0 +1,5 @@
+namespace: fleet-default
+
+helm:
+  values:
+    clustername_prefix: docker-rke2-example-cluster

@@ -18,6 +18,9 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 Cypress.config();
 describe('Enable CAPI Providers', () => {
   const statusReady = 'Ready'
+  const branch = 'main'
+  const turtlesRepoUrl = 'https://github.com/rancher/turtles.git'
+
   // Providers names
   const kubeadmProvider = 'kubeadm'
   const dockerProvider = 'docker'
@@ -85,6 +88,17 @@ describe('Enable CAPI Providers', () => {
         cy.contains(readyStatus);
       })
     );
+
+    it('Add Docker Clusterclass fleet repo', () => {
+      // Add upstream docker classes repo to fleet-local workspace
+      cy.addFleetGitRepo('docker-clusterclasses', turtlesRepoUrl, branch, 'examples/clusterclasses/docker');
+    });
+
+    // CNI to be used across all specs
+    it('Add CNI fleet repo', () => {
+      // Add upstream cni repo to fleet-local workspace
+      cy.addFleetGitRepo('cni-calico', turtlesRepoUrl, branch, 'examples/applications/cni/calico');
+    });
 
     xit('Custom Fleet addon config', () => {
       // Skipped as we are unable to install Monitoring app on clusters without cattle-fleet-system namespace
