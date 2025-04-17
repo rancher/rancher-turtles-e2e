@@ -16,7 +16,7 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
   const k8sVersion = 'v1.31.1'
   const podCIDR = '192.168.0.0/16'
   const branch = 'capz-refactor'
-  const path = ['/tests/assets/rancher-turtles-fleet-example/capz/aks/classes']
+  const path = ['/tests/assets/rancher-turtles-fleet-example/capz/aks/classes-clusters']
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
   const clientID = Cypress.env("azure_client_id")
   const clientSecret = btoa(Cypress.env("azure_client_secret"))
@@ -25,7 +25,7 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
   const location = "westeurope" // this is one of the regions supported by ClusterClass definition
   const namespace = "capz-system"
   const clusterClassFleetRepoURL = 'https://github.com/rancher/turtles'
-  const ccPaths = ['/examples/clusterclasses/azure']
+  const classesPath = ['/examples/clusterclasses/azure']
   const clusterClassRepoName = "azure-clusterclasses"
 
   beforeEach(() => {
@@ -46,7 +46,7 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
   })
 
   qase(21, it('Add CAPZ AKS ClusterClass using fleet', () => {
-    cy.addFleetGitRepo(clusterClassRepoName, clusterClassFleetRepoURL, "main", ccPaths)
+    cy.addFleetGitRepo(clusterClassRepoName, clusterClassFleetRepoURL, "main", classesPath)
     // Go to CAPI > ClusterClass to ensure the clusterclass is created
     cy.checkCAPIClusterClass(className);
   })
@@ -95,7 +95,7 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
   }
 
 
-  qase(44, it.only('Create CAPZ from Clusterclass via UI', () => {
+  qase(44, it('Create CAPZ from Clusterclass via UI', () => {
     // Create cluster from Clusterclass UI
     const machines: Record<string, string> = { 'mp-system': 'default-system', 'mp-worker': 'default-worker' }
     const extraVariables: ClusterClassVariablesInput[] = [

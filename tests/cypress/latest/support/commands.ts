@@ -135,11 +135,15 @@ Cypress.Commands.add('createCAPICluster', (className, clusterName, machines, k8s
         cy.get('.vs__selected-options').click();
       })
     })
+    // The options list is located somewhere outside the <body> block; so it needs to be called outside the above block.
     cy.contains(value).click();
-    cy.get('h2').contains('Workers').parents('div.block').within(() => {
-      cy.clickButton('Add');
-      counter++;
-    })
+    // Ensure there are more entries to be made before clicking the `Add` button.
+    if (Object.entries(machines).length > counter + 1) {
+      cy.get('h2').contains('Workers').parents('div.block').within(() => {
+        cy.clickButton('Add');
+        counter++;
+      })
+    }
   })
 
   cy.clickButton('Next');
@@ -156,6 +160,9 @@ Cypress.Commands.add('createCAPICluster', (className, clusterName, machines, k8s
     })
   }
   cy.clickButton('Create');
+  // Add a check to ensure there are no errors
+  cy.wait(3000)
+  cy.get('div[id=cru-errors]').should('not.exist');
 });
 
 
@@ -173,8 +180,7 @@ Cypress.Commands.add('checkCAPIClusterClass', (className) => {
   cy.contains('Cluster Classes').click();
   cy.getBySel('button-group-child-1').click();
   cy.typeInFilter(className);
-  cy.getBySel('sortable-cell-0-0').should('contain.text', 'Active');
-  cy.getBySel('sortable-cell-0-1').should('exist');
+  cy.waitForAllRowsInState('Active');
 });
 
 // Command to check CAPI cluster Active status
@@ -723,7 +729,7 @@ Cypress.Commands.add('verifyTableRow', (rowNumber, expectedText1, expectedText2)
 
 // Wait until all the rows in the table on current page are in the same State
 Cypress.Commands.add('waitForAllRowsInState', (desiredState, timeout = 120000) => {
-  cy.get('table > tbody > tr', { timeout }).should(($rows) => {
+  cy.get('table > tbody > tr.main-row', { timeout }).should(($rows) => {
     // Make sure there is at least one row
     expect($rows.length).to.be.greaterThan(0);
     const allInDesiredState = $rows.toArray().every((row) => {

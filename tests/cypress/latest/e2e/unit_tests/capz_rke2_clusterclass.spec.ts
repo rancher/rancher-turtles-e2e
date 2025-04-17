@@ -13,7 +13,7 @@ describe('Import/Create CAPZ RKE2', { tags: '@full' }, () => {
     const registrationMethod = "internal-first"
     const k8sVersion = "v1.31.1+rke2r1"
     const branch = 'capz-refactor'
-    const path = ['/tests/assets/rancher-turtles-fleet-example/capz/rke2/classes']
+    const path = ['/tests/assets/rancher-turtles-fleet-example/capz/rke2/classes-clusters']
     const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
     const clientID = Cypress.env("azure_client_id")
     const clientSecret = btoa(Cypress.env("azure_client_secret"))
@@ -21,8 +21,9 @@ describe('Import/Create CAPZ RKE2', { tags: '@full' }, () => {
     const tenantID = Cypress.env("azure_tenant_id")
     const location = "westeurope" // the community image for provisioning Azure VM is only available in certain locations
     const clusterClassFleetRepoURL = 'https://github.com/rancher/turtles'
-    const ccPaths = ['/examples/clusterclasses/azure', '/examples/applications/cni/calico', '/examples/applications/ccm/azure']
+    const classesPath = ['/examples/clusterclasses/azure', '/examples/applications/cni/calico', '/examples/applications/ccm/azure']
     const clusterClassRepoName = "azure-clusterclasses"
+
     beforeEach(() => {
         cy.login();
         cypressLib.burgerMenuToggle();
@@ -41,7 +42,7 @@ describe('Import/Create CAPZ RKE2', { tags: '@full' }, () => {
     })
 
     qase(21, it('Add CAPZ RKE2 ClusterClass, Calico CNI and Azure CCM Fleet Repo', () => {
-        cy.addFleetGitRepo(clusterClassRepoName, clusterClassFleetRepoURL, "main", ccPaths)
+        cy.addFleetGitRepo(clusterClassRepoName, clusterClassFleetRepoURL, "main", classesPath)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(className);
 
@@ -51,8 +52,7 @@ describe('Import/Create CAPZ RKE2', { tags: '@full' }, () => {
         cy.accesMenuSelection(['More Resources', 'Fleet', 'HelmApps']);
         ["azure-ccm", "calico-cni"].forEach((app) => {
             cy.typeInFilter(app);
-            cy.getBySel('sortable-cell-0-0').should('contain.text', 'Active');
-            cy.getBySel('sortable-cell-0-1').should('exist');
+            cy.waitForAllRowsInState('Active');
         })
     })
     );

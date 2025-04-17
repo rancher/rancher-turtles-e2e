@@ -428,8 +428,8 @@ jobs:
             export CHARTMUSEUM_REPO=http://${{ needs.create-runner.outputs.public_dns }}
           fi
 
-          if [ ${{ inputs.rancher_version }} == *"2.11"*]; then
-            export SPEC="${SPEC}\n$e2e/unit_tests/capz_rke2_clusterclass.spec.ts"
+          if [ ${{ inputs.rancher_version }} =~ *"2.11"*]; then
+            export SPEC="${SPEC}"$'\n'"e2e/unit_tests/capz_rke2_clusterclass.spec.ts"
           fi
           cd tests && make start-cypress-tests
       - name: Upload Cypress screenshots (Basics)
