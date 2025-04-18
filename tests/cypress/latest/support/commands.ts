@@ -127,10 +127,9 @@ Cypress.Commands.add('createCAPICluster', (className, clusterName, machines, k8s
   }
 
   // Machine Deployment/Pool details
-  var counter: number = 0;
-  Object.entries(machines).forEach(([key, value]) => {
+  Object.entries(machines).forEach(([key, value], index, array) => {
     cy.get('h2').contains('Workers').parents('div.block').within(() => {
-      cy.getBySel(`array-list-box${counter}`).within(() => {
+      cy.getBySel(`array-list-box${index}`).within(() => {
         cy.typeValue('Name', key);
         cy.get('.vs__selected-options').click();
       })
@@ -138,10 +137,10 @@ Cypress.Commands.add('createCAPICluster', (className, clusterName, machines, k8s
     // The options list is located somewhere outside the <body> block; so it needs to be called outside the above block.
     cy.contains(value).click();
     // Ensure there are more entries to be made before clicking the `Add` button.
-    if (Object.entries(machines).length > counter + 1) {
+    const isLast = index === array.length - 1;
+    if (!isLast) {
       cy.get('h2').contains('Workers').parents('div.block').within(() => {
         cy.clickButton('Add');
-        counter++;
       })
     }
   })
