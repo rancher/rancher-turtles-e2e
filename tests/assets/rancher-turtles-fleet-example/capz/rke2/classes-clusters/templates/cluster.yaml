@@ -1,0 +1,36 @@
+{{- $cluster_name := printf "%s-%s" .Values.classname (randAlphaNum 4) | lower -}}
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  labels:
+    owner: turtles-qa
+    cloud-provider: azure
+    cni: calico
+  name: {{ $cluster_name }}
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+      - 192.168.0.0/16
+  topology:
+    class: azure-rke2-example
+    controlPlane:
+      replicas: {{ .Values.cluster.systempoolCount | int }}
+    variables:
+    - name: subscriptionID
+      value: "{{ .Values.azure.subscriptionID }}"
+    - name: location
+      value: "{{ .Values.cluster.location }}"
+    - name: resourceGroup
+      value: {{ $cluster_name }}
+    - name: azureClusterIdentityName
+      value: cluster-identity
+    - name: registrationMethod
+      value: "{{ .Values.cluster.rke2RegistrationMethod }}"
+    version: "{{ .Values.cluster.kubernetesVersion }}"
+    workers:
+      machineDeployments:
+      - class: rke2-default-worker
+        name: md-0
+        replicas: {{ .Values.cluster.userpoolCount | int }}

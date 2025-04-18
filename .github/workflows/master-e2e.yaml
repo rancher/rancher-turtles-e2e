@@ -412,7 +412,9 @@ jobs:
             e2e/unit_tests/capa_rke2_cluster.spec.ts
             e2e/unit_tests/capa_eks_cluster.spec.ts
             e2e/unit_tests/capz_cluster.spec.ts
+            e2e/unit_tests/capz_aks_clusterclass.spec.ts
             e2e/unit_tests/capg_cluster.spec.ts
+            ${{ contains(inputs.rancher_version, '2.11') && 'e2e/unit_tests/capz_rke2_clusterclass.spec.ts' || '' }}
           UI_ACCOUNT: ${{ inputs.ui_account }}
           UPGRADE_OS_CHANNEL: ${{ inputs.upgrade_os_channel }}
         run: |

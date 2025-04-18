@@ -1,0 +1,11 @@
+namespace: default
+
+helm:
+  chart: ./
+  valuesFrom:
+    - secretKeyRef:
+        name: azure-creds-secret
+        namespace: capz-system
+        key: values.yaml
+  values:
+    classname: azure-aks-example

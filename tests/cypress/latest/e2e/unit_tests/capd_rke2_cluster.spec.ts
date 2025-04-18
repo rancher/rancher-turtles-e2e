@@ -55,11 +55,11 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
       if (path.includes('clusterclass')) {
         // Add classes fleet repo to fleet-local workspace
         fullPath = fullPath.concat('/', classesPath)
-        cy.addFleetGitRepo(classesRepoName, repoUrl, branch, fullPath);
+        cy.addFleetGitRepo(classesRepoName, repoUrl, branch, [fullPath]);
         fullPath = fullPath.replace(classesPath, clustersPath);
         cypressLib.burgerMenuToggle();
       }
-      cy.addFleetGitRepo(clustersRepoName, repoUrl, branch, fullPath);
+      cy.addFleetGitRepo(clustersRepoName, repoUrl, branch, [fullPath]);
 
       if (path.includes(clustersPath)) {
         clusterPrefix = clusterNamePrefix
@@ -182,5 +182,5 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
         })
       );
     }
-  })  
+  })
 });

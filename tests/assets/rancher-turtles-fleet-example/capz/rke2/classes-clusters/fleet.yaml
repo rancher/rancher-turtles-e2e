@@ -1,12 +1,11 @@
 namespace: default
 
 helm:
-  chart: ./capz-aks-helmchart
+  chart: ./
   valuesFrom:
     - secretKeyRef:
         name: azure-creds-secret
         namespace: capz-system
         key: values.yaml
   values:
-    clustername_prefix: turtles-qa-capz-aks
-    clusterclassname_prefix: capz-aks-class
+    classname: azure-rke2-example

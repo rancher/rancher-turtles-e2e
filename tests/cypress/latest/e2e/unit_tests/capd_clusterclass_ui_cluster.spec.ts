@@ -20,13 +20,11 @@ import { skipClusterDeletion } from '~/support/utils';
 Cypress.config();
 describe('Create CAPD', { tags: '@short' }, () => {
   const timeout = 300000
-  const classesRepo = 'classes'
   const className = 'capd-kubeadm-class'
   const clusterNamePrefix = className + '-cluster'
   const clusterName = clusterNamePrefix + randomstring.generate({ length: 4, capitalization: "lowercase" })
   const classPath = '/clusterclass/classes'
   const k8sVersion = 'v1.30.3'
-  const machineName = 'default-worker'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const basePath = '/tests/assets/rancher-turtles-fleet-example/capd/'
   const pathNames = ['kubeadm'] // TODO: Add rke2 path (capi-ui-extension/issues/121)
@@ -49,7 +47,7 @@ describe('Create CAPD', { tags: '@short' }, () => {
         var fullPath = basePath + path
         // Add classes fleet repo to fleet-local workspace
         fullPath = fullPath.concat('/', classPath)
-        cy.addFleetGitRepo(className, repoUrl, branch, fullPath);
+        cy.addFleetGitRepo(className, repoUrl, branch, [fullPath]);
       })
     }
 
@@ -70,7 +68,8 @@ describe('Create CAPD', { tags: '@short' }, () => {
 
     qase(44,
       it('Create child CAPD cluster from Clusterclass', () => {
-        cy.createCAPICluster(className, clusterName, machineName, k8sVersion, podCIDR, serviceCIDR);
+        const machines: Record<string, string> = { 'md-0': 'default-worker' }
+        cy.createCAPICluster(className, clusterName, machines, k8sVersion, podCIDR, serviceCIDR);
         cy.checkCAPIClusterActive(clusterName);
         cy.clusterAutoImport(clusterName, 'Enable');
         // Check child cluster is auto-imported
