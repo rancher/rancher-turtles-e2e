@@ -763,9 +763,7 @@ Cypress.Commands.add('burgerMenuOperate', (operation: 'open' | 'close') => {
 
 
 Cypress.Commands.add('deleteKubernetesResource', (clusterName = 'local', resourcePath: string[], resourceName: string, namespace?: string) => {
-  cy.burgerMenuOperate('open');
-  cy.accesMenuSelection([clusterName])
-  cy.getBySel('header').get('.cluster-name').contains(clusterName);
+  cy.exploreCluster(clusterName);
 
   if (namespace) {
     cy.setNamespace(namespace);
@@ -782,3 +780,9 @@ Cypress.Commands.add('deleteKubernetesResource', (clusterName = 'local', resourc
   cy.typeInFilter(resourceName);
   cy.getBySel('sortable-cell-0-1').should('not.exist');
 })
+
+Cypress.Commands.add('exploreCluster', (clusterName: string) => {
+  cy.burgerMenuOperate('open');
+  cy.accesMenuSelection([clusterName])
+  cy.getBySel('header').get('.cluster-name').contains(clusterName);
+});

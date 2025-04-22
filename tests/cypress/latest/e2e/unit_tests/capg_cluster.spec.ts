@@ -112,7 +112,15 @@ describe('Import CAPG GKE', { tags: '@full' }, () => {
         cy.removeFleetGitRepo(repoName);
         // Wait until the following returns no clusters found
         // This is checked by ensuring the cluster is not available in CAPI menu
-        cy.checkCAPIClusterDeleted(clusterName, timeout);
+        // cy.checkCAPIClusterDeleted(clusterName, timeout);
+
+        // Due to https://github.com/kubernetes-sigs/cluster-api-provider-gcp/issues/1454, the cluster is forever in deleting state; we only check that the cluster is in `Deleting` state until the fix is released, which should be somewhere around June 2025
+        cy.exploreCluster('local');
+        ["GCPManagedClusters", "GCPManagedControlPlanes"].forEach((resource) => {
+          cy.accesMenuSelection(['More Resources', 'Cluster Provisioning', resource])
+          cy.typeInFilter(clusterName);
+          cy.getBySel('sortable-cell-0-1', { timeout: timeout }).should('not.exist');
+        })
       })
     );
   }

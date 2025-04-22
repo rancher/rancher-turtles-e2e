@@ -58,6 +58,7 @@ declare global {
       typeInFilter(text: string): Chainable<Element>;
       goToHome(): Chainable<Element>;
       patchYamlResource(clusterName: string, namespace: string, resourceKind: string, resourceName: string, patch: object): Chainable<Element>;
+      exploreCluster(clusterName: string): Chainable<Element>;
       // Functions declared in capz_support.js
       createCAPZValuesSecret(location: string, clientID: string, tenantID: string, subscriptionID: string, version: string, registrationMethod?: string, userpoolCount?: number, systempoolCount?: number): Chainable<Element>;
       createAzureClusterIdentity(clientSecret: string, clientID: string, tenantID: string): Chainable<Element>;
