@@ -22,7 +22,7 @@ jobs:
         steps:
         - name: Checkout
           uses: actions/checkout@v4
-        - name: Add squad/qa label to assigned issues
+        - name: Add squad/qa label to assigned issues and issues to project
           if: github.event_name == 'issues'
           env:
             GH_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -52,7 +52,7 @@ jobs:
             ' -f owner="$OWNER" -f repo="$REPO" -F number=$PR_NUMBER --jq '.data.repository.pullRequest.closingIssuesReferences.nodes | length > 0')
 
             if [[ "$HAS_LINKED" == "false" ]]; then
-                echo "No linked issues found for PR #$PR_NUMBER. Adding label 'squad/qa' and to PR to the project."
+                echo "No linked issues found for PR #$PR_NUMBER. Adding label 'squad/qa' and PR to the project."
                 gh pr edit $PR_NUMBER --add-label="${{ env.SQUAD_QA_LABEL }}" --add-project="${{ env.PROJECT_NAME }}"
             else
                 echo "PR #$PR_NUMBER has linked issues. Skipping label addition."
