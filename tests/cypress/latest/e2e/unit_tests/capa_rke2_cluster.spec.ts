@@ -10,7 +10,7 @@ describe('Import CAPA RKE2', { tags: '@full' }, () => {
   const repoName = 'clusters-capa-rke2'
   const clusterNamePrefix = 'turtles-qa-capa-rke2' // as per fleet values
   const branch = 'main'
-  const path = ['/tests/assets/rancher-turtles-fleet-example/capa/rke2']
+  const path = '/tests/assets/rancher-turtles-fleet-example/capa/rke2'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
 
   beforeEach(() => {

@@ -624,12 +624,11 @@ Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, paths, works
 
   cy.typeValue('Repository URL', repoUrl);
   cy.typeValue('Branch Name', branch);
-  var index: number = 0
-  paths.forEach((path) => {
+  const pathsArray = Array.isArray(paths) ? paths : [paths];
+  pathsArray.forEach((path, index) => {
     cy.clickButton('Add Path');
     cy.getBySel('gitRepo-paths').within(() => {
       cy.getBySel('input-' + index).type(path);
-      index++;
     })
   })
   cy.clickButton('Next');

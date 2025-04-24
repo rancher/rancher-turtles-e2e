@@ -16,7 +16,7 @@ describe('Import/Create CAPZ AKS with ClusterClass', { tags: '@full' }, () => {
   const k8sVersion = 'v1.31.1'
   const podCIDR = '192.168.0.0/16'
   const branch = 'capz-refactor'
-  const path = ['/tests/assets/rancher-turtles-fleet-example/capz/aks/classes-clusters']
+  const path = '/tests/assets/rancher-turtles-fleet-example/capz/aks/classes-clusters'
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
   const clientID = Cypress.env("azure_client_id")
   const clientSecret = btoa(Cypress.env("azure_client_secret"))
@@ -25,7 +25,7 @@ describe('Import/Create CAPZ AKS with ClusterClass', { tags: '@full' }, () => {
   const location = "westeurope" // this is one of the regions supported by ClusterClass definition
   const namespace = "capz-system"
   const clusterClassFleetRepoURL = 'https://github.com/rancher/turtles'
-  const classesPath = ['/examples/clusterclasses/azure']
+  const classesPath = '/examples/clusterclasses/azure'
   const clusterClassRepoName = "azure-clusterclasses"
 
   beforeEach(() => {

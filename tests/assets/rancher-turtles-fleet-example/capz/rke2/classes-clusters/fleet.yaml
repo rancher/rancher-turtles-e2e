@@ -1,7 +1,6 @@
 namespace: default
 
 helm:
-  chart: ./
   valuesFrom:
     - secretKeyRef:
         name: azure-creds-secret

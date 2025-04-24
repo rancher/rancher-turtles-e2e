@@ -12,7 +12,7 @@ spec:
       cidrBlocks:
       - 192.168.0.0/16
   topology:
-    class: azure-aks-example
+    class: "{{ .Values.classname }}"
     variables:
     - name: subscriptionID
       value: "{{ .Values.azure.subscriptionID }}"

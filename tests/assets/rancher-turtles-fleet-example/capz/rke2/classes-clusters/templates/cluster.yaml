@@ -14,7 +14,7 @@ spec:
       cidrBlocks:
       - 192.168.0.0/16
   topology:
-    class: azure-rke2-example
+    class: "{{ .Values.classname }}"
     controlPlane:
       replicas: {{ .Values.cluster.systempoolCount | int }}
     variables:
