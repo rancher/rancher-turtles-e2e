@@ -95,7 +95,7 @@ describe('Import/Create CAPZ AKS with ClusterClass', { tags: '@full' }, () => {
   }
 
 
-  qase(44, it('Create CAPZ from Clusterclass via UI', () => {
+  qase(45, it('Create CAPZ from Clusterclass via UI', () => {
     // Create cluster from Clusterclass UI
     const machines: Record<string, string> = { 'mp-system': 'default-system', 'mp-worker': 'default-worker' }
     const extraVariables: ClusterClassVariablesInput[] = [

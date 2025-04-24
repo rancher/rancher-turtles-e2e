@@ -76,49 +76,6 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
   })
   );
 
-  qase(24, xit("Scale up imported CAPZ cluster by updating configmap and forcefully updating the repo", () => {
-    cy.contains('local')
-      .click();
-    cy.get('.header-buttons > :nth-child(1) > .icon')
-      .click();
-    cy.contains('Import YAML');
-
-    var encodedData = ''
-    cy.readFile('./fixtures/capz-helm-values.yaml').then((data) => {
-      data = data.replace(/systempoolCount: 1/g, "systempoolCount: 2")
-      data = data.replace(/userpoolCount: 2/g, "userpoolCount: 4")
-
-      // workaround; these values need to be re-replaced before applying the scaling changes
-      data = data.replace(/replace_location/g, location)
-      data = data.replace(/replace_client_id/g, clientID)
-      data = data.replace(/replace_tenant_id/g, tenantID)
-      data = data.replace(/replace_subscription_id/g, subscriptionID)
-      encodedData = btoa(data)
-    })
-
-    cy.readFile('./fixtures/capz-helm-values-secret.yaml').then((data) => {
-      cy.get('.CodeMirror')
-        .then((editor) => {
-          data = data.replace(/replace_values/g, encodedData)
-          editor[0].CodeMirror.setValue(data);
-        })
-    });
-
-    cy.clickButton('Import');
-    cy.clickButton('Close');
-
-    cypressLib.burgerMenuToggle();
-    cy.forceUpdateFleetGitRepo(repoName)
-
-    // TODO: check if the cluster is actually updated
-    // TODO: Wait until the fleet repo is ready
-    // Go to Cluster Management > CAPI > Clusters and check if the cluster has started provisioning
-    cypressLib.burgerMenuToggle();
-    cy.checkCAPIMenu();
-    cy.contains('Provisioned ' + clusterName, { timeout: timeout });
-  })
-  );
-
   qase(25, it('Remove imported CAPZ cluster from Rancher Manager and Delete the CAPZ cluster', { retries: 1 }, () => {
 
     // Check cluster is not deleted after removal

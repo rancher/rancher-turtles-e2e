@@ -41,7 +41,7 @@ describe('Import/Create CAPZ RKE2 with ClusterClass', { tags: '@full' }, () => {
         cy.createAzureClusterIdentity(clientSecret, clientID, tenantID)
     })
 
-    qase(21, it('Add CAPZ RKE2 ClusterClass, Calico CNI and Azure CCM Fleet Repo', () => {
+    it('Add CAPZ RKE2 ClusterClass, Calico CNI and Azure CCM Fleet Repo', () => {
         cy.addFleetGitRepo(clusterClassRepoName, clusterClassFleetRepoURL, "main", classesPath)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(className);
@@ -54,8 +54,7 @@ describe('Import/Create CAPZ RKE2 with ClusterClass', { tags: '@full' }, () => {
             cy.typeInFilter(app);
             cy.waitForAllRowsInState('Active');
         })
-    })
-    );
+    });
 
     it('Add GitRepo for clusterclass cluster and get cluster name', () => {
         cy.addFleetGitRepo(repoName, repoUrl, branch, path);
@@ -79,19 +78,18 @@ describe('Import/Create CAPZ RKE2 with ClusterClass', { tags: '@full' }, () => {
         cy.contains(new RegExp('Active.*' + clusterName), { timeout: 300000 });
     })
 
-    qase(23, it('Install App on imported cluster', { retries: 1 }, () => {
+    it('Install App on imported cluster', { retries: 1 }, () => {
         // Click on imported CAPZ cluster
         cy.contains(clusterName).click();
 
         // Install Chart
         // We install Logging chart instead of Monitoring, since this is relatively lightweight.
         cy.checkChart('Install', 'Logging', 'cattle-logging');
-    })
-    );
+    });
 
 
     if (skipClusterDeletion) {
-        qase(25, it('Remove imported CAPZ cluster from Rancher Manager', { retries: 1 }, () => {
+        it('Remove imported CAPZ cluster from Rancher Manager', { retries: 1 }, () => {
             // Check cluster is not deleted after removal
             cy.deleteCluster(clusterName);
             cy.goToHome();
@@ -99,10 +97,9 @@ describe('Import/Create CAPZ RKE2 with ClusterClass', { tags: '@full' }, () => {
             // This is checked by ensuring the cluster is not available in navigation menu
             cy.contains(clusterName).should('not.exist');
             cy.checkCAPIClusterProvisioned(clusterName);
-        })
-        );
+        });
 
-        qase(26, it('Delete the CAPZ cluster fleet repo and remove all the other resources', () => {
+        it('Delete the CAPZ cluster fleet repo and remove all the other resources', () => {
 
             // Remove the fleet git repo
             cy.removeFleetGitRepo(repoName);
@@ -117,8 +114,7 @@ describe('Import/Create CAPZ RKE2 with ClusterClass', { tags: '@full' }, () => {
             cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "azure-creds-secret", namespace)
             cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', 'default')
             cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "cluster-identity-secret", namespace)
-        })
-        );
+        });
     }
 
 });
