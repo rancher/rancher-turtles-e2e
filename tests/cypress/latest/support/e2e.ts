@@ -33,7 +33,8 @@ declare global {
       fleetNamespaceToggle(toggleOption: string): Chainable<Element>;
       verifyTableRow(rowNumber: number, expectedText1?: string | RegExp, expectedText2?: string | RegExp): Chainable<Element>;
       waitForAllRowsInState(desiredState: string, timeout?: number): Chainable<Element>;
-      accesMenuSelection(menuPaths: string[]): Chainable<Element>; burgerMenuOperate(operation: 'open' | 'close'): Chainable<Element>;
+      accesMenuSelection(menuPaths: string[]): Chainable<Element>;
+      burgerMenuOperate(operation: 'open' | 'close'): Chainable<Element>;
       checkChart(operation: string, chartName: string, namespace: string, version?: string, questions?: any): Chainable<Element>;
       deleteCluster(clusterName: string): Chainable<Element>;
       searchCluster(clusterName: string): Chainable<Element>;
