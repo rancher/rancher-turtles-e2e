@@ -9,10 +9,9 @@ import { ClusterClassVariablesInput } from '~/support/structs';
 Cypress.config();
 describe('Import/Create CAPZ AKS with ClusterClass', { tags: '@full' }, () => {
   const timeout = 1200000
-  const repoName = 'clusters-capz-aks'
+  const repoName = 'classes-clusters-capz-aks'
   const className = 'azure-aks-example'
-  const clusterNamePrefix = className
-  const clusterName = clusterNamePrefix + randomstring.generate({ length: 4, capitalization: "lowercase" })
+  const clusterName = className + randomstring.generate({ length: 4, capitalization: "lowercase" })
   const k8sVersion = 'v1.31.1'
   const podCIDR = '192.168.0.0/16'
   const branch = 'capz-refactor'
@@ -55,8 +54,8 @@ describe('Import/Create CAPZ AKS with ClusterClass', { tags: '@full' }, () => {
   var fleetClusterName: string;
   it('Add GitRepo for cluster and get cluster name', () => {
     cy.addFleetGitRepo(repoName, repoUrl, branch, path);
-    // Check CAPI cluster using its name prefix
-    cy.checkCAPICluster(clusterNamePrefix);
+    // Check CAPI cluster using its name prefix i.e. className
+    cy.checkCAPICluster(className);
 
     // Get the cluster name by its prefix and use it across the test
     cy.getBySel('sortable-cell-0-1').then(($cell) => {
@@ -124,7 +123,7 @@ describe('Import/Create CAPZ AKS with ClusterClass', { tags: '@full' }, () => {
   );
 
   if (skipClusterDeletion) {
-    qase(25, it('Remove imported CAPZ cluster from Rancher Manager and Delete the CAPZ cluster', { retries: 1 }, () => {
+    qase(25, it('Remove created CAPZ cluster from Rancher Manager and Delete the CAPZ cluster', { retries: 1 }, () => {
       // Check cluster is not deleted after removal
       cy.deleteCluster(clusterName);
       cy.goToHome();
@@ -138,7 +137,7 @@ describe('Import/Create CAPZ AKS with ClusterClass', { tags: '@full' }, () => {
     })
     );
 
-    qase(26, it('Delete the CAPZ cluster fleet repo', () => {
+    qase(26, it('Delete the CAPZ clusterclasses fleet repo and other resources', () => {
       // Remove the clusterclass repo
       cy.removeFleetGitRepo(clusterClassRepoName);
 

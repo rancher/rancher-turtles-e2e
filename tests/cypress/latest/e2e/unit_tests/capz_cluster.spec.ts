@@ -92,7 +92,7 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
   );
 
   if (skipClusterDeletion) {
-    qase(26, it('Delete the CAPZ cluster fleet repo', () => {
+    qase(26, it('Delete the CAPZ cluster fleet repo and other resources', () => {
 
       // Remove the fleet git repo
       cy.removeFleetGitRepo(repoName);
