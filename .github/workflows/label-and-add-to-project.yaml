@@ -1,0 +1,58 @@
+name: Add to Kanban board
+run-name: Label ${{ github.event.number }} and add to the project board
+
+on:
+  issues:
+    types:
+      - assigned
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  add_label:
+    env:
+      SQUAD_QA_LABEL: "squad/qa"
+      PROJECT_NAME: "CAPI / Turtles"
+    name: Add Label and add to project board
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Label assigned issues and add them to project board
+      if: github.event_name == 'issues'
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      run: gh issue edit "${{ github.event.issue.number }}" --add-label="${{ env.SQUAD_QA_LABEL }}" --add-project="${{ env.PROJECT_NAME }}"
+
+    - name: Label orphaned PRs and add them to project board
+      if: github.event_name == 'pull_request'
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      run: |
+        OWNER=${{ github.repository_owner }}
+        REPO=$(echo "${{ github.repositoryUrl }}" | sed -E 's/.*\/([^/]+)\.git/\1/')
+        PR_NUMBER=$(( ${{ github.event.pull_request.number }} ))
+        HAS_LINKED=$(gh api graphql -f query='
+            query($owner: String!, $repo: String!, $number: Int!) {
+                repository(owner: $owner, name: $repo) {
+                    pullRequest(number: $number) {
+                        closingIssuesReferences(first: 10) {
+                            nodes {
+                                number
+                            }
+                        }
+                    }
+                }
+            }
+        ' -f owner="$OWNER" -f repo="$REPO" -F number=$PR_NUMBER --jq '.data.repository.pullRequest.closingIssuesReferences.nodes | length > 0')
+
+        if [[ "$HAS_LINKED" == "false" ]]; then
+            echo "No linked issues found for PR #$PR_NUMBER. Labeling PR with 'squad/qa' and adding it to the project."
+            gh pr edit $PR_NUMBER --add-label="${{ env.SQUAD_QA_LABEL }}" --add-project="${{ env.PROJECT_NAME }}"
+        else
+            echo "PR #$PR_NUMBER has linked issues. Skipping label addition and project board."
+        fi
