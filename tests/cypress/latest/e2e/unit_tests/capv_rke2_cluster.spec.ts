@@ -34,7 +34,7 @@ describe('Import CAPV', { tags: '@vsphere' }, () => {
 
   beforeEach(() => {
     cy.login();
-    cypressLib.burgerMenuToggle();
+    cy.burgerMenuOperate('open');
   });
 
   it('Setup the namespace for importing', () => {
@@ -88,7 +88,7 @@ describe('Import CAPV', { tags: '@vsphere' }, () => {
     cy.addFleetGitRepo(repoName, repoUrl, branch, path);
 
     // Go to Cluster Management > CAPI > Clusters and check if the cluster has started provisioning
-    cypressLib.burgerMenuToggle();
+    cy.burgerMenuOperate('open');
     cy.checkCAPIMenu();
     cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
   })
@@ -157,13 +157,13 @@ describe('Import CAPV', { tags: '@vsphere' }, () => {
     cy.clickButton('Import');
     cy.clickButton('Close');
 
-    cypressLib.burgerMenuToggle();
+    cy.burgerMenuOperate('open');
     cy.forceUpdateFleetGitRepo(repoName)
 
     // TODO: check if the cluster is actually updated
     // TODO: Wait until the fleet repo is ready
     // Go to Cluster Management > CAPI > Clusters and check if the cluster has started provisioning
-    cypressLib.burgerMenuToggle();
+    cy.burgerMenuOperate('open');
     cy.checkCAPIMenu();
     cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
   })
@@ -185,6 +185,10 @@ describe('Import CAPV', { tags: '@vsphere' }, () => {
       // Wait until the following returns no clusters found
       // This is checked by ensuring the cluster is not available in CAPI menu
       cy.checkCAPIClusterDeleted(clusterName, timeout);
+    })
+
+    it('Delete the helm values secret', () => {
+      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "capv-helm-values", 'default')
     })
   }
 });

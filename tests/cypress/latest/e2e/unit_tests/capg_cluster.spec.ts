@@ -13,28 +13,23 @@ describe('Import CAPG GKE', { tags: '@full' }, () => {
   const path = '/tests/assets/rancher-turtles-fleet-example/capg/gke'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const gcpProject = Cypress.env("gcp_project")
+  const namespace = 'capg-system'
 
   beforeEach(() => {
     cy.login();
-    cypressLib.burgerMenuToggle();
+    cy.burgerMenuOperate('open');
   });
 
-  it('Create values.yaml Secret', () => {
+  it('Create the helm values secret', () => {
     cy.contains('local')
       .click();
     cy.get('.header-buttons > :nth-child(1) > .icon')
       .click();
     cy.contains('Import YAML');
-    var encodedData = ''
-    cy.readFile('./fixtures/capg-helm-values.yaml').then((data) => {
-      data = data.replace(/replace_gcp_project/g, gcpProject)
-      encodedData = btoa(data)
-    })
-
     cy.readFile('./fixtures/capg-helm-values-secret.yaml').then((data) => {
       cy.get('.CodeMirror')
         .then((editor) => {
-          data = data.replace(/replace_values/g, encodedData)
+          data = data.replace(/replace_gcp_project/g, gcpProject)
           editor[0].CodeMirror.setValue(data);
         })
     });
@@ -123,5 +118,9 @@ describe('Import CAPG GKE', { tags: '@full' }, () => {
         })
       })
     );
+
+    it('Delete the helm values secret', () => {
+      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "capg-helm-values", namespace)
+    })
   }
 });

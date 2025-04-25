@@ -82,11 +82,15 @@ Cypress.Commands.add('createNamespace', (namespace) => {
 });
 
 // Command to set namespace selection
-// TODO(pvala): Could be improved to check if the namespace is already set before changing it
 Cypress.Commands.add('setNamespace', (namespace) => {
   cy.getBySel('namespaces-dropdown', { timeout: 18000 }).trigger('click');
   cy.get('.ns-clear').click();
-  cy.get('.ns-filter-input').type(namespace + '{enter}{esc}');
+  cy.get('.ns-filter-input').clear().type(namespace);
+  cy.get('.ns-options').within(() => {
+    cy.get(`div[id='ns_${namespace}']`).click();
+  });
+  cy.get('.ns-filter-input').type('{enter}{esc}');
+  cy.get('.ns-values').should('contain.text', namespace);
 });
 
 // Command to reset namespace selection to default 'Only User Namespaces'
@@ -211,7 +215,7 @@ Cypress.Commands.add('checkCAPIClusterDeleted', (clusterName, timeout) => {
 // Command to check CAPI Menu is visible
 Cypress.Commands.add('checkCAPIMenu', () => {
   cy.goToHome();
-  cypressLib.burgerMenuToggle();
+  cy.burgerMenuOperate('open');
   cypressLib.accesMenu('Cluster Management');
   cy.get('.header').contains('CAPI').click();
   cy.wait(2000);
@@ -634,7 +638,7 @@ Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, paths, works
   cy.clickButton('Create');
 
   // Navigate to fleet repo
-  cypressLib.burgerMenuToggle();
+  cy.burgerMenuOperate('open');
   cy.checkFleetGitRepo(repoName, workspace); // Wait until the repo details are loaded
 })
 

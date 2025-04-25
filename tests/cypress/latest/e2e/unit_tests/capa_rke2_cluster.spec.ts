@@ -15,7 +15,7 @@ describe('Import CAPA RKE2', { tags: '@full' }, () => {
 
   beforeEach(() => {
     cy.login();
-    cypressLib.burgerMenuToggle();
+    cy.burgerMenuOperate('open');
   });
 
   it('Setup the namespace for importing', () => {

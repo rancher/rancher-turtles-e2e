@@ -19,7 +19,7 @@ Cypress.config();
 describe('Menu testing - @install', { tags: '@install' }, () => {
   beforeEach(() => {
     cy.login();
-    cypressLib.burgerMenuToggle();
+    cy.burgerMenuOperate('open');
   });
 
   it('Check Turtles menu', () => {

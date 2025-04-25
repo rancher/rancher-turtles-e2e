@@ -26,7 +26,7 @@ describe('Import CAPZ RKE2 with ClusterClass', { tags: '@full' }, () => {
 
     beforeEach(() => {
         cy.login();
-        cypressLib.burgerMenuToggle();
+        cy.burgerMenuOperate('open')
     });
 
     it('Setup the namespace for importing', () => {

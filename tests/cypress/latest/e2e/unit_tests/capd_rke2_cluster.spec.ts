@@ -33,7 +33,7 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
 
   beforeEach(() => {
     cy.login();
-    cypressLib.burgerMenuToggle();
+    cy.burgerMenuOperate('open');
   });
 
   pathNames.forEach((path) => {

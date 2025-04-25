@@ -21,14 +21,14 @@ describe('Install Turtles Operator - @install', { tags: '@install' }, () => {
 
   beforeEach(() => {
     cy.login();
-    cypressLib.burgerMenuToggle();
+    cy.burgerMenuOperate('open');
   });
 
   it("Change helm charts to Include Prerelease Versions", () => {
     // this test should be run before the turtles repository is added; so that it can fetch the prereleased versions
 
     // toggle the navigation menu to a close
-    cypressLib.burgerMenuToggle();
+    cy.burgerMenuOperate('close');
 
     cy.getBySel('nav_header_showUserMenu').click();
     cy.contains('Preferences').click();
