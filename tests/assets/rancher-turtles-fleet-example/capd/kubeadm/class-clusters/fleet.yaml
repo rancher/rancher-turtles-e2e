@@ -1,4 +1,4 @@
-namespace: fleet-default
+namespace: default
 
 helm:
   values:

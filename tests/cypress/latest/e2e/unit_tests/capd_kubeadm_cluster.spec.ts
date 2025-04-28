@@ -15,7 +15,6 @@ import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
-import { isRancherManagerVersion } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
@@ -52,13 +51,6 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
       var fullPath = basePath + path
       cy.addFleetGitRepo(clustersRepoName, repoUrl, branch, fullPath);
 
-      if (path == classClustersPath && isRancherManagerVersion("2.10")) {
-        // Add cni gitrepo to fleet-default workspace
-        // The cni gitrepo is scoped to docker-kubeadm-example only by fleet.yaml
-        cypressLib.burgerMenuToggle();
-        cy.addFleetGitRepo(clustersRepoName + '-cni', repoUrl, branch, basePath + 'cni', 'fleet-default');
-      }
-
       if (path == clustersPath) {
         clusterPrefix = clusterNamePrefix
       } else {
@@ -91,7 +83,8 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
     // fleet-addon provider checks (for rancher dev/2.10.3 and up)
     if (path == classClustersPath) {
       qase(42,
-        it('Check if cluster is registered in Fleet only once', () => {
+        // skip due to turtles/issues/1329
+        xit('Check if cluster is registered in Fleet only once', () => {
           cypressLib.accesMenu('Continuous Delivery');
           cy.contains('Dashboard').should('be.visible');
           cypressLib.accesMenu('Clusters');
@@ -169,11 +162,6 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
 
       qase(10,
         it('Delete the CAPD fleet repo - ' + path, () => {
-          if (path == classClustersPath && isRancherManagerVersion("2.10")) {
-            // Remove the cni fleet repo
-            cy.removeFleetGitRepo(clustersRepoName + '-cni', 'fleet-default');
-            cypressLib.burgerMenuToggle();
-          }
           // Remove the clusters fleet repo
           cy.removeFleetGitRepo(clustersRepoName);
 

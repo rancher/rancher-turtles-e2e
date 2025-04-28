@@ -14,7 +14,6 @@ limitations under the License.
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { isRancherManagerVersion } from '~/support/utils';
 
 Cypress.config();
 describe('Enable CAPI Providers', () => {
@@ -32,7 +31,7 @@ describe('Enable CAPI Providers', () => {
   const vsphereProvider = 'vsphere'
 
   // Expected provider versions
-  const kubeadmProviderVersion = 'v1.10.0'
+  const kubeadmProviderVersion = 'v1.9.5'
   const fleetProviderVersion = 'v0.8.1'
   const vsphereProviderVersion = 'v1.12.0'
   const amazonProviderVersion = 'v2.8.1'
@@ -91,18 +90,16 @@ describe('Enable CAPI Providers', () => {
     );
 
     it('Add Docker Clusterclass fleet repo', () => {
-      // Add upstream docker classes repo to fleet-default workspace
-      cy.addFleetGitRepo('docker-clusterclasses', turtlesRepoUrl, branch, 'examples/clusterclasses/docker', '', 'fleet-default');
+      // Add upstream docker classes repo
+      cy.addFleetGitRepo('docker-clusterclasses', turtlesRepoUrl, branch, 'examples/clusterclasses/docker');
       cy.checkCAPIClusterClass(dockerProvider);
     });
 
-    if (isRancherManagerVersion("2.11")) {
-      // CNI to be used across all specs
-      it('Add CNI fleet repo', () => {
-        // Add upstream cni repo to fleet-default workspace
-        cy.addFleetGitRepo('cni-calico', turtlesRepoUrl, branch, 'examples/applications/cni/calico', '', 'fleet-default');
-      });
-    }
+    // CNI to be used across all specs
+    it('Add CNI fleet repo', () => {
+      // Add upstream cni repo
+      cy.addFleetGitRepo('cni-calico', turtlesRepoUrl, branch, 'examples/applications/cni/calico');
+    });
 
     xit('Custom Fleet addon config', () => {
       // Skipped as we are unable to install Monitoring app on clusters without cattle-fleet-system namespace

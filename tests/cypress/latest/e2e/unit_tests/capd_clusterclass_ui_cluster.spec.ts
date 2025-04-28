@@ -23,7 +23,7 @@ describe('Create CAPD', { tags: '@short' }, () => {
   const className = 'docker-kubeadm-example'
   const clusterNamePrefix = className + '-cluster'
   const clusterName = clusterNamePrefix + randomstring.generate({ length: 4, capitalization: "lowercase" })
-  const k8sVersion = 'v1.30.3'
+  const k8sVersion = 'v1.31.4'
   const pathNames = ['kubeadm'] // TODO: Add rke2 path (capi-ui-extension/issues/121)
 
   beforeEach(() => {

@@ -18,7 +18,6 @@ import 'cypress-file-upload';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import jsyaml from 'js-yaml';
 import _ from 'lodash';
-import { isRancherManagerVersion } from './utils';
 
 // Generic commands
 // Go to specific Sub Menu from Access Menu
@@ -47,11 +46,7 @@ Cypress.Commands.add('setAutoImport', (mode) => {
   // If the desired mode is already in place, then simply reload the page.
   cy.getBySel('sortable-table-0-action-button').click();
 
-  var dropdownLabel = '.list-unstyled.menu'
-  if (isRancherManagerVersion("2.11")) {
-    dropdownLabel = '.popperContainer'
-  }
-
+  var dropdownLabel = '.popperContainer'
   cy.get(dropdownLabel).then(($list) => {
     if ($list.text().includes(mode + ' CAPI Auto-Import')) {
       cy.contains(mode + ' CAPI Auto-Import').click();
@@ -616,11 +611,8 @@ Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, paths, works
   cy.clickButton('Add Repository');
   cy.contains('Git Repo:').should('be.visible');
   cy.typeValue('Name', repoName);
-
-  if (isRancherManagerVersion("2.11")) {
-    cy.clickButton("Next");
-    cy.get('button.btn').contains('Previous').should('be.visible');
-  }
+  cy.clickButton("Next");
+  cy.get('button.btn').contains('Previous').should('be.visible');
 
   cy.typeValue('Repository URL', repoUrl);
   cy.typeValue('Branch Name', branch);
@@ -637,12 +629,8 @@ Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, paths, works
   if (targetNamespace) {
     cy.typeValue('Target Namespace', targetNamespace);
   }
-
-  if (isRancherManagerVersion("2.11")) {
-    cy.clickButton("Next");
-    cy.get('button.btn').contains('Previous').should('be.visible');
-  }
-
+  cy.clickButton("Next");
+  cy.get('button.btn').contains('Previous').should('be.visible');
   cy.clickButton('Create');
 
   // Navigate to fleet repo
@@ -666,9 +654,7 @@ Cypress.Commands.add('forceUpdateFleetGitRepo', (repoName, workspace) => {
   // Click on the actions menu and select 'Force Update' from the menu
   cy.get('.actions .btn.actions').click();
   cy.get('.icon.group-icon.icon-refresh').click();
-  if (isRancherManagerVersion("2.11")) {
-    cy.clickButton('Update')
-  }
+  cy.clickButton('Update')
 })
 
 // Command to check Fleet Git Repository

@@ -5,8 +5,7 @@ kind: Cluster
 metadata:
   name: {{ $cluster_name }}
   labels:
-    cni: by-fleet-addon-kindnet # label for v2.10
-    cni: calico # label for v2.11
+    cni: calico
     cluster-api.cattle.io/rancher-auto-import: "true"
 spec:
   clusterNetwork:
@@ -19,7 +18,7 @@ spec:
       - 10.128.0.0/12
   topology:
     class: docker-kubeadm-example
-    classNamespace: fleet-default
+    classNamespace: default
     controlPlane:
       metadata: {}
       replicas: 1
@@ -36,7 +35,7 @@ spec:
         enabled: false
         enforce: baseline
         warn: restricted
-    version: v1.30.3
+    version: v1.31.4
     workers:
       machineDeployments:
       - class: default-worker

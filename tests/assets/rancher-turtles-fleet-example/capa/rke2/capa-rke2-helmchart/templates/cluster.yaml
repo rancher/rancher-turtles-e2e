@@ -298,7 +298,7 @@ data:
           serviceAccountName: cloud-controller-manager
           containers:
             - name: aws-cloud-controller-manager
-              image: registry.k8s.io/provider-aws/cloud-controller-manager:v1.28.3
+              image: registry.k8s.io/provider-aws/cloud-controller-manager:v1.31.0
               args:
                 - --v=2
                 - --cloud-provider=aws
@@ -855,7 +855,7 @@ data:
                       key: access_key
                       name: aws-secret
                       optional: true
-              image: registry.k8s.io/provider-aws/aws-ebs-csi-driver:v1.25.0
+              image: registry.k8s.io/provider-aws/aws-ebs-csi-driver:v1.31.0
               imagePullPolicy: IfNotPresent
               livenessProbe:
                 failureThreshold: 5
@@ -1020,7 +1020,7 @@ data:
                   valueFrom:
                     fieldRef:
                       fieldPath: spec.nodeName
-              image: registry.k8s.io/provider-aws/aws-ebs-csi-driver:v1.25.0
+              image: registry.k8s.io/provider-aws/aws-ebs-csi-driver:v1.31.0
               livenessProbe:
                 failureThreshold: 5
                 httpGet:

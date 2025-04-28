@@ -2,7 +2,6 @@ apiVersion: addons.cluster.x-k8s.io/v1beta1
 kind: ClusterResourceSet
 metadata:
   name: docker-kubeadm-example-crs-0
-  namespace: fleet-default
 spec:
   clusterSelector:
     matchLabels:
@@ -135,4 +134,3 @@ data:
 kind: ConfigMap
 metadata:
   name: cni-docker-kubeadm-example-crs-0
-  namespace: fleet-default

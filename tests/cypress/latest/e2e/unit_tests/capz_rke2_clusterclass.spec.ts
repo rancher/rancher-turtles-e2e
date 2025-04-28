@@ -11,7 +11,7 @@ describe('Import CAPZ RKE2 with ClusterClass', { tags: '@full' }, () => {
     const repoName = 'classes-clusters-capz-rke2'
     const className = 'azure-rke2-example'
     const registrationMethod = "internal-first"
-    const k8sVersion = "v1.31.1+rke2r1"
+    const k8sVersion = "v1.31.4+rke2r1"
     const branch = 'main'
     const path = '/tests/assets/rancher-turtles-fleet-example/capz/rke2/classes-clusters'
     const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
@@ -21,7 +21,7 @@ describe('Import CAPZ RKE2 with ClusterClass', { tags: '@full' }, () => {
     const tenantID = Cypress.env("azure_tenant_id")
     const location = "westeurope" // the community image for provisioning Azure VM is only available in certain locations
     const clusterClassFleetRepoURL = 'https://github.com/rancher/turtles'
-    const examplesPath = ['/examples/clusterclasses/azure', '/examples/applications/cni/calico', '/examples/applications/ccm/azure']
+    const examplesPath = ['/examples/clusterclasses/azure', '/examples/applications/ccm/azure']
     const clusterClassRepoName = "azure-clusterclasses"
 
     beforeEach(() => {
@@ -41,7 +41,7 @@ describe('Import CAPZ RKE2 with ClusterClass', { tags: '@full' }, () => {
         cy.createAzureClusterIdentity(clientSecret, clientID, tenantID)
     })
 
-    it('Add CAPZ RKE2 ClusterClass, Calico CNI and Azure CCM Fleet Repo', () => {
+    it('Add CAPZ RKE2 ClusterClass and Azure CCM Fleet Repo', () => {
         cy.addFleetGitRepo(clusterClassRepoName, clusterClassFleetRepoURL, "main", examplesPath)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(className);
