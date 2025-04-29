@@ -30,7 +30,7 @@ describe('Create CAPD', { tags: '@short' }, () => {
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const basePath = '/tests/assets/rancher-turtles-fleet-example/capd/'
   const pathNames = ['kubeadm'] // TODO: Add rke2 path (capi-ui-extension/issues/121)
-  const branch = 'main'
+  const branch = 'release-2.10'
 
   beforeEach(() => {
     cy.login();

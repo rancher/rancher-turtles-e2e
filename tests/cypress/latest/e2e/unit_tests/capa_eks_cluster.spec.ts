@@ -9,7 +9,7 @@ describe('Import CAPA EKS', { tags: '@full' }, () => {
   const timeout = 1200000
   const repoName = 'clusters-capa-eks'
   const clusterNamePrefix = 'turtles-qa-capa-eks' // as per fleet values
-  const branch = 'main'
+  const branch = 'release-2.10'
   const path = '/tests/assets/rancher-turtles-fleet-example/capa/eks'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
 

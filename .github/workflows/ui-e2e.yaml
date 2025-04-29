@@ -23,9 +23,11 @@ on:
         type: string
       turtles_operator_version:
         description: Rancher Turtles operator version to test (eg. 0.16.0)
+        default: 0.18.0
         type: string
       capi_ui_version:
         description: Version of the capi-ui-extension to test (eg. 0.8.1)
+        default: 0.8.2
         type: string
       grep_test_by_tag:
         description: Test tags. For multiple selection separate with spaces (Available options - @install [@short @full|@vsphere]). Keep always @install
@@ -34,7 +36,7 @@ on:
         default: '@install @short'
       operator_dev_chart:
         description: Install rancher turtles dev chart
-        default: true
+        default: false
         type: boolean
       destroy_runner:
         description: Destroy the auto-generated self-hosted runner
