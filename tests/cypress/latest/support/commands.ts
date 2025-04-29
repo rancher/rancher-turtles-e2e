@@ -36,7 +36,7 @@ Cypress.Commands.add('namespaceAutoImport', (mode) => {
     .should('be.visible');
 
   // Select default namespace
-  cy.setNamespace('Project: Default');
+  cy.setNamespace('default');
   cy.setAutoImport(mode);
   cy.namespaceReset();
 });
@@ -71,7 +71,7 @@ Cypress.Commands.add('createNamespace', (namespace) => {
   cy.contains('local')
     .click();
   cypressLib.accesMenu('Projects/Namespaces');
-  cy.setNamespace('Not');
+  cy.setNamespace('Not', 'all_orphans');
 
   // Create namespace
   cy.contains('Create Namespace').click();
@@ -82,20 +82,30 @@ Cypress.Commands.add('createNamespace', (namespace) => {
 });
 
 // Command to set namespace selection
-Cypress.Commands.add('setNamespace', (namespace) => {
+Cypress.Commands.add('setNamespace', (namespace, namespaceID) => {
+  var nsID: string = `ns_${namespace}`
+  if (namespaceID) {
+    nsID = namespaceID
+  } else if (namespace.startsWith('Project:')) {
+    nsID = ''
+  }
   cy.getBySel('namespaces-dropdown', { timeout: 18000 }).trigger('click');
   cy.get('.ns-clear').click();
-  cy.get('.ns-filter-input').clear().type(namespace);
+  // cy.get('.ns-filter-input').clear().type(namespace);
   cy.get('.ns-options').within(() => {
-    cy.get(`div[id='ns_${namespace}']`).click();
+    if (nsID != '') {
+      cy.get(`div[id='${nsID}']`).click();
+    } else {
+      cy.get('.ns-option').contains(namespace).click();
+    }
   });
-  cy.get('.ns-filter-input').type('{enter}{esc}');
+  cy.get('.ns-filter-input').type('{esc}');
   cy.get('.ns-values').should('contain.text', namespace);
 });
 
 // Command to reset namespace selection to default 'Only User Namespaces'
 Cypress.Commands.add('namespaceReset', () => {
-  cy.setNamespace('Only User Namespaces');
+  cy.setNamespace('Only User Namespaces', 'all_user');
 });
 
 // Command to create CAPI cluster from Clusterclass (ui-extn: v0.8.2)
