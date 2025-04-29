@@ -91,7 +91,6 @@ Cypress.Commands.add('setNamespace', (namespace, namespaceID) => {
   }
   cy.getBySel('namespaces-dropdown', { timeout: 18000 }).trigger('click');
   cy.get('.ns-clear').click();
-  // cy.get('.ns-filter-input').clear().type(namespace);
   cy.get('.ns-options').within(() => {
     if (nsID != '') {
       cy.get(`div[id='${nsID}']`).click();

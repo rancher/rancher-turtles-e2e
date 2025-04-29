@@ -72,7 +72,7 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
     cy.contains(clusterName).click();
 
     // Install Chart
-    cy.checkChart('Install', 'Monitoring', 'cattle-monitoring');
+    cy.checkChart('Install', 'Monitoring', 'cattle-monitoring-system');
   })
   );
 

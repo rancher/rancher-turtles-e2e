@@ -84,7 +84,7 @@ describe('Import CAPZ RKE2 with ClusterClass', { tags: '@full' }, () => {
 
         // Install Chart
         // We install Logging chart instead of Monitoring, since this is relatively lightweight.
-        cy.checkChart('Install', 'Logging', 'cattle-logging');
+        cy.checkChart('Install', 'Logging', 'cattle-logging-system');
     });
 
 

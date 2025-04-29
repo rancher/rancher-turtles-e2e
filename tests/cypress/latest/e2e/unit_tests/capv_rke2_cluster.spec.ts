@@ -111,7 +111,7 @@ describe('Import CAPV', { tags: '@vsphere' }, () => {
     cy.contains('Cluster Dashboard').should('exist');
 
     // Install Chart
-    cy.checkChart('Install', 'Monitoring', 'cattle-monitoring');
+    cy.checkChart('Install', 'Monitoring', 'cattle-monitoring-system');
   })
 
   it("Scale up imported CAPV cluster by updating values and forcefully updating the repo", () => {
