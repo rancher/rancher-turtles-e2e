@@ -28,7 +28,7 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const basePath = '/tests/assets/rancher-turtles-fleet-example/capd/rke2/'
   const pathNames = [clustersPath, 'clusterclass']
-  const branch = 'main'
+  const branch = 'release-2.10'
   const questions = [{ menuEntry: 'Rancher Turtles Features Settings', inputBoxTitle: 'Kubectl Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.31.0' }];
 
   beforeEach(() => {
@@ -129,7 +129,7 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
       qase(41,
         it('Update chart and check cluster status', () => {
           cy.contains('local').click();
-          cy.checkChart('Update', 'Rancher Turtles', 'rancher-turtles-system', '', questions);
+          cy.checkChart('Update', 'Rancher Turtles', 'rancher-turtles-system', Cypress.env('turtles_operator_version'), questions);
 
           // Check cluster is Active
           cy.searchCluster(clusterName);

@@ -28,7 +28,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const basePath = '/tests/assets/rancher-turtles-fleet-example/capd/kubeadm/'
   const pathNames = [clustersPath, 'clusterclass']
-  const branch = 'main'
+  const branch = 'release-2.10'
 
   beforeEach(() => {
     cy.login();
