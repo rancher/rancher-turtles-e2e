@@ -18,6 +18,14 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 
 Cypress.config();
 describe('Install CAPI extension - @install', { tags: '@install' }, () => {
+  
+  before(() => {
+    cy.startCertMonitor(); 
+  });
+
+  after(() => {
+    cy.stopCertMonitor();
+  });
 
   beforeEach(() => {
     cy.login();

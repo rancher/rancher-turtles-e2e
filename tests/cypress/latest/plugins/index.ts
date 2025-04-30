@@ -15,6 +15,8 @@ limitations under the License.
 /// <reference types="cypress" />
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
+import { registerTlsMonitor } from './tls-monitor';
+
 
 /**
  * @type {Cypress.PluginConfig}
@@ -24,12 +26,13 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
   const url = process.env.RANCHER_URL || 'https://localhost:8005';
+  registerTlsMonitor(on);
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { isFileExist, findFiles } = require('cy-verify-downloads');
   on('task', { isFileExist, findFiles })
 
-  config.baseUrl = url.replace(/\/$/,);
+  config.baseUrl = url.replace(/\/$/, '');
   config.env.cache_session = process.env.CACHE_SESSION || false;
   config.env.chartmuseum_repo = process.env.CHARTMUSEUM_REPO || '';
   config.env.turtles_operator_version = process.env.TURTLES_OPERATOR_VERSION;

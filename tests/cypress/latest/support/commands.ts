@@ -771,3 +771,33 @@ Cypress.Commands.add('exploreCluster', (clusterName: string) => {
   cy.accesMenuSelection([clusterName])
   cy.getBySel('header').get('.cluster-name').contains(clusterName);
 });
+
+let lastFingerprint: string | null = null;
+let intervalId: NodeJS.Timeout | null = null;
+
+Cypress.Commands.add('startCertMonitor', (intervalMs: number = 10000) => {
+  // Take baseUrl and cut off the protocol
+  const host = new URL(Cypress.config('baseUrl') || '').hostname;
+  cy.task('getCertInfo', { host }).then((certInfo: any) => {
+    lastFingerprint = certInfo.fingerprint;
+    cy.log(`[TLS MONITOR] Started. Fingerprint: ${certInfo.fingerprint}`);
+
+    intervalId = setInterval(() => {
+      cy.task('getCertInfo', { host }).then((current: any) => {
+        if (current.fingerprint256 !== lastFingerprint) {
+          cy.log('[TLS MONITOR] TLS cert changed. Reloading...');
+          lastFingerprint = current.fingerprint;
+          window.location.reload();
+        }
+      });
+    }, intervalMs);
+  });
+});
+
+Cypress.Commands.add('stopCertMonitor', () => {
+  if (intervalId) {
+    clearInterval(intervalId);
+    intervalId = null;
+    cy.log('[TLS MONITOR] Stopped.');
+  }
+});

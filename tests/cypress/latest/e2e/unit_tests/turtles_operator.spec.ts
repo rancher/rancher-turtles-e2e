@@ -19,6 +19,14 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 Cypress.config();
 describe('Install Turtles Operator - @install', { tags: '@install' }, () => {
 
+  before(() => {
+    cy.startCertMonitor(); 
+  });
+
+  after(() => {
+    cy.stopCertMonitor();
+  });
+
   beforeEach(() => {
     cy.login();
     cypressLib.burgerMenuToggle();
