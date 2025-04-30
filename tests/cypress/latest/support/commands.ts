@@ -83,19 +83,14 @@ Cypress.Commands.add('createNamespace', (namespace) => {
 
 // Command to set namespace selection
 Cypress.Commands.add('setNamespace', (namespace, namespaceID) => {
-  var nsID: string = `ns_${namespace}`
-  if (namespaceID) {
-    nsID = namespaceID
-  } else if (namespace.startsWith('Project:')) {
-    nsID = ''
-  }
+  const nsID: string = namespaceID || (namespace.startsWith('Project:')) ? '' : `ns_${namespace}`
   cy.getBySel('namespaces-dropdown', { timeout: 18000 }).trigger('click');
   cy.get('.ns-clear').click();
   cy.get('.ns-options').within(() => {
     if (nsID != '') {
       cy.get(`div[id='${nsID}']`).click();
     } else {
-      cy.get('.ns-option').contains(namespace).click();
+      cy.contains('.ns-option', namespace).click();
     }
   });
   cy.get('.ns-filter-input').type('{esc}');
@@ -400,18 +395,20 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
 // You can optionally provide an array of questions and answer them before the installation starts
 // Example1: cy.checkChart('Alerting', 'default', [{ menuEntry: '(None)', checkbox: 'Enable Microsoft Teams' }]);
 // Example2: cy.checkChart('Rancher Turtles', 'rancher-turtles-system', [{ menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Seamless integration with Fleet and CAPI'},{ menuEntry: 'Rancher webhook cleanup settings', inputBoxTitle: 'Webhook Cleanup Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.28.0'}]);
-Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, questions) => {
+Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, questions, refreshRepo = false) => {
   cy.get('.nav').contains('Apps').click();
 
   // Select All Repositries and click Action/Refresh
   cy.get('.nav').contains('Repositories').click();
   cy.waitForAllRowsInState('Active');
   cy.wait(500);
-  cy.get('div.checkbox-outer-container.check').click();
-  cy.wait(500);
-  cy.contains('Refresh').click();
-  cy.waitForAllRowsInState('Active');
-  cy.wait(1000);
+  if (refreshRepo && refreshRepo == true) {
+    cy.get('div.checkbox-outer-container.check').click();
+    cy.wait(500);
+    cy.contains('Refresh').click();
+    cy.waitForAllRowsInState('Active');
+    cy.wait(1000);
+  }
 
   cy.get('.nav').contains('Charts').click();
   cy.contains('Featured Charts').should('be.visible');

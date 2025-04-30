@@ -35,7 +35,7 @@ declare global {
       waitForAllRowsInState(desiredState: string, timeout?: number): Chainable<Element>;
       accesMenuSelection(menuPaths: string[]): Chainable<Element>;
       burgerMenuOperate(operation: 'open' | 'close'): Chainable<Element>;
-      checkChart(operation: string, chartName: string, namespace: string, version?: string, questions?: any): Chainable<Element>;
+      checkChart(operation: string, chartName: string, namespace: string, version?: string, questions?: any, refreshRepo?: boolean): Chainable<Element>;
       deleteCluster(clusterName: string): Chainable<Element>;
       searchCluster(clusterName: string): Chainable<Element>;
       createNamespace(namespace: string): Chainable<Element>;
@@ -60,6 +60,7 @@ declare global {
       goToHome(): Chainable<Element>;
       patchYamlResource(clusterName: string, namespace: string, resourceKind: string, resourceName: string, patch: object): Chainable<Element>;
       exploreCluster(clusterName: string): Chainable<Element>;
+      importYAML(clusterName: string, replaceFunc: () => string,): Chainable<Element>;
       // Functions declared in capz_support.js
       createCAPZValuesSecret(location: string, clientID: string, tenantID: string, subscriptionID: string, version: string, registrationMethod?: string, userpoolCount?: number, systempoolCount?: number): Chainable<Element>;
       createAzureClusterIdentity(clientSecret: string, clientID: string, tenantID: string): Chainable<Element>;
