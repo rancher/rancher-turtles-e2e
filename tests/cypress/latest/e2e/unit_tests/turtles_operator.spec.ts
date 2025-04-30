@@ -20,7 +20,7 @@ Cypress.config();
 describe('Install Turtles Operator - @install', { tags: '@install' }, () => {
 
   before(() => {
-    cy.startCertMonitor(); 
+    cy.startCertMonitor(10000);
   });
 
   after(() => {

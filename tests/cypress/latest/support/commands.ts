@@ -772,32 +772,20 @@ Cypress.Commands.add('exploreCluster', (clusterName: string) => {
   cy.getBySel('header').get('.cluster-name').contains(clusterName);
 });
 
-let lastFingerprint: string | null = null;
-let intervalId: NodeJS.Timeout | null = null;
-
 Cypress.Commands.add('startCertMonitor', (intervalMs: number = 10000) => {
-  // Take baseUrl and cut off the protocol
-  const host = new URL(Cypress.config('baseUrl') || '').hostname;
-  cy.task('getCertInfo', { host }).then((certInfo: any) => {
-    lastFingerprint = certInfo.fingerprint;
-    cy.log(`[TLS MONITOR] Started. Fingerprint: ${certInfo.fingerprint}`);
+  const host = Cypress.config('baseUrl')?.replace(/^https?:\/\//, '').replace(/\/.*$/, ''); // Remove protocol and path
+  if (!host) {
+    throw new Error('[TLS MONITOR] baseUrl is not defined.');
+  }
 
-    intervalId = setInterval(() => {
-      cy.task('getCertInfo', { host }).then((current: any) => {
-        if (current.fingerprint256 !== lastFingerprint) {
-          cy.log('[TLS MONITOR] TLS cert changed. Reloading...');
-          lastFingerprint = current.fingerprint;
-          window.location.reload();
-        }
-      });
-    }, intervalMs);
-  });
+  cy.task('startCertMonitor', { host, intervalMs });
 });
 
 Cypress.Commands.add('stopCertMonitor', () => {
-  if (intervalId) {
-    clearInterval(intervalId);
-    intervalId = null;
-    cy.log('[TLS MONITOR] Stopped.');
+  const host = Cypress.config('baseUrl')?.replace(/^https?:\/\//, '').replace(/\/.*$/, ''); // Remove protocol and path
+  if (!host) {
+    throw new Error('[TLS MONITOR] baseUrl is not defined.');
   }
+
+  cy.task('stopCertMonitor', { host });
 });
