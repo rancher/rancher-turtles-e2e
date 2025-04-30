@@ -17,7 +17,6 @@ limitations under the License.
 require('dotenv').config();
 import { registerTlsMonitor } from './tls-monitor';
 
-
 /**
  * @type {Cypress.PluginConfig}
  */

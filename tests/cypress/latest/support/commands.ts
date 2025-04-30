@@ -773,7 +773,8 @@ Cypress.Commands.add('exploreCluster', (clusterName: string) => {
 });
 
 Cypress.Commands.add('startCertMonitor', (intervalMs: number = 10000) => {
-  const host = Cypress.config('baseUrl')?.replace(/^https?:\/\//, '').replace(/\/.*$/, ''); // Remove protocol and path
+  // Take baseUrl and cut off the protocol
+  const host = new URL(Cypress.config('baseUrl') || '').hostname;
   if (!host) {
     throw new Error('[TLS MONITOR] baseUrl is not defined.');
   }
@@ -782,7 +783,7 @@ Cypress.Commands.add('startCertMonitor', (intervalMs: number = 10000) => {
 });
 
 Cypress.Commands.add('stopCertMonitor', () => {
-  const host = Cypress.config('baseUrl')?.replace(/^https?:\/\//, '').replace(/\/.*$/, ''); // Remove protocol and path
+  const host = new URL(Cypress.config('baseUrl') || '').hostname;
   if (!host) {
     throw new Error('[TLS MONITOR] baseUrl is not defined.');
   }
