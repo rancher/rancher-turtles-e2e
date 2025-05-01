@@ -53,11 +53,6 @@ describe('Install Turtles Operator - @install', { tags: '@install' }, () => {
     it('Install Turtles operator', { retries: 1 }, () => {
       cy.contains('local').click();
 
-      // Used for enabling fleet-addon feature within Rancher Turtles installation
-      const questions = [
-        { menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Enable Agent TLS Mode' }
-      ];
-
       var turtlesVersion = Cypress.env('turtles_operator_version')
 
       // if operator dev chart is to be used, ignore the turtles version
@@ -66,7 +61,7 @@ describe('Install Turtles Operator - @install', { tags: '@install' }, () => {
         turtlesVersion = ""
       }
 
-      cy.checkChart('Install', 'Rancher Turtles', 'rancher-turtles-system', turtlesVersion, questions);
+      cy.checkChart('Install', 'Rancher Turtles', 'rancher-turtles-system', turtlesVersion);
     })
   );
 });
