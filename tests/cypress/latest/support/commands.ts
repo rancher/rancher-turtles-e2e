@@ -440,7 +440,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
   if (questions) {
     // Some apps like Alerting show questions page directly so no further action needed here
     // Some other apps like Turtles have a 'Customize install settings' checkbox or its variant which needs to be clicked
-    if (chartName == 'Rancher Turtles' && operation == "Install") {
+    if (chartName == 'Rancher Turtles' && operation == "Update") {
       cy.contains('Customize install settings').should('be.visible').click();
     }
 
