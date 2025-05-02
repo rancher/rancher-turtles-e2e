@@ -8,8 +8,8 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
   var clusterName: string
   const timeout = 1200000
   const repoName = 'clusters-capz-aks'
-  const clusterNamePrefix = 'turtles-qa-capz-aks' // as per fleet values
-  const branch = 'main'
+  const clusterNamePrefix = 'turtles-qa-azure-aks' // as per fleet values
+  const branch = 'aws-rke2-class'
   const k8sVersion = 'v1.31.4'
   const path = '/tests/assets/rancher-turtles-fleet-example/capz/aks/clusters'
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
@@ -64,7 +64,7 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
 
     // Check cluster is Active
     cy.searchCluster(clusterName);
-    cy.contains(new RegExp('Active.*' + clusterName), { timeout: 300000 });
+    cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
   })
   );
   qase(23, it('Install App on imported cluster', { retries: 1 }, () => {

@@ -8,9 +8,9 @@ describe('Import CAPG GKE', { tags: '@full' }, () => {
   var clusterName: string
   const timeout = 1200000
   const repoName = 'clusters-capg-gke'
-  const clusterNamePrefix = 'turtles-qa-capg-gke' // as per fleet values
-  const branch = 'main'
-  const path = '/tests/assets/rancher-turtles-fleet-example/capg/gke'
+  const clusterNamePrefix = 'turtles-qa-gcp-gke' // as per fleet values
+  const branch = 'aws-rke2-class'
+  const path = '/tests/assets/rancher-turtles-fleet-example/capg/gke/clusters'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const gcpProject = Cypress.env("gcp_project")
   const namespace = 'capg-system'
@@ -72,7 +72,7 @@ describe('Import CAPG GKE', { tags: '@full' }, () => {
 
       // Check cluster is Active
       cy.searchCluster(clusterName);
-      cy.contains(new RegExp('Active.*' + clusterName), { timeout: 300000 });
+      cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
     })
   );
 

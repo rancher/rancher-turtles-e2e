@@ -7,4 +7,4 @@ helm:
         namespace: capz-system
         key: values.yaml
   values:
-    clustername_prefix: turtles-qa-capz-aks
+    clustername_prefix: turtles-qa-azure-aks

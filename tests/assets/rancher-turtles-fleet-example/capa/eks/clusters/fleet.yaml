@@ -1,9 +1,8 @@
 namespace: default
 
 helm:
-  chart: ./capa-eks-helmchart
   values:
-    clustername_prefix: turtles-qa-capa-eks
+    clustername_prefix: turtles-qa-aws-eks
     region: ap-south-2
     version: v1.31
     worker_machine_count: 1

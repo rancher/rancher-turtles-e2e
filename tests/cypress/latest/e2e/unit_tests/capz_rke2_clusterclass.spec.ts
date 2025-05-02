@@ -8,19 +8,19 @@ describe('Import CAPZ RKE2 with ClusterClass', { tags: '@full' }, () => {
     var clusterName: string;
     const timeout = 1200000
     const namespace = 'capz-system'
-    const repoName = 'classes-clusters-capz-rke2'
+    const repoName = 'class-clusters-capz-rke2'
     const className = 'azure-rke2-example'
     const registrationMethod = "internal-first"
     const k8sVersion = "v1.31.4+rke2r1"
-    const branch = 'main'
-    const path = '/tests/assets/rancher-turtles-fleet-example/capz/rke2/classes-clusters'
+    const branch = 'aws-rke2-class'
+    const path = '/tests/assets/rancher-turtles-fleet-example/capz/rke2/class-clusters'
     const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
     const clientID = Cypress.env("azure_client_id")
     const clientSecret = btoa(Cypress.env("azure_client_secret"))
     const subscriptionID = Cypress.env("azure_subscription_id")
     const tenantID = Cypress.env("azure_tenant_id")
     const location = "westeurope" // the community image for provisioning Azure VM is only available in certain locations
-    const clusterClassFleetRepoURL = 'https://github.com/rancher/turtles'
+    const turtlesRepoUrl = 'https://github.com/rancher/turtles'
     const examplesPath = ['/examples/clusterclasses/azure', '/examples/applications/ccm/azure']
     const clusterClassRepoName = "azure-clusterclasses"
 
@@ -42,7 +42,7 @@ describe('Import CAPZ RKE2 with ClusterClass', { tags: '@full' }, () => {
     })
 
     it('Add CAPZ RKE2 ClusterClass and Azure CCM Fleet Repo', () => {
-        cy.addFleetGitRepo(clusterClassRepoName, clusterClassFleetRepoURL, "main", examplesPath)
+        cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', examplesPath)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(className);
 
@@ -56,7 +56,7 @@ describe('Import CAPZ RKE2 with ClusterClass', { tags: '@full' }, () => {
         })
     });
 
-    it('Add GitRepo for classes-cluster and get cluster name', () => {
+    it('Add GitRepo for class-cluster and get cluster name', () => {
         cy.addFleetGitRepo(repoName, repoUrl, branch, path);
         // Check CAPI cluster using its name prefix
         cy.checkCAPICluster(className);
@@ -75,7 +75,7 @@ describe('Import CAPZ RKE2 with ClusterClass', { tags: '@full' }, () => {
 
         // Check cluster is Active
         cy.searchCluster(clusterName);
-        cy.contains(new RegExp('Active.*' + clusterName), { timeout: 300000 });
+        cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
     })
 
     it('Install App on imported cluster', { retries: 1 }, () => {
