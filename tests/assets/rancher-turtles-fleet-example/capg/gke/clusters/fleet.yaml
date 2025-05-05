@@ -9,4 +9,4 @@ helm:
   values:
     clustername_prefix: turtles-qa-gcp-gke
     region: asia-south2
-    worker_machine_count: 3
+    worker_machine_count: 1

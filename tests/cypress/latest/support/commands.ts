@@ -186,13 +186,18 @@ Cypress.Commands.add('checkCAPIClusterClass', (className) => {
 });
 
 // Command to check CAPI cluster Active status
-Cypress.Commands.add('checkCAPIClusterActive', (clusterName) => {
+Cypress.Commands.add('checkCAPIClusterActive', (clusterName, timeout) => {
+  if (timeout != undefined) {
+    timeout = timeout
+  } else {
+    timeout = 90000
+  }
   cy.checkCAPIMenu();
-  cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: 90000 });
+  cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
   cy.contains('Machine Deployments').click();
-  cy.contains(new RegExp('Running.*' + clusterName), { timeout: 90000 });
+  cy.contains(new RegExp('Running.*' + clusterName), { timeout: timeout });
   cy.contains('Machine Sets').click();
-  cy.contains(new RegExp('Active.*' + clusterName), { timeout: 90000 });
+  cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
 });
 
 // Command to check CAPI cluster Provisioned status

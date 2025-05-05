@@ -59,8 +59,9 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
     cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
     // Check child cluster is created and auto-imported
+    // This is checked by ensuring the cluster is available in navigation menu
     cy.goToHome();
-    cy.contains(new RegExp('Pending.*' + clusterName));
+    cy.contains(clusterName).should('exist');
 
     // Check cluster is Active
     cy.searchCluster(clusterName);

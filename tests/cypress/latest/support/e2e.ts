@@ -43,7 +43,7 @@ declare global {
       createCAPICluster(className: string, clusterName: string, machines: Record<string, string>, k8sVersion: string, podCIDR: string, serviceCIDR?: string, extraVariables?: ClusterClassVariablesInput[]): Chainable<Element>;
       checkCAPICluster(clustername: string): Chainable<Element>;
       checkCAPIClusterClass(classname: string): Chainable<Element>;
-      checkCAPIClusterActive(clustername: string): Chainable<Element>;
+      checkCAPIClusterActive(clustername: string, timeout?: number): Chainable<Element>;
       checkCAPIClusterProvisioned(clustername: string, timeout?: number): Chainable<Element>;
       checkCAPIClusterDeleted(clustername: string, timeout: number): Chainable<Element>;
       checkCAPIMenu(): Chainable<Element>;

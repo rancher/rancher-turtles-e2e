@@ -9,5 +9,5 @@ helm:
     ami_id: ami-063222db4f3a22666
     machine_type: t3.xlarge
     cp_machine_count: 3
-    worker_machine_count: 3
+    worker_machine_count: 1
 

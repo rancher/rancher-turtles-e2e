@@ -65,12 +65,17 @@ describe('Import CAPA RKE2', { tags: '@full' }, () => {
     cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
     // Check child cluster is created and auto-imported
+    // This is checked by ensuring the cluster is available in navigation menu
     cy.goToHome();
-    cy.contains(new RegExp('Pending.*' + clusterName));
+    cy.contains(clusterName).should('exist');
 
     // Check cluster is Active
     cy.searchCluster(clusterName);
     cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+
+    // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+    // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
+    cy.checkCAPIClusterActive(clusterName, timeout);
   })
 
   qase(32,

@@ -66,8 +66,12 @@ describe('Import/Create CAPZ AKS with ClusterClass', { tags: '@full' }, () => {
 
   it('Auto import child CAPZ AKS cluster', () => {
     // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-    //  Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
     cy.checkCAPIClusterProvisioned(fleetClusterName, timeout);
+
+    // Check child cluster is created and auto-imported
+    // This is checked by ensuring the cluster is available in navigation menu
+    cy.goToHome();
+    cy.contains(fleetClusterName).should('exist');
 
     // Check cluster is Active
     cy.searchCluster(fleetClusterName);

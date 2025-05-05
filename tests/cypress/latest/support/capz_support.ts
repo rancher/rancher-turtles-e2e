@@ -21,7 +21,7 @@ Cypress.Commands.add('createAzureClusterIdentity', (clientSecret, clientID, tena
 });
 
 // Create values.yaml Secret
-Cypress.Commands.add('createCAPZValuesSecret', (location, clientID, tenantID, subscriptionID, version?: string, registrationMethod?: string, userpoolCount = 3, systempoolCount = 3) => {
+Cypress.Commands.add('createCAPZValuesSecret', (location, clientID, tenantID, subscriptionID, version?: string, registrationMethod?: string, userpoolCount = 1, systempoolCount = 3) => {
     cy.contains('local')
         .click();
     cy.get('.header-buttons > :nth-child(1) > .icon')

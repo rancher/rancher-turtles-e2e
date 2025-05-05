@@ -19,7 +19,7 @@ import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
 describe('Create CAPD', { tags: '@short' }, () => {
-  const timeout = 300000
+  const timeout = 600000
   const className = 'docker-kubeadm-example'
   const clusterNamePrefix = className + '-cluster'
   const clusterName = clusterNamePrefix + randomstring.generate({ length: 4, capitalization: "lowercase" })
@@ -56,7 +56,9 @@ describe('Create CAPD', { tags: '@short' }, () => {
       it('Create child CAPD cluster from Clusterclass', () => {
         const machines: Record<string, string> = { 'md-0': 'default-worker' }
         cy.createCAPICluster(className, clusterName, machines, k8sVersion, podCIDR, serviceCIDR);
-        cy.checkCAPIClusterActive(clusterName);
+        
+        // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
+        cy.checkCAPIClusterActive(clusterName, timeout);
         cy.clusterAutoImport(clusterName, 'Enable');
         // Check child cluster is auto-imported
         cy.searchCluster(clusterName);

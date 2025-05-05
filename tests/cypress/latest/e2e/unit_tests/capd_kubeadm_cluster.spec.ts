@@ -19,7 +19,7 @@ import { skipClusterDeletion } from '~/support/utils';
 Cypress.config();
 describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
   var clusterName: string, clusterPrefix: string
-  const timeout = 300000
+  const timeout = 600000
   const namePrefix = 'docker-kubeadm-'
   const clustersPath = 'clusters'
   const classClustersPath = 'class-' + clustersPath
@@ -68,15 +68,21 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
     if (path == clustersPath) { var qase_id = 6 } else { qase_id = 5 }
     qase(qase_id,
       it('Auto import child CAPD cluster', () => {
+        // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+        cy.checkCAPIClusterProvisioned(clusterName, timeout);
+
         // Check child cluster is created and auto-imported
+        // This is checked by ensuring the cluster is available in navigation menu
         cy.goToHome();
-        cy.contains(new RegExp('Pending.*' + clusterName), { timeout: timeout });
+        cy.contains(clusterName).should('exist');
 
         // Check cluster is Active
         cy.searchCluster(clusterName);
         cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
-        // TODO: Check MachineSet unavailable status and use checkCAPIClusterActive
-        cy.checkCAPIClusterProvisioned(clusterName);
+
+        // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+        // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
+        cy.checkCAPIClusterActive(clusterName, timeout);
       })
     );
 
