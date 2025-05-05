@@ -40,7 +40,8 @@ export const registerTlsMonitor = (on: any): void => {
   on('task', {
     startCertMonitor({ host, intervalMs }: { host: string; intervalMs: number }) {
       if (monitors[host]) {
-        throw new Error(`[TLS MONITOR] Monitor already running for host: ${host}`);
+        console.log(`[TLS MONITOR] Monitor already running for host: ${host}. Reusing the existing monitor.`);
+        return null; // Do nothing if the monitor is already running
       }
 
       let lastFingerprint: string | null = null;
