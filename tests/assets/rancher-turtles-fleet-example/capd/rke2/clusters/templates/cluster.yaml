@@ -52,7 +52,7 @@ metadata:
   annotations:
     "helm.sh/resource-policy": keep
 spec: 
-  replicas: 1
+  replicas: 3
   rolloutStrategy:
     rollingUpdate:
       maxSurge: 1
@@ -112,7 +112,7 @@ metadata:
     "helm.sh/resource-policy": keep
 spec:
   clusterName: {{ $cluster_name }}
-  replicas: 1
+  replicas: 2
   selector:
     cluster.x-k8s.io/cluster-name: {{ $cluster_name }}
   template:

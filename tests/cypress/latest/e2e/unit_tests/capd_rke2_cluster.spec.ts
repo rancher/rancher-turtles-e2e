@@ -104,7 +104,7 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
           cy.get('.CodeMirror')
             .then((editor) => {
               var text = editor[0].CodeMirror.getValue();
-              text = text.replace(/replicas: 1/g, 'replicas: 2');
+              text = text.replace(/replicas: 2/g, 'replicas: 3');
               editor[0].CodeMirror.setValue(text);
               cy.clickButton('Save');
             })

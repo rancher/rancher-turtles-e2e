@@ -21,7 +21,7 @@ spec:
     classNamespace: default
     controlPlane:
       metadata: {}
-      replicas: 1
+      replicas: 3
     variables:
     - name: imageRepository
       value: ""
@@ -40,4 +40,4 @@ spec:
       machineDeployments:
       - class: default-worker
         name: md-0
-        replicas: 1
+        replicas: 3
