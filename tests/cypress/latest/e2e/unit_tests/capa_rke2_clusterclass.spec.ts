@@ -79,7 +79,8 @@ describe('Import CAPA RKE2', { tags: '@full' }, () => {
       cy.contains(clusterName).click();
 
       // Install Chart
-      cy.checkChart('Install', 'Monitoring', 'cattle-monitoring-system');
+      // We install Logging chart instead of Monitoring, since this is relatively lightweight.
+      cy.checkChart('Install', 'Logging', 'cattle-logging-system');
     })
   );
 

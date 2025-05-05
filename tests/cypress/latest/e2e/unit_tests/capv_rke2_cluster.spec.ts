@@ -111,7 +111,8 @@ describe('Import CAPV', { tags: '@vsphere' }, () => {
     cy.contains('Cluster Dashboard').should('exist');
 
     // Install Chart
-    cy.checkChart('Install', 'Monitoring', 'cattle-monitoring-system', undefined, undefined, true);
+    // We install Logging chart instead of Monitoring, since this is relatively lightweight.
+    cy.checkChart('Install', 'Logging', 'cattle-logging-system');
   })
 
   it("Scale up imported CAPV cluster by updating values and forcefully updating the repo", () => {
