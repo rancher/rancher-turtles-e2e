@@ -46,6 +46,7 @@ docker run --init -v $PWD:/workdir -w /workdir \
     -e SKIP_CLUSTER_DELETE=$SKIP_CLUSTER_DELETE \
     -e "GREP=$GREP" \
     -e "GREPTAGS=$GREPTAGS" \
+    -e "CI=$CI" \
     --add-host host.docker.internal:host-gateway \
     --ipc=host \
     $CYPRESS_DOCKER \

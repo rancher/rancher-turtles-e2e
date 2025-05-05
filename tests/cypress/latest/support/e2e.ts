@@ -99,19 +99,22 @@ registerCypressGrep()
 // Abort on first failure in @install tests
 const resultFile = './fixtures/runtime_test_result.yaml'
 beforeEach(() => {
-  cy.readFile(resultFile).then((data) => {
-    const content = yaml.load(data)
-    const result = content['test_result']
-    cy.log('Previous Test Result: ' + result);
-    if (result == 'failed') {
-      cy.log('Stopping test run - previous test(s) have failed')
-      Cypress.stop()
-    }
-  });
+  if (Cypress.env("ci")) {
+    cy.log('Running in GitHub Actions - checking previous test result');
+    cy.readFile(resultFile).then((data) => {
+      const content = yaml.load(data)
+      const result = content['test_result']
+      cy.log('Previous Test Result: ' + result);
+      if (result == 'failed') {
+        cy.log('Stopping test run - previous test(s) have failed')
+        Cypress.stop()
+      }
+    });
+  } else cy.log('Not running in GitHub Actions - skipping test result check');
 });
 
 afterEach(function () {
-  if (this.currentTest?.state == 'failed' && this.currentTest?.fullTitle?.().includes('@install')) {
+  if (Cypress.env("ci") && this.currentTest?.state == 'failed' && this.currentTest?.fullTitle?.().includes('@install')) {
     const result = { test_result: this.currentTest?.state };
     const data = yaml.dump(result);
     cy.writeFile(resultFile, data);

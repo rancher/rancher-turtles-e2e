@@ -56,5 +56,8 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   config.env.grep = process.env.GREP;
   config.env.grepTags = process.env.GREPTAGS;
 
+  // To know if tests are running in a CI environment
+  config.env.ci = process.env.CI;
+
   return config;
 };
