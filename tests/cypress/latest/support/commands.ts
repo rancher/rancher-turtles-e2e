@@ -385,9 +385,14 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
   }
   cy.clickButton('Create');
   // Make sure the repo is active before leaving
+  // Always press Refresh button as workaround for https://github.com/rancher/rancher/issues/49671
   cy.wait(1000);
   cy.typeInFilter(repositoryName);
-  cy.contains(new RegExp('Active.*' + repositoryName), { timeout: 150000 });
+  cy.getBySel('sortable-table-0-action-button').click();
+  cy.wait(1000);
+  cy.get('.icon.group-icon.icon-refresh').click();
+  cy.wait(1000);
+  cy.contains(new RegExp('Active.*' + repositoryName), { timeout: 60000 });
 });
 
 // Command to Install or Update App from Charts menu
