@@ -28,7 +28,7 @@ spec:
       value: none
     - name: dockerImage
       value: kindest/node:v1.31.4
-    version: v1.31.4+rke2r1
+    version: v1.31.7+rke2r1
     workers:
       machineDeployments:
       - class: default-worker

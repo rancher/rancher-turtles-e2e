@@ -14,7 +14,7 @@ vsphere:
 cluster:
   name: turtles-qa-capv-rke2
   namespace: default
-  rke2_version: v1.31.4+rke2r1
+  rke2_version: v1.31.7+rke2r1
   control_plane_endpoint_ip: replace_cluster_control_plane_endpoint_ip
   control_plane_machine_count: 1
   worker_machine_count: 1
