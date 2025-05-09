@@ -6,6 +6,7 @@ metadata:
   name: {{ .Values.cluster.name }}
   labels:
     cluster.x-k8s.io/cluster-name: {{ .Values.cluster.name }}
+    cluster-api.cattle.io/rancher-auto-import: "true"
 spec:
   clusterNetwork:
     pods:

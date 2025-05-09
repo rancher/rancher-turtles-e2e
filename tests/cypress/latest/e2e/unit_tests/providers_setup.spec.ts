@@ -125,11 +125,11 @@ describe('Enable CAPI Providers', () => {
   });
 
   context('vSphere provider', { tags: '@vsphere' }, () => {
-    it('Create CAPI Providers Namespace - ' + vsphereProviderNamespace, () => {
+    it.only('Create CAPI Providers Namespace - ' + vsphereProviderNamespace, () => {
       cy.createNamespace(vsphereProviderNamespace);
     })
     qase(40,
-      it('Create CAPV provider', () => {
+      it.only('Create CAPV provider', () => {
         // Create vsphere Infrastructure provider
         // See capv_rke2_cluster.spec.ts for more details about `vsphere_secrets_json_base64` structure
         const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")

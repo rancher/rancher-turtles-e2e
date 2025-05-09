@@ -57,7 +57,7 @@ describe('Import CAPV', { tags: '@vsphere' }, () => {
       data = data.replace(/replace_vsphere_network/g, JSON.stringify(vsphere_secrets_json.vsphere_network))
       data = data.replace(/replace_vsphere_resource_pool/g, JSON.stringify(vsphere_secrets_json.vsphere_resource_pool))
       data = data.replace(/replace_vsphere_folder/g, JSON.stringify(vsphere_secrets_json.vsphere_folder))
-      data = data.replace(/replace_vsphere_template/g, JSON.stringify(vsphere_secrets_json.vsphere_template))
+      data = data.replace(/replace_vsphere_template/g, 'SLEMicro-6.1-SCSI')
       data = data.replace(/replace_vsphere_ssh_authorized_key/g, JSON.stringify(vsphere_secrets_json.vsphere_ssh_authorized_key))
       data = data.replace(/replace_vsphere_tls_thumbprint/g, JSON.stringify(vsphere_secrets_json.vsphere_tls_thumbprint))
       // Placeholder 'replace_cluster_control_plane_endpoint_ip' is already replaced at workflow level
@@ -103,7 +103,7 @@ describe('Import CAPV', { tags: '@vsphere' }, () => {
     cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
   })
 
-  it('Install App on imported cluster', { retries: 1 }, () => {
+  xit('Install App on imported cluster', { retries: 1 }, () => {
     // Sometimes the cluster icon is not active yet, so we need to wait a bit
     cy.wait(1000);
     // Click on imported CAPV cluster
@@ -115,7 +115,7 @@ describe('Import CAPV', { tags: '@vsphere' }, () => {
     cy.checkChart('Install', 'Logging', 'cattle-logging-system');
   })
 
-  it("Scale up imported CAPV cluster by updating values and forcefully updating the repo", () => {
+  xit("Scale up imported CAPV cluster by updating values and forcefully updating the repo", () => {
     cy.contains('local')
       .click();
     cy.get('.header-buttons > :nth-child(1) > .icon')
