@@ -1,0 +1,112 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  name: {{ .Values.cluster.name }}
+  namespace: {{ .Values.cluster.namespace }}
+  labels:
+    cni: calico
+    csi: vsphere
+    cloud-provider: vsphere
+    cluster-api.cattle.io/rancher-auto-import: "true"
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+      - 192.168.0.0/16
+  topology:
+    class: vsphere-rke2-example
+    classNamespace: {{ .Values.cluster.namespace }}
+    version: {{ .Values.cluster.rke2_version }}
+    controlPlane:
+      replicas: {{ .Values.cluster.control_plane_machine_count }}
+    workers:
+      machineDeployments:
+      - class: vsphere-rke2-example-worker
+        name: md-0
+        replicas: {{ .Values.cluster.worker_machine_count }}
+    variables:
+    - name: vSphereClusterIdentityName
+      value: cluster-identity
+    - name: sshKey
+      value: {{ .Values.vsphere.ssh_authorized_key }}
+    - name: vSphereTLSThumbprint
+      value: {{ .Values.vsphere.tls_thumbprint }}
+    - name: vSphereDataCenter
+      value: {{ .Values.vsphere.datacenter }}
+    - name: vSphereDataStore
+      value: {{ .Values.vsphere.datastore }}
+    - name: vSphereFolder
+      value: {{ .Values.vsphere.folder }}
+    - name: vSphereNetwork
+      value: {{ .Values.vsphere.network }}
+    - name: vSphereResourcePool
+      value: {{ .Values.vsphere.resource_pool }}
+    - name: vSphereServer
+      value: {{ .Values.vsphere.server }}
+    - name: vSphereTemplate
+      value: {{ .Values.vsphere.template }}
+    - name: controlPlaneIpAddr
+      value: {{ .Values.cluster.control_plane_endpoint_ip }}
+    - name: controlPlanePort
+      value: 6443
+    - name: kubeVIPInterface
+      value: eth0
+---
+kind: Bundle
+apiVersion: fleet.cattle.io/v1alpha1
+metadata:
+  name: vsphere-csi-config
+  namespace: {{ .Values.cluster.namespace }}
+spec:
+  resources:
+  - content: |-
+      apiVersion: v1
+      kind: Secret
+      type: Opaque
+      metadata:
+        name: vsphere-config-secret
+        namespace: vmware-system-csi
+      stringData:
+        csi-vsphere.conf: |+
+          [Global]
+          thumbprint = {{ .Values.vsphere.tls_thumbprint | quote }}
+
+          [VirtualCenter {{ .Values.vsphere.server | quote }}]
+          user = {{ .Values.vsphere.username | quote }}
+          password = {{ .Values.vsphere.password | quote }}
+          datacenters = {{ .Values.vsphere.datacenter | quote }}
+
+          [Network]
+          public-network = {{ .Values.vsphere.network | quote }}
+
+          [Labels]
+          region = ""
+          zone = ""
+  targets:
+  - clusterSelector:
+      matchLabels:
+        csi: vsphere
+        cluster.x-k8s.io/cluster-name: {{ .Values.cluster.name }}
+---
+kind: Bundle
+apiVersion: fleet.cattle.io/v1alpha1
+metadata:
+  name: vsphere-cloud-credentials
+  namespace: {{ .Values.cluster.namespace }}
+spec:
+  resources:
+  - content: |-
+      apiVersion: v1
+      kind: Secret
+      type: Opaque
+      metadata:
+        name: vsphere-cloud-secret
+        namespace: kube-system
+      stringData:
+        {{ .Values.vsphere.server }}.password: {{ .Values.vsphere.password | quote }}
+        {{ .Values.vsphere.server }}.username: {{ .Values.vsphere.username | quote }}
+  targets:
+  - clusterSelector:
+      matchLabels:
+        cloud-provider: vsphere
+        cluster.x-k8s.io/cluster-name: {{ .Values.cluster.name }}

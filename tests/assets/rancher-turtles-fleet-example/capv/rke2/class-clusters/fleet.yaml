@@ -1,0 +1,8 @@
+namespace: default
+
+helm:
+  valuesFrom:
+    - secretKeyRef:
+        name: capv-helm-values
+        namespace: default
+        key: values.yaml

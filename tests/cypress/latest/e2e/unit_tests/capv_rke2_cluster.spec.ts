@@ -87,16 +87,18 @@ describe('Import CAPV', { tags: '@vsphere' }, () => {
     // Add CAPV fleet repository
     cy.addFleetGitRepo(repoName, repoUrl, branch, path);
 
-    // Go to Cluster Management > CAPI > Clusters and check if the cluster has started provisioning
-    cy.burgerMenuOperate('open');
-    cy.checkCAPIMenu();
-    cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
+    // Check CAPI cluster using its name
+    cy.checkCAPICluster(clusterName);
   })
 
   it('Auto import child CAPV cluster', () => {
+    // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+    cy.checkCAPIClusterProvisioned(clusterName, timeout);
+
     // Check child cluster is created and auto-imported
+    // This is checked by ensuring the cluster is available in navigation menu
     cy.goToHome();
-    cy.contains(new RegExp('Pending.*' + clusterName));
+    cy.contains(clusterName).should('exist');
 
     // Check cluster is Active
     cy.searchCluster(clusterName);

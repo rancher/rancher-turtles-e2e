@@ -12,4 +12,8 @@ vsphere:
   tls_thumbprint: replace_vsphere_tls_thumbprint
 
 cluster:
-  control_plane_endpoint_ip: replace_cluster_control_plane_endpoint_ip
+  name: turtles-qa-capv-rke2-example
+  namespace: default
+  rke2_version: v1.31.7+rke2r1
+  control_plane_machine_count: 1
+  worker_machine_count: 1
