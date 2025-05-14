@@ -89,9 +89,10 @@ describe('Enable CAPI Providers', () => {
       })
     );
 
-    it('Add Docker Clusterclass fleet repo', () => {
-      // Add upstream docker classes repo
-      cy.addFleetGitRepo('docker-clusterclasses', turtlesRepoUrl, branch, 'examples/clusterclasses/docker');
+    it('Add Docker Clusterclass & LB fleet repos', () => {
+      // Add upstream docker classes & lb repos
+      const examplesPath = ['examples/clusterclasses/docker', 'examples/applications/lb/docker']
+      cy.addFleetGitRepo('docker-clusterclasses-apps', turtlesRepoUrl, branch, examplesPath);
       cy.checkCAPIClusterClass(dockerProvider);
     });
 
