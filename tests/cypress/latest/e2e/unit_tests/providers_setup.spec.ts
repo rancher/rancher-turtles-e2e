@@ -32,7 +32,7 @@ describe('Enable CAPI Providers', () => {
 
   // Expected provider versions
   const kubeadmProviderVersion = 'v1.9.5'
-  const fleetProviderVersion = 'v0.8.1'
+  const fleetProviderVersion = 'v0.9.0'
   const vsphereProviderVersion = 'v1.12.0'
   const amazonProviderVersion = 'v2.8.1'
   const googleProviderVersion = 'v1.9.0'
@@ -89,8 +89,8 @@ describe('Enable CAPI Providers', () => {
       })
     );
 
-    it('Add Docker Clusterclass & LB fleet repos', () => {
-      // Add upstream docker classes & lb repos
+    it('Add Docker Clusterclass & LB fleet repo', () => {
+      // Add upstream docker classes & lb repo
       const examplesPath = ['examples/clusterclasses/docker', 'examples/applications/lb/docker']
       cy.addFleetGitRepo('docker-clusterclasses-apps', turtlesRepoUrl, branch, examplesPath);
       cy.checkCAPIClusterClass(dockerProvider);
