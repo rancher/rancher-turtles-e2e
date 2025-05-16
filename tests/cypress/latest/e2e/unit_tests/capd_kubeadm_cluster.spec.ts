@@ -28,7 +28,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const basePath = '/tests/assets/rancher-turtles-fleet-example/capd/kubeadm/'
   const pathNames = [clustersPath, classClustersPath]
-  const branch = 'lb-rke2'
+  const branch = 'main'
 
   beforeEach(() => {
     cy.login();
@@ -123,7 +123,8 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
           // Click on imported CAPD cluster
           cy.contains(clusterName).click();
           // Install Chart
-          cy.checkChart('Install', 'Monitoring', 'cattle-monitoring-system');
+          // We install Logging chart instead of Monitoring, since this is relatively lightweight.
+          cy.checkChart('Install', 'Logging', 'cattle-logging-system');
         })
       );
 

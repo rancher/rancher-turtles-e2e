@@ -28,7 +28,7 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const basePath = '/tests/assets/rancher-turtles-fleet-example/capd/rke2/'
   const pathNames = [clustersPath, classClustersPath]
-  const branch = 'lb-rke2'
+  const branch = 'main'
   const questions = [{ menuEntry: 'Rancher Turtles Features Settings', inputBoxTitle: 'Kubectl Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.31.0' }];
 
   beforeEach(() => {
@@ -94,7 +94,8 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
           cy.contains(clusterName).click();
 
           // Install Chart
-          cy.checkChart('Install', 'Monitoring', 'cattle-monitoring-system');
+          // We install Logging chart instead of Monitoring, since this is relatively lightweight.
+          cy.checkChart('Install', 'Logging', 'cattle-logging-system');
         })
       );
 
