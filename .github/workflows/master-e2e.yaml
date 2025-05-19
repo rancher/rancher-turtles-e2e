@@ -44,9 +44,6 @@ on:
       azure_tenant_id:
         description: AZURE_TENANT_ID is required to create Azure Cloud credentials
         required: true
-      azure_location:
-        description: AZURE_LOCATION is required to create Azure cluster
-        required: true
       vsphere_secrets_json_base64:
         description: VSPHERE_SECRETS_JSON_BASE64 is required to create vSphere cluster
         required: true
@@ -393,7 +390,6 @@ jobs:
           AZURE_CLIENT_ID: ${{ secrets.azure_client_id }}
           AZURE_TENANT_ID: ${{ secrets.azure_tenant_id }}
           AZURE_SUBSCRIPTION_ID: ${{ secrets.azure_subscription_id }}
-          AZURE_LOCATION: ${{ secrets.AZURE_LOCATION }}
           VSPHERE_SECRETS_JSON_BASE64: ${{ secrets.vsphere_secrets_json_base64 }}
           QASE_RUN_ID: ${{ needs.pre-qase.outputs.qase_run_id }}
           GREPTAGS: ${{ inputs.grep_test_by_tag }}
@@ -410,9 +406,9 @@ jobs:
             e2e/unit_tests/capd_ui_clusterclass.spec.ts
             e2e/unit_tests/capv_rke2_cluster.spec.ts
             e2e/unit_tests/capv_rke2_clusterclass.spec.ts
-            e2e/unit_tests/capa_rke2_clusterclass.spec.ts
             e2e/unit_tests/capa_eks_cluster.spec.ts
-            e2e/unit_tests/capz_cluster.spec.ts
+            e2e/unit_tests/capa_rke2_clusterclass.spec.ts
+            e2e/unit_tests/capz_aks_cluster.spec.ts
             e2e/unit_tests/capz_aks_clusterclass.spec.ts
             e2e/unit_tests/capz_rke2_clusterclass.spec.ts
             e2e/unit_tests/capg_cluster.spec.ts

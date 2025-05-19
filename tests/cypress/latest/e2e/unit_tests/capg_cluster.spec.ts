@@ -4,12 +4,12 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
-describe('Import CAPG GKE', { tags: '@full' }, () => {
+describe('Import CAPG GKE Cluster', { tags: '@full' }, () => {
   var clusterName: string
   const timeout = 1200000
-  const repoName = 'clusters-capg-gke'
+  const repoName = 'clusters-gcp-gke'
   const clusterNamePrefix = 'turtles-qa-gcp-gke' // as per fleet values
-  const branch = 'main'
+  const branch = 'qase-ids'
   const path = '/tests/assets/rancher-turtles-fleet-example/capg/gke/clusters'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const gcpProject = Cypress.env("gcp_project")
@@ -33,7 +33,6 @@ describe('Import CAPG GKE', { tags: '@full' }, () => {
           editor[0].CodeMirror.setValue(data);
         })
     });
-
     cy.clickButton('Import');
     cy.clickButton('Close');
 

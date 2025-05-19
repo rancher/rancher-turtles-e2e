@@ -61,7 +61,6 @@ jobs:
       azure_client_id: ${{ secrets.AZURE_CLIENT_ID }}
       azure_client_secret: ${{ secrets.AZURE_CLIENT_SECRET }}
       azure_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      azure_location: ${{ secrets.AZURE_LOCATION }}
       qase_api_token: ${{ secrets.QASE_API_TOKEN }}
       rancher_password: ${{ secrets.RANCHER_PASSWORD }}
       vsphere_secrets_json_base64: ${{ secrets.VSPHERE_SECRETS_JSON_BASE64 }}

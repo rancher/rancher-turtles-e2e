@@ -62,8 +62,8 @@ declare global {
       exploreCluster(clusterName: string): Chainable<Element>;
       createVSphereClusterIdentity(vsphere_username: string, vsphere_password: string): Chainable<Element>;
       // Functions declared in capz_support.js
-      createCAPZValuesSecret(location: string, clientID: string, tenantID: string, subscriptionID: string, version: string, registrationMethod?: string, userpoolCount?: number, systempoolCount?: number): Chainable<Element>;
-      createAzureClusterIdentity(clientSecret: string, clientID: string, tenantID: string): Chainable<Element>;
+      createCAPZValuesSecret(clientID: string, tenantID: string, subscriptionID: string): Chainable<Element>;
+      createAzureClusterIdentity(clientID: string, tenantID: string, clientSecret: string ): Chainable<Element>;
       deleteKubernetesResource(clusterName: string, resourcePath: string[], resourceName: string, namespace?: string): Chainable<Element>;
     }
   }

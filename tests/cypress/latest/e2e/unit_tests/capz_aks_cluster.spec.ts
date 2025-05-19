@@ -4,20 +4,18 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
-describe('Import/Create CAPZ', { tags: '@full' }, () => {
+describe('Import CAPZ AKS Cluster', { tags: '@full' }, () => {
   var clusterName: string
   const timeout = 1200000
-  const repoName = 'clusters-capz-aks'
+  const repoName = 'clusters-azure-aks'
   const clusterNamePrefix = 'turtles-qa-azure-aks' // as per fleet values
-  const branch = 'main'
-  const k8sVersion = 'v1.31.4'
+  const branch = 'qase-ids'
   const path = '/tests/assets/rancher-turtles-fleet-example/capz/aks/clusters'
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
   const clientID = Cypress.env("azure_client_id")
   const clientSecret = btoa(Cypress.env("azure_client_secret"))
   const subscriptionID = Cypress.env("azure_subscription_id")
   const tenantID = Cypress.env("azure_tenant_id")
-  const location = Cypress.env("azure_location")
   const namespace = 'capz-system'
 
   beforeEach(() => {
@@ -30,11 +28,11 @@ describe('Import/Create CAPZ', { tags: '@full' }, () => {
   })
 
   it('Create values.yaml Secret', () => {
-    cy.createCAPZValuesSecret(location, clientID, tenantID, subscriptionID, k8sVersion);
+    cy.createCAPZValuesSecret(clientID, tenantID, subscriptionID);
   })
 
   it('Create AzureClusterIdentity', () => {
-    cy.createAzureClusterIdentity(clientSecret, clientID, tenantID);
+    cy.createAzureClusterIdentity(clientID, tenantID, clientSecret);
   })
 
   qase(21, it('Add CAPZ cluster fleet repo and get cluster name', () => {

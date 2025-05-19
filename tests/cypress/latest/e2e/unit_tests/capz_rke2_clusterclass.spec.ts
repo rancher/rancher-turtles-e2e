@@ -1,28 +1,25 @@
 import '~/support/commands';
-import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
-describe('Import CAPZ RKE2 with ClusterClass', { tags: '@full' }, () => {
+describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
     var clusterName: string;
     const timeout = 1200000
     const namespace = 'capz-system'
-    const repoName = 'class-clusters-capz-rke2'
+    const repoName = 'class-clusters-azure-rke2'
     const className = 'azure-rke2-example'
-    const registrationMethod = "internal-first"
-    const k8sVersion = "v1.31.7+rke2r1"
-    const branch = 'main'
+    const branch = 'qase-ids'
     const path = '/tests/assets/rancher-turtles-fleet-example/capz/rke2/class-clusters'
     const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
+    const turtlesRepoUrl = 'https://github.com/rancher/turtles'
+    const examplesPath = ['examples/clusterclasses/azure/rke2', '/examples/applications/ccm/azure']
+    const clusterClassRepoName = "azure-rke2-clusterclass"
+
     const clientID = Cypress.env("azure_client_id")
     const clientSecret = btoa(Cypress.env("azure_client_secret"))
     const subscriptionID = Cypress.env("azure_subscription_id")
     const tenantID = Cypress.env("azure_tenant_id")
-    const location = "westeurope" // the community image for provisioning Azure VM is only available in certain locations
-    const turtlesRepoUrl = 'https://github.com/rancher/turtles'
-    const examplesPath = ['/examples/clusterclasses/azure', '/examples/applications/ccm/azure']
-    const clusterClassRepoName = "azure-clusterclasses"
 
     beforeEach(() => {
         cy.login();
@@ -34,11 +31,11 @@ describe('Import CAPZ RKE2 with ClusterClass', { tags: '@full' }, () => {
     })
 
     it('Create values.yaml Secret', () => {
-        cy.createCAPZValuesSecret(location, clientID, tenantID, subscriptionID, k8sVersion, registrationMethod, 3, 3);
+        cy.createCAPZValuesSecret(clientID, tenantID, subscriptionID);
     })
 
     it('Create AzureClusterIdentity', () => {
-        cy.createAzureClusterIdentity(clientSecret, clientID, tenantID)
+        cy.createAzureClusterIdentity(clientID, tenantID, clientSecret)
     })
 
     it('Add CAPZ RKE2 ClusterClass and Azure CCM Fleet Repo', () => {
@@ -58,7 +55,7 @@ describe('Import CAPZ RKE2 with ClusterClass', { tags: '@full' }, () => {
 
     it('Add GitRepo for class-cluster and get cluster name', () => {
         cy.addFleetGitRepo(repoName, repoUrl, branch, path);
-        // Check CAPI cluster using its name prefix
+        // Check CAPI cluster using its name prefix i.e. className
         cy.checkCAPICluster(className);
 
         // Get the cluster name by its prefix and use it across the test

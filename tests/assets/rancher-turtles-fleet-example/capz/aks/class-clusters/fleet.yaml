@@ -7,4 +7,9 @@ helm:
         namespace: capz-system
         key: values.yaml
   values:
-    classname: azure-aks-example
+    clustername_prefix: turtles-qa
+    className: azure-aks-example
+    kubernetesVersion: v1.31.4
+    systempoolCount: 3
+    userpoolCount: 3
+    location: westeurope # this is one of the regions supported by ClusterClass definition

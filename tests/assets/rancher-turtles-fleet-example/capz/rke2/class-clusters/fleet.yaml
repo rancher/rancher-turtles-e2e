@@ -7,4 +7,10 @@ helm:
         namespace: capz-system
         key: values.yaml
   values:
-    classname: azure-rke2-example
+    clustername_prefix: turtles-qa
+    className: azure-rke2-example
+    kubernetesVersion: v1.31.7+rke2r1
+    cp_machine_count: 3
+    worker_machine_count: 3
+    rke2RegistrationMethod: internal-first
+    location: westeurope # the community image for provisioning Azure VM is only available in certain locations

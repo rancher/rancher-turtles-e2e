@@ -4,18 +4,16 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
-describe('Import CAPA RKE2', { tags: '@full' }, () => {
+describe('Import CAPA RKE2 Class-Cluster', { tags: '@full' }, () => {
   var clusterName: string
   const timeout = 1200000
   const className = 'aws-rke2-example'
-  const path = 'class-clusters'
-  const repoName = className + path
-  const clusterNamePrefix = 'turtles-qa-' + className // as per fleet values
-  const branch = 'main'
-  const basePath = '/tests/assets/rancher-turtles-fleet-example/capa/rke2/'
+  const repoName = 'class-clusters-aws-rke2'
+  const branch = 'qase-ids'
+  const path = '/tests/assets/rancher-turtles-fleet-example/capa/rke2/class-clusters'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
-  const examplesPath = ['examples/clusterclasses/aws', 'examples/applications/ccm/aws-helm', 'examples/applications/csi/aws']
+  const examplesPath = ['examples/clusterclasses/aws/rke2', 'examples/applications/ccm/aws', 'examples/applications/csi/aws']
   const clusterClassRepoName = 'aws-rke2-clusterclass'
 
   beforeEach(() => {
@@ -48,9 +46,9 @@ describe('Import CAPA RKE2', { tags: '@full' }, () => {
         .should('exist');
 
       // Add CAPA fleet repository
-      cy.addFleetGitRepo(repoName, repoUrl, branch, basePath+path);
-      // Check CAPI cluster using its name prefix
-      cy.checkCAPICluster(clusterNamePrefix);
+      cy.addFleetGitRepo(repoName, repoUrl, branch, path);
+    // Check CAPI cluster using its name prefix i.e. className
+      cy.checkCAPICluster(className);
 
       // Get the cluster name by its prefix and use it across the test
       cy.getBySel('sortable-cell-0-1').then(($cell) => {

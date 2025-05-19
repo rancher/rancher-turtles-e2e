@@ -4,12 +4,12 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
-describe('Import CAPA EKS', { tags: '@full' }, () => {
+describe('Import CAPA EKS Cluster', { tags: '@full' }, () => {
   var clusterName: string
   const timeout = 1200000
-  const repoName = 'clusters-capa-eks'
+  const repoName = 'clusters-aws-eks'
   const clusterNamePrefix = 'turtles-qa-aws-eks' // as per fleet values
-  const branch = 'main'
+  const branch = 'qase-ids'
   const path = '/tests/assets/rancher-turtles-fleet-example/capa/eks/clusters'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
 

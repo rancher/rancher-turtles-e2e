@@ -18,12 +18,12 @@ spec:
     apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: AzureClusterIdentity
     name: cluster-identity
-  location: "{{ .Values.cluster.location }}"
+  location: {{ .Values.location }}
   resourceGroupName: {{ $cluster_name }}
   nodeResourceGroupName: {{ $cluster_name }}-nodes
   sshPublicKey: null
   subscriptionID: "{{ .Values.azure.subscriptionID }}"
-  version: "{{ .Values.cluster.kubernetesVersion }}"
+  version: {{ .Values.kubernetesVersion }}
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: AzureManagedMachinePool
@@ -73,7 +73,7 @@ metadata:
   name: {{ $cluster_name }}-pool0
 spec:
   clusterName: {{ $cluster_name }}
-  replicas: {{ .Values.cluster.systempoolCount | int }}
+  replicas: {{ .Values.systempoolCount }}
   template:
     metadata: {}
     spec:
@@ -84,7 +84,7 @@ spec:
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: AzureManagedMachinePool
         name: {{ $cluster_name }}-pool0
-      version: "{{ .Values.cluster.kubernetesVersion }}"
+      version: {{ .Values.kubernetesVersion }}
 ---
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: MachinePool
@@ -94,7 +94,7 @@ metadata:
   name: {{ $cluster_name }}-pool1
 spec:
   clusterName: {{ $cluster_name }}
-  replicas: {{ .Values.cluster.userpoolCount | int }}
+  replicas: {{ .Values.userpoolCount }}
   template:
     metadata: {}
     spec:
@@ -105,4 +105,4 @@ spec:
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: AzureManagedMachinePool
         name: {{ $cluster_name }}-pool1
-      version: "{{ .Values.cluster.kubernetesVersion }}"
+      version: {{ .Values.kubernetesVersion }}

@@ -1,31 +1,31 @@
 import '~/support/commands';
 
-import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import * as randomstring from "randomstring";
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
 import { ClusterClassVariablesInput } from '~/support/structs';
 
 Cypress.config();
-describe('Import/Create CAPZ AKS with ClusterClass', { tags: '@full' }, () => {
+describe('Import/Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
   const timeout = 1200000
-  const repoName = 'class-clusters-capz-aks'
+  const repoName = 'class-clusters-azure-aks'
   const className = 'azure-aks-example'
-  const clusterName = className + randomstring.generate({ length: 4, capitalization: "lowercase" })
+  const clusterName = 'turtles-qa-' + className + randomstring.generate({ length: 4, capitalization: "lowercase" })
   const k8sVersion = 'v1.31.4'
   const podCIDR = '192.168.0.0/16'
-  const branch = 'main'
+  const branch = 'qase-ids'
   const path = '/tests/assets/rancher-turtles-fleet-example/capz/aks/class-clusters'
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
+  const location = "westeurope" // this is one of the regions supported by ClusterClass definition
+  const namespace = "capz-system"
+  const turtlesRepoUrl = 'https://github.com/rancher/turtles'
+  const classesPath = 'examples/clusterclasses/azure/aks'
+  const clusterClassRepoName = "azure-aks-clusterclass"
+
   const clientID = Cypress.env("azure_client_id")
   const clientSecret = btoa(Cypress.env("azure_client_secret"))
   const subscriptionID = Cypress.env("azure_subscription_id")
   const tenantID = Cypress.env("azure_tenant_id")
-  const location = "westeurope" // this is one of the regions supported by ClusterClass definition
-  const namespace = "capz-system"
-  const turtlesRepoUrl = 'https://github.com/rancher/turtles'
-  const classesPath = '/examples/clusterclasses/azure'
-  const clusterClassRepoName = "azure-clusterclasses"
 
   beforeEach(() => {
     cy.login();
@@ -37,11 +37,11 @@ describe('Import/Create CAPZ AKS with ClusterClass', { tags: '@full' }, () => {
   })
 
   it('Create values.yaml Secret', () => {
-    cy.createCAPZValuesSecret(location, clientID, tenantID, subscriptionID, k8sVersion, undefined, 1, 1)
+    cy.createCAPZValuesSecret(clientID, tenantID, subscriptionID);
   })
 
   it('Create AzureClusterIdentity', () => {
-    cy.createAzureClusterIdentity(clientSecret, clientID, tenantID)
+    cy.createAzureClusterIdentity(clientID, tenantID, clientSecret);
   })
 
   qase(21, it('Add CAPZ AKS ClusterClass using fleet', () => {
@@ -97,8 +97,7 @@ describe('Import/Create CAPZ AKS with ClusterClass', { tags: '@full' }, () => {
     })
   }
 
-
-  qase(45, it('Create CAPZ from Clusterclass via UI', () => {
+  qase(45, it('Create CAPZ AKS from Clusterclass via UI', () => {
     // Create cluster from Clusterclass UI
     const machines: Record<string, string> = { 'mp-system': 'default-system', 'mp-worker': 'default-worker' }
     const extraVariables: ClusterClassVariablesInput[] = [

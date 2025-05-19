@@ -2,7 +2,8 @@ namespace: default
 
 helm:
   values:
-    clustername_prefix: turtles-qa-aws-rke2-example
+    clustername_prefix: turtles-qa
+    className: aws-rke2-example
     region: ap-south-2
     sshKeyName: turtles-qa-rke2
     version: v1.31.7+rke2r1
@@ -10,4 +11,3 @@ helm:
     machine_type: t3.2xlarge
     cp_machine_count: 3
     worker_machine_count: 1
-

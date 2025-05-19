@@ -54,7 +54,7 @@ jobs:
        continue-on-error: true
        run: |
          # Get the AKS clusters by prefix
-         for rg in $(az group list --query "[?starts_with(name,'turtles-qa-capz-aks')].name" | jq -r ".[]" 2> /dev/null); do
+         for rg in $(az group list --query "[?starts_with(name,'turtles-qa-azure')].name" | jq -r ".[]" 2> /dev/null); do
            echo "Deleting AKS resource group: $rg"
            az group delete --name $rg --yes
          done
