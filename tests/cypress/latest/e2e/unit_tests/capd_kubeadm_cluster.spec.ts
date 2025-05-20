@@ -20,23 +20,34 @@ Cypress.config();
 describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
   var clusterName: string, clusterPrefix: string
   const timeout = 600000
-  const namePrefix = 'docker-kubeadm-'
+  const namePrefix = 'docker-kubeadm'
   const clustersPath = 'clusters'
   const classClustersPath = 'class-' + clustersPath
-  const className = namePrefix + 'example'
-  const clusterNamePrefix = namePrefix + 'cluster' // as per fleet values
+  const className = namePrefix + '-example'
+  const clusterNamePrefix = namePrefix + '-cluster' // as per fleet values
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const basePath = '/tests/assets/rancher-turtles-fleet-example/capd/kubeadm/'
   const pathNames = [clustersPath, classClustersPath]
-  const branch = 'main'
+  const branch = 'qase-ids'
+  const turtlesRepoUrl = 'https://github.com/rancher/turtles'
+  const classesPath = 'examples/clusterclasses/docker/kubeadm'
+  const clusterClassRepoName = "docker-kb-clusterclass"
 
   beforeEach(() => {
     cy.login();
     cy.burgerMenuOperate('open');
   });
 
+  qase(92,
+    it('Add CAPD Kubeadm ClusterClass using fleet', () => {
+      cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath)
+      // Go to CAPI > ClusterClass to ensure the clusterclass is created
+      cy.checkCAPIClusterClass(className);
+    })
+  );
+
   pathNames.forEach((path) => {
-    const clustersRepoName = namePrefix + path
+    const clustersRepoName = path + namePrefix
 
     it('Setup the namespace for importing', () => {
       if (path == clustersPath) {
@@ -46,26 +57,28 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
       }
     })
 
-    it('Add CAPD cluster fleet repo - ' + path + ' and get cluster name', () => {
-      cypressLib.checkNavIcon('cluster-management').should('exist');
-      var fullPath = basePath + path
-      cy.addFleetGitRepo(clustersRepoName, repoUrl, branch, fullPath);
+    if (path == clustersPath) { var qase_id = 5 } else { qase_id = 6 }
+    qase(qase_id,
+      it('Add CAPD cluster fleet repo - ' + path + ' and get cluster name', () => {
+        cypressLib.checkNavIcon('cluster-management').should('exist');
+        var fullPath = basePath + path
+        cy.addFleetGitRepo(clustersRepoName, repoUrl, branch, fullPath);
+        if (path == clustersPath) {
+          clusterPrefix = clusterNamePrefix
+        } else {
+          clusterPrefix = className
+        }
+        // Check CAPI cluster using its name prefix
+        cy.checkCAPICluster(clusterPrefix);
+        // Get the cluster name by its prefix and use it across the test
+        cy.getBySel('sortable-cell-0-1').then(($cell) => {
+          clusterName = $cell.text();
+          cy.log('CAPI Cluster Name:', clusterName);
+        });
+      })
+    );
 
-      if (path == clustersPath) {
-        clusterPrefix = clusterNamePrefix
-      } else {
-        clusterPrefix = className
-      }
-      // Check CAPI cluster using its name prefix
-      cy.checkCAPICluster(clusterPrefix);
-      // Get the cluster name by its prefix and use it across the test
-      cy.getBySel('sortable-cell-0-1').then(($cell) => {
-        clusterName = $cell.text();
-        cy.log('CAPI Cluster Name:', clusterName);
-      });
-    })
-
-    if (path == clustersPath) { var qase_id = 6 } else { qase_id = 5 }
+    if (path == clustersPath) { var qase_id = 93 } else { qase_id = 94 }
     qase(qase_id,
       it('Auto import child CAPD cluster', () => {
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
@@ -128,7 +141,7 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
         })
       );
 
-      qase(8,
+      qase(95,
         it('Scale the imported CAPD cluster', () => {
           // Access CAPI cluster
           cy.checkCAPIMenu();
@@ -155,7 +168,8 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
     }
 
     if (skipClusterDeletion) {
-      qase(9,
+      if (path == clustersPath) { var qase_id = 96 } else { qase_id = 98 }
+      qase(qase_id,
         it('Remove imported CAPD cluster from Rancher Manager', { retries: 1 }, () => {
           // Check cluster is not deleted after removal
           cy.deleteCluster(clusterName);
@@ -167,7 +181,8 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
         })
       );
 
-      qase(10,
+      if (path == clustersPath) { var qase_id = 97 } else { qase_id = 99 }
+      qase(qase_id,
         it('Delete the CAPD fleet repo - ' + path, () => {
           // Remove the clusters fleet repo
           cy.removeFleetGitRepo(clustersRepoName);

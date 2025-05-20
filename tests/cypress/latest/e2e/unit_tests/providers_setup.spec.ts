@@ -12,7 +12,6 @@ limitations under the License.
 */
 
 import '~/support/commands';
-import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 
 Cypress.config();
@@ -89,18 +88,13 @@ describe('Enable CAPI Providers', () => {
       })
     );
 
-    it('Add Docker Clusterclass & LB fleet repo', () => {
-      // Add upstream docker classes & lb repo
-      const examplesPath = ['examples/clusterclasses/docker', 'examples/applications/lb/docker']
-      cy.addFleetGitRepo('docker-clusterclasses-apps', turtlesRepoUrl, branch, examplesPath);
-      cy.checkCAPIClusterClass(dockerProvider);
-    });
-
-    // CNI to be used across all specs
-    it('Add CNI fleet repo', () => {
-      // Add upstream cni repo
-      cy.addFleetGitRepo('cni-calico', turtlesRepoUrl, branch, 'examples/applications/cni/calico');
-    });
+    qase(90,
+      // CNI to be used across all specs
+      it('Add CNI fleet repo', () => {
+        // Add upstream cni repo
+        cy.addFleetGitRepo('cni-calico', turtlesRepoUrl, branch, 'examples/applications/cni/calico');
+      })
+    );
 
     xit('Custom Fleet addon config', () => {
       // Skipped as we are unable to install Monitoring app on clusters without cattle-fleet-system namespace

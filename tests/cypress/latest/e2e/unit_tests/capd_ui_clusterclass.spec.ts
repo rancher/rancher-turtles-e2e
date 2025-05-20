@@ -12,7 +12,6 @@ limitations under the License.
 */
 
 import '~/support/commands';
-import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import * as randomstring from "randomstring";
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';

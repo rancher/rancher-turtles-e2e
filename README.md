@@ -28,7 +28,7 @@ What tests are doing:
 3. Export the following ENV VAR: `RANCHER_URL` (format: `https://<FQDN>/dashboard`), `RANCHER_PASSWORD`, `RANCHER_USER`, `CYPRESS_TAGS=@install [@short @full|@vsphere]`, and provider specific env var:
     1. CAPA - `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
     2. CAPG - `GCP_CREDENTIALS` and `GCP_PROJECT`
-    3. CAPZ - `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET` and `AZURE_SUBSCRIPTION_ID`.
+    3. CAPZ - `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, and `AZURE_SUBSCRIPTION_ID`.
     4. CAPV - `VSPHERE_ENDPOINTS_LIST` (workflow only, otherwise hardcoded endpoint_ip is part of the following var), `VSPHERE_SECRETS_JSON_BASE64`, see [here](tests/cypress/latest/e2e/unit_tests/capv_rke2_cluster.spec.ts#L15) for reference.
 4. Start Cypress: `./node_modules/cypress/bin/cypress open -C cypress.config.ts` or `npx cypress open --env grepTags="@install @short"`
 

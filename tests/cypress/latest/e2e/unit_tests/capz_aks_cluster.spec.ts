@@ -75,22 +75,20 @@ describe('Import CAPZ AKS Cluster', { tags: '@full' }, () => {
   })
   );
 
-  qase(25, it('Remove imported CAPZ cluster from Rancher Manager and Delete the CAPZ cluster', { retries: 1 }, () => {
-
-    // Check cluster is not deleted after removal
-    cy.deleteCluster(clusterName);
-    cy.goToHome();
-    // kubectl get clusters.cluster.x-k8s.io
-    // This is checked by ensuring the cluster is not available in navigation menu
-    cy.contains(clusterName).should('not.exist');
-    cy.checkCAPIClusterProvisioned(clusterName);
-
-    // Delete CAPI cluster created from Fleet
-    cy.removeCAPIResource('Clusters', clusterName, timeout);
-  })
-  );
-
   if (skipClusterDeletion) {
+    qase(25, it('Remove imported CAPZ cluster from Rancher Manager', { retries: 1 }, () => {
+
+      // Check cluster is not deleted after removal
+      cy.deleteCluster(clusterName);
+      cy.goToHome();
+      // kubectl get clusters.cluster.x-k8s.io
+      // This is checked by ensuring the cluster is not available in navigation menu
+      cy.contains(clusterName).should('not.exist');
+      cy.checkCAPIClusterProvisioned(clusterName);
+  
+    })
+    );
+
     qase(26, it('Delete the CAPZ cluster fleet repo and other resources', () => {
 
       // Remove the fleet git repo

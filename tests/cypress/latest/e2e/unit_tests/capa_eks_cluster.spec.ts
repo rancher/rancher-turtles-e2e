@@ -40,19 +40,21 @@ describe('Import CAPA EKS Cluster', { tags: '@full' }, () => {
     })
   );
 
-  it('Auto import child CAPA cluster', () => {
-    // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-    cy.checkCAPIClusterProvisioned(clusterName, timeout);
+  qase(105,
+    it('Auto import child CAPA cluster', () => {
+      // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+      cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
-    // Check child cluster is created and auto-imported
-    // This is checked by ensuring the cluster is available in navigation menu
-    cy.goToHome();
-    cy.contains(clusterName).should('exist');
+      // Check child cluster is created and auto-imported
+      // This is checked by ensuring the cluster is available in navigation menu
+      cy.goToHome();
+      cy.contains(clusterName).should('exist');
 
-    // Check cluster is Active
-    cy.searchCluster(clusterName);
-    cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
-  })
+      // Check cluster is Active
+      cy.searchCluster(clusterName);
+      cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+    })
+  );
 
   qase(32,
     it('Install App on imported cluster', { retries: 1 }, () => {
