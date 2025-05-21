@@ -28,7 +28,7 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const basePath = '/tests/assets/rancher-turtles-fleet-example/capd/rke2/'
   const pathNames = [clustersPath, classClustersPath]
-  const branch = 'qase-ids'
+  const branch = 'main'
   const questions = [{ menuEntry: 'Rancher Turtles Features Settings', inputBoxTitle: 'Kubectl Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.31.0' }];
 
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
