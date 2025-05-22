@@ -210,7 +210,7 @@ spec:
       resourcePool: {{ .Values.vsphere.resource_pool | quote }}
       server: {{ .Values.vsphere.server }}
       storagePolicyName: ""
-      template: {{ .Values.vsphere.template }}
+      template: {{ .Values.vsphere.rke2_template }}
       thumbprint: {{ .Values.vsphere.tls_thumbprint }}
 ---
 apiVersion: cluster.x-k8s.io/v1beta1
@@ -288,7 +288,7 @@ spec:
       resourcePool: {{ .Values.vsphere.resource_pool | quote }}
       server: {{ .Values.vsphere.server }}
       storagePolicyName: ""
-      template: {{ .Values.vsphere.template }}
+      template: {{ .Values.vsphere.rke2_template }}
       thumbprint: {{ .Values.vsphere.tls_thumbprint }}
 ---
 apiVersion: addons.cluster.x-k8s.io/v1beta1

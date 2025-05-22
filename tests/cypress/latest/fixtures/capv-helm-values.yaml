@@ -7,7 +7,8 @@ vsphere:
   network: replace_vsphere_network
   resource_pool: replace_vsphere_resource_pool
   folder: replace_vsphere_folder
-  template: replace_vsphere_template
+  rke2_template: replace_vsphere_rke2_template
+  kubeadm_template: replace_vsphere_kubeadm_template
   ssh_authorized_key: replace_vsphere_ssh_authorized_key
   tls_thumbprint: replace_vsphere_tls_thumbprint
 

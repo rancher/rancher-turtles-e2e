@@ -14,14 +14,14 @@ spec:
       cidrBlocks:
       - 192.168.0.0/16
   topology:
-    class: vsphere-rke2-example
+    class: vsphere-kubeadm-example
     classNamespace: {{ .Values.cluster.namespace }}
-    version: {{ .Values.cluster.rke2_version }}
+    version: {{ .Values.cluster.version }}
     controlPlane:
       replicas: {{ .Values.cluster.control_plane_machine_count }}
     workers:
       machineDeployments:
-      - class: vsphere-rke2-example-worker
+      - class: vsphere-kubeadm-example-worker
         name: md-0
         replicas: {{ .Values.cluster.worker_machine_count }}
     variables:
@@ -44,7 +44,7 @@ spec:
     - name: vSphereServer
       value: {{ .Values.vsphere.server }}
     - name: vSphereTemplate
-      value: {{ .Values.vsphere.rke2_template }}
+      value: {{ .Values.vsphere.kubeadm_template }}
     - name: controlPlaneIpAddr
       value: {{ .Values.cluster.control_plane_endpoint_ip }}
     - name: controlPlanePort

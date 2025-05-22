@@ -3,17 +3,17 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
-describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
+describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
   const timeout = 1200000
-  const clusterRepoName = 'class-clusters-capv-rke2'
-  const classRepoName = 'vsphere-rke2-clusterclass'
-  const className = 'vsphere-rke2-example'
-  const clusterName = 'turtles-qa-capv-rke2-example'
+  const clusterRepoName = 'class-clusters-capv-kb'
+  const classRepoName = 'vsphere-kb-clusterclass'
+  const className = 'vsphere-kubeadm-example'
+  const clusterName = 'turtles-qa-capv-kb-example'
   const branch = 'main'
-  const path = '/tests/assets/rancher-turtles-fleet-example/capv/rke2/class-clusters'
+  const path = '/tests/assets/rancher-turtles-fleet-example/capv/kubeadm/class-clusters'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
-  const examplesPath = ['examples/clusterclasses/vsphere/rke2', 'examples/applications/ccm/vsphere', 'examples/applications/csi/vsphere']
+  const examplesPath = ['examples/clusterclasses/vsphere/kubeadm', 'examples/applications/ccm/vsphere', 'examples/applications/csi/vsphere']
   const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
 
   // Decode the base64 encoded secrets and make json object
@@ -63,7 +63,6 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
           editor[0].CodeMirror.setValue(data);
         })
     });
-
     cy.clickButton('Import');
     cy.clickButton('Close');
   })
@@ -74,7 +73,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     cy.createVSphereClusterIdentity(vsphere_username, vsphere_password)
   })
 
-  it('Add CAPV RKE2 ClusterClass and Applications Fleet Repo', () => {
+  it('Add CAPV Kubeadm ClusterClass and Applications Fleet Repo', () => {
     cy.addFleetGitRepo(classRepoName, turtlesRepoUrl, 'main', examplesPath)
     // Go to CAPI > ClusterClass to ensure the clusterclass is created
     cy.checkCAPIClusterClass(className);
@@ -138,7 +137,6 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     })
 
     it('Delete the CAPV cluster and ClusterClass fleet repo', () => {
-
       // Remove the fleet git repo
       cy.removeFleetGitRepo(clusterRepoName);
       // Wait until the following returns no clusters found

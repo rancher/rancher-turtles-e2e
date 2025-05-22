@@ -3,9 +3,9 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
-describe('Import CAPV', { tags: '@vsphere' }, () => {
+describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
   const timeout = 1200000
-  const repoName = 'clusters-capv'
+  const repoName = 'clusters-capv-rke2'
   const clusterName = "turtles-qa-capv-rke2"
   const branch = 'main'
   const path = '/tests/assets/rancher-turtles-fleet-example/capv/rke2/clusters'
@@ -23,7 +23,8 @@ describe('Import CAPV', { tags: '@vsphere' }, () => {
   //     "vsphere_network": "replace_vsphere_network",
   //     "vsphere_resource_pool": "replace_vsphere_resource_pool",
   //     "vsphere_folder": "replace_vsphere_folder",
-  //     "vsphere_template": "replace_vsphere_templae",
+  //     "vsphere_rke2_template": "replace_vsphere_rke2_template",
+  //     "vsphere_kubeadm_template": "replace_vsphere_kubeadm_template",
   //     "vsphere_ssh_authorized_key": "replace_vsphere_ssh_authorized_key",
   //     "vsphere_tls_thumbprint": "replace_vsphere_tls_thumbprint",
   //     "cluster_control_plane_endpoint_ip": "replace_cluster_control_plane_endpoint_ip"
@@ -57,7 +58,8 @@ describe('Import CAPV', { tags: '@vsphere' }, () => {
       data = data.replace(/replace_vsphere_network/g, JSON.stringify(vsphere_secrets_json.vsphere_network))
       data = data.replace(/replace_vsphere_resource_pool/g, JSON.stringify(vsphere_secrets_json.vsphere_resource_pool))
       data = data.replace(/replace_vsphere_folder/g, JSON.stringify(vsphere_secrets_json.vsphere_folder))
-      data = data.replace(/replace_vsphere_template/g, JSON.stringify(vsphere_secrets_json.vsphere_template))
+      data = data.replace(/replace_vsphere_rke2_template/g, JSON.stringify(vsphere_secrets_json.vsphere_rke2_template))
+      data = data.replace(/replace_vsphere_kubeadm_template/g, JSON.stringify(vsphere_secrets_json.vsphere_kubeadm_template))
       data = data.replace(/replace_vsphere_ssh_authorized_key/g, JSON.stringify(vsphere_secrets_json.vsphere_ssh_authorized_key))
       data = data.replace(/replace_vsphere_tls_thumbprint/g, JSON.stringify(vsphere_secrets_json.vsphere_tls_thumbprint))
       // Placeholder 'replace_cluster_control_plane_endpoint_ip' is already replaced at workflow level
@@ -103,6 +105,10 @@ describe('Import CAPV', { tags: '@vsphere' }, () => {
     // Check cluster is Active
     cy.searchCluster(clusterName);
     cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+
+    // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+    // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
+    cy.checkCAPIClusterActive(clusterName, timeout);
   })
 
   it('Install App on imported cluster', { retries: 1 }, () => {
@@ -138,7 +144,8 @@ describe('Import CAPV', { tags: '@vsphere' }, () => {
       data = data.replace(/replace_vsphere_network/g, JSON.stringify(vsphere_secrets_json.vsphere_network))
       data = data.replace(/replace_vsphere_resource_pool/g, JSON.stringify(vsphere_secrets_json.vsphere_resource_pool))
       data = data.replace(/replace_vsphere_folder/g, JSON.stringify(vsphere_secrets_json.vsphere_folder))
-      data = data.replace(/replace_vsphere_template/g, JSON.stringify(vsphere_secrets_json.vsphere_template))
+      data = data.replace(/replace_vsphere_rke2_template/g, JSON.stringify(vsphere_secrets_json.vsphere_rke2_template))
+      data = data.replace(/replace_vsphere_kubeadm_template/g, JSON.stringify(vsphere_secrets_json.vsphere_kubeadm_template))
       data = data.replace(/replace_vsphere_ssh_authorized_key/g, JSON.stringify(vsphere_secrets_json.vsphere_ssh_authorized_key))
       data = data.replace(/replace_vsphere_tls_thumbprint/g, JSON.stringify(vsphere_secrets_json.vsphere_tls_thumbprint))
       // Placeholder 'replace_cluster_control_plane_endpoint_ip' is already replaced at workflow level
