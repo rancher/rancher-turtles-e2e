@@ -3,13 +3,13 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
-describe('Import CAPV RKE2', { tags: '@vsphere' }, () => {
+describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
   const timeout = 1200000
-  const clusterRepoName = 'class-clusters-capv'
+  const clusterRepoName = 'class-clusters-capv-rke2'
   const classRepoName = 'vsphere-rke2-clusterclass'
   const className = 'vsphere-rke2-example'
   const clusterName = 'turtles-qa-capv-rke2-example'
-  const branch = 'main'
+  const branch = 'vsphere-kb-class' // To be changed
   const path = '/tests/assets/rancher-turtles-fleet-example/capv/rke2/class-clusters'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
@@ -44,7 +44,8 @@ describe('Import CAPV RKE2', { tags: '@vsphere' }, () => {
       data = data.replace(/replace_vsphere_network/g, JSON.stringify(vsphere_secrets_json.vsphere_network))
       data = data.replace(/replace_vsphere_resource_pool/g, JSON.stringify(vsphere_secrets_json.vsphere_resource_pool))
       data = data.replace(/replace_vsphere_folder/g, JSON.stringify(vsphere_secrets_json.vsphere_folder))
-      data = data.replace(/replace_vsphere_template/g, JSON.stringify(vsphere_secrets_json.vsphere_template))
+      data = data.replace(/replace_vsphere_rke2_template/g, JSON.stringify(vsphere_secrets_json.vsphere_rke2_template))
+      data = data.replace(/replace_vsphere_kubeadm_template/g, JSON.stringify(vsphere_secrets_json.vsphere_kubeadm_template))
       data = data.replace(/replace_vsphere_ssh_authorized_key/g, JSON.stringify(vsphere_secrets_json.vsphere_ssh_authorized_key))
       data = data.replace(/replace_vsphere_tls_thumbprint/g, JSON.stringify(vsphere_secrets_json.vsphere_tls_thumbprint))
       // Placeholder 'replace_cluster_control_plane_endpoint_ip' is already replaced at workflow level
