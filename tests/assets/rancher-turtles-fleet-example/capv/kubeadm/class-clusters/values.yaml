@@ -16,5 +16,5 @@ cluster:
   name: turtles-qa-capv-kb-example
   namespace: default
   version: v1.31.4
-  control_plane_machine_count: 1
+  control_plane_machine_count: 1 # Todo: 3, turtles/issues/1402
   worker_machine_count: 1

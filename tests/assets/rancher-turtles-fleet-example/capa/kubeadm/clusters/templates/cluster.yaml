@@ -1,0 +1,145 @@
+{{- $cluster_name := printf "%s-%s" .Values.clustername_prefix (randAlphaNum 4) | lower -}}
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  labels:
+    cni: calico
+    cloud-provider: aws
+    csi: aws-ebs-csi-driver
+    clusterclass-name.fleet.addons.cluster.x-k8s.io: aws-kubeadm-example # Workaround for HelmApp
+  name: {{ $cluster_name }}
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+      - 192.168.0.0/16
+  controlPlaneRef:
+    apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+    kind: KubeadmControlPlane
+    name: {{ $cluster_name }}-control-plane
+  infrastructureRef:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+    kind: AWSCluster
+    name: {{ $cluster_name }}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+kind: AWSCluster
+metadata:
+  name: {{ $cluster_name }}
+spec:
+  network:
+    cni:
+      cniIngressRules:
+        - description: BGP
+          fromPort: 179
+          protocol: tcp
+          toPort: 179
+        - description: IP-in-IP
+          fromPort: -1
+          protocol: "4"
+          toPort: 65535
+        - description: Calico Typha
+          fromPort: 5473
+          protocol: tcp
+          toPort: 5473
+  controlPlaneLoadBalancer:
+    loadBalancerType: nlb
+    healthCheckProtocol: HTTPS
+  region: {{ .Values.region }}
+  sshKeyName: {{ .Values.sshKeyName }}
+---
+apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+kind: KubeadmControlPlane
+metadata:
+  name: {{ $cluster_name }}-control-plane
+spec:
+  kubeadmConfigSpec:
+    clusterConfiguration:
+      apiServer:
+        extraArgs:
+          cloud-provider: external
+      controllerManager:
+        extraArgs:
+          cloud-provider: external
+    initConfiguration:
+      nodeRegistration:
+        kubeletExtraArgs:
+          cloud-provider: external
+        name: {{ "'{{ ds.meta_data.local_hostname }}'" }}
+    joinConfiguration:
+      nodeRegistration:
+        kubeletExtraArgs:
+          cloud-provider: external
+        name: {{ "'{{ ds.meta_data.local_hostname }}'" }}
+  machineTemplate:
+    infrastructureRef:
+      apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+      kind: AWSMachineTemplate
+      name: {{ $cluster_name }}-control-plane
+  replicas: {{ .Values.cp_machine_count }}
+  version: {{ .Values.version }}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+kind: AWSMachineTemplate
+metadata:
+  name: {{ $cluster_name }}-control-plane
+spec:
+  template:
+    spec:
+      ami:
+        id: {{ .Values.ami_id }}
+      instanceType: t3.xlarge
+      iamInstanceProfile: "control-plane.cluster-api-provider-aws.sigs.k8s.io"
+      rootVolume:
+        size: 50
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachineDeployment
+metadata:
+  name: {{ $cluster_name }}-md-0
+spec:
+  clusterName: {{ $cluster_name }}
+  replicas: {{ .Values.worker_machine_count }}
+  selector:
+    cluster.x-k8s.io/cluster-name: {{ $cluster_name }}
+  template:
+    spec:
+      bootstrap:
+        configRef:
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+          kind: KubeadmConfigTemplate
+          name: {{ $cluster_name }}-md-0
+      clusterName: {{ $cluster_name }}
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+        kind: AWSMachineTemplate
+        name: {{ $cluster_name }}-md-0
+      version: {{ .Values.version }}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+kind: AWSMachineTemplate
+metadata:
+  name: {{ $cluster_name }}-md-0
+spec:
+  template:
+    spec:
+      ami:
+        id: {{ .Values.ami_id }}
+      instanceType: t3.xlarge
+      iamInstanceProfile: "nodes.cluster-api-provider-aws.sigs.k8s.io"
+      rootVolume:
+        size: 50
+---
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+kind: KubeadmConfigTemplate
+metadata:
+  name: {{ $cluster_name }}-md-0
+spec:
+  template:
+    spec:
+      joinConfiguration:
+        nodeRegistration:
+          kubeletExtraArgs:
+            cloud-provider: external
+          name: {{ "'{{ ds.meta_data.local_hostname }}'" }}
