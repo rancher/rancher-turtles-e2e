@@ -1,0 +1,216 @@
+{{- $cluster_name := printf "%s-%s" .Values.clustername_prefix (randAlphaNum 4) | lower -}}
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  labels:
+    cloud-provider: aws
+    csi: aws-ebs-csi-driver
+    clusterclass-name.fleet.addons.cluster.x-k8s.io: aws-rke2-example # Workaround for HelmApp
+  name: {{ $cluster_name }}
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+      - 192.168.0.0/16
+  controlPlaneRef:
+    apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+    kind: RKE2ControlPlane
+    name: {{ $cluster_name }}-control-plane
+  infrastructureRef:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+    kind: AWSCluster
+    name: {{ $cluster_name }}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+kind: AWSCluster
+metadata:
+  name: {{ $cluster_name }}
+spec:
+  bastion:
+    enabled: true
+  controlPlaneLoadBalancer:
+    additionalListeners:
+    - port: 9345
+      protocol: TCP
+    - port: 2379
+      protocol: TCP
+    ingressRules:
+    - description: RKE2 Control Plane
+      fromPort: 9345
+      natGatewaysIPsSource: true
+      protocol: tcp
+      toPort: 9345
+    - cidrBlocks:
+      - 0.0.0.0/0
+      description: Kubernetes API
+      fromPort: 6443
+      protocol: tcp
+      toPort: 6443
+    - description: Etcd
+      fromPort: 2379
+      natGatewaysIPsSource: true
+      protocol: tcp
+      toPort: 2379
+    - description: Etcd peer
+      fromPort: 2380
+      natGatewaysIPsSource: true
+      protocol: tcp
+      toPort: 2380
+    loadBalancerType: nlb
+  network:
+    additionalControlPlaneIngressRules:
+    - description: RKE2 Control Plane additional group
+      fromPort: 9345
+      protocol: tcp
+      sourceSecurityGroupRoles:
+      - node
+      - controlplane
+      - apiserver-lb
+      - lb
+      toPort: 9345
+    - description: Etcd
+      fromPort: 2379
+      natGatewaysIPsSource: true
+      protocol: tcp
+      toPort: 2379
+    - description: Etcd peer
+      fromPort: 2380
+      natGatewaysIPsSource: true
+      protocol: tcp
+      toPort: 2380
+    - description: Calico Typha
+      fromPort: 5473
+      protocol: tcp
+      sourceSecurityGroupRoles:
+      - node
+      - controlplane
+      - apiserver-lb
+      - lb
+      toPort: 5473
+    - description: Calico Typha health check
+      fromPort: 9098
+      protocol: tcp
+      sourceSecurityGroupRoles:
+      - node
+      - controlplane
+      - apiserver-lb
+      - lb
+      toPort: 9098
+    - description: Calico health check
+      fromPort: 9099
+      protocol: tcp
+      sourceSecurityGroupRoles:
+      - node
+      - controlplane
+      - apiserver-lb
+      - lb
+      toPort: 9099
+    vpc:
+      availabilityZoneUsageLimit: 1
+  region: {{ .Values.region }}
+  sshKeyName: {{ .Values.sshKeyName }}
+---
+apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+kind: RKE2ControlPlane
+metadata:
+  name: {{ $cluster_name }}-control-plane
+spec:
+  agentConfig:
+    kubelet:
+      extraArgs:
+      - --cloud-provider=external
+  machineTemplate:
+    infrastructureRef:
+      apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+      kind: AWSMachineTemplate
+      name: {{ $cluster_name }}-control-plane
+    nodeDrainTimeout: 2m
+  preRKE2Commands:
+  - sudo hostnamectl set-hostname $(curl -s http://169.254.169.254/1.0/meta-data/hostname)
+  replicas: {{ .Values.cp_machine_count }}
+  rolloutStrategy:
+    rollingUpdate:
+      maxSurge: 1
+    type: RollingUpdate
+  serverConfig:
+    cloudProviderName: external
+    cni: calico
+    etcd:
+      backupConfig:
+        retention: "10"
+        scheduleCron: '*/15 * * * *'
+  version: {{ .Values.version }}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+kind: AWSMachineTemplate
+metadata:
+  name: {{ $cluster_name }}-control-plane
+spec:
+  template:
+    spec:
+      ami:
+        id: {{ .Values.ami_id }}
+      iamInstanceProfile: control-plane.cluster-api-provider-aws.sigs.k8s.io
+      instanceType: t3.xlarge
+      rootVolume:
+        size: 50
+      sshKeyName: {{ .Values.sshKeyName }}
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachineDeployment
+metadata:
+  name: {{ $cluster_name }}-md-0
+  annotations:
+    "helm.sh/resource-policy": keep
+spec:
+  clusterName: {{ $cluster_name }}
+  replicas: {{ .Values.worker_machine_count }}
+  selector:
+    matchLabels:
+      cluster.x-k8s.io/cluster-name: {{ $cluster_name }}
+  template:
+    metadata:
+      labels:
+        cluster.x-k8s.io/cluster-name: {{ $cluster_name }}
+    spec:
+      bootstrap:
+        configRef:
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+          kind: RKE2ConfigTemplate
+          name: {{ $cluster_name }}-md-0
+      clusterName: {{ $cluster_name }}
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+        kind: AWSMachineTemplate
+        name: {{ $cluster_name }}-md-0
+      version: {{ .Values.version }}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta2
+kind: AWSMachineTemplate
+metadata:
+  name: {{ $cluster_name }}-md-0
+spec:
+  template:
+    spec:
+      ami:
+        id: {{ .Values.ami_id }}
+      iamInstanceProfile: nodes.cluster-api-provider-aws.sigs.k8s.io
+      instanceType: t3.xlarge
+      rootVolume:
+        size: 50
+      sshKeyName: {{ .Values.sshKeyName }}
+---
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+kind: RKE2ConfigTemplate
+metadata:
+  name: {{ $cluster_name }}-md-0
+spec:
+  template:
+    spec:
+      agentConfig:
+        kubelet:
+          extraArgs:
+          - --cloud-provider=external
+      preRKE2Commands:
+      - sudo hostnamectl set-hostname $(curl -s http://169.254.169.254/1.0/meta-data/hostname)

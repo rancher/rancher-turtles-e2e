@@ -1,0 +1,11 @@
+namespace: default
+
+helm:
+  values:
+    clustername_prefix: turtles-qa-aws-rke2
+    region: ap-south-2
+    sshKeyName: turtles-qa-rke2
+    version: v1.31.7+rke2r1
+    ami_id: ami-063222db4f3a22666
+    cp_machine_count: 3
+    worker_machine_count: 1
