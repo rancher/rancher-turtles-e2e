@@ -152,7 +152,7 @@ spec:
       ami:
         id: {{ .Values.ami_id }}
       iamInstanceProfile: control-plane.cluster-api-provider-aws.sigs.k8s.io
-      instanceType: t3.xlarge
+      instanceType: t3.2xlarge
       rootVolume:
         size: 50
       sshKeyName: {{ .Values.sshKeyName }}
@@ -196,7 +196,7 @@ spec:
       ami:
         id: {{ .Values.ami_id }}
       iamInstanceProfile: nodes.cluster-api-provider-aws.sigs.k8s.io
-      instanceType: t3.xlarge
+      instanceType: t3.2xlarge
       rootVolume:
         size: 50
       sshKeyName: {{ .Values.sshKeyName }}

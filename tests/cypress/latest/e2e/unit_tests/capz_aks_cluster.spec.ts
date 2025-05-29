@@ -66,7 +66,7 @@ describe('Import CAPZ AKS Cluster', { tags: '@full' }, () => {
     cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
   })
   );
-  qase(23, it('Install App on imported cluster', { retries: 1 }, () => {
+  qase(23, it('Install App on imported cluster', () => {
     // Click on imported CAPZ cluster
     cy.contains(clusterName).click();
 

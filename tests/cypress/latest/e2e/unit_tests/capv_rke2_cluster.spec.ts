@@ -117,7 +117,7 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
     cy.checkCAPIClusterActive(clusterName, timeout);
   })
 
-  it('Install App on imported cluster', { retries: 1 }, () => {
+  it('Install App on imported cluster', () => {
     // Sometimes the cluster icon is not active yet, so we need to wait a bit
     cy.wait(1000);
     // Click on imported CAPV cluster

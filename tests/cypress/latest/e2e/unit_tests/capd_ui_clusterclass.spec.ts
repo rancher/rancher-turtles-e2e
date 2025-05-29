@@ -66,7 +66,7 @@ describe('Create CAPD', { tags: '@short' }, () => {
     );
 
 
-    it('Install App on created cluster', { retries: 1 }, () => {
+    it('Install App on created cluster', () => {
       // Click on imported CAPD cluster
       cy.contains(clusterName).click();
       // Install Chart

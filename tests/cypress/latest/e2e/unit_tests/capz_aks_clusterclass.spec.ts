@@ -119,7 +119,7 @@ describe('Import/Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
   })
   );
 
-  qase(57, it('Install App on imported cluster', { retries: 1 }, () => {
+  qase(57, it('Install App on imported cluster', () => {
     // Click on imported CAPZ cluster
     cy.contains(clusterName).click();
 

@@ -122,7 +122,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     cy.checkCAPIClusterActive(clusterName, timeout);
   })
 
-  it('Install App on imported cluster', { retries: 1 }, () => {
+  it('Install App on imported cluster', () => {
     // Click on imported CAPV cluster
     cy.contains(clusterName).click();
 

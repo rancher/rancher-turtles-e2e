@@ -86,7 +86,7 @@ describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
     })
     );
 
-    qase(80, it('Install App on imported cluster', { retries: 1 }, () => {
+    qase(80, it('Install App on imported cluster', () => {
         // Click on imported CAPZ cluster
         cy.contains(clusterName).click();
 

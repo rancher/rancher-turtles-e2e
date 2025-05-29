@@ -104,7 +104,7 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
 
     if (path == clustersPath) {
       qase(101,
-        it('Install App on imported cluster', { retries: 1 }, () => {
+        it('Install App on imported cluster', () => {
           // Click on imported CAPD cluster
           cy.contains(clusterName).click();
 

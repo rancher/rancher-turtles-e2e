@@ -444,11 +444,15 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
     cy.contains(version).click();
     cy.url().should("contain", version)
   }
-  cy.clickButton(operation);
-  // During update, Chart name changes to App name
-  if (operation == "Install") {
-    cy.contains('.header > .title', chartName)
-  }
+  
+  cy.get('body').invoke('text').then((bodyText) => {
+    if (bodyText.includes('Current')) {
+      cy.contains('Current').click();
+    }
+  });  
+
+  cy.getBySel('btn-chart-install').click();
+  cy.contains(operation + ': Step 1')
   cy.clickButton('Next');
 
   // Used for entering questions and answering them
@@ -649,7 +653,6 @@ Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, paths, works
   cy.clickButton('Create');
 
   // Navigate to fleet repo
-  cy.burgerMenuOperate('open');
   cy.checkFleetGitRepo(repoName, workspace); // Wait until the repo details are loaded
 })
 

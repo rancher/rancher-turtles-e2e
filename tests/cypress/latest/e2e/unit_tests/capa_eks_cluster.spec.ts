@@ -57,7 +57,7 @@ describe('Import CAPA EKS Cluster', { tags: '@full' }, () => {
   );
 
   qase(32,
-    it('Install App on imported cluster', { retries: 1 }, () => {
+    it('Install App on imported cluster', () => {
       // Click on imported CAPA cluster
       cy.contains(clusterName).click();
 

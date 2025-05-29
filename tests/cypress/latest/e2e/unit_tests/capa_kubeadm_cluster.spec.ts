@@ -77,7 +77,7 @@ describe('Import CAPA Kubeadm Cluster', { tags: '@full' }, () => {
   );
 
   qase(120,
-    xit('Install App on imported cluster', { retries: 1 }, () => {
+    it('Install App on imported cluster', () => {
       // Click on imported CAPA cluster
       cy.contains(clusterName).click();
 

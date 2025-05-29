@@ -77,7 +77,7 @@ describe('Import CAPG GKE Cluster', { tags: '@full' }, () => {
   );
 
   qase(37,
-    it('Install App on imported cluster', { retries: 1 }, () => {
+    it('Install App on imported cluster', () => {
       // Click on imported CAPG cluster
       cy.contains(clusterName).click();
 

@@ -77,7 +77,8 @@ describe('Import CAPA RKE2 Cluster', { tags: '@full' }, () => {
   );
 
   qase(107,
-    xit('Install App on imported cluster', { retries: 1 }, () => {
+    // rancher/turtles/issues/1416
+    xit('Install App on imported cluster', () => {
       // Click on imported CAPA cluster
       cy.contains(clusterName).click();
 
