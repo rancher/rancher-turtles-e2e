@@ -4,12 +4,12 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
-describe('Import CAPA RKE2 Cluster', { tags: '@full' }, () => {
+describe('Import CAPA RKE2 Cluster', { tags: '@aws' }, () => {
   var clusterName: string
   const timeout = 1200000
   const repoName = 'clusters-aws-rke2'
   const clusterNamePrefix = 'turtles-qa-aws-rke2' // as per fleet values
-  const branch = 'main'
+  const branch = 'flaky-fix'
   const path = '/tests/assets/rancher-turtles-fleet-example/capa/rke2/clusters'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'

@@ -649,7 +649,6 @@ Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, paths, works
   cy.clickButton('Create');
 
   // Navigate to fleet repo
-  cy.burgerMenuOperate('open');
   cy.checkFleetGitRepo(repoName, workspace); // Wait until the repo details are loaded
 })
 

@@ -144,7 +144,7 @@ describe('Enable CAPI Providers', () => {
     );
   })
 
-  context('Cloud Providers', { tags: '@full' }, () => {
+  context('Cloud Providers', { tags: '@aws' }, () => {
     const providerType = 'infrastructure'
     cloudProviderNamespaces.forEach(namespace => {
       it('Create CAPI Cloud Providers Namespaces - ' + namespace, () => {
