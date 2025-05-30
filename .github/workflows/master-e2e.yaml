@@ -93,7 +93,7 @@ on:
         type: string
       upstream_cluster_version:
         description: Cluster upstream version where to install Rancher (K3s or RKE2)
-        default: v1.31.4+k3s1
+        default: v1.32.5+k3s1
         type: string
       zone:
         description: GCP zone to host the runner
