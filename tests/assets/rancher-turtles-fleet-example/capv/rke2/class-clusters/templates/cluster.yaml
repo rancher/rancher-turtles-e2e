@@ -51,6 +51,8 @@ spec:
       value: 6443
     - name: kubeVIPInterface
       value: eth0
+    - name: productKey
+      value: {{ .Values.cluster.product_key | quote }}
 ---
 kind: Bundle
 apiVersion: fleet.cattle.io/v1alpha1

@@ -166,7 +166,11 @@ spec:
     name: vsphere-controlplane
   nodeDrainTimeout: 2m
   preRKE2Commands:
-    - sleep 30 #fix to give OS time to become ready
+    - sleep 30 # fix to give OS time to become ready
+    {{- if .Values.cluster.product_key }}
+    - transactional-update register -r {{ .Values.cluster.product_key }}
+    - transactional-update register -p SL-Micro-Extras/6.1/x86_64
+    {{- end }}
   version: {{ .Values.cluster.rke2_version }}
   agentConfig:
     additionalUserData:
@@ -258,6 +262,10 @@ spec:
     spec:
       preRKE2Commands:
         - sleep 30 # fix to give OS time to become ready
+        {{- if .Values.cluster.product_key }}
+        - transactional-update register -r {{ .Values.cluster.product_key }}
+        - transactional-update register -p SL-Micro-Extras/6.1/x86_64
+        {{- end }}
       agentConfig:
         kubelet:
           extraArgs:
