@@ -14,3 +14,4 @@ vsphere:
 
 cluster:
   control_plane_endpoint_ip: replace_cluster_control_plane_endpoint_ip
+  product_key: ""

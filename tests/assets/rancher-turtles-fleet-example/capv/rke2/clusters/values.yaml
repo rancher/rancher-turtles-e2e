@@ -19,3 +19,4 @@ cluster:
   control_plane_machine_count: 1
   worker_machine_count: 1
   cpi_image_k8s_version: v1.31.0
+  product_key: ""
