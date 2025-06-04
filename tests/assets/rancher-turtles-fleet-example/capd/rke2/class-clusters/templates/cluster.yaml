@@ -20,7 +20,7 @@ spec:
     serviceDomain: cluster.local
   topology:
     class: docker-rke2-example
-    classNamespace: default
+    classNamespace: capi-classes
     controlPlane:
       replicas: 3
     variables:

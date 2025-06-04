@@ -209,7 +209,7 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
     })
 
     it('Delete the helm values secret', () => {
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "capv-helm-values", 'default')
+      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "capv-helm-values", 'capv-system')
     })
   }
 });

@@ -107,7 +107,7 @@ describe('Import CAPZ AKS Cluster', { tags: '@full' }, () => {
 
     it('Delete AzureClusterIdentities resource', { retries: 1 }, () => {
       // This test can be flaky, so it is in a separate test.
-      cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', 'default')
+      cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', namespace)
     })
   }
 

@@ -18,7 +18,7 @@ spec:
       - 10.128.0.0/12
   topology:
     class: docker-kubeadm-example
-    classNamespace: default
+    classNamespace: capi-classes
     controlPlane:
       metadata: {}
       replicas: 3

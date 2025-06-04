@@ -27,7 +27,7 @@ Cypress.Commands.add('accesMenuSelection', (menuPaths: string[]) => {
   })
 });
 
-// Command to set CAPI Auto-import on default namespace
+// Command to set CAPI Auto-import on capi-clusters namespace
 Cypress.Commands.add('namespaceAutoImport', (mode) => {
   cy.contains('local')
     .click();
@@ -35,8 +35,8 @@ Cypress.Commands.add('namespaceAutoImport', (mode) => {
   cy.contains('Create Project')
     .should('be.visible');
 
-  // Select default namespace
-  cy.setNamespace('default');
+  // Select capi-clusters namespace
+  cy.setNamespace('capi-clusters');
   cy.setAutoImport(mode);
   cy.namespaceReset();
 });
@@ -619,7 +619,7 @@ Cypress.Commands.add('goToHome', () => {
 
 // Fleet commands
 // Command add Fleet Git Repository
-Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, paths, workspace, targetNamespace) => {
+Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, paths, targetNamespace, workspace) => {
   cy.accesMenuSelection(['Continuous Delivery', 'Git Repos']);
   cy.getBySel('masthead-create').should('be.visible');
   cy.contains('fleet-').click();

@@ -13,7 +13,7 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
   const path = '/tests/assets/rancher-turtles-fleet-example/capv/kubeadm/class-clusters'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
-  const examplesPath = ['examples/clusterclasses/vsphere/kubeadm', 'examples/applications/ccm/vsphere', 'examples/applications/csi/vsphere']
+  const classesPath = 'examples/clusterclasses/vsphere/kubeadm'
   const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
 
   // Decode the base64 encoded secrets and make json object
@@ -73,8 +73,8 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
     cy.createVSphereClusterIdentity(vsphere_username, vsphere_password)
   })
 
-  it('Add CAPV Kubeadm ClusterClass and Applications Fleet Repo', () => {
-    cy.addFleetGitRepo(classRepoName, turtlesRepoUrl, 'main', examplesPath)
+  it('Add CAPV Kubeadm ClusterClass Fleet Repo and check Applications', () => {
+    cy.addFleetGitRepo(classRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
     // Go to CAPI > ClusterClass to ensure the clusterclass is created
     cy.checkCAPIClusterClass(className);
 
@@ -147,8 +147,8 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
       cy.removeFleetGitRepo(classRepoName);
 
       // Delete secret and VSphereClusterIdentity
-      cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'VSphereClusterIdentities'], 'cluster-identity', 'default')
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "capv-helm-values", 'default')
+      cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'VSphereClusterIdentities'], 'cluster-identity', 'capv-system')
+      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "capv-helm-values", 'capv-system')
     })
   }
 });

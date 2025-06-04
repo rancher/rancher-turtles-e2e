@@ -13,7 +13,7 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
     const path = '/tests/assets/rancher-turtles-fleet-example/capz/kubeadm/class-clusters'
     const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
     const turtlesRepoUrl = 'https://github.com/rancher/turtles'
-    const examplesPath = ['examples/clusterclasses/azure/kubeadm', '/examples/applications/ccm/azure']
+    const classesPath = 'examples/clusterclasses/azure/kubeadm'
     const clusterClassRepoName = "azure-kubeadm-clusterclass"
 
     const clientID = Cypress.env("azure_client_id")
@@ -38,8 +38,8 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
         cy.createAzureClusterIdentity(clientID, tenantID, clientSecret)
     })
 
-    it('Add CAPZ Kubeadm ClusterClass and Azure CCM Fleet Repo', () => {
-        cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', examplesPath)
+    it('Add CAPZ Kubeadm ClusterClass Fleet Repo and check Azure CCM', () => {
+        cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(className);
 

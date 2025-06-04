@@ -14,7 +14,7 @@ vsphere:
 
 cluster:
   name: turtles-qa-capv-rke2
-  namespace: default
+  namespace: capi-clusters
   rke2_version: v1.31.7+rke2r1
   control_plane_machine_count: 1
   worker_machine_count: 1
