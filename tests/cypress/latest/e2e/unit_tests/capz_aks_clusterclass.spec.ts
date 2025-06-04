@@ -45,7 +45,7 @@ describe('Import/Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
   })
 
   qase(84, it('Add CAPZ AKS ClusterClass using fleet', () => {
-    cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath)
+    cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-clusters')
     // Go to CAPI > ClusterClass to ensure the clusterclass is created
     cy.checkCAPIClusterClass(className);
   })
@@ -149,7 +149,7 @@ describe('Import/Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
 
       // Delete secret and AzureClusterIdentity
       cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "azure-creds-secret", namespace)
-      cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', 'default')
+      cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', 'capi-clusters')
       cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "cluster-identity-secret", namespace)
     })
   }

@@ -15,7 +15,7 @@ spec:
       - 192.168.0.0/16
   topology:
     class: vsphere-rke2-example
-    classNamespace: {{ .Values.cluster.namespace }}
+    classNamespace: capi-classes
     version: {{ .Values.cluster.rke2_version }}
     controlPlane:
       replicas: {{ .Values.cluster.control_plane_machine_count }}

@@ -1,4 +1,4 @@
-namespace: default
+namespace: capi-clusters
 
 helm:
   valuesFrom:

@@ -39,6 +39,7 @@ describe('Enable CAPI Providers', () => {
 
   const kubeadmBaseURL = 'https://github.com/kubernetes-sigs/cluster-api/releases/'
   const kubeadmProviderTypes = ['bootstrap', 'control plane']
+  const capiNamespaces = ['capi-clusters', 'capi-classes']
   const localProviderNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system', 'capd-system']
   const cloudProviderNamespaces = ['capa-system', 'capg-system', 'capz-system']
   const vsphereProviderNamespace = 'capv-system'
@@ -49,6 +50,12 @@ describe('Enable CAPI Providers', () => {
   });
 
   context('Local providers - @install', { tags: '@install' }, () => {
+    capiNamespaces.forEach(namespace => {
+      it('Create CAPI Namespaces - ' + namespace, () => {
+        cy.createNamespace(namespace);
+      })
+    })
+
     localProviderNamespaces.forEach(namespace => {
       it('Create CAPI Providers Namespaces - ' + namespace, () => {
         cy.createNamespace(namespace);
@@ -89,10 +96,10 @@ describe('Enable CAPI Providers', () => {
     );
 
     qase(90,
-      // CNI to be used across all specs
-      it('Add CNI fleet repo', () => {
-        // Add upstream cni repo
-        cy.addFleetGitRepo('cni-calico', turtlesRepoUrl, branch, 'examples/applications/cni/calico');
+      // HelmApps to be used across all specs
+      it('Add Applications fleet repo', () => {
+        // Add upstream apps repo
+        cy.addFleetGitRepo('helm-apps', turtlesRepoUrl, branch, 'examples/applications/', 'capi-clusters');
       })
     );
 

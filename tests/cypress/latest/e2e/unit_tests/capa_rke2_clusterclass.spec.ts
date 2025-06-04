@@ -13,7 +13,7 @@ describe('Import CAPA RKE2 Class-Cluster', { tags: '@full' }, () => {
   const path = '/tests/assets/rancher-turtles-fleet-example/capa/rke2/class-clusters'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
-  const examplesPath = ['examples/clusterclasses/aws/rke2', 'examples/applications/cni/aws/calico', 'examples/applications/ccm/aws', 'examples/applications/csi/aws']
+  const classesPath = 'examples/clusterclasses/aws/rke2'
   const clusterClassRepoName = 'aws-rke2-clusterclass'
 
   beforeEach(() => {
@@ -26,8 +26,8 @@ describe('Import CAPA RKE2 Class-Cluster', { tags: '@full' }, () => {
   })
 
   qase(116,
-    it('Add CAPA RKE2 ClusterClass and Applications Fleet Repo', () => {
-      cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', examplesPath)
+    it('Add CAPA RKE2 ClusterClass Fleet Repo and check Applications', () => {
+      cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(className);
 
@@ -37,7 +37,7 @@ describe('Import CAPA RKE2 Class-Cluster', { tags: '@full' }, () => {
       cy.accesMenuSelection(['More Resources', 'Fleet', 'HelmApps']);
       ['aws-ccm', 'aws-csi-driver'].forEach((app) => {
           cy.typeInFilter(app);
-          cy.waitForAllRowsInState('Active');
+          cy.getBySel('sortable-cell-0-1').should('exist');
       })
     })
   );

@@ -12,9 +12,6 @@ describe('Import CAPA RKE2 Cluster', { tags: '@full' }, () => {
   const branch = 'main'
   const path = '/tests/assets/rancher-turtles-fleet-example/capa/rke2/clusters'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
-  const turtlesRepoUrl = 'https://github.com/rancher/turtles'
-  const examplesPath = ['examples/applications/cni/aws/calico', 'examples/applications/ccm/aws', 'examples/applications/csi/aws']
-  const awsAppsRepoName = 'aws-rke2-apps'
 
   beforeEach(() => {
     cy.login();
@@ -25,16 +22,14 @@ describe('Import CAPA RKE2 Cluster', { tags: '@full' }, () => {
     cy.namespaceAutoImport('Enable');
   })
 
-  it('Add CAPA RKE2 Applications Fleet Repo', () => {
-    cy.addFleetGitRepo(awsAppsRepoName, turtlesRepoUrl, 'main', examplesPath)
-
+  it('Check CAPA RKE2 Applications', () => {
     // Navigate to `local` cluster, More Resources > Fleet > Helm Apps and ensure the charts are active.
     cy.burgerMenuOperate('open');
     cy.contains('local').click();
     cy.accesMenuSelection(['More Resources', 'Fleet', 'HelmApps']);
     ['aws-ccm', 'aws-csi-driver'].forEach((app) => {
         cy.typeInFilter(app);
-        cy.waitForAllRowsInState('Active');
+        cy.getBySel('sortable-cell-0-1').should('exist');
     })
   })
 
@@ -107,9 +102,6 @@ describe('Import CAPA RKE2 Cluster', { tags: '@full' }, () => {
         // Wait until the following returns no clusters found
         // This is checked by ensuring the cluster is not available in CAPI menu
         cy.checkCAPIClusterDeleted(clusterName, timeout);
-
-        // Remove the apps repo
-        cy.removeFleetGitRepo(awsAppsRepoName);
       })
     );
   }

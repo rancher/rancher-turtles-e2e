@@ -1,4 +1,4 @@
-namespace: default
+namespace: capi-clusters
 
 helm:
   values:
@@ -8,6 +8,6 @@ diff:
   comparePatches:
   - apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
     kind: DockerCluster
-    namespace: default
+    namespace: capi-clusters
     jsonPointers:
     - "/spec/failureDomains" 

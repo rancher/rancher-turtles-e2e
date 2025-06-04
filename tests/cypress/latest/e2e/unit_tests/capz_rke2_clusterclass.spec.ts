@@ -13,7 +13,7 @@ describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
     const path = '/tests/assets/rancher-turtles-fleet-example/capz/rke2/class-clusters'
     const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
     const turtlesRepoUrl = 'https://github.com/rancher/turtles'
-    const examplesPath = ['examples/clusterclasses/azure/rke2', '/examples/applications/ccm/azure']
+    const classesPath = 'examples/clusterclasses/azure/rke2'
     const clusterClassRepoName = "azure-rke2-clusterclass"
 
     const clientID = Cypress.env("azure_client_id")
@@ -38,8 +38,8 @@ describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
         cy.createAzureClusterIdentity(clientID, tenantID, clientSecret)
     })
 
-    qase(87, it('Add CAPZ RKE2 ClusterClass and Azure CCM Fleet Repo', () => {
-        cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', examplesPath)
+    qase(87, it('Add CAPZ RKE2 ClusterClass Fleet Repo and check Azure CCM', () => {
+        cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(className);
 
@@ -49,7 +49,7 @@ describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
         cy.accesMenuSelection(['More Resources', 'Fleet', 'HelmApps']);
         ["azure-ccm", "calico-cni"].forEach((app) => {
             cy.typeInFilter(app);
-            cy.waitForAllRowsInState('Active');
+            cy.getBySel('sortable-cell-0-1').should('exist');
         })
     })
     );
@@ -122,7 +122,7 @@ describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
 
             // Delete secret and AzureClusterIdentity
             cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "azure-creds-secret", namespace)
-            cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', 'default')
+            cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', 'capi-clusters')
             cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "cluster-identity-secret", namespace)
         })
         );

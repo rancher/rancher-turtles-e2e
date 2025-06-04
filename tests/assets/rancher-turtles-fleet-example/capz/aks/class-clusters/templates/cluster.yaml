@@ -13,6 +13,7 @@ spec:
       - 192.168.0.0/16
   topology:
     class: {{ .Values.className }}
+    classNamespace: capi-clusters # TODO: Change to capi-classes (capi-ui-extension/issues/111)
     variables:
     - name: subscriptionID
       value: "{{ .Values.azure.subscriptionID }}"

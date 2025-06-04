@@ -35,7 +35,6 @@ describe('Import CAPG GKE Cluster', { tags: '@full' }, () => {
     });
     cy.clickButton('Import');
     cy.clickButton('Close');
-
   })
 
   it('Setup the namespace for importing', () => {

@@ -13,8 +13,9 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
   const path = '/tests/assets/rancher-turtles-fleet-example/capv/kubeadm/class-clusters'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
-  const examplesPath = ['examples/clusterclasses/vsphere/kubeadm', 'examples/applications/ccm/vsphere', 'examples/applications/csi/vsphere']
+  const classesPath = 'examples/clusterclasses/vsphere/kubeadm'
   const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
+  const namespace = 'capv-system'
 
   // Decode the base64 encoded secrets and make json object
   const vsphere_secrets_json = JSON.parse(Buffer.from(vsphere_secrets_json_base64, 'base64').toString('utf-8'))
@@ -34,6 +35,7 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
     cy.get('.header-buttons > :nth-child(1) > .icon')
       .click();
     cy.contains('Import YAML');
+
     var encodedData = ''
     cy.readFile('./fixtures/capv-helm-values.yaml').then((data) => {
       data = data.replace(/replace_vsphere_server/g, JSON.stringify(vsphere_secrets_json.vsphere_server))
@@ -73,8 +75,8 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
     cy.createVSphereClusterIdentity(vsphere_username, vsphere_password)
   })
 
-  it('Add CAPV Kubeadm ClusterClass and Applications Fleet Repo', () => {
-    cy.addFleetGitRepo(classRepoName, turtlesRepoUrl, 'main', examplesPath)
+  it('Add CAPV Kubeadm ClusterClass Fleet Repo and check Applications', () => {
+    cy.addFleetGitRepo(classRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
     // Go to CAPI > ClusterClass to ensure the clusterclass is created
     cy.checkCAPIClusterClass(className);
 
@@ -83,7 +85,7 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
     cy.contains('local').click();
     cy.accesMenuSelection(['More Resources', 'Fleet', 'HelmApps']);
     cy.typeInFilter('vsphere-ccm');
-    cy.waitForAllRowsInState('Active');
+    cy.getBySel('sortable-cell-0-1').should('exist');
   });
 
 
@@ -147,8 +149,8 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
       cy.removeFleetGitRepo(classRepoName);
 
       // Delete secret and VSphereClusterIdentity
-      cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'VSphereClusterIdentities'], 'cluster-identity', 'default')
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "capv-helm-values", 'default')
+      cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'VSphereClusterIdentities'], 'cluster-identity', 'capi-clusters')
+      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "capv-helm-values", namespace)
     })
   }
 });

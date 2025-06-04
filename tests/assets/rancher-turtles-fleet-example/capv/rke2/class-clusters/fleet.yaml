@@ -1,8 +1,8 @@
-namespace: default
+namespace: capi-clusters
 
 helm:
   valuesFrom:
     - secretKeyRef:
         name: capv-helm-values
-        namespace: default
+        namespace: capv-system
         key: values.yaml

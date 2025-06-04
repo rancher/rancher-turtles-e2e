@@ -11,6 +11,7 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
   const path = '/tests/assets/rancher-turtles-fleet-example/capv/rke2/clusters'
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
   const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
+  const namespace = 'capv-system'
 
   // The `vsphere_secrets_json_base64` environment variable must be stored in GitHub Actions Secrets and BASE64 encoded.
   // export VSPHERE_SECRETS_JSON_BASE64=$(echo '
@@ -49,6 +50,7 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
     cy.get('.header-buttons > :nth-child(1) > .icon')
       .click();
     cy.contains('Import YAML');
+
     var encodedData = ''
     cy.readFile('./fixtures/capv-helm-values.yaml').then((data) => {
       data = data.replace(/replace_vsphere_server/g, JSON.stringify(vsphere_secrets_json.vsphere_server))
@@ -209,7 +211,7 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
     })
 
     it('Delete the helm values secret', () => {
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "capv-helm-values", 'default')
+      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "capv-helm-values", namespace)
     })
   }
 });

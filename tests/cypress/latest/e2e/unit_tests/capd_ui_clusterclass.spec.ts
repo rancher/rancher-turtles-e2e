@@ -24,6 +24,7 @@ describe('Create CAPD', { tags: '@short' }, () => {
   const clusterName = clusterNamePrefix + randomstring.generate({ length: 4, capitalization: "lowercase" })
   const k8sVersion = 'v1.31.4'
   const pathNames = ['kubeadm'] // TODO: Add rke2 path (capi-ui-extension/issues/121)
+  const namespace = 'capi-classes' // TODO: Change to capi-clusters (capi-ui-extension/issues/111)
 
   beforeEach(() => {
     cy.login();
@@ -40,6 +41,8 @@ describe('Create CAPD', { tags: '@short' }, () => {
       cy.contains('local').click();
       cy.getBySel('header-action-import-yaml').click();
       cy.contains('Import YAML');
+      cy.get('.vs__selected-options').click();
+      cy.contains(namespace).click();
 
       cy.readFile('./fixtures/kindnet.yaml').then((data) => {
         cy.get('.CodeMirror')
@@ -95,8 +98,8 @@ describe('Create CAPD', { tags: '@short' }, () => {
       })
 
       it('Delete the Kindnet Config Map', () => {
-        cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'ConfigMaps'], "cni-docker-kubeadm-example-crs-0", 'default');
-        cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'ClusterResourceSets'], "docker-kubeadm-example-crs-0", 'default');
+        cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'ConfigMaps'], "cni-docker-kubeadm-example-crs-0", namespace);
+        cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'ClusterResourceSets'], "docker-kubeadm-example-crs-0", namespace);
       })
     }
   })

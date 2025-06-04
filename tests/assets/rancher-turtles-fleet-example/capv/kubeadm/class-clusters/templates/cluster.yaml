@@ -15,7 +15,7 @@ spec:
       - 192.168.0.0/16
   topology:
     class: vsphere-kubeadm-example
-    classNamespace: {{ .Values.cluster.namespace }}
+    classNamespace: capi-classes
     version: {{ .Values.cluster.version }}
     controlPlane:
       replicas: {{ .Values.cluster.control_plane_machine_count }}

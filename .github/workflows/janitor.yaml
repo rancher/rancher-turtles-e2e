@@ -36,7 +36,7 @@ jobs:
         continue-on-error: true
         run: |
           # Get the GKE clusters by prefix
-          for cl in $(gcloud container clusters list --location asia-south2 --filter="name:turtles-qa-capg-gke" --format json | jq -r ".[] | .name" 2> /dev/null); do
+          for cl in $(gcloud container clusters list --location asia-south2 --filter="name:turtles-qa-gcp-gke" --format json | jq -r ".[] | .name" 2> /dev/null); do
            echo "Deleting GKE cluster: $cl"
            gcloud container clusters delete --location asia-south2 $cl --async --quiet
           done

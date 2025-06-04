@@ -29,7 +29,7 @@ metadata:
   name: {{ $cluster_name }}
 spec:
   bastion:
-    enabled: true
+    enabled: false
   controlPlaneLoadBalancer:
     additionalListeners:
     - port: 9345

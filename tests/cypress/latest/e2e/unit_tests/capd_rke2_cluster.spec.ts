@@ -32,7 +32,7 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
   const questions = [{ menuEntry: 'Rancher Turtles Features Settings', inputBoxTitle: 'Kubectl Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.31.0' }];
 
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
-  const examplesPath = ['examples/clusterclasses/docker/rke2', 'examples/applications/lb/docker']
+  const classesPath = 'examples/clusterclasses/docker/rke2'
   const clusterClassRepoName = "docker-rke2-clusterclass"
 
   beforeEach(() => {
@@ -41,8 +41,8 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
   });
 
   qase(91,
-    it('Add CAPD RKE2 ClusterClass and LB Fleet Repo', () => {
-      cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', examplesPath)
+    it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
+      cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(className);
     })
