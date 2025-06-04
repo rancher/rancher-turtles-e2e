@@ -38,7 +38,7 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
         cy.createAzureClusterIdentity(clientID, tenantID, clientSecret)
     })
 
-    qase(87, it('Add CAPZ Kubeadm ClusterClass and Azure CCM Fleet Repo', () => {
+    it('Add CAPZ Kubeadm ClusterClass and Azure CCM Fleet Repo', () => {
         cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', examplesPath)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(className);
@@ -51,10 +51,9 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
             cy.typeInFilter(app);
             cy.waitForAllRowsInState('Active');
         })
-    })
-    );
+    });
 
-    qase(78, it('Add GitRepo for class-cluster and get cluster name', () => {
+    it('Add GitRepo for class-cluster and get cluster name', () => {
         cy.addFleetGitRepo(repoName, repoUrl, branch, path);
         // Check CAPI cluster using its name prefix i.e. className
         cy.checkCAPICluster(className);
@@ -64,10 +63,9 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
             clusterName = $cell.text();
             cy.log('CAPI Cluster Name:', clusterName);
         });
-    })
-    );
+    });
 
-    qase(79, it('Auto import child CAPZ Kubeadm cluster', () => {
+    it('Auto import child CAPZ Kubeadm cluster', () => {
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
         cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
@@ -83,22 +81,20 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
         // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
         cy.checkCAPIClusterActive(clusterName, timeout);
-    })
-    );
+    });
 
-    qase(80, it('Install App on imported cluster', { retries: 1 }, () => {
+    it('Install App on imported cluster', { retries: 1 }, () => {
         // Click on imported CAPZ cluster
         cy.contains(clusterName).click();
 
         // Install Chart
         // We install Logging chart instead of Monitoring, since this is relatively lightweight.
         cy.checkChart('Install', 'Logging', 'cattle-logging-system');
-    })
-    );
+    });
 
 
     if (skipClusterDeletion) {
-        qase(82, it('Remove imported CAPZ cluster from Rancher Manager', { retries: 1 }, () => {
+        it('Remove imported CAPZ cluster from Rancher Manager', { retries: 1 }, () => {
             // Check cluster is not deleted after removal
             cy.deleteCluster(clusterName);
             cy.goToHome();
@@ -106,10 +102,9 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
             // This is checked by ensuring the cluster is not available in navigation menu
             cy.contains(clusterName).should('not.exist');
             cy.checkCAPIClusterProvisioned(clusterName);
-        })
-        );
+        });
 
-        qase(83, it('Delete the CAPZ cluster and clusterclasses fleet repo and other resources', () => {
+        it('Delete the CAPZ cluster and clusterclasses fleet repo and other resources', () => {
 
             // Remove the fleet git repo
             cy.removeFleetGitRepo(repoName);
@@ -124,8 +119,7 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
             cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "azure-creds-secret", namespace)
             cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', 'default')
             cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "cluster-identity-secret", namespace)
-        })
-        );
+        });
     }
 
 });
