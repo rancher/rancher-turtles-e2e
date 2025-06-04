@@ -4,6 +4,7 @@ apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
   labels:
+    cni: calico
     cloud-provider: aws
     csi: aws-ebs-csi-driver
   name: {{ $cluster_name }}
@@ -27,6 +28,8 @@ spec:
       value: {{ .Values.machine_type }}
     - name: amiID
       value: {{ .Values.ami_id }}
+    - name: cni
+      value: none
     version: {{ .Values.version }}
     workers:
       machineDeployments:

@@ -13,7 +13,7 @@ describe('Import CAPA RKE2 Cluster', { tags: '@full' }, () => {
   const path = '/tests/assets/rancher-turtles-fleet-example/capa/rke2/clusters'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
-  const examplesPath = ['examples/applications/ccm/aws', 'examples/applications/csi/aws']
+  const examplesPath = ['examples/applications/cni/aws/calico', 'examples/applications/ccm/aws', 'examples/applications/csi/aws']
   const awsAppsRepoName = 'aws-rke2-apps'
 
   beforeEach(() => {
@@ -77,8 +77,7 @@ describe('Import CAPA RKE2 Cluster', { tags: '@full' }, () => {
   );
 
   qase(107,
-    // rancher/turtles/issues/1416
-    xit('Install App on imported cluster', () => {
+    it('Install App on imported cluster', () => {
       // Click on imported CAPA cluster
       cy.contains(clusterName).click();
 
