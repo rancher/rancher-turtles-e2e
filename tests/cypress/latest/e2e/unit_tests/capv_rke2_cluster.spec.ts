@@ -140,8 +140,8 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
 
     var encodedData = ''
     cy.readFile('./fixtures/capv-helm-values.yaml').then((data) => {
-      data = data.replace(/control_plane_machine_count: 1/g, "control_plane_machine_count: 2")
-      data = data.replace(/worker_machine_count: 1/g, "worker_machine_count: 2")
+      data = data.replace(/control_plane_machine_count: 1/g, "control_plane_machine_count: 3")
+      data = data.replace(/worker_machine_count: 1/g, "worker_machine_count: 3")
 
       // workaround; these values need to be re-replaced before applying the scaling changes
       data = data.replace(/replace_vsphere_server/g, JSON.stringify(vsphere_secrets_json.vsphere_server))
