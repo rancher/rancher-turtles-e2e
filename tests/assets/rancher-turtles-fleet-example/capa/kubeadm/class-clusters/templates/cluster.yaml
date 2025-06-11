@@ -1,0 +1,37 @@
+{{- $cluster_name := printf "%s-%s-%s" .Values.clustername_prefix .Values.className (randAlphaNum 4) | lower -}}
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  labels:
+    cni: calico
+    cloud-provider: aws
+    csi: aws-ebs-csi-driver
+  name: {{ $cluster_name }}
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+      - 192.168.0.0/16
+  topology:
+    class: {{ .Values.className }}
+    classNamespace: capi-classes
+    controlPlane:
+      replicas: {{ .Values.cp_machine_count }}
+    variables:
+    - name: region
+      value: {{ .Values.region }}
+    - name: sshKeyName
+      value: {{ .Values.sshKeyName }}
+    - name: controlPlaneMachineType
+      value: {{ .Values.machine_type }}
+    - name: workerMachineType
+      value: {{ .Values.machine_type }}
+    - name: amiID
+      value: {{ .Values.ami_id }}
+    version: {{ .Values.version }}
+    workers:
+      machineDeployments:
+      - class: default-worker
+        name: md-0
+        replicas: {{ .Values.worker_machine_count }}

@@ -7,6 +7,7 @@ helm:
     sshKeyName: turtles-qa-rke2
     version: v1.31.7+rke2r1
     # Private copy of ami-012e88f0aa221423a from eu-west-2 capa-ami-ubuntu-24.04-v1.31.5 -1738233293
-    ami_id: ami-0af073946d0fe5c39
+    ami_id: ami-035c9a1657ffc50bb
+    machine_type: t3.2xlarge
     cp_machine_count: 3
     worker_machine_count: 1

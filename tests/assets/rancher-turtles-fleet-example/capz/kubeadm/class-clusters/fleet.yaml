@@ -10,6 +10,6 @@ helm:
     clustername_prefix: turtles-qa
     className: azure-kubeadm-example
     kubernetesVersion: v1.31.2
-    cp_machine_count: 1
+    cp_machine_count: 1 # Todo: 3, turtles/issues/1402
     worker_machine_count: 1
     location: westeurope # the community image for provisioning Azure VM is only available in certain locations

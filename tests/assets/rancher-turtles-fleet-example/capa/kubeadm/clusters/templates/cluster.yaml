@@ -89,7 +89,7 @@ spec:
     spec:
       ami:
         id: {{ .Values.ami_id }}
-      instanceType: t3.xlarge
+      instanceType: {{ .Values.machine_type }}
       iamInstanceProfile: "control-plane.cluster-api-provider-aws.sigs.k8s.io"
       rootVolume:
         size: 50
@@ -126,7 +126,7 @@ spec:
     spec:
       ami:
         id: {{ .Values.ami_id }}
-      instanceType: t3.xlarge
+      instanceType: {{ .Values.machine_type }}
       iamInstanceProfile: "nodes.cluster-api-provider-aws.sigs.k8s.io"
       rootVolume:
         size: 50

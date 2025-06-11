@@ -2,7 +2,8 @@ namespace: capi-clusters
 
 helm:
   values:
-    clustername_prefix: turtles-qa-aws-kb
+    clustername_prefix: turtles-qa
+    className: aws-kubeadm-example
     region: ap-south-2
     sshKeyName: turtles-qa-rke2
     version: v1.31.0
