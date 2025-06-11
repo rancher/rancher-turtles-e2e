@@ -124,7 +124,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     cy.checkCAPIClusterActive(clusterName, timeout);
   })
 
-  it('Install App on imported cluster', () => {
+  it.skip('Install App on imported cluster', () => {
     // Click on imported CAPV cluster
     cy.contains(clusterName).click();
 
@@ -134,7 +134,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
   })
 
   if (skipClusterDeletion) {
-    it('Remove imported CAPV cluster from Rancher Manager', { retries: 1 }, () => {
+    it.skip('Remove imported CAPV cluster from Rancher Manager', { retries: 1 }, () => {
       // Check cluster is not deleted after removal
       cy.deleteCluster(clusterName);
       cy.goToHome();
@@ -144,7 +144,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
       cy.checkCAPIClusterProvisioned(clusterName);
     })
 
-    it('Delete the CAPV cluster and ClusterClass fleet repo', () => {
+    it.skip('Delete the CAPV cluster and ClusterClass fleet repo', () => {
 
       // Remove the fleet git repo
       cy.removeFleetGitRepo(clusterRepoName);

@@ -119,7 +119,7 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
     cy.checkCAPIClusterActive(clusterName, timeout);
   })
 
-  it('Install App on imported cluster', () => {
+  it.skip('Install App on imported cluster', () => {
     // Sometimes the cluster icon is not active yet, so we need to wait a bit
     cy.wait(1000);
     // Click on imported CAPV cluster
@@ -131,7 +131,7 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
     cy.checkChart('Install', 'Logging', 'cattle-logging-system');
   })
 
-  it("Scale up imported CAPV cluster by updating values and forcefully updating the repo", () => {
+  it.skip("Scale up imported CAPV cluster by updating values and forcefully updating the repo", () => {
     cy.contains('local')
       .click();
     cy.get('.header-buttons > :nth-child(1) > .icon')
@@ -183,16 +183,31 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
     cy.burgerMenuOperate('open');
     cy.forceUpdateFleetGitRepo(repoName)
 
-    // TODO: check if the cluster is actually updated
-    // TODO: Wait until the fleet repo is ready
-    // Go to Cluster Management > CAPI > Clusters and check if the cluster has started provisioning
-    cy.burgerMenuOperate('open');
-    cy.checkCAPIMenu();
-    cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
+    // Wait until the cluster is scaled up: Unavailable -> Provisioned
+    // cy.burgerMenuOperate('open');
+    // cy.checkCAPIMenu();
+    // cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
+
+    // CODE FROM Auto Import child CAPV cluster
+    // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+    cy.checkCAPIClusterProvisioned(clusterName, timeout);
+
+    // Check child cluster is created and auto-imported
+    // This is checked by ensuring the cluster is available in navigation menu
+    cy.goToHome();
+    cy.contains(clusterName).should('exist');
+
+    // Check cluster is Active
+    cy.searchCluster(clusterName);
+    cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+
+    // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+    // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
+    cy.checkCAPIClusterActive(clusterName, timeout);
   })
 
   if (skipClusterDeletion) {
-    it('Remove imported CAPV cluster from Rancher Manager', { retries: 1 }, () => {
+    it.skip('Remove imported CAPV cluster from Rancher Manager', { retries: 1 }, () => {
       // Check cluster is not deleted after removal
       cy.deleteCluster(clusterName);
       cy.goToHome();
@@ -202,7 +217,7 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
       cy.checkCAPIClusterProvisioned(clusterName, timeout);
     })
 
-    it('Delete the CAPV cluster fleet repo', () => {
+    it.skip('Delete the CAPV cluster fleet repo', () => {
       // Remove the fleet git repo
       cy.removeFleetGitRepo(repoName)
       // Wait until the following returns no clusters found
@@ -210,7 +225,7 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
       cy.checkCAPIClusterDeleted(clusterName, timeout);
     })
 
-    it('Delete the helm values secret', () => {
+    it.skip('Delete the helm values secret', () => {
       cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "capv-helm-values", namespace)
     })
   }

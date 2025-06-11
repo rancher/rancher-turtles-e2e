@@ -15,5 +15,5 @@ vsphere:
 cluster:
   control_plane_endpoint_ip: replace_cluster_control_plane_endpoint_ip
   product_key: ""
-  control_plane_machine_count: 1
-  worker_machine_count: 1
+  control_plane_machine_count: 3
+  worker_machine_count: 3
