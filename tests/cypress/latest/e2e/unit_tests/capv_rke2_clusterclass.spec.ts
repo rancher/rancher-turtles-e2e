@@ -1,6 +1,8 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
+import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
+import yaml from 'js-yaml';
 
 Cypress.config();
 describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
@@ -9,7 +11,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
   const classRepoName = 'vsphere-rke2-clusterclass'
   const className = 'vsphere-rke2-example'
   const clusterName = 'turtles-qa-capv-rke2-example'
-  const branch = 'main'
+  const branch = 'capv-kube-vip-test' // TODO: change to main when the branch is merged
   const path = '/tests/assets/rancher-turtles-fleet-example/capv/rke2/class-clusters'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
@@ -38,6 +40,9 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
 
     var encodedData = ''
     cy.readFile('./fixtures/capv-helm-values.yaml').then((data) => {
+      // Deploy HA cluster with 3 control plane and 3 worker nodes, instead of default 1+1
+      data = data.replace(/control_plane_machine_count: 1/g, "control_plane_machine_count: 3")
+      data = data.replace(/worker_machine_count: 1/g, "worker_machine_count: 3")
       data = data.replace(/replace_vsphere_server/g, JSON.stringify(vsphere_secrets_json.vsphere_server))
       data = data.replace(/replace_vsphere_username/g, JSON.stringify(vsphere_secrets_json.vsphere_username))
       data = data.replace(/replace_vsphere_password/g, JSON.stringify(vsphere_secrets_json.vsphere_password))
@@ -53,7 +58,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
       // This is not mandatory field, usable for SLE only
       if (vsphere_secrets_json.cluster_product_key) {
         const productKeyValue = vsphere_secrets_json.cluster_product_key
-        data = data.replace(/product_key: ""/, `product_key: "${productKeyValue}"`);
+        data = data.replace(/product_key:.*/, `product_key: "${productKeyValue}"`);
       }
       // Placeholder 'replace_cluster_control_plane_endpoint_ip' is already replaced at workflow level
       // Anyway it might be helpful for local runs when capv-helm-values.yaml is not modified by the workflow
@@ -123,6 +128,57 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
     cy.checkCAPIClusterActive(clusterName, timeout);
   })
+
+  qase(131, it('Validate kube-vip leader election ability across CPs', () => {
+    function getActiveKubeVipLeaderNode() {
+      cy.burgerMenuOperate('open');
+      cy.contains(clusterName).click();
+      cy.accesMenuSelection(['More Resources', 'Coordination', 'Leases']);
+      cy.setNamespace('All Namespaces', 'all_user');
+      // Filter out kube-vip lease resource
+      cy.typeInFilter('plndr-cp-lock');
+      // Ensure the kube-vip lease is present
+      cy.getBySel('sortable-cell-0-1').should('exist');
+      return cy.getBySel('sortable-cell-0-2').invoke('text');
+    }
+
+    // Get initial kube-vip leader node name and store it as an alias
+    getActiveKubeVipLeaderNode().then((leader) => {
+      cy.wrap(leader).as('initialLeader');
+    });
+
+    // Modify the helper job resource to use the initial leader name
+    cy.get('@initialLeader').then((leader) => {
+      cy.readFile('fixtures/capv-kube-vip-static-pod-toggle-job.yaml').then((data) => {
+        data = data.replace(/nodeName:.*/, `nodeName: ${leader}`);
+        cy.writeFile('fixtures/capv-kube-vip-static-pod-toggle-job.yaml', data);
+      });
+    });
+
+    // Trigger the job to disable kube-vip static pod on initial leader node
+    // Leader role of kube-vip should be taken over by another node immediately
+    cy.importYaml(clusterName, 'fixtures/capv-kube-vip-static-pod-toggle-job.yaml');
+
+    // Wait for the job to complete
+    // TODO: poll https://kubevip_address:6443 until 401 is returned
+    cy.wait(10000);
+
+    // Get enforced kube-vip leader node name and store it as an alias
+    getActiveKubeVipLeaderNode().then((leader) => {
+      cy.wrap(leader).as('enforcedLeader');
+    });
+
+    // Ensure the enforced leader node name is different from the initial one
+    cy.get('@initialLeader').then((initial) => {
+      cy.get('@enforcedLeader').then((enforced) => {
+        expect(initial).not.to.eq(enforced);
+      });
+    });
+
+    // Trigger the same job once again to restore the kube-vip static pod on initial leader node
+    cy.importYaml(clusterName, 'fixtures/capv-kube-vip-static-pod-toggle-job.yaml');
+  })
+  );
 
   it('Install App on imported cluster', () => {
     // Click on imported CAPV cluster

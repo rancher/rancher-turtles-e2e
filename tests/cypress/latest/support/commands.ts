@@ -810,3 +810,31 @@ Cypress.Commands.add('createVSphereClusterIdentity', (vsphere_username, vsphere_
   cy.clickButton('Import');
   cy.clickButton('Close');
 });
+
+Cypress.Commands.add('importYaml', (clusterName, yamlFilePath) => {
+  cypressLib.burgerMenuToggle();
+  cy.get('div.cluster-name').contains(clusterName).click();
+  cy.wait(250);
+  cy.get('header').find('button').filter(':has(i.icon-upload)').click();
+  cy.get('div.card-container').contains('Import YAML').should('be.visible');
+
+  // Insert file content into the CodeMirror editor
+  // We could use File Upload but this has benefit we may modify the content on the fly (not implemented yet)
+  cy.readFile(yamlFilePath).then((content) => {
+    cy.get('.CodeMirror').then((codeMirrorElement) => {
+      const cm = (codeMirrorElement[0] as any).CodeMirror;
+      cm.setValue(content);
+    });
+  })
+  cy.clickButton('Import');
+  cy.get('div.card-container').contains(/Applied \d+ Resource/).should('be.visible');
+
+  // Check if there is a column with age which contains a number
+  // Ideally we would need to wait for Active State for each resource but this column is not present on 2.9
+  cy.get('[data-testid^="sortable-cell-"] .live-date').each(($el) => {
+    cy.wrap($el).contains(/\d+/, { timeout: 60000 });
+  }).then(() => {
+    // All elements defined, click Close button
+    cy.clickButton('Close');
+  });
+});
