@@ -36,7 +36,7 @@ declare global {
       accesMenuSelection(menuPaths: string[]): Chainable<Element>;
       burgerMenuOperate(operation: 'open' | 'close'): Chainable<Element>;
       checkChart(operation: string, chartName: string, namespace: string, version?: string, questions?: any, refreshRepo?: boolean): Chainable<Element>;
-      deleteCluster(clusterName: string): Chainable<Element>;
+      deleteCluster(clusterName: string, timeout?: number): Chainable<Element>;
       searchCluster(clusterName: string): Chainable<Element>;
       createNamespace(namespace: string): Chainable<Element>;
       setNamespace(namespace: string, namespaceID?: string): Chainable<Element>;

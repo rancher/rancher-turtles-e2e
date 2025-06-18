@@ -592,7 +592,7 @@ Cypress.Commands.add('searchCluster', (clusterName) => {
 });
 
 // Command to remove cluster from Rancher
-Cypress.Commands.add('deleteCluster', (clusterName) => {
+Cypress.Commands.add('deleteCluster', (clusterName, timeout = 120000) => {
   cy.searchCluster(clusterName);
   cy.viewport(1920, 1080);
   cy.getBySel('sortable-table_check_select_all').click();
@@ -600,7 +600,7 @@ Cypress.Commands.add('deleteCluster', (clusterName) => {
   cy.getBySel('prompt-remove-input')
     .type(clusterName);
   cy.getBySel('prompt-remove-confirm-button').click();
-  cy.contains(clusterName).should('not.exist');
+  cy.contains(clusterName, { timeout: timeout }).should('not.exist');
 });
 
 // Command to type in Filter input
