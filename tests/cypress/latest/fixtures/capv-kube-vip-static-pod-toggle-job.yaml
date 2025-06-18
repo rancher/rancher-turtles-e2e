@@ -12,7 +12,7 @@ spec:
       nodeName: replace_by_active_kubevip_leader_node_name
       containers:
       - name: kube-vip-toggle
-        image: busybox:latest
+        image: registry.suse.com/bci/bci-busybox:16.0
         command:
         - sh
         - -c

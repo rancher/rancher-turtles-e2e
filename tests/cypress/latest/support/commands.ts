@@ -811,12 +811,17 @@ Cypress.Commands.add('createVSphereClusterIdentity', (vsphere_username, vsphere_
   cy.clickButton('Close');
 });
 
-Cypress.Commands.add('importYaml', (clusterName, yamlFilePath) => {
+Cypress.Commands.add('importYaml', (clusterName, yamlFilePath, namespace) => {
   cypressLib.burgerMenuToggle();
   cy.get('div.cluster-name').contains(clusterName).click();
   cy.wait(250);
   cy.get('header').find('button').filter(':has(i.icon-upload)').click();
   cy.get('div.card-container').contains('Import YAML').should('be.visible');
+
+  if (namespace) {
+    cy.get('.vs__selected-options').click();
+    cy.contains(namespace).click();
+  }
 
   // Insert file content into the CodeMirror editor
   // We could use File Upload but this has benefit we may modify the content on the fly (not implemented yet)
