@@ -61,6 +61,9 @@ declare global {
       patchYamlResource(clusterName: string, namespace: string, resourceKind: string, resourceName: string, patch: object): Chainable<Element>;
       exploreCluster(clusterName: string): Chainable<Element>;
       createVSphereClusterIdentity(vsphere_username: string, vsphere_password: string): Chainable<Element>;
+      createAWSClusterStaticIdentity(accessKey: string, secretKey: string): Chainable<Element>;
+      createCAPIProvider(providerName: string): Chainable<Element>;
+      checkCAPIProvider(providerName: string): Chainable<Element>;
       // Functions declared in capz_support.js
       createCAPZValuesSecret(clientID: string, tenantID: string, subscriptionID: string): Chainable<Element>;
       createAzureClusterIdentity(clientID: string, tenantID: string, clientSecret: string ): Chainable<Element>;

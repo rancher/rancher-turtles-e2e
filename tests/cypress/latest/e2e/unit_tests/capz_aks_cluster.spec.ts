@@ -100,7 +100,7 @@ describe('Import CAPZ AKS Cluster', { tags: '@full' }, () => {
     );
 
     it('Delete the secrets', () => {
-      ["azure-creds-secret", "cluster-identity-secret"].forEach((resourceName) => {
+      ['azure-creds-secret', 'cluster-identity'].forEach((resourceName) => {
         cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], resourceName, namespace)
       })
     })

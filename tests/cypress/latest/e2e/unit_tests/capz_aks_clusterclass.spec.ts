@@ -21,6 +21,7 @@ describe('Import/Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/azure/aks'
   const clusterClassRepoName = "azure-aks-clusterclass"
+  const providerName = 'azure'
 
   const clientID = Cypress.env("azure_client_id")
   const clientSecret = btoa(Cypress.env("azure_client_secret"))
@@ -32,8 +33,15 @@ describe('Import/Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
     cy.burgerMenuOperate('open')
   });
 
+  // TODO: Create Provider via UI, ref: capi-ui-extension/issues/128
+  it('Create Azure CAPIProvider', () => {
+    cy.removeCAPIResource('Providers', providerName);
+    cy.createCAPIProvider(providerName);
+    cy.checkCAPIProvider(providerName);
+  })
+
   it('Setup the namespace for importing', () => {
-    cy.namespaceAutoImport('Enable');
+    cy.namespaceAutoImport('Disable');
   })
 
   it('Create values.yaml Secret', () => {
@@ -114,6 +122,7 @@ describe('Import/Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
     cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
 
     // Check child cluster is auto-imported
+    cy.clusterAutoImport(clusterName, 'Enable');
     cy.searchCluster(clusterName);
     cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
   })
@@ -148,9 +157,9 @@ describe('Import/Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
       cy.removeFleetGitRepo(clusterClassRepoName);
 
       // Delete secret and AzureClusterIdentity
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "azure-creds-secret", namespace)
+      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'azure-creds-secret', namespace)
       cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', 'capi-clusters')
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "cluster-identity-secret", namespace)
+      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'cluster-identity', namespace)
     })
   }
 

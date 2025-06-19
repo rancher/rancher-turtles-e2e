@@ -5,6 +5,7 @@ kind: Cluster
 metadata:
   labels:
     owner: turtles-qa
+    cluster-api.cattle.io/rancher-auto-import: "true"
   name: {{ $cluster_name }}
 spec:
   clusterNetwork:

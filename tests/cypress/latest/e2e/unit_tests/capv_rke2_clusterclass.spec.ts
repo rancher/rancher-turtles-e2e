@@ -16,6 +16,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
   const classesPath = 'examples/clusterclasses/vsphere/rke2'
   const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
   const namespace = 'capv-system'
+  const providerName = 'vsphere'
 
   // Decode the base64 encoded secrets and make json object
   const vsphere_secrets_json = JSON.parse(Buffer.from(vsphere_secrets_json_base64, 'base64').toString('utf-8'))
@@ -75,7 +76,12 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     cy.clickButton('Close');
   })
 
-  it('Create VSphereClusterIdentity', () => {
+  // TODO: Create Provider via UI, ref: capi-ui-extension/issues/128
+  it('Create VSphere CAPIProvider & VSphereClusterIdentity', () => {
+    cy.removeCAPIResource('Providers', providerName);
+    cy.createCAPIProvider(providerName);
+    cy.checkCAPIProvider(providerName);
+
     const vsphere_username = JSON.stringify(vsphere_secrets_json.vsphere_username).replace(/\"/g, "")
     const vsphere_password = JSON.stringify(vsphere_secrets_json.vsphere_password).replace(/\"/g, "")
     cy.createVSphereClusterIdentity(vsphere_username, vsphere_password)
@@ -156,8 +162,8 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
       cy.removeFleetGitRepo(classRepoName);
 
       // Delete secret and VSphereClusterIdentity
-      cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'VSphereClusterIdentities'], 'cluster-identity', 'capi-clusters')
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "capv-helm-values", namespace)
+      cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'VSphereClusterIdentities'], 'cluster-identity');
+      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'capv-helm-values', namespace);
     })
   }
 });

@@ -15,6 +15,9 @@ describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/aws/kubeadm'
   const clusterClassRepoName = 'aws-kb-clusterclass'
+  const providerName = 'aws'
+  const accessKey = Cypress.env('aws_access_key')
+  const secretKey = Cypress.env('aws_secret_key')
 
   beforeEach(() => {
     cy.login();
@@ -22,7 +25,15 @@ describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
   });
 
   it('Setup the namespace for importing', () => {
-    cy.namespaceAutoImport('Enable');
+    cy.namespaceAutoImport('Disable');
+  })
+
+  // TODO: Create Provider via UI, ref: capi-ui-extension/issues/128
+  it('Create AWS CAPIProvider & AWSClusterStaticIdentity', () => {
+    cy.removeCAPIResource('Providers', providerName);
+    cy.createCAPIProvider(providerName);
+    cy.checkCAPIProvider(providerName);
+    cy.createAWSClusterStaticIdentity(accessKey, secretKey);
   })
 
   qase(129,
@@ -114,6 +125,10 @@ describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
 
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
+
+        // Delete secret and AWSClusterStaticIdentity
+        cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'cluster-identity', 'capa-system')
+        cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AWSClusterStaticIdentities'], 'cluster-identity')
       })
     );
   }

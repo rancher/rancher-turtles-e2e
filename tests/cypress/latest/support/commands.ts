@@ -793,6 +793,8 @@ Cypress.Commands.add('exploreCluster', (clusterName: string) => {
 
 // Create VSphereClusterIdentity
 Cypress.Commands.add('createVSphereClusterIdentity', (vsphere_username, vsphere_password) => {
+  cy.goToHome();
+  cy.burgerMenuOperate('open');
   cy.contains('local')
       .click();
   cy.get('.header-buttons > :nth-child(1) > .icon')
@@ -809,4 +811,54 @@ Cypress.Commands.add('createVSphereClusterIdentity', (vsphere_username, vsphere_
   });
   cy.clickButton('Import');
   cy.clickButton('Close');
+});
+
+// Create AWSClusterStaticIdentity
+Cypress.Commands.add('createAWSClusterStaticIdentity', (accessKey, secretKey) => {
+  cy.goToHome();
+  cy.burgerMenuOperate('open');
+  cy.contains('local')
+      .click();
+  cy.get('.header-buttons > :nth-child(1) > .icon')
+      .click();
+  cy.contains('Import YAML');
+
+  cy.readFile('./fixtures/capa-aws-cluster-identity.yaml').then((data) => {
+      cy.get('.CodeMirror')
+          .then((editor) => {
+              data = data.replace(/replace_access_key_id/g, accessKey)
+              data = data.replace(/replace_secret_access_key/g, secretKey)
+              editor[0].CodeMirror.setValue(data);
+          })
+  });
+  cy.clickButton('Import');
+  cy.clickButton('Close');
+});
+
+// Create CAPIProvider using YAML
+Cypress.Commands.add('createCAPIProvider', (providerName) => {
+  cy.goToHome();
+  cy.burgerMenuOperate('open');
+  cy.contains('local')
+    .click();
+  cy.get('.header-buttons > :nth-child(1) > .icon')
+    .click();
+  cy.contains('Import YAML');
+  cy.readFile('./fixtures/capi-' + providerName + '-provider.yaml').then((data) => {
+    cy.get('.CodeMirror')
+        .then((editor) => {
+            editor[0].CodeMirror.setValue(data);
+        })
+  });
+  cy.clickButton('Import');
+  cy.clickButton('Close');
+});
+
+// Check CAPIProvider ready status
+Cypress.Commands.add('checkCAPIProvider', (providerName) => {
+  // Navigate to providers Menu
+  cy.checkCAPIMenu();
+  cy.contains('Providers').click();
+  cy.typeInFilter(providerName);
+  cy.waitForAllRowsInState('Ready');
 });

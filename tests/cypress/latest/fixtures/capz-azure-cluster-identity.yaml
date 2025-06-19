@@ -4,14 +4,12 @@ data:
   clientSecret: replace_client_secret
 kind: Secret
 metadata:
-  name: cluster-identity-secret
+  name: cluster-identity
   namespace: capz-system
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: AzureClusterIdentity
 metadata:
-  annotations:
-    "helm.sh/resource-policy": keep
   labels:
     clusterctl.cluster.x-k8s.io/move-hierarchy: "true"
   name: cluster-identity
@@ -20,7 +18,7 @@ spec:
   allowedNamespaces: {}
   clientID: replace_client_id
   clientSecret:
-    name: cluster-identity-secret
+    name: cluster-identity
     namespace: capz-system
   tenantID: replace_tenant_id
   type: ServicePrincipal
