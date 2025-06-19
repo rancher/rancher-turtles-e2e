@@ -31,6 +31,8 @@ spec:
       value: {{ .Values.ami_id }}
     - name: cni
       value: none
+    - name: awsClusterIdentityName
+      value: cluster-identity
     version: {{ .Values.version }}
     workers:
       machineDeployments:

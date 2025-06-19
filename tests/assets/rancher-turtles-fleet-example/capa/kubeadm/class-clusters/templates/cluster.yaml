@@ -27,6 +27,8 @@ spec:
       value: {{ .Values.machine_type }}
     - name: workerMachineType
       value: {{ .Values.machine_type }}
+    - name: awsClusterIdentityName
+      value: cluster-identity
     - name: amiID
       value: {{ .Values.ami_id }}
     version: {{ .Values.version }}

@@ -4,17 +4,19 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
-describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
+describe('Import CAPA Kubeadm Class-Cluster', { tags: '@aws' }, () => {
   var clusterName: string
   const timeout = 1200000
   const className = 'aws-kubeadm-example'
   const repoName = 'class-clusters-aws-kb'
-  const branch = 'main'
+  const branch = 'awsclusterstaticidentity'
   const path = '/tests/assets/rancher-turtles-fleet-example/capa/kubeadm/class-clusters'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/aws/kubeadm'
   const clusterClassRepoName = 'aws-kb-clusterclass'
+  const accessKey = Cypress.env('aws_access_key')
+  const secretKey = Cypress.env('aws_secret_key')
 
   beforeEach(() => {
     cy.login();
@@ -23,6 +25,12 @@ describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
 
   it('Setup the namespace for importing', () => {
     cy.namespaceAutoImport('Enable');
+  })
+
+  it('Create AWSClusterStaticIdentity', () => {
+    cy.removeCAPIResource('Providers', 'aws');
+    cy.burgerMenuOperate('open');
+    cy.createAWSClusterStaticIdentity(accessKey, secretKey);
   })
 
   qase(129,
@@ -114,6 +122,10 @@ describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
 
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
+
+        // Delete secret and AWSClusterControllerIdentity
+        cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AWSClusterControllerIdentities'], 'cluster-identity', 'capi-clusters')
+        cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'cluster-identity', 'capa-system')
       })
     );
   }
