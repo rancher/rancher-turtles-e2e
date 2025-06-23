@@ -843,3 +843,14 @@ Cypress.Commands.add('importYaml', (clusterName, yamlFilePath, namespace) => {
     cy.clickButton('Close');
   });
 });
+
+// Command to verify the count of resources with a given name in a cluster
+Cypress.Commands.add('verifyResourceCount', (clusterName, resourcePath, resourceName, namespace, expectedCount) => {
+  cy.exploreCluster(clusterName);
+  cy.accesMenuSelection(resourcePath);
+  cy.setNamespace(namespace);
+  cy.typeInFilter(resourceName);
+  cy.get('table > tbody > tr.main-row').should(($rows) => {
+    expect($rows.length).to.be.equal(expectedCount);
+  });
+});

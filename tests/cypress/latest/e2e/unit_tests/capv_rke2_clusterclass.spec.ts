@@ -99,7 +99,6 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     cy.getBySel('sortable-cell-0-1').should('exist');
   });
 
-
   it('Add CAPV class-clusters fleet repo', () => {
     cypressLib.checkNavIcon('cluster-management')
       .should('exist');
@@ -142,6 +141,9 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
       return cy.getBySel('sortable-cell-0-2').invoke('text');
     }
 
+    // Initial count of kube-vip pods should be 3 (one for each control plane node)
+    cy.verifyResourceCount(clusterName, ['Workloads', 'Pods'], 'kube-vip', 'kube-system', 3);
+
     // Get initial kube-vip leader node name and store it as an alias
     getActiveKubeVipLeaderNode().then((leader) => {
       cy.wrap(leader).as('initialLeader');
@@ -163,6 +165,9 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     // TODO: poll https://kubevip_address:6443 until 401 is returned
     cy.wait(10000);
 
+    // Count of kube-vip pods should be one less than initial count
+    cy.verifyResourceCount(clusterName, ['Workloads', 'Pods'], 'kube-vip', 'kube-system', 2);
+
     // Get enforced kube-vip leader node name and store it as an alias
     getActiveKubeVipLeaderNode().then((leader) => {
       cy.wrap(leader).as('enforcedLeader');
@@ -177,6 +182,9 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
 
     // Trigger the same job once again to restore the kube-vip static pod on initial leader node
     cy.importYaml(clusterName, 'fixtures/capv-kube-vip-static-pod-toggle-job.yaml', 'kube-system');
+
+    // Count of kube-vip pods should be back on initial value (one for each control plane node)
+    cy.verifyResourceCount(clusterName, ['Workloads', 'Pods'], 'kube-vip', 'kube-system', 3);
   })
   );
 

@@ -60,6 +60,7 @@ declare global {
       goToHome(): Chainable<Element>;
       patchYamlResource(clusterName: string, namespace: string, resourceKind: string, resourceName: string, patch: object): Chainable<Element>;
       importYaml(clusterName: string, yamlFilePath: string, namespace?: string): Chainable<Element>;
+      verifyResourceCount(clusterName: string, resourcePath: string[], resourceName: string, namespace: string, expectedCount: number): Chainable<Element>;
       exploreCluster(clusterName: string): Chainable<Element>;
       createVSphereClusterIdentity(vsphere_username: string, vsphere_password: string): Chainable<Element>;
       // Functions declared in capz_support.js
