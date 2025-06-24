@@ -126,6 +126,12 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
     // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
     cy.checkCAPIClusterActive(clusterName, timeout);
+
+    // Adding extra wait to ensure all CPs are Active - this is important for kube-vip leader election test
+    cy.burgerMenuOperate('open');
+    cy.contains(clusterName).click();
+    cy.accesMenuSelection(['Nodes']);
+    cy.waitForAllRowsInState('Active', 300000);
   })
 
   qase(131, it('Validate kube-vip leader election ability across CPs', () => {
