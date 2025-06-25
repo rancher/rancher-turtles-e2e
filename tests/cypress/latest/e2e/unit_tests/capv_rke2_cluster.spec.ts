@@ -7,7 +7,7 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
   const timeout = 1200000
   const repoName = 'clusters-capv-rke2'
   const clusterName = "turtles-qa-capv-rke2"
-  const branch = 'main'
+  const branch = 'capv-kube-vip-test' // TODO: change to main when the branch is merged
   const path = '/tests/assets/rancher-turtles-fleet-example/capv/rke2/clusters'
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
   const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
@@ -28,8 +28,9 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
   //     "vsphere_kubeadm_template": "replace_vsphere_kubeadm_template",
   //     "vsphere_ssh_authorized_key": "replace_vsphere_ssh_authorized_key",
   //     "vsphere_tls_thumbprint": "replace_vsphere_tls_thumbprint",
-  //     "cluster_control_plane_endpoint_ip": "replace_cluster_control_plane_endpoint_ip"
-  //     "cluster_product_key": "replace_cluster_product_key"
+  //     "cluster_control_plane_endpoint_ip": "replace_cluster_control_plane_endpoint_ip",
+  //     "cluster_product_key": "replace_cluster_product_key",
+  //     "cluster_docker_auth_token": "replace_cluster_docker_auth_token"
   //   }' | jq | base64 -w0)
 
   // Decode the base64 encoded secrets and make json object
@@ -140,8 +141,8 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
 
     var encodedData = ''
     cy.readFile('./fixtures/capv-helm-values.yaml').then((data) => {
-      data = data.replace(/control_plane_machine_count: 1/g, "control_plane_machine_count: 2")
-      data = data.replace(/worker_machine_count: 1/g, "worker_machine_count: 2")
+      data = data.replace(/control_plane_machine_count: 1/g, "control_plane_machine_count: 3")
+      data = data.replace(/worker_machine_count: 1/g, "worker_machine_count: 3")
 
       // workaround; these values need to be re-replaced before applying the scaling changes
       data = data.replace(/replace_vsphere_server/g, JSON.stringify(vsphere_secrets_json.vsphere_server))
@@ -159,7 +160,7 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
       // This is not mandatory field, usable for SLE only
       if (vsphere_secrets_json.cluster_product_key) {
         const productKeyValue = vsphere_secrets_json.cluster_product_key
-        data = data.replace(/product_key: ""/, `product_key: "${productKeyValue}"`);
+        data = data.replace(/product_key:.*/, `product_key: "${productKeyValue}"`);
       }
       // Placeholder 'replace_cluster_control_plane_endpoint_ip' is already replaced at workflow level
       // Anyway it might be helpful for local runs when capv-helm-values.yaml is not modified by the workflow

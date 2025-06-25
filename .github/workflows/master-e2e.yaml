@@ -345,7 +345,7 @@ jobs:
       - name: Inject kube-vip controlplane IP for vsphere into capv-helm-values.yaml
         if: ${{ needs.create-runner.outputs.uuid == 'vsphere' }}
         run: |
-          # A round-robin distribution of 3 available control plane IPs
+          # A round-robin distribution of 3 available control plane IPs for kube-vip
           INDEX=$(((${{ github.run_number }} % 3) + 1))
           CP_ENDPOINT_IP=$(echo ${{ secrets.vsphere_endpoints_list }} | cut -d' ' -f${INDEX})
           sed -i "s/replace_cluster_control_plane_endpoint_ip/${CP_ENDPOINT_IP}/" tests/cypress/latest/fixtures/capv-helm-values.yaml
