@@ -28,8 +28,9 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
   //     "vsphere_kubeadm_template": "replace_vsphere_kubeadm_template",
   //     "vsphere_ssh_authorized_key": "replace_vsphere_ssh_authorized_key",
   //     "vsphere_tls_thumbprint": "replace_vsphere_tls_thumbprint",
-  //     "cluster_control_plane_endpoint_ip": "replace_cluster_control_plane_endpoint_ip"
-  //     "cluster_product_key": "replace_cluster_product_key"
+  //     "cluster_control_plane_endpoint_ip": "replace_cluster_control_plane_endpoint_ip",
+  //     "cluster_product_key": "replace_cluster_product_key",
+  //     "cluster_docker_auth_token": "replace_cluster_docker_auth_token"
   //   }' | jq | base64 -w0)
 
   // Decode the base64 encoded secrets and make json object

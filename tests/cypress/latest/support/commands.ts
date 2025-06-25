@@ -811,9 +811,9 @@ Cypress.Commands.add('createVSphereClusterIdentity', (vsphere_username, vsphere_
   cy.clickButton('Close');
 });
 
-Cypress.Commands.add('importYaml', (clusterName, yamlFilePath, namespace) => {
-  cypressLib.burgerMenuToggle();
-  cy.get('div.cluster-name').contains(clusterName).click();
+Cypress.Commands.add('importYaml', (clusterName, yamlOrPath, namespace) => {
+  cy.burgerMenuOperate('open');
+  cy.accesMenuSelection([clusterName])
   cy.wait(250);
   cy.get('header').find('button').filter(':has(i.icon-upload)').click();
   cy.get('div.card-container').contains('Import YAML').should('be.visible');
@@ -823,14 +823,25 @@ Cypress.Commands.add('importYaml', (clusterName, yamlFilePath, namespace) => {
     cy.contains(namespace).click();
   }
 
-  // Insert file content into the CodeMirror editor
-  // We could use File Upload but this has benefit we may modify the content on the fly (not implemented yet)
-  cy.readFile(yamlFilePath).then((content) => {
+  // Paste file content into the CodeMirror editor
+  const setYamlContent = (content: string) => {
     cy.get('.CodeMirror').then((codeMirrorElement) => {
       const cm = (codeMirrorElement[0] as any).CodeMirror;
       cm.setValue(content);
     });
-  })
+  };
+
+  if (
+    typeof yamlOrPath === 'string' &&
+    (yamlOrPath.endsWith('.yaml') || yamlOrPath.endsWith('.yml'))
+  ) {
+    // will read the file and pass it as content argument to setYamlContent
+    cy.readFile(yamlOrPath).then(setYamlContent);
+  } else {
+    // will pass the string directly as content argument to setYamlContent
+    setYamlContent(yamlOrPath);
+  }
+
   cy.clickButton('Import');
   cy.get('div.card-container').contains(/Applied \d+ Resource/).should('be.visible');
 
