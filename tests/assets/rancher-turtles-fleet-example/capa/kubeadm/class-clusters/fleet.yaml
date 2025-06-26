@@ -10,5 +10,5 @@ helm:
     # Private copy of ami-0988c3c36e3080c43 from eu-west-2 capa-ami-ubuntu-24.04-v1.31.0-1739348996
     ami_id: ami-0ac1df8d2f90a496c
     machine_type: t3.xlarge
-    cp_machine_count: 1 # Todo: 3, turtles/issues/1402
-    worker_machine_count: 1
+    cp_machine_count: 3
+    worker_machine_count: 3
