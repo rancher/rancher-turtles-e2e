@@ -138,11 +138,8 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
     cy.checkCAPIClusterActive(clusterName, timeout);
 
-    // Adding extra wait to ensure all CPs are Active - this is important for kube-vip leader election test
-    cy.burgerMenuOperate('open');
-    cy.contains(clusterName).click();
-    cy.accesMenuSelection(['Nodes']);
-    cy.verifyResourceCount(clusterName, ['Nodes'], clusterName, 'capi-clusters', 6);
+    // Block until all 6 nodes are Active - this is important for kube-vip leader election test
+    cy.verifyResourceCount(clusterName, ['Nodes'], clusterName, '', 6); // '' means no namespace
     cy.waitForAllRowsInState('Active', 300000);
   })
 

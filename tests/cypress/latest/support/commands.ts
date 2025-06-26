@@ -820,7 +820,7 @@ Cypress.Commands.add('importYaml', (clusterName, yamlOrPath, namespace) => {
 
   if (namespace) {
     cy.get('.vs__selected-options').click();
-    cy.contains(namespace).click();
+    cy.contains('.vs__dropdown-menu .vs__dropdown-option', namespace).click();
   }
 
   // Paste file content into the CodeMirror editor
@@ -859,7 +859,9 @@ Cypress.Commands.add('importYaml', (clusterName, yamlOrPath, namespace) => {
 Cypress.Commands.add('verifyResourceCount', (clusterName, resourcePath, resourceName, namespace, expectedCount, timeout = 480000) => {
   cy.exploreCluster(clusterName);
   cy.accesMenuSelection(resourcePath);
-  cy.setNamespace(namespace);
+  if (namespace != '' ) {
+    cy.setNamespace(namespace);
+  }
   cy.typeInFilter(resourceName);
   cy.get('table > tbody > tr.main-row', { timeout }).should(($rows) => {
     expect($rows.length).to.be.equal(expectedCount);
