@@ -856,12 +856,12 @@ Cypress.Commands.add('importYaml', (clusterName, yamlOrPath, namespace) => {
 });
 
 // Command to verify the count of resources with a given name in a cluster
-Cypress.Commands.add('verifyResourceCount', (clusterName, resourcePath, resourceName, namespace, expectedCount) => {
+Cypress.Commands.add('verifyResourceCount', (clusterName, resourcePath, resourceName, namespace, expectedCount, timeout = 480000) => {
   cy.exploreCluster(clusterName);
   cy.accesMenuSelection(resourcePath);
   cy.setNamespace(namespace);
   cy.typeInFilter(resourceName);
-  cy.get('table > tbody > tr.main-row').should(($rows) => {
+  cy.get('table > tbody > tr.main-row', { timeout }).should(($rows) => {
     expect($rows.length).to.be.equal(expectedCount);
   });
 });

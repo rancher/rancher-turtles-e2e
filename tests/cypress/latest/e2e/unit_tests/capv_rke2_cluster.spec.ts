@@ -30,7 +30,8 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
   //     "vsphere_tls_thumbprint": "replace_vsphere_tls_thumbprint",
   //     "cluster_control_plane_endpoint_ip": "replace_cluster_control_plane_endpoint_ip",
   //     "cluster_product_key": "replace_cluster_product_key",
-  //     "cluster_docker_auth_token": "replace_cluster_docker_auth_token"
+  //     "cluster_docker_auth_username": "replace_cluster_docker_auth_username",
+  //     "cluster_docker_auth_password": "replace_cluster_docker_auth_password"
   //   }' | jq | base64 -w0)
 
   // Decode the base64 encoded secrets and make json object

@@ -80,11 +80,13 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     cy.clickButton('Close');
   })
 
-  it('Create Docker Auth token Secret', () => {
+  it('Create Docker Auth Secret', () => {
     // Prevention for Docker.io rate limiting
     cy.readFile('./fixtures/capv-docker-auth-token-secret.yaml').then((data) => {
-      const dockerAuthTokenBase64 = Buffer.from(vsphere_secrets_json.cluster_docker_auth_token).toString('base64')
-      data = data.replace(/replace_cluster_docker_auth_token/, dockerAuthTokenBase64)
+      const dockerAuthPasswordBase64 = Buffer.from(vsphere_secrets_json.cluster_docker_auth_password).toString('base64')
+      const dockerAuthUsernameBase64 = Buffer.from(vsphere_secrets_json.cluster_docker_auth_username).toString('base64')
+      data = data.replace(/replace_cluster_docker_auth_username/, dockerAuthUsernameBase64)
+      data = data.replace(/replace_cluster_docker_auth_password/, dockerAuthPasswordBase64)
       cy.importYaml('local', data, 'capi-clusters')
     })
   });
@@ -140,6 +142,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     cy.burgerMenuOperate('open');
     cy.contains(clusterName).click();
     cy.accesMenuSelection(['Nodes']);
+    cy.verifyResourceCount(clusterName, ['Nodes'], clusterName, 'capi-clusters', 6);
     cy.waitForAllRowsInState('Active', 300000);
   })
 
