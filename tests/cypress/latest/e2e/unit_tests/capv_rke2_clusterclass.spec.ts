@@ -2,7 +2,6 @@ import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
-import yaml from 'js-yaml';
 
 Cypress.config();
 describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
@@ -158,6 +157,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
 
     // Initial count of kube-vip pods should be 3 (one for each control plane node)
     cy.verifyResourceCount(clusterName, ['Workloads', 'Pods'], 'kube-vip', 'kube-system', 3);
+    cy.waitForAllRowsInState('Running', 300000);
 
     // Get initial kube-vip leader node name and store it as an alias
     getActiveKubeVipLeaderNode().then((leader) => {
@@ -182,6 +182,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
 
     // Count of kube-vip pods should be one less than initial count
     cy.verifyResourceCount(clusterName, ['Workloads', 'Pods'], 'kube-vip', 'kube-system', 2);
+    cy.waitForAllRowsInState('Running', 300000);
 
     // Get enforced kube-vip leader node name and store it as an alias
     getActiveKubeVipLeaderNode().then((leader) => {
@@ -200,6 +201,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
 
     // Count of kube-vip pods should be back on initial value (one for each control plane node)
     cy.verifyResourceCount(clusterName, ['Workloads', 'Pods'], 'kube-vip', 'kube-system', 3);
+    cy.waitForAllRowsInState('Running', 300000);
   })
   );
 
@@ -234,9 +236,10 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
       // Remove the clusterclass repo
       cy.removeFleetGitRepo(classRepoName);
 
-      // Delete secret and VSphereClusterIdentity
+      // Delete secrets and VSphereClusterIdentity
       cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'VSphereClusterIdentities'], 'cluster-identity', 'capi-clusters')
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "capv-helm-values", namespace)
+      cy.deleteKubernetesResource('local', ['Storage', 'Secrets'], "capv-docker-token", 'capi-clusters')
+      cy.deleteKubernetesResource('local', ['Storage', 'Secrets'], "capv-helm-values", namespace)
     })
   }
 });
