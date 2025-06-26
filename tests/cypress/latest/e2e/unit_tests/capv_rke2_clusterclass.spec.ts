@@ -80,6 +80,15 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     cy.clickButton('Close');
   })
 
+  it('Create Docker Auth token Secret', () => {
+    // Prevention for Docker.io rate limiting
+    cy.readFile('./fixtures/capv-docker-auth-token-secret.yaml').then((data) => {
+      const dockerAuthTokenBase64 = Buffer.from(vsphere_secrets_json.cluster_docker_auth_token).toString('base64')
+      data = data.replace(/replace_cluster_docker_auth_token/, dockerAuthTokenBase64)
+      cy.importYaml('local', data, 'capi-clusters')
+    })
+  });
+
   it('Create VSphereClusterIdentity', () => {
     const vsphere_username = JSON.stringify(vsphere_secrets_json.vsphere_username).replace(/\"/g, "")
     const vsphere_password = JSON.stringify(vsphere_secrets_json.vsphere_password).replace(/\"/g, "")
