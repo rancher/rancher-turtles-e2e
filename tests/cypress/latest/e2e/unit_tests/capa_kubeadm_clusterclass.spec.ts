@@ -9,7 +9,7 @@ describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
   const timeout = 1200000
   const className = 'aws-kubeadm-example'
   const repoName = 'class-clusters-aws-kb'
-  const branch = 'main'
+  const branch = 'multiple-cp-count'
   const path = '/tests/assets/rancher-turtles-fleet-example/capa/kubeadm/class-clusters'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
@@ -60,7 +60,7 @@ describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
 
       // Add CAPA fleet repository
       cy.addFleetGitRepo(repoName, repoUrl, branch, path);
-    // Check CAPI cluster using its name prefix i.e. className
+      // Check CAPI cluster using its name prefix i.e. className
       cy.checkCAPICluster(className);
 
       // Get the cluster name by its prefix and use it across the test

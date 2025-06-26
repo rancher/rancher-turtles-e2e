@@ -9,7 +9,7 @@ describe('Import CAPA Kubeadm Cluster', { tags: '@full' }, () => {
   const timeout = 1200000
   const repoName = 'clusters-aws-kb'
   const clusterNamePrefix = 'turtles-qa-aws-kb' // as per fleet values
-  const branch = 'main'
+  const branch = 'multiple-cp-count'
   const path = '/tests/assets/rancher-turtles-fleet-example/capa/kubeadm/clusters'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
 
@@ -28,8 +28,8 @@ describe('Import CAPA Kubeadm Cluster', { tags: '@full' }, () => {
     cy.contains('local').click();
     cy.accesMenuSelection(['More Resources', 'Fleet', 'HelmApps']);
     ['aws-ccm', 'aws-csi-driver', 'calico-cni-aws'].forEach((app) => {
-        cy.typeInFilter(app);
-        cy.getBySel('sortable-cell-0-1').should('exist');
+      cy.typeInFilter(app);
+      cy.getBySel('sortable-cell-0-1').should('exist');
     })
   })
 
@@ -40,7 +40,7 @@ describe('Import CAPA Kubeadm Cluster', { tags: '@full' }, () => {
 
       // Add CAPA fleet repository
       cy.addFleetGitRepo(repoName, repoUrl, branch, path);
-    // Check CAPI cluster using its name prefix
+      // Check CAPI cluster using its name prefix
       cy.checkCAPICluster(clusterNamePrefix);
 
       // Get the cluster name by its prefix and use it across the test
