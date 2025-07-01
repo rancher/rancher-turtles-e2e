@@ -1,0 +1,39 @@
+{{- $cluster_name := printf "%s-%s-%s" .Values.clustername_prefix .Values.className (randAlphaNum 4) | lower -}}
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  labels:
+    owner: turtles-qa
+    cloud-provider: gcp
+    cni: calico
+    cluster-api.cattle.io/rancher-auto-import: "true"
+  name: {{ $cluster_name }}
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+      - 192.168.0.0/16
+  topology:
+    class: {{ .Values.className }}
+    classNamespace: capi-classes
+    controlPlane:
+      replicas: {{ .Values.cp_machine_count }}
+    workers:
+      machineDeployments:
+      - class: default-worker
+        name: md-0
+        replicas: {{ .Values.worker_machine_count }}
+    variables:
+    - name: gcpProject
+      value: {{ .Values.gcp.gcpProject }}
+    - name: region
+      value: {{ .Values.region }}
+    - name: gcpNetworkName
+      value: {{ .Values.gcpNetworkName }}
+    - name: clusterFailureDomains
+      value:
+        - {{ .Values.region }}-a
+    - name: imageId
+      value: projects/{{ .Values.gcp.gcpProject }}/global/images/{{ .Values.imageID }}
+    version: {{ .Values.kubernetesVersion }}

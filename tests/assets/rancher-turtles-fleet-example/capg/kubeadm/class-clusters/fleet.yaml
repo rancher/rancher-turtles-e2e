@@ -1,0 +1,17 @@
+namespace: capi-clusters
+
+helm:
+  valuesFrom:
+    - secretKeyRef:
+        name: capg-helm-values
+        namespace: capg-system
+        key: values.yaml
+  values:
+    clustername_prefix: turtles-qa
+    className: gcp-kubeadm-example
+    kubernetesVersion: v1.31.4
+    cp_machine_count: 3
+    worker_machine_count: 3
+    region: asia-south2
+    imageID: cluster-api-ubuntu-2404-v1-31-4-1749799816
+    gcpNetworkName: rancher-turtles-e2e-ci
