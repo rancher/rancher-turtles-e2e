@@ -9,7 +9,7 @@ describe('Import CAPA Kubeadm Cluster', { tags: '@full' }, () => {
   const timeout = 1200000
   const repoName = 'clusters-aws-kb'
   const clusterNamePrefix = 'turtles-qa-aws-kb' // as per fleet values
-  const branch = 'multiple-cp-count'
+  const branch = 'main'
   const path = '/tests/assets/rancher-turtles-fleet-example/capa/kubeadm/clusters'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
 

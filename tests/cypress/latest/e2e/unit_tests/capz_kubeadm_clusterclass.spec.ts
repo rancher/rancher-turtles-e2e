@@ -9,7 +9,7 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
     const namespace = 'capz-system'
     const repoName = 'class-clusters-azure-kubeadm'
     const className = 'azure-kubeadm-example'
-    const branch = 'multiple-cp-count'
+    const branch = 'main'
     const path = '/tests/assets/rancher-turtles-fleet-example/capz/kubeadm/class-clusters'
     const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
     const turtlesRepoUrl = 'https://github.com/rancher/turtles'
@@ -29,9 +29,9 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
 
     // TODO: Create Provider via UI, ref: capi-ui-extension/issues/128
     it('Create Azure CAPIProvider', () => {
-      cy.removeCAPIResource('Providers', providerName);
-      cy.createCAPIProvider(providerName);
-      cy.checkCAPIProvider(providerName);
+        cy.removeCAPIResource('Providers', providerName);
+        cy.createCAPIProvider(providerName);
+        cy.checkCAPIProvider(providerName);
     })
 
     it('Setup the namespace for importing', () => {
