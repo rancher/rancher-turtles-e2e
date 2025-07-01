@@ -19,3 +19,4 @@ cluster:
   control_plane_machine_count: 1
   worker_machine_count: 1
   product_key: ""
+  docker_auth_token_secret_name: capv-docker-token

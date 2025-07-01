@@ -59,6 +59,8 @@ declare global {
       typeInFilter(text: string): Chainable<Element>;
       goToHome(): Chainable<Element>;
       patchYamlResource(clusterName: string, namespace: string, resourceKind: string, resourceName: string, patch: object): Chainable<Element>;
+      importYaml(clusterName: string, yamlOrPath: string, namespace?: string): Chainable<Element>;
+      verifyResourceCount(clusterName: string, resourcePath: string[], resourceName: string, namespace: string, expectedCount: number, timeout?: number): Chainable<Element>;
       exploreCluster(clusterName: string): Chainable<Element>;
       createVSphereClusterIdentity(vsphere_username: string, vsphere_password: string): Chainable<Element>;
       createAWSClusterStaticIdentity(accessKey: string, secretKey: string): Chainable<Element>;

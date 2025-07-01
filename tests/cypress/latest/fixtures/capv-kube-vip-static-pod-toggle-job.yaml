@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kube-vip-toggle
+  namespace: kube-system
+spec:
+  ttlSecondsAfterFinished: 5
+  template:
+    spec:
+      restartPolicy: Never
+      # kubectl get leases.coordination.k8s.io plndr-cp-lock -n kube-system -ojsonpath='{.spec.holderIdentity}'
+      nodeName: replace_by_active_kubevip_leader_node_name
+      containers:
+      - name: kube-vip-toggle
+        image: registry.suse.com/bci/bci-busybox:16.0
+        command:
+        - sh
+        - -c
+        - |
+          set -e
+          cd /manifests
+          if [ -f "kube-vip.yaml" ]; then
+            echo "Renaming kube-vip.yaml -> .kube-vip.yaml-inactive"
+            mv kube-vip.yaml .kube-vip.yaml-inactive
+            exit 0
+          elif [ -f ".kube-vip.yaml-inactive" ]; then
+            echo "Renaming .kube-vip.yaml-inactive -> kube-vip.yaml"
+            mv .kube-vip.yaml-inactive kube-vip.yaml
+            exit 0
+          else
+            echo "Neither kube-vip.yaml nor .kube-vip.yaml-inactive found. Nothing to do."
+            exit 42
+          fi
+        volumeMounts:
+        - name: manifests
+          mountPath: /manifests
+      volumes:
+      - name: manifests
+        hostPath:
+          path: /var/lib/rancher/rke2/agent/pod-manifests
+          type: Directory

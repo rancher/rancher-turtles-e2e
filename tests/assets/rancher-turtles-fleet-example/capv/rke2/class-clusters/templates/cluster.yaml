@@ -53,6 +53,8 @@ spec:
       value: eth0
     - name: productKey
       value: {{ .Values.cluster.product_key | quote }}
+    - name: dockerAuthSecret
+      value: {{ .Values.cluster.docker_auth_token_secret_name }}
 ---
 kind: Bundle
 apiVersion: fleet.cattle.io/v1alpha1

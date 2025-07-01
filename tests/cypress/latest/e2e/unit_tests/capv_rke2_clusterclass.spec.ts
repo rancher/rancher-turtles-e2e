@@ -1,5 +1,6 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
+import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
@@ -9,7 +10,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
   const classRepoName = 'vsphere-rke2-clusterclass'
   const className = 'vsphere-rke2-example'
   const clusterName = 'turtles-qa-capv-rke2-example'
-  const branch = 'main'
+  const branch = 'capv-kube-vip-test' // TODO: change to main when the branch is merged
   const path = '/tests/assets/rancher-turtles-fleet-example/capv/rke2/class-clusters'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
@@ -39,6 +40,9 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
 
     var encodedData = ''
     cy.readFile('./fixtures/capv-helm-values.yaml').then((data) => {
+      // Deploy HA cluster with 3 control plane and 3 worker nodes, instead of default 1+1
+      data = data.replace(/control_plane_machine_count: 1/g, "control_plane_machine_count: 3")
+      data = data.replace(/worker_machine_count: 1/g, "worker_machine_count: 3")
       data = data.replace(/replace_vsphere_server/g, JSON.stringify(vsphere_secrets_json.vsphere_server))
       data = data.replace(/replace_vsphere_username/g, JSON.stringify(vsphere_secrets_json.vsphere_username))
       data = data.replace(/replace_vsphere_password/g, JSON.stringify(vsphere_secrets_json.vsphere_password))
@@ -54,7 +58,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
       // This is not mandatory field, usable for SLE only
       if (vsphere_secrets_json.cluster_product_key) {
         const productKeyValue = vsphere_secrets_json.cluster_product_key
-        data = data.replace(/product_key: ""/, `product_key: "${productKeyValue}"`);
+        data = data.replace(/product_key:.*/, `product_key: "${productKeyValue}"`);
       }
       // Placeholder 'replace_cluster_control_plane_endpoint_ip' is already replaced at workflow level
       // Anyway it might be helpful for local runs when capv-helm-values.yaml is not modified by the workflow
@@ -87,6 +91,17 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     cy.createVSphereClusterIdentity(vsphere_username, vsphere_password)
   })
 
+  it('Create Docker Auth Secret', () => {
+    // Prevention for Docker.io rate limiting
+    cy.readFile('./fixtures/capv-docker-auth-token-secret.yaml').then((data) => {
+      const dockerAuthPasswordBase64 = Buffer.from(vsphere_secrets_json.cluster_docker_auth_password).toString('base64')
+      const dockerAuthUsernameBase64 = Buffer.from(vsphere_secrets_json.cluster_docker_auth_username).toString('base64')
+      data = data.replace(/replace_cluster_docker_auth_username/, dockerAuthUsernameBase64)
+      data = data.replace(/replace_cluster_docker_auth_password/, dockerAuthPasswordBase64)
+      cy.importYaml('local', data, 'capi-clusters')
+    })
+  });
+
   it('Add CAPV RKE2 ClusterClass Fleet Repo and check Applications', () => {
     cy.addFleetGitRepo(classRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
     // Go to CAPI > ClusterClass to ensure the clusterclass is created
@@ -99,7 +114,6 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     cy.typeInFilter('vsphere-ccm');
     cy.getBySel('sortable-cell-0-1').should('exist');
   });
-
 
   it('Add CAPV class-clusters fleet repo', () => {
     cypressLib.checkNavIcon('cluster-management')
@@ -128,7 +142,74 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
     // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
     cy.checkCAPIClusterActive(clusterName, timeout);
+
+    // Block until all 6 nodes are Active - this is important for kube-vip leader election test
+    cy.verifyResourceCount(clusterName, ['Nodes'], clusterName, '', 6); // '' means no namespace
+    cy.waitForAllRowsInState('Active', 300000);
   })
+
+  qase(131, it('Validate kube-vip leader election ability across CPs', () => {
+    function getActiveKubeVipLeaderNode() {
+      cy.burgerMenuOperate('open');
+      cy.contains(clusterName).click();
+      cy.accesMenuSelection(['More Resources', 'Coordination', 'Leases']);
+      cy.setNamespace('All Namespaces', 'all_user');
+      // Filter out kube-vip lease resource
+      cy.typeInFilter('plndr-cp-lock');
+      // Ensure the kube-vip lease is present
+      cy.getBySel('sortable-cell-0-1').should('exist');
+      return cy.getBySel('sortable-cell-0-2').invoke('text');
+    }
+
+    // Initial count of kube-vip pods should be 3 (one for each control plane node)
+    cy.verifyResourceCount(clusterName, ['Workloads', 'Pods'], 'kube-vip', 'kube-system', 3);
+    cy.waitForAllRowsInState('Running', 300000);
+
+    // Get initial kube-vip leader node name and store it as an alias
+    getActiveKubeVipLeaderNode().then((leader) => {
+      cy.wrap(leader).as('initialLeader');
+    });
+
+    // Modify the helper job resource to use the initial leader name
+    cy.get('@initialLeader').then((leader) => {
+      cy.readFile('fixtures/capv-kube-vip-static-pod-toggle-job.yaml').then((data) => {
+        data = data.replace(/nodeName:.*/, `nodeName: ${leader}`);
+        cy.writeFile('fixtures/capv-kube-vip-static-pod-toggle-job.yaml', data);
+      });
+    });
+
+    // Trigger the job to disable kube-vip static pod on initial leader node
+    // Leader role of kube-vip should be taken over by another node immediately
+    cy.importYaml(clusterName, 'fixtures/capv-kube-vip-static-pod-toggle-job.yaml', 'kube-system');
+
+    // Wait for the job to complete
+    // TODO: poll https://kubevip_address:6443 until 401 is returned
+    cy.wait(10000);
+
+    // Count of kube-vip pods should be one less than initial count
+    cy.verifyResourceCount(clusterName, ['Workloads', 'Pods'], 'kube-vip', 'kube-system', 2);
+    cy.waitForAllRowsInState('Running', 300000);
+
+    // Get enforced kube-vip leader node name and store it as an alias
+    getActiveKubeVipLeaderNode().then((leader) => {
+      cy.wrap(leader).as('enforcedLeader');
+    });
+
+    // Ensure the enforced leader node name is different from the initial one
+    cy.get('@initialLeader').then((initial) => {
+      cy.get('@enforcedLeader').then((enforced) => {
+        expect(initial).not.to.eq(enforced);
+      });
+    });
+
+    // Trigger the same job once again to restore the kube-vip static pod on initial leader node
+    cy.importYaml(clusterName, 'fixtures/capv-kube-vip-static-pod-toggle-job.yaml', 'kube-system');
+
+    // Count of kube-vip pods should be back on initial value (one for each control plane node)
+    cy.verifyResourceCount(clusterName, ['Workloads', 'Pods'], 'kube-vip', 'kube-system', 3);
+    cy.waitForAllRowsInState('Running', 300000);
+  })
+  );
 
   it('Install App on imported cluster', () => {
     // Click on imported CAPV cluster
@@ -163,7 +244,8 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
 
       // Delete secret and VSphereClusterIdentity
       cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'VSphereClusterIdentities'], 'cluster-identity');
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'capv-helm-values', namespace);
+      cy.deleteKubernetesResource('local', ['Storage', 'Secrets'], "capv-helm-values", namespace)
+      cy.deleteKubernetesResource('local', ['Storage', 'Secrets'], "capv-docker-token", 'capi-clusters')
     })
   }
 });

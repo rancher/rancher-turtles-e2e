@@ -862,3 +862,60 @@ Cypress.Commands.add('checkCAPIProvider', (providerName) => {
   cy.typeInFilter(providerName);
   cy.waitForAllRowsInState('Ready');
 });
+
+Cypress.Commands.add('importYaml', (clusterName, yamlOrPath, namespace) => {
+  cy.burgerMenuOperate('open');
+  cy.accesMenuSelection([clusterName])
+  cy.wait(250);
+  cy.get('header').find('button').filter(':has(i.icon-upload)').click();
+  cy.get('div.card-container').contains('Import YAML').should('be.visible');
+
+  if (namespace) {
+    cy.get('.vs__selected-options').click();
+    cy.contains('.vs__dropdown-menu .vs__dropdown-option', namespace).click();
+  }
+
+  // Paste file content into the CodeMirror editor
+  const setYamlContent = (content: string) => {
+    cy.get('.CodeMirror').then((codeMirrorElement) => {
+      const cm = (codeMirrorElement[0] as any).CodeMirror;
+      cm.setValue(content);
+    });
+  };
+
+  if (
+    typeof yamlOrPath === 'string' &&
+    (yamlOrPath.endsWith('.yaml') || yamlOrPath.endsWith('.yml'))
+  ) {
+    // will read the file and pass it as content argument to setYamlContent
+    cy.readFile(yamlOrPath).then(setYamlContent);
+  } else {
+    // will pass the string directly as content argument to setYamlContent
+    setYamlContent(yamlOrPath);
+  }
+
+  cy.clickButton('Import');
+  cy.get('div.card-container').contains(/Applied \d+ Resource/).should('be.visible');
+
+  // Check if there is a column with age which contains a number
+  // Ideally we would need to wait for Active State for each resource but this column is not present on 2.9
+  cy.get('[data-testid^="sortable-cell-"] .live-date').each(($el) => {
+    cy.wrap($el).contains(/\d+/, { timeout: 60000 });
+  }).then(() => {
+    // All elements defined, click Close button
+    cy.clickButton('Close');
+  });
+});
+
+// Command to verify the count of resources with a given name in a cluster
+Cypress.Commands.add('verifyResourceCount', (clusterName, resourcePath, resourceName, namespace, expectedCount, timeout = 480000) => {
+  cy.exploreCluster(clusterName);
+  cy.accesMenuSelection(resourcePath);
+  if (namespace != '' ) {
+    cy.setNamespace(namespace);
+  }
+  cy.typeInFilter(resourceName);
+  cy.get('table > tbody > tr.main-row', { timeout }).should(($rows) => {
+    expect($rows.length).to.be.equal(expectedCount);
+  });
+});
