@@ -34,7 +34,7 @@ describe('Enable CAPI Providers', () => {
   const fleetProviderVersion = 'v0.11.0'
   const vsphereProviderVersion = 'v1.12.0'
   const amazonProviderVersion = 'v2.8.1'
-  const googleProviderVersion = 'v1.9.0'
+  const googleProviderVersion = 'v1.10.0'
   const azureProviderVersion = 'v1.19.1'
 
   const kubeadmBaseURL = 'https://github.com/kubernetes-sigs/cluster-api/releases/'
