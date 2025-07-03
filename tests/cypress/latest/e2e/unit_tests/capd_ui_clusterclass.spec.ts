@@ -38,27 +38,14 @@ describe('Create CAPD', { tags: '@short' }, () => {
     }
 
     it('Create Kindnet configmap', () => {
-      cy.contains('local').click();
-      cy.getBySel('header-action-import-yaml').click();
-      cy.contains('Import YAML');
-      cy.get('.vs__selected-options').click();
-      cy.contains(namespace).click();
-
-      cy.readFile('./fixtures/kindnet.yaml').then((data) => {
-        cy.get('.CodeMirror')
-          .then((editor) => {
-            editor[0].CodeMirror.setValue(data);
-          })
-      })
-      cy.clickButton('Import')
-      cy.clickButton('Close')
+      cy.importYAML('fixtures/kindnet.yaml', namespace);
     })
 
     qase(44,
       it('Create child CAPD cluster from Clusterclass', () => {
         const machines: Record<string, string> = { 'md-0': 'default-worker' }
         cy.createCAPICluster(className, clusterName, machines, k8sVersion, podCIDR, serviceCIDR);
-        
+
         // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
         cy.checkCAPIClusterActive(clusterName, timeout);
         cy.clusterAutoImport(clusterName, 'Enable');

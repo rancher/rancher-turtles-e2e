@@ -32,12 +32,6 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
   })
 
   it('Create values.yaml Secret', () => {
-    cy.contains('local')
-      .click();
-    cy.get('.header-buttons > :nth-child(1) > .icon')
-      .click();
-    cy.contains('Import YAML');
-
     var encodedData = ''
     cy.readFile('./fixtures/capv-helm-values.yaml').then((data) => {
       // Deploy HA cluster with 3 control plane and 3 worker nodes, instead of default 1+1
@@ -69,15 +63,9 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     })
 
     cy.readFile('./fixtures/capv-helm-values-secret.yaml').then((data) => {
-      cy.get('.CodeMirror')
-        .then((editor) => {
-          data = data.replace(/replace_values/g, encodedData)
-          editor[0].CodeMirror.setValue(data);
-        })
+      data = data.replace(/replace_values/g, encodedData)
+      cy.importYAML(data)
     });
-
-    cy.clickButton('Import');
-    cy.clickButton('Close');
   })
 
   // TODO: Create Provider via UI, ref: capi-ui-extension/issues/128
@@ -98,7 +86,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
       const dockerAuthUsernameBase64 = Buffer.from(vsphere_secrets_json.cluster_docker_auth_username).toString('base64')
       data = data.replace(/replace_cluster_docker_auth_username/, dockerAuthUsernameBase64)
       data = data.replace(/replace_cluster_docker_auth_password/, dockerAuthPasswordBase64)
-      cy.importYaml('local', data, 'capi-clusters')
+      cy.importYAML(data, 'capi-clusters')
     })
   });
 
@@ -180,7 +168,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
 
     // Trigger the job to disable kube-vip static pod on initial leader node
     // Leader role of kube-vip should be taken over by another node immediately
-    cy.importYaml(clusterName, 'fixtures/capv-kube-vip-static-pod-toggle-job.yaml', 'kube-system');
+    cy.importYAML('fixtures/capv-kube-vip-static-pod-toggle-job.yaml', 'kube-system', clusterName);
 
     // Wait for the job to complete
     // TODO: poll https://kubevip_address:6443 until 401 is returned
@@ -203,7 +191,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     });
 
     // Trigger the same job once again to restore the kube-vip static pod on initial leader node
-    cy.importYaml(clusterName, 'fixtures/capv-kube-vip-static-pod-toggle-job.yaml', 'kube-system');
+    cy.importYAML('fixtures/capv-kube-vip-static-pod-toggle-job.yaml', 'kube-system', clusterName);
 
     // Count of kube-vip pods should be back on initial value (one for each control plane node)
     cy.verifyResourceCount(clusterName, ['Workloads', 'Pods'], 'kube-vip', 'kube-system', 3);
