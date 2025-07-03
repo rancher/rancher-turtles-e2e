@@ -24,20 +24,10 @@ describe('Import CAPG Kubeadm Cluster', { tags: '@full' }, () => {
   });
 
   it('Create the helm values secret', () => {
-    cy.contains('local')
-      .click();
-    cy.get('.header-buttons > :nth-child(1) > .icon')
-      .click();
-    cy.contains('Import YAML');
     cy.readFile('./fixtures/capg-helm-values-secret.yaml').then((data) => {
-      cy.get('.CodeMirror')
-        .then((editor) => {
-          data = data.replace(/replace_gcp_project/g, gcpProject)
-          editor[0].CodeMirror.setValue(data);
-        })
+      data = data.replace(/replace_gcp_project/g, gcpProject)
+      cy.importYAML(data)
     });
-    cy.clickButton('Import');
-    cy.clickButton('Close');
   })
 
   it('Setup the namespace for importing', () => {

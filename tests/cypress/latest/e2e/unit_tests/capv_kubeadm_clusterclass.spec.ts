@@ -31,12 +31,6 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
   })
 
   it('Create values.yaml Secret', () => {
-    cy.contains('local')
-      .click();
-    cy.get('.header-buttons > :nth-child(1) > .icon')
-      .click();
-    cy.contains('Import YAML');
-
     var encodedData = ''
     cy.readFile('./fixtures/capv-helm-values.yaml').then((data) => {
       data = data.replace(/replace_vsphere_server/g, JSON.stringify(vsphere_secrets_json.vsphere_server))
@@ -60,14 +54,9 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
     })
 
     cy.readFile('./fixtures/capv-helm-values-secret.yaml').then((data) => {
-      cy.get('.CodeMirror')
-        .then((editor) => {
-          data = data.replace(/replace_values/g, encodedData)
-          editor[0].CodeMirror.setValue(data);
-        })
+      data = data.replace(/replace_values/g, encodedData)
+      cy.importYAML(data)
     });
-    cy.clickButton('Import');
-    cy.clickButton('Close');
   })
 
   // TODO: Create Provider via UI, ref: capi-ui-extension/issues/128
