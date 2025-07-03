@@ -30,12 +30,35 @@ describe('Enable CAPI Providers', () => {
   const vsphereProvider = 'vsphere'
 
   // Expected provider versions
-  const kubeadmProviderVersion = 'v1.9.5'
-  const fleetProviderVersion = 'v0.11.0'
-  const vsphereProviderVersion = 'v1.12.0'
-  const amazonProviderVersion = 'v2.8.1'
-  const googleProviderVersion = 'v1.10.0'
-  const azureProviderVersion = 'v1.19.1'
+  const providerVersions = {
+    prod: {
+      kubeadm: 'v1.9.5',
+      fleet: 'v0.11.0',
+      vsphere: 'v1.12.0',
+      amazon: 'v2.8.1',
+      google: 'v1.10.0',
+      azure: 'v1.19.1'
+    },
+    dev: {
+      kubeadm: 'v1.9.5',
+      fleet: 'v0.11.0',
+      vsphere: 'v1.12.0',
+      amazon: 'v2.8.1',
+      google: 'v1.10.0',
+      azure: 'v1.19.1'
+    }
+  }
+
+  // Set the provider versions based on the environment
+  const buildType = Cypress.env('chartmuseum_repo') ? 'dev' : 'prod';
+
+  // Assign the provider versions based on the build type
+  const kubeadmProviderVersion = providerVersions[buildType].kubeadm
+  const fleetProviderVersion = providerVersions[buildType].fleet
+  const vsphereProviderVersion = providerVersions[buildType].vsphere
+  const amazonProviderVersion = providerVersions[buildType].amazon
+  const googleProviderVersion = providerVersions[buildType].google
+  const azureProviderVersion = providerVersions[buildType].azure
 
   const kubeadmBaseURL = 'https://github.com/kubernetes-sigs/cluster-api/releases/'
   const kubeadmProviderTypes = ['bootstrap', 'control plane']
