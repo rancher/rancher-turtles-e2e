@@ -97,7 +97,7 @@ on:
         type: string
       zone:
         description: GCP zone to host the runner
-        default: asia-south2-a
+        default: asia-south1-a
         type: string
       qase_run_id:
         description: Qase run ID to use for reporting
