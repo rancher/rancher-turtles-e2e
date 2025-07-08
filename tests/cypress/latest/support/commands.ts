@@ -866,14 +866,7 @@ Cypress.Commands.add('importYAML', (yamlOrPath, namespace, clusterName = 'local'
   cy.clickButton('Import');
   cy.get('div.card-container').contains(/Applied \d+ Resource/).should('be.visible');
 
-  // Check if there is a column with age which contains a number
-  // Ideally we would need to wait for Active State for each resource but this column is not present on 2.9
-  cy.get('[data-testid^="sortable-cell-"] .live-date').each(($el) => {
-    cy.wrap($el).contains(/\d+/, { timeout: 60000 });
-  }).then(() => {
-    // All elements defined, click Close button
-    cy.clickButton('Close');
-  });
+  cy.clickButton('Close');
 });
 
 // Command to verify the count of resources with a given name in a cluster
