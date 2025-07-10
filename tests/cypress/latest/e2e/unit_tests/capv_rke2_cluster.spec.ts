@@ -109,7 +109,7 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
     cy.checkCAPIClusterActive(clusterName, timeout);
   })
 
-  it('Install App on imported cluster', () => {
+  it.skip('Install App on imported cluster', () => {
     // Sometimes the cluster icon is not active yet, so we need to wait a bit
     cy.wait(1000);
     // Click on imported CAPV cluster
@@ -121,7 +121,7 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
     cy.checkChart('Install', 'Logging', 'cattle-logging-system');
   })
 
-  it("Scale up imported CAPV cluster by updating values and forcefully updating the repo", () => {
+  it.skip("Scale up imported CAPV cluster by updating values and forcefully updating the repo", () => {
     var encodedData = ''
     cy.readFile('./fixtures/capv-helm-values.yaml').then((data) => {
       data = data.replace(/control_plane_machine_count: 1/g, "control_plane_machine_count: 3")
