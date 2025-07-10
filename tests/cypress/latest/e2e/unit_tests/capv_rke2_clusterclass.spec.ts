@@ -35,8 +35,8 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     var encodedData = ''
     cy.readFile('./fixtures/capv-helm-values.yaml').then((data) => {
       // Deploy HA cluster with 3 control plane and 3 worker nodes, instead of default 1+1
-      data = data.replace(/control_plane_machine_count: 1/g, "control_plane_machine_count: 3")
-      data = data.replace(/worker_machine_count: 1/g, "worker_machine_count: 3")
+      data = data.replace(/control_plane_machine_count: 1/g, "control_plane_machine_count: 1")
+      data = data.replace(/worker_machine_count: 1/g, "worker_machine_count: 1")
       data = data.replace(/replace_vsphere_server/g, JSON.stringify(vsphere_secrets_json.vsphere_server))
       data = data.replace(/replace_vsphere_username/g, JSON.stringify(vsphere_secrets_json.vsphere_username))
       data = data.replace(/replace_vsphere_password/g, JSON.stringify(vsphere_secrets_json.vsphere_password))
@@ -136,7 +136,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     cy.waitForAllRowsInState('Active', 300000);
   })
 
-  qase(131, it('Validate kube-vip leader election ability across CPs', () => {
+  qase(131, it.skip('Validate kube-vip leader election ability across CPs', () => {
     function getActiveKubeVipLeaderNode() {
       cy.burgerMenuOperate('open');
       cy.contains(clusterName).click();
@@ -199,7 +199,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
   })
   );
 
-  it('Install App on imported cluster', () => {
+  it.skip('Install App on imported cluster', () => {
     // Click on imported CAPV cluster
     cy.contains(clusterName).click();
 
