@@ -28,8 +28,6 @@ spec:
       value: {{ $cluster_name }}
     - name: azureClusterIdentityName
       value: cluster-identity
-    - name: registrationMethod
-      value: {{ .Values.rke2RegistrationMethod }}
     version: {{ .Values.kubernetesVersion }}
     workers:
       machineDeployments:
