@@ -31,12 +31,13 @@ describe('Enable CAPI Providers', () => {
 
   // Expected provider versions
   const providerVersions = {
+    // Latest turtles release
     prod: {
       kubeadm: 'v1.9.5',
       fleet: 'v0.11.0',
       vsphere: 'v1.12.0',
       amazon: 'v2.8.1',
-      google: 'v1.10.0',
+      google: 'v1.9.0',
       azure: 'v1.19.1'
     },
     dev: {

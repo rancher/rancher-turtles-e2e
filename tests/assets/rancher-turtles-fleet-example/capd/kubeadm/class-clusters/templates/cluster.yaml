@@ -6,7 +6,6 @@ metadata:
   name: {{ $cluster_name }}
   labels:
     cni: calico
-    cluster-api.cattle.io/rancher-auto-import: "true"
 spec:
   clusterNetwork:
     pods:
@@ -40,4 +39,4 @@ spec:
       machineDeployments:
       - class: default-worker
         name: md-0
-        replicas: 3
+        replicas: 2
