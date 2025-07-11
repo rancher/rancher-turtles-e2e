@@ -1,10 +1,9 @@
 import '~/support/commands';
-import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
-describe('Import CAPG Kubeadm Cluster', { tags: '@full' }, () => {
+describe('Import CAPG Kubeadm Class-Cluster', { tags: '@full' }, () => {
   var clusterName: string
   const timeout = 1200000
   const className = 'gcp-kubeadm-example'
