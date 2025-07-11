@@ -19,8 +19,8 @@ on:
         default: none
         type: string
       rancher_version:
-        description: Rancher Manager channel/version/head_version to use for installation
-        default: latest/devel/2.11
+        description: Rancher Manager channel/<version|head_version>[/head_version] to use for installation
+        default: head/2.11
         type: string
       turtles_operator_version:
         description: Rancher Turtles operator version to test (eg. 0.16.0)
@@ -72,7 +72,7 @@ jobs:
       cluster_name: cluster-k3s
       destroy_runner: ${{ github.event_name == 'schedule' && true || inputs.destroy_runner }}
       capi_ui_version: ${{ inputs.capi_ui_version }}
-      rancher_version: ${{ inputs.rancher_version || 'latest/devel/2.11' }}
+      rancher_version: ${{ inputs.rancher_version || 'head/2.11' }}
       qase_run_id: ${{ inputs.qase_run_id || 'auto' }}
       grep_test_by_tag: ${{ inputs.grep_test_by_tag || (github.event.schedule == '0 3 * * *' && '@install @short') || (github.event.schedule == '0 4 * * *' && '@install @vsphere') || (github.event.schedule == '0 5 * * 6' && '@install @full') }}
       operator_dev_chart: ${{ inputs.operator_dev_chart == true || (github.event_name == 'schedule' && true) }}

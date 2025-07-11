@@ -7,7 +7,7 @@ toolchain go1.23.3
 require (
 	github.com/onsi/ginkgo/v2 v2.22.0
 	github.com/onsi/gomega v1.34.2
-	github.com/rancher-sandbox/ele-testhelpers v0.0.0-20250415062725-efdf8e57c793
+	github.com/rancher-sandbox/ele-testhelpers v0.0.0-20250711071119-c33617a1af7a
 	github.com/rancher-sandbox/qase-ginkgo v1.0.1
 	github.com/sirupsen/logrus v1.9.3
 )
