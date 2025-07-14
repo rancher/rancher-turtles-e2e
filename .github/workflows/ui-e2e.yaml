@@ -45,6 +45,13 @@ on:
         description: Skip CAPI cluster and fleet repo deletion tests
         default: false
         type: boolean
+      runner_template:
+        description: Runner template to use
+        default: capi-e2e-ci-runner-spot-n2-highmem-16-template-v3
+        type: choice
+        options:
+          - capi-e2e-ci-runner-spot-n2-highmem-16-template-v3
+          - capi-e2e-ci-runner-standard-n2-highmem-4-template-v4
   schedule:
     - cron: '0 3 * * *' # @short
     - cron: '0 4 * * *' # @vsphere
@@ -78,3 +85,4 @@ jobs:
       operator_dev_chart: ${{ inputs.operator_dev_chart == true || (github.event_name == 'schedule' && true) }}
       turtles_operator_version: ${{ inputs.turtles_operator_version }}
       skip_cluster_delete: ${{ inputs.skip_cluster_delete || (github.event_name == 'schedule' && false) }}
+      runner_template: ${{ inputs.runner_template || 'capi-e2e-ci-runner-spot-n2-highmem-16-template-v3' }}
