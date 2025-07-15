@@ -38,15 +38,15 @@ describe('Import CAPD Kubeadm', { tags: '@short' }, () => {
     cy.burgerMenuOperate('open');
   });
 
-  qase(92,
-    it('Add CAPD Kubeadm ClusterClass using fleet', () => {
-      cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
-      // Go to CAPI > ClusterClass to ensure the clusterclass is created
-      cy.checkCAPIClusterClass(className);
-    })
-  );
-
   pathNames.forEach((path) => {
+    qase(92,
+      it('Add CAPD Kubeadm ClusterClass using fleet', () => {
+        cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
+        // Go to CAPI > ClusterClass to ensure the clusterclass is created
+        cy.checkCAPIClusterClass(className);
+      })
+    );
+
     const clustersRepoName = path + namePrefix
 
     it('Setup the namespace for importing', () => {

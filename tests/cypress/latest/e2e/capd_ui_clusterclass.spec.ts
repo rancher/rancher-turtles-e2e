@@ -26,8 +26,8 @@ describe('Create CAPD', { tags: '@short' }, () => {
   const pathNames = ['kubeadm'] // TODO: Add rke2 path (capi-ui-extension/issues/121)
   const namespace = 'capi-classes' // TODO: Change to capi-clusters (capi-ui-extension/issues/111)
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
-  const classesPath = 'examples/clusterclasses/docker/kubeadm'
-  const clusterClassRepoName = "docker-kb-clusterclass"
+  const classesPath = 'examples/clusterclasses/docker/'
+  const clusterClassRepoName = "docker-ui-clusterclass"
 
   beforeEach(() => {
     cy.login();
@@ -44,8 +44,8 @@ describe('Create CAPD', { tags: '@short' }, () => {
       cy.importYAML('fixtures/kindnet.yaml', namespace);
     })
 
-    it('Add CAPD Kubeadm ClusterClass using fleet', () => {
-      cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, namespace)
+    it('Add CAPD ClusterClass fleet repo', () => {
+      cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath + path, namespace)
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(className);
     })
@@ -98,7 +98,7 @@ describe('Create CAPD', { tags: '@short' }, () => {
         cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'ClusterResourceSets'], "docker-kubeadm-example-crs-0", namespace);
       })
 
-      it('Remove the CAPD Kubeadm ClusterClass fleet repo', () => {
+      it('Remove the CAPD ClusterClass fleet repo', () => {
         cy.removeFleetGitRepo(clusterClassRepoName)
       })
     }
