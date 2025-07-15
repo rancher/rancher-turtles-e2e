@@ -25,6 +25,9 @@ describe('Create CAPD', { tags: '@short' }, () => {
   const k8sVersion = 'v1.31.4'
   const pathNames = ['kubeadm'] // TODO: Add rke2 path (capi-ui-extension/issues/121)
   const namespace = 'capi-classes' // TODO: Change to capi-clusters (capi-ui-extension/issues/111)
+  const turtlesRepoUrl = 'https://github.com/rancher/turtles'
+  const classesPath = 'examples/clusterclasses/docker/kubeadm'
+  const clusterClassRepoName = "docker-kb-clusterclass"
 
   beforeEach(() => {
     cy.login();
@@ -39,6 +42,12 @@ describe('Create CAPD', { tags: '@short' }, () => {
 
     it('Create Kindnet configmap', () => {
       cy.importYAML('fixtures/kindnet.yaml', namespace);
+    })
+
+    it('Add CAPD Kubeadm ClusterClass using fleet', () => {
+      cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, namespace)
+      // Go to CAPI > ClusterClass to ensure the clusterclass is created
+      cy.checkCAPIClusterClass(className);
     })
 
     qase(44,
@@ -87,6 +96,10 @@ describe('Create CAPD', { tags: '@short' }, () => {
       it('Delete the Kindnet Config Map', () => {
         cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'ConfigMaps'], "cni-docker-kubeadm-example-crs-0", namespace);
         cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'ClusterResourceSets'], "docker-kubeadm-example-crs-0", namespace);
+      })
+
+      it('Remove the CAPD Kubeadm ClusterClass fleet repo', () => {
+        cy.removeFleetGitRepo(clusterClassRepoName)
       })
     }
   })
