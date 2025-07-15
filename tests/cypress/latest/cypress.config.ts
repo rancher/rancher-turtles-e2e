@@ -36,6 +36,6 @@ export default defineConfig({
     screenshotsFolder: './screenshots',
     videosFolder: './videos',
     downloadsFolder: './downloads',
-    specPattern: 'e2e/unit_tests/*.spec.ts',
+    specPattern: 'e2e/*.spec.ts',
   },
 })

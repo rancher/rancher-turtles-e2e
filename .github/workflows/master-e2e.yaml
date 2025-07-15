@@ -396,29 +396,23 @@ jobs:
           TURTLES_OPERATOR_VERSION: ${{inputs.turtles_operator_version}}
           SKIP_CLUSTER_DELETE: ${{ inputs.skip_cluster_delete }}
           SPEC: |
-            e2e/unit_tests/first_connection.spec.ts
-            e2e/unit_tests/turtles_operator.spec.ts
-            e2e/unit_tests/turtles_extension.spec.ts
-            e2e/unit_tests/menu.spec.ts
-            e2e/unit_tests/providers_setup.spec.ts
-            e2e/unit_tests/capd_kubeadm_cluster.spec.ts
-            e2e/unit_tests/capd_rke2_cluster.spec.ts
-            e2e/unit_tests/capd_ui_clusterclass.spec.ts
-            e2e/unit_tests/capv_rke2_cluster.spec.ts
-            e2e/unit_tests/capa_eks_cluster.spec.ts
-            e2e/unit_tests/capa_rke2_cluster.spec.ts
-            e2e/unit_tests/capa_kubeadm_cluster.spec.ts
-            e2e/unit_tests/capz_aks_cluster.spec.ts
-            e2e/unit_tests/capz_rke2_v2prov_cluster.spec.ts
-            e2e/unit_tests/capg_gke_cluster.spec.ts
-            e2e/unit_tests/capg_kubeadm_clusterclass.spec.ts
-            e2e/unit_tests/capv_rke2_clusterclass.spec.ts
-            e2e/unit_tests/capv_kubeadm_clusterclass.spec.ts
-            e2e/unit_tests/capa_rke2_clusterclass.spec.ts
-            e2e/unit_tests/capa_kubeadm_clusterclass.spec.ts
-            e2e/unit_tests/capz_aks_clusterclass.spec.ts
-            e2e/unit_tests/capz_rke2_clusterclass.spec.ts
-            e2e/unit_tests/capz_kubeadm_clusterclass.spec.ts
+            e2e/first_connection.spec.ts
+            e2e/turtles_operator.spec.ts
+            e2e/turtles_extension.spec.ts
+            e2e/menu.spec.ts
+            e2e/providers_setup.spec.ts
+            e2e/capd_kubeadm_cluster.spec.ts
+            e2e/capd_rke2_cluster.spec.ts
+            e2e/capd_ui_clusterclass.spec.ts
+            e2e/capv_rke2_clusterclass.spec.ts
+            e2e/capv_kubeadm_clusterclass.spec.ts
+            e2e/capa_rke2_clusterclass.spec.ts
+            e2e/capa_kubeadm_clusterclass.spec.ts
+            e2e/capg_kubeadm_clusterclass.spec.ts
+            e2e/capz_aks_clusterclass.spec.ts
+            e2e/capz_rke2_clusterclass.spec.ts
+            e2e/capz_kubeadm_clusterclass.spec.ts
+            e2e/capz_rke2_v2prov_cluster.spec.ts
           UI_ACCOUNT: ${{ inputs.ui_account }}
           UPGRADE_OS_CHANNEL: ${{ inputs.upgrade_os_channel }}
         run: |
