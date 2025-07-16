@@ -40,15 +40,15 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
     cy.burgerMenuOperate('open');
   });
 
-  pathNames.forEach((path) => {
-    qase(91,
-      it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
-        cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
-        // Go to CAPI > ClusterClass to ensure the clusterclass is created
-        cy.checkCAPIClusterClass(className);
-      })
-    );
+  qase(91,
+    it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
+      cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
+      // Go to CAPI > ClusterClass to ensure the clusterclass is created
+      cy.checkCAPIClusterClass(className);
+    })
+  );
 
+  pathNames.forEach((path) => {
     const clustersRepoName = path + namePrefix
 
     it('Setup the namespace for importing', () => {
@@ -184,9 +184,12 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
         })
       );
 
-      it('Remove CAPD RKE2 ClusterClass Fleet Repo', () => {
-        cy.removeFleetGitRepo(clusterClassRepoName)
-      })
     }
-  })
+  });
+
+  if (skipClusterDeletion) {
+    it('Remove CAPD RKE2 ClusterClass Fleet Repo', () => {
+      cy.removeFleetGitRepo(clusterClassRepoName)
+    })
+  }
 });
