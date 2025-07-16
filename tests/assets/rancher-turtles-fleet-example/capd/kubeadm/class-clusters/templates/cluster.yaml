@@ -6,7 +6,6 @@ metadata:
   name: {{ $cluster_name }}
   labels:
     cni: calico
-    cluster-api.cattle.io/rancher-auto-import: "true"
 spec:
   clusterNetwork:
     pods:
