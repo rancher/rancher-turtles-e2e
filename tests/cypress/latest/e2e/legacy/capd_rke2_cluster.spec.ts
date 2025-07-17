@@ -17,19 +17,14 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
-describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
+describe('Import CAPD RKE2', { tags: '@short' }, () => {
   var clusterName: string
   const timeout = 600000
-  const className = 'docker-rke2-example'
+  const clusterNamePrefix = 'docker-rke2-cluster' // as per fleet values
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
-  const path = '/tests/assets/rancher-turtles-fleet-example/capd/rke2/class-clusters'
+  const path = '/tests/assets/rancher-turtles-fleet-example/capd/rke2/clusters'
   const branch = 'main'
-  const questions = [{ menuEntry: 'Rancher Turtles Features Settings', inputBoxTitle: 'Kubectl Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.31.0' }];
-
-  const turtlesRepoUrl = 'https://github.com/rancher/turtles'
-  const classesPath = 'examples/clusterclasses/docker/rke2'
-  const clustersRepoName = 'docker-rke2-class-clusters'
-  const clusterClassRepoName = "docker-rke2-clusterclass"
+  const clustersRepoName = 'docker-rke2-clusters'
 
   beforeEach(() => {
     cy.login();
@@ -37,24 +32,16 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
   });
 
   it('Setup the namespace for importing', () => {
-    cy.namespaceAutoImport('Disable');
+    cy.namespaceAutoImport('Enable');
   })
 
-  qase(91,
-    it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
-      cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
-      // Go to CAPI > ClusterClass to ensure the clusterclass is created
-      cy.checkCAPIClusterClass(className);
-    })
-  );
-
-  qase(29,
+  qase(30,
     it('Add CAPD cluster fleet repo and get cluster name', () => {
       cypressLib.checkNavIcon('cluster-management').should('exist');
       cy.addFleetGitRepo(clustersRepoName, repoUrl, branch, path);
 
-      // Check CAPI cluster using its name prefix i.e. className
-      cy.checkCAPICluster(className);
+      // Check CAPI cluster using its name prefix
+      cy.checkCAPICluster(clusterNamePrefix);
       // Get the cluster name by its prefix and use it across the test
       cy.getBySel('sortable-cell-0-1').then(($cell) => {
         clusterName = $cell.text();
@@ -63,7 +50,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
     })
   );
 
-  qase(101,
+  qase(100,
     it('Auto import child CAPD cluster', () => {
       // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
       cy.checkCAPIClusterProvisioned(clusterName, timeout);
@@ -95,8 +82,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
   );
 
   qase(8,
-    // TODO: rancher-turtles-e2e/issues/224
-    xit('Scale up imported CAPD cluster', () => {
+    it('Scale up imported CAPD cluster', () => {
       // Access CAPI cluster
       cy.checkCAPIMenu();
       cy.contains('Machine Deployments').click();
@@ -120,19 +106,8 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
     })
   );
 
-  qase(41,
-    it('Update chart and check cluster status', () => {
-      cy.contains('local').click();
-      cy.checkChart('Update', 'Rancher Turtles', 'rancher-turtles-system', '', questions);
-
-      // Check cluster is Active
-      cy.searchCluster(clusterName);
-      cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
-    })
-  );
-
   if (skipClusterDeletion) {
-    qase(103,
+    qase(9,
       it('Remove imported CAPD cluster from Rancher Manager', { retries: 1 }, () => {
         // Check cluster is not deleted after removal
         cy.deleteCluster(clusterName);
@@ -144,7 +119,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
       })
     );
 
-    qase(104,
+    qase(10,
       it('Delete the CAPD fleet repos', () => {
         // Remove the clusters fleet repo
         cy.removeFleetGitRepo(clustersRepoName);
@@ -152,9 +127,6 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
         // Wait until the following returns no clusters found
         // This is checked by ensuring the cluster is not available in CAPI menu
         cy.checkCAPIClusterDeleted(clusterName, timeout);
-
-        // Remove the clusterclass repo
-        cy.removeFleetGitRepo(clusterClassRepoName);
 
         // Ensure the cluster is not available in navigation menu
         cy.getBySel('side-menu').then(($menu) => {
