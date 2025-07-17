@@ -5,7 +5,7 @@ import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
-  var clusterName: string
+  let clusterName: string
   const timeout = 1200000
   const className = 'aws-kubeadm-example'
   const repoName = 'class-clusters-aws-kb'

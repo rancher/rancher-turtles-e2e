@@ -1,10 +1,9 @@
 import '~/support/commands';
-import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
-  var clusterName: string;
+  let clusterName: string;
   const timeout = 1200000
   const namespace = 'capz-system'
   const repoName = 'class-clusters-azure-kubeadm'

@@ -1,0 +1,30 @@
+name: Lint
+
+on:
+  pull_request:
+
+jobs:
+  cypress-lint:
+    runs-on: ubuntu-latest
+    env:
+      NODE_VERSION: current
+      WORKING_DIR: tests/cypress/latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install npm
+        run: |
+          cd ${{ env.WORKING_DIR }}
+          npm install --save-dev
+          npm ls --depth=0
+
+      - name: Analysis
+        run: |
+          cd ${{ env.WORKING_DIR }}
+          npm run lint

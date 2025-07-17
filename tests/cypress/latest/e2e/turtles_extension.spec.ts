@@ -35,7 +35,7 @@ describe('Install CAPI extension - @install', { tags: '@install' }, () => {
 
       cy.getBySel('extension-card-install-btn-capi').click();
 
-      var capiUIVersion = Cypress.env('capi_ui_version')
+      const capiUIVersion = Cypress.env('capi_ui_version')
       // if the env var is empty or not defined at all; use the latest version
       if (capiUIVersion != "" && capiUIVersion != undefined) {
         cy.getBySel('install-ext-modal-select-version').click();

@@ -59,7 +59,7 @@ describe('Import/Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
   })
   );
 
-  var fleetClusterName: string;
+  let fleetClusterName: string;
   qase(55, it('Add GitRepo for cluster and get cluster name', () => {
     cy.addFleetGitRepo(repoName, repoUrl, branch, path);
     // Check CAPI cluster using its name prefix i.e. className
