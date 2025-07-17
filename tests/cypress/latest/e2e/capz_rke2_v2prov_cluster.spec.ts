@@ -5,7 +5,7 @@ import * as randomstring from "randomstring";
 
 Cypress.config();
 describe('Create Azure RKE2 Cluster', { tags: '@full' }, () => {
-  var userID: any, ccID: string;
+  let userID: string, ccID: string;
   const timeout = 1200000
   const userName = 'admin'
   const k8sVersion = 'v1.31.7+rke2r1'
@@ -22,7 +22,7 @@ describe('Create Azure RKE2 Cluster', { tags: '@full' }, () => {
     cy.typeInFilter(userName);
     // Get the user id
     cy.getBySel('sortable-cell-0-1').then(($cell) => {
-      userID = $cell.text();
+      userID = String($cell.text());
       cy.log('User ID:', userID);
     });
 

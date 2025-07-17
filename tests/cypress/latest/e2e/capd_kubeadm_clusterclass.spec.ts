@@ -18,7 +18,7 @@ import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
-  var clusterName: string
+  let clusterName: string
   const timeout = 600000
   const className = 'docker-kubeadm-example'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
@@ -106,7 +106,7 @@ describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
       cy.contains('View YAML').click();
       const annotation = 'provisioning.cattle.io/externally-managed: \'true\'';
       cy.get('.CodeMirror').then((editor) => {
-        var text = editor[0].CodeMirror.getValue();
+        const text = editor[0].CodeMirror.getValue();
         expect(text).to.include(annotation);
       });
     })
@@ -134,7 +134,7 @@ describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
         .click();
       cy.get('.CodeMirror')
         .then((editor) => {
-          var text = editor[0].CodeMirror.getValue();
+          let text = editor[0].CodeMirror.getValue();
           text = text.replace(/replicas: 2/g, 'replicas: 3');
           editor[0].CodeMirror.setValue(text);
           cy.clickButton('Save');

@@ -5,7 +5,7 @@ import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPA RKE2 Cluster', { tags: '@full' }, () => {
-  var clusterName: string
+  let clusterName: string
   const timeout = 1200000
   const repoName = 'clusters-aws-rke2'
   const clusterNamePrefix = 'turtles-qa-aws-rke2' // as per fleet values
@@ -28,8 +28,8 @@ describe('Import CAPA RKE2 Cluster', { tags: '@full' }, () => {
     cy.contains('local').click();
     cy.accesMenuSelection(['More Resources', 'Fleet', 'HelmApps']);
     ['aws-ccm', 'aws-csi-driver'].forEach((app) => {
-        cy.typeInFilter(app);
-        cy.getBySel('sortable-cell-0-1').should('exist');
+      cy.typeInFilter(app);
+      cy.getBySel('sortable-cell-0-1').should('exist');
     })
   })
 
@@ -40,7 +40,7 @@ describe('Import CAPA RKE2 Cluster', { tags: '@full' }, () => {
 
       // Add CAPA fleet repository
       cy.addFleetGitRepo(repoName, repoUrl, branch, path);
-    // Check CAPI cluster using its name prefix
+      // Check CAPI cluster using its name prefix
       cy.checkCAPICluster(clusterNamePrefix);
 
       // Get the cluster name by its prefix and use it across the test

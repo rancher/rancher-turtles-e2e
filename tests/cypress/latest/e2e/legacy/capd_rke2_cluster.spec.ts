@@ -18,7 +18,7 @@ import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPD RKE2', { tags: '@short' }, () => {
-  var clusterName: string
+  let clusterName: string
   const timeout = 600000
   const clusterNamePrefix = 'docker-rke2-cluster' // as per fleet values
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
@@ -92,7 +92,7 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
         .click();
       cy.get('.CodeMirror')
         .then((editor) => {
-          var text = editor[0].CodeMirror.getValue();
+          let text = editor[0].CodeMirror.getValue();
           text = text.replace(/replicas: 2/g, 'replicas: 3');
           editor[0].CodeMirror.setValue(text);
           cy.clickButton('Save');

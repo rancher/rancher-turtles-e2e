@@ -15,16 +15,24 @@ import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
+import { Question } from '~/support/structs';
+
 
 Cypress.config();
 describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
-  var clusterName: string
+  let clusterName: string
   const timeout = 600000
   const className = 'docker-rke2-example'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const path = '/tests/assets/rancher-turtles-fleet-example/capd/rke2/class-clusters'
   const branch = 'main'
-  const questions = [{ menuEntry: 'Rancher Turtles Features Settings', inputBoxTitle: 'Kubectl Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.31.0' }];
+  const questions: Question[] = [
+    {
+      menuEntry: 'Rancher Turtles Features Settings',
+      inputBoxTitle: 'Kubectl Image',
+      inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.31.0'
+    }
+  ];
 
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/docker/rke2'
@@ -106,7 +114,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
         .click();
       cy.get('.CodeMirror')
         .then((editor) => {
-          var text = editor[0].CodeMirror.getValue();
+          let text = editor[0].CodeMirror.getValue();
           text = text.replace(/replicas: 2/g, 'replicas: 3');
           editor[0].CodeMirror.setValue(text);
           cy.clickButton('Save');

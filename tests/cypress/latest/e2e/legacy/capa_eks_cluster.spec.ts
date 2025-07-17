@@ -5,7 +5,7 @@ import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPA EKS Cluster', { tags: '@full' }, () => {
-  var clusterName: string
+  let clusterName: string
   const timeout = 1200000
   const repoName = 'clusters-aws-eks'
   const clusterNamePrefix = 'turtles-qa-aws-eks' // as per fleet values

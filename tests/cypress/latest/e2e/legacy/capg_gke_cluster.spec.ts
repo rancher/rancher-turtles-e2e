@@ -5,7 +5,7 @@ import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPG GKE Cluster', { tags: '@full' }, () => {
-  var clusterName: string
+  let clusterName: string
   const timeout = 1200000
   const repoName = 'clusters-gcp-gke'
   const clusterNamePrefix = 'turtles-qa-gcp-gke' // as per fleet values

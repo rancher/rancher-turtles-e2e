@@ -38,7 +38,7 @@ describe('Install Turtles Operator - @install', { tags: '@install' }, () => {
   })
 
   it('Add turtles repo', { retries: 2 }, () => {
-    var turtlesHelmRepo = Cypress.env('chartmuseum_repo')
+    let turtlesHelmRepo = Cypress.env('chartmuseum_repo')
     // if the env var is empty or not defined at all; use the normal repo
     if (turtlesHelmRepo == '') {
       turtlesHelmRepo = 'https://rancher.github.io/turtles/'
@@ -52,10 +52,10 @@ describe('Install Turtles Operator - @install', { tags: '@install' }, () => {
     it('Install Turtles operator', { retries: 1 }, () => {
       cy.contains('local').click();
 
-      var turtlesVersion = Cypress.env('turtles_operator_version')
+      let turtlesVersion = Cypress.env('turtles_operator_version')
 
       // if operator dev chart is to be used, ignore the turtles version
-      var turtlesHelmRepo = Cypress.env('chartmuseum_repo')
+      const turtlesHelmRepo = Cypress.env('chartmuseum_repo')
       if (turtlesHelmRepo != "" && turtlesHelmRepo != undefined) {
         turtlesVersion = ""
       }

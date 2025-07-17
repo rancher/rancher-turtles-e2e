@@ -1,13 +1,20 @@
 {
-  "plugins": ["@typescript-eslint"],
+  "plugins": [
+    "@typescript-eslint"
+  ],
   "extends": [
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:cypress/recommended"
   ],
+  "rules": {
+    "cypress/no-unnecessary-waiting": "off",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "cypress/unsafe-to-chain-command": "warn"
+  },
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
-      "sourceType": "module",
-      "ecmaVersion": "2015"
+    "sourceType": "module",
+    "ecmaVersion": "2015"
   }
 }

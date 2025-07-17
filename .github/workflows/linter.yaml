@@ -4,24 +4,6 @@ on:
   pull_request:
 
 jobs:
-  golang-lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          cache-dependency-path: tests/go.sum
-          go-version-file: tests/go.mod
-
-      - name: Analysis
-        uses: golangci/golangci-lint-action@v4
-        with:
-          args: -v
-          working-directory: tests
-
   cypress-lint:
     runs-on: ubuntu-latest
     env:

@@ -5,7 +5,7 @@ import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPZ AKS Cluster', { tags: '@full' }, () => {
-  var clusterName: string
+  let clusterName: string
   const timeout = 1200000
   const repoName = 'clusters-azure-aks'
   const clusterNamePrefix = 'turtles-qa-azure-aks' // as per fleet values
@@ -85,7 +85,7 @@ describe('Import CAPZ AKS Cluster', { tags: '@full' }, () => {
       // This is checked by ensuring the cluster is not available in navigation menu
       cy.contains(clusterName).should('not.exist');
       cy.checkCAPIClusterProvisioned(clusterName);
-  
+
     })
     );
 

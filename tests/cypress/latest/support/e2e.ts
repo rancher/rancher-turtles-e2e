@@ -15,7 +15,7 @@ limitations under the License.
 import './commands';
 import yaml from 'js-yaml';
 import './capz_support';
-import { ClusterClassVariablesInput } from './structs';
+import { ClusterClassVariablesInput, Question } from './structs';
 
 declare global {
   // In Cypress functions should be declared with 'namespace'
@@ -35,7 +35,7 @@ declare global {
       waitForAllRowsInState(desiredState: string, timeout?: number): Chainable<Element>;
       accesMenuSelection(menuPaths: string[]): Chainable<Element>;
       burgerMenuOperate(operation: 'open' | 'close'): Chainable<Element>;
-      checkChart(operation: string, chartName: string, namespace: string, version?: string, questions?: any, refreshRepo?: boolean): Chainable<Element>;
+      checkChart(operation: string, chartName: string, namespace: string, version?: string, questions?: Question[], refreshRepo?: boolean): Chainable<Element>;
       deleteCluster(clusterName: string, timeout?: number): Chainable<Element>;
       searchCluster(clusterName: string): Chainable<Element>;
       createNamespace(namespace: string): Chainable<Element>;
@@ -98,7 +98,7 @@ require('cypress-dark');
 require('cy-verify-downloads').addCustomCommand();
 require('cypress-plugin-tab');
 require('@rancher-ecp-qa/cypress-library');
-// @ts-ignore
+// @ts-expect-error ignore the error
 import registerCypressGrep from '@cypress/grep'
 registerCypressGrep()
 
