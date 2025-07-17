@@ -35,9 +35,9 @@ describe('Create CAPD', { tags: '@short' }, () => {
   });
 
   pathNames.forEach((path) => {
+    let serviceCIDR: string
     if (path.includes('kubeadm')) {
-      var podCIDR = '192.168.0.0/16'
-      var serviceCIDR = '10.128.0.0/12'
+      serviceCIDR = '10.128.0.0/12'
     }
 
     it('Create Kindnet configmap', () => {
@@ -53,7 +53,7 @@ describe('Create CAPD', { tags: '@short' }, () => {
     qase(44,
       it('Create child CAPD cluster from Clusterclass', () => {
         const machines: Record<string, string> = { 'md-0': 'default-worker' }
-        cy.createCAPICluster(className, clusterName, machines, k8sVersion, podCIDR, serviceCIDR);
+        cy.createCAPICluster(className, clusterName, machines, k8sVersion, '192.168.0.0/16', serviceCIDR);
 
         // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
         cy.checkCAPIClusterActive(clusterName, timeout);

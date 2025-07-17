@@ -47,7 +47,7 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
   })
 
   it('Create values.yaml Secret', () => {
-    var encodedData = ''
+    let encodedData = ''
     cy.readFile('./fixtures/capv-helm-values.yaml').then((data) => {
       data = data.replace(/replace_vsphere_server/g, JSON.stringify(vsphere_secrets_json.vsphere_server))
       data = data.replace(/replace_vsphere_username/g, JSON.stringify(vsphere_secrets_json.vsphere_username))
@@ -122,7 +122,7 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
   })
 
   it("Scale up imported CAPV cluster by updating values and forcefully updating the repo", () => {
-    var encodedData = ''
+    let encodedData = ''
     cy.readFile('./fixtures/capv-helm-values.yaml').then((data) => {
       data = data.replace(/control_plane_machine_count: 1/g, "control_plane_machine_count: 3")
       data = data.replace(/worker_machine_count: 1/g, "worker_machine_count: 3")

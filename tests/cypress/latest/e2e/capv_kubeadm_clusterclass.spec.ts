@@ -31,7 +31,7 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
   })
 
   it('Create values.yaml Secret', () => {
-    var encodedData = ''
+    let encodedData = ''
     cy.readFile('./fixtures/capv-helm-values.yaml').then((data) => {
       data = data.replace(/replace_vsphere_server/g, JSON.stringify(vsphere_secrets_json.vsphere_server))
       data = data.replace(/replace_vsphere_username/g, JSON.stringify(vsphere_secrets_json.vsphere_username))

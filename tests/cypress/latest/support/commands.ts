@@ -47,7 +47,7 @@ Cypress.Commands.add('setAutoImport', (mode) => {
   // If the desired mode is already in place, then simply reload the page.
   cy.getBySel('sortable-table-0-action-button').click();
 
-  var dropdownLabel = '.popperContainer'
+  const dropdownLabel = '.popperContainer'
   cy.get(dropdownLabel).then(($list) => {
     if ($list.text().includes(mode + ' CAPI Auto-Import')) {
       cy.contains(mode + ' CAPI Auto-Import').click();
@@ -262,7 +262,7 @@ Cypress.Commands.add('addInfraProvider', (providerType, name, namespace, cloudCr
   cy.checkCAPIMenu();
   cy.contains('Providers').click();
   cy.clickButton('Create');
-  var selector = 'select-icon-grid-' + providerType
+  const selector = 'select-icon-grid-' + providerType
   cy.getBySel(selector).click();
   cy.contains('Provider: Create ' + providerType, { matchCase: false }).should('be.visible');
 
@@ -464,7 +464,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
       cy.contains('Customize install settings').should('be.visible').click();
     }
 
-    questions.forEach((question: { menuEntry: string; checkbox: string; inputBoxTitle: string; inputBoxValue: string; }) => {
+    questions.forEach((question) => {
       if (question.checkbox) {
         cy.contains('a', question.menuEntry).click();
         cy.contains(question.checkbox).click(); // TODO make sure the checkbox is enabled

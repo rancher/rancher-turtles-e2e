@@ -5,7 +5,7 @@ import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPA Kubeadm Cluster', { tags: '@full' }, () => {
-  var clusterName: string
+  let clusterName: string
   const timeout = 1200000
   const repoName = 'clusters-aws-kb'
   const clusterNamePrefix = 'turtles-qa-aws-kb' // as per fleet values

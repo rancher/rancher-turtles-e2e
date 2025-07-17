@@ -32,7 +32,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
   })
 
   it('Create values.yaml Secret', () => {
-    var encodedData = ''
+    let encodedData = ''
     cy.readFile('./fixtures/capv-helm-values.yaml').then((data) => {
       // Deploy HA cluster with 3 control plane and 3 worker nodes, instead of default 1+1
       data = data.replace(/control_plane_machine_count: 1/g, "control_plane_machine_count: 3")
