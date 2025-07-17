@@ -33,5 +33,5 @@ spec:
       machineDeployments:
       - class: default-worker
         name: md-0
-        replicas: 3
+        replicas: {{ .Values.replicas }}
 

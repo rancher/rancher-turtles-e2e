@@ -401,8 +401,8 @@ jobs:
             e2e/turtles_extension.spec.ts
             e2e/menu.spec.ts
             e2e/providers_setup.spec.ts
-            e2e/capd_kubeadm_cluster.spec.ts
-            e2e/capd_rke2_cluster.spec.ts
+            e2e/capd_rke2_clusterclass.spec.ts
+            e2e/capd_kubeadm_clusterclass.spec.ts
             e2e/capd_ui_clusterclass.spec.ts
             e2e/capv_rke2_clusterclass.spec.ts
             e2e/capv_kubeadm_clusterclass.spec.ts

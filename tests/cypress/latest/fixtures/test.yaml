@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clusters-helm-values
+  namespace: capi-clusters
+data:  
+  values.yaml: |-
+    clustername_prefix: turtles-qa
+    className: aws-rke2-example
+    region: ap-south-2
+    sshKeyName: turtles-qa-rke2
+    version: v1.31.7+rke2r1
+    # Private copy of ami-012e88f0aa221423a from eu-west-2 capa-ami-ubuntu-24.04-v1.31.5 -1738233293
+    ami_id: ami-035c9a1657ffc50bb
+    machine_type: t3.2xlarge
+    cp_machine_count: 3
+    worker_machine_count: 1
+    className: aws-kubeadm-example
+    region: ap-south-2
+    sshKeyName: turtles-qa-rke2
+    version: v1.31.0
+    # Private copy of ami-0988c3c36e3080c43 from eu-west-2 capa-ami-ubuntu-24.04-v1.31.0-1739348996
+    ami_id: ami-0ac1df8d2f90a496c
+    machine_type: t3.xlarge
+    cp_machine_count: 3
+    worker_machine_count: 3
+    className: gcp-kubeadm-example
+    kubernetesVersion: v1.31.4
+    cp_machine_count: 3
+    worker_machine_count: 3
+    region: asia-south2
+    imageID: cluster-api-ubuntu-2404-v1-31-4-1749799816
+    gcpNetworkName: rancher-turtles-e2e-ci
+    clustername_prefix: turtles-qa
+    className: azure-kubeadm-example
+    kubernetesVersion: v1.31.2
+    cp_machine_count: 3
+    worker_machine_count: 3
+    location: westeurope # the community image for provisioning Azure VM is only available in certain locations
+    clustername_prefix: turtles-qa
+    className: azure-aks-example
+    kubernetesVersion: v1.31.4
+    systempoolCount: 3
+    userpoolCount: 3
+    location: westeurope # this is one of the regions supported by ClusterClass definition
+    className: azure-rke2-example
+    kubernetesVersion: v1.31.7+rke2r1
+    cp_machine_count: 3
+    worker_machine_count: 3
+    location: westeurope # the community image for provisioning Azure VM is only available in certain locations
