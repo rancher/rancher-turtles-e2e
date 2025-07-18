@@ -623,7 +623,7 @@ Cypress.Commands.add('goToHome', () => {
 Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, paths, targetNamespace, workspace) => {
   cy.accesMenuSelection(['Continuous Delivery', 'Git Repos']);
   cy.getBySel('masthead-create').should('be.visible');
-  cy.contains('fleet-').click();
+  cy.getBySel('workspace-switcher').click();
   if (!workspace) {
     workspace = 'fleet-local';
   }
@@ -683,7 +683,7 @@ Cypress.Commands.add('checkFleetGitRepo', (repoName, workspace) => {
   cy.accesMenuSelection(['Continuous Delivery', 'Git Repos']);
   cy.getBySel('masthead-create').should('be.visible');
   // Change the workspace using the dropdown on the top bar
-  cy.contains('fleet-').click();
+  cy.getBySel('workspace-switcher').click();
   if (!workspace) {
     workspace = 'fleet-local';
   }
