@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: capd-helm-values
+  namespace: capi-clusters
+data:  
+  values.yaml: |-
+    kubeadm_k8s_version: v1.31.4
+    rke2_k8s_version: v1.31.7+rke2r1
+    cp_machine_count: 3
+    worker_machine_count: 2

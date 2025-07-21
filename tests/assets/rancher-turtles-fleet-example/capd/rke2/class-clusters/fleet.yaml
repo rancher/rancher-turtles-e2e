@@ -1,5 +1,8 @@
 namespace: capi-clusters
 
 helm:
-  values:
-    clustername_prefix: docker-rke2-example-cluster
+  valuesFrom:
+    - configMapKeyRef:
+        name: capd-helm-values
+        namespace: capi-clusters
+        key: values.yaml

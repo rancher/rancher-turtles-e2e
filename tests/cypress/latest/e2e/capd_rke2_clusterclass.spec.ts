@@ -20,9 +20,9 @@ import { Question } from '~/support/structs';
 
 Cypress.config();
 describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
-  let clusterName: string
   const timeout = 600000
   const className = 'docker-rke2-example'
+  const clusterName = className + '-cluster'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const path = '/tests/assets/rancher-turtles-fleet-example/capd/rke2/class-clusters'
   const branch = 'main'
@@ -48,6 +48,12 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
     cy.namespaceAutoImport('Disable');
   })
 
+  it('Create values.yaml ConfigMap', () => {
+    cy.readFile('./fixtures/capd-helm-values.yaml').then((data) => {
+      cy.importYAML(data)
+    });
+  })
+
   qase(91,
     it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
       cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
@@ -57,17 +63,12 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
   );
 
   qase(29,
-    it('Add CAPD cluster fleet repo and get cluster name', () => {
+    it('Add CAPD RKE2 class-clusters fleet repo', () => {
       cypressLib.checkNavIcon('cluster-management').should('exist');
       cy.addFleetGitRepo(clustersRepoName, repoUrl, branch, path);
 
-      // Check CAPI cluster using its name prefix i.e. className
-      cy.checkCAPICluster(className);
-      // Get the cluster name by its prefix and use it across the test
-      cy.getBySel('sortable-cell-0-1').then(($cell) => {
-        clusterName = $cell.text();
-        cy.log('CAPI Cluster Name:', clusterName);
-      });
+      // Check CAPI cluster using its name
+      cy.checkCAPICluster(clusterName);
     })
   );
 
@@ -103,28 +104,21 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
   );
 
   qase(8,
-    // TODO: rancher-turtles-e2e/issues/224
-    xit('Scale up imported CAPD cluster', () => {
-      // Access CAPI cluster
+    it("Scale up imported CAPD class-cluster by updating values and forcefully updating the repo", () => {
+      cy.readFile('./fixtures/capd-helm-values.yaml').then((data) => {
+        data = data.replace(/worker_machine_count: 2/g, 'worker_machine_count: 3')
+        cy.importYAML(data)
+      });
+  
+      cy.burgerMenuOperate('open');
+      cy.forceUpdateFleetGitRepo(clustersRepoName);
+  
+      // Check CAPI cluster status
       cy.checkCAPIMenu();
       cy.contains('Machine Deployments').click();
       cy.typeInFilter(clusterName);
-      cy.getBySel('sortable-table-0-action-button').click();
-      cy.contains('Edit YAML')
-        .click();
-      cy.get('.CodeMirror')
-        .then((editor) => {
-          let text = editor[0].CodeMirror.getValue();
-          text = text.replace(/replicas: 2/g, 'replicas: 3');
-          editor[0].CodeMirror.setValue(text);
-          cy.clickButton('Save');
-        })
-
-      // Check CAPI cluster status
-      cy.contains('Machine Deployments').click();
-      cy.typeInFilter(clusterName);
       cy.get('.content > .count', { timeout: timeout }).should('have.text', '3');
-      cy.checkCAPIClusterProvisioned(clusterName);
+      cy.checkCAPIClusterActive(clusterName);
     })
   );
 
@@ -172,5 +166,9 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
         })
       })
     );
+
+    it('Delete the helm values ConfigMap', () => {
+      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'ConfigMaps'], "capd-helm-values", 'capi-clusters')
+    })
   }
 });

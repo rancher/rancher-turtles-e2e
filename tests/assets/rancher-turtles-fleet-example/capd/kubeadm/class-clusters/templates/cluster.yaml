@@ -1,9 +1,7 @@
-{{- $cluster_name := printf "%s-%s" .Values.clustername_prefix (randAlphaNum 4) | lower -}}
----
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
-  name: {{ $cluster_name }}
+  name: docker-kubeadm-example-cluster
   labels:
     cni: calico
 spec:
@@ -20,7 +18,7 @@ spec:
     classNamespace: capi-classes
     controlPlane:
       metadata: {}
-      replicas: 3
+      replicas: {{ .Values.cp_machine_count }}
     variables:
     - name: imageRepository
       value: ""
@@ -34,9 +32,9 @@ spec:
         enabled: false
         enforce: baseline
         warn: restricted
-    version: v1.31.4
+    version: {{ .Values.kubeadm_k8s_version }}
     workers:
       machineDeployments:
       - class: default-worker
         name: md-0
-        replicas: 3
+        replicas: {{ .Values.worker_machine_count }}

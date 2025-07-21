@@ -3,7 +3,7 @@ import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
-describe('Import CAPG Kubeadm Cluster', { tags: '@full' }, () => {
+describe('Import CAPG Kubeadm Class-Cluster', { tags: '@full' }, () => {
   let clusterName: string
   const timeout = 1200000
   const className = 'gcp-kubeadm-example'
