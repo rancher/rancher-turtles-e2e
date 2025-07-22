@@ -9,8 +9,8 @@
   ],
   "rules": {
     "cypress/no-unnecessary-waiting": "off",
-    "@typescript-eslint/no-explicit-any": "warn",
-    "cypress/unsafe-to-chain-command": "warn"
+    "@typescript-eslint/no-explicit-any": "off",
+    "cypress/unsafe-to-chain-command": "off"
   },
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
