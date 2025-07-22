@@ -404,6 +404,7 @@ jobs:
             e2e/capd_rke2_clusterclass.spec.ts
             e2e/capd_kubeadm_clusterclass.spec.ts
             e2e/capd_ui_clusterclass.spec.ts
+            e2e/azure_rke2_v2prov_cluster.spec.ts
             e2e/capv_rke2_clusterclass.spec.ts
             e2e/capv_kubeadm_clusterclass.spec.ts
             e2e/capa_rke2_clusterclass.spec.ts
@@ -412,7 +413,6 @@ jobs:
             e2e/capz_aks_clusterclass.spec.ts
             e2e/capz_rke2_clusterclass.spec.ts
             e2e/capz_kubeadm_clusterclass.spec.ts
-            e2e/capz_rke2_v2prov_cluster.spec.ts
           UI_ACCOUNT: ${{ inputs.ui_account }}
           UPGRADE_OS_CHANNEL: ${{ inputs.upgrade_os_channel }}
         run: |

@@ -4,7 +4,7 @@ import { skipClusterDeletion } from '~/support/utils';
 import * as randomstring from "randomstring";
 
 Cypress.config();
-describe('Create Azure RKE2 Cluster', { tags: '@full' }, () => {
+describe('Create Azure RKE2 Cluster', { tags: '@short' }, () => {
   let userID: string, ccID: string;
   const timeout = 1200000
   const userName = 'admin'
@@ -15,6 +15,11 @@ describe('Create Azure RKE2 Cluster', { tags: '@full' }, () => {
     cy.login();
     cy.burgerMenuOperate('open')
   });
+
+  it('Create Azure Cloud credentials', () => {
+    // Create Azure Cloud credentials
+    cy.addCloudCredsAzure('azure', Cypress.env('azure_client_id'), Cypress.env('azure_client_secret'), Cypress.env('azure_subscription_id'));
+  })
 
   it('Get user ID and Cloud credential ID', () => {
     cy.accesMenuSelection(['Users & Authentication']);
