@@ -795,7 +795,7 @@ Cypress.Commands.add('exploreCluster', (clusterName: string) => {
 Cypress.Commands.add('createVSphereClusterIdentity', (vsphere_username, vsphere_password) => {
   cy.goToHome();
   cy.burgerMenuOperate('open');
-  cy.readFile('./fixtures/capv-vsphere-cluster-identity.yaml').then((data) => {
+  cy.readFile('./fixtures/vsphere/capv-vsphere-cluster-identity.yaml').then((data) => {
     data = data.replace(/replace_vsphere_username/g, btoa(vsphere_username))
     data = data.replace(/replace_vsphere_password/g, btoa(vsphere_password))
     cy.importYAML(data)
@@ -807,7 +807,7 @@ Cypress.Commands.add('createAWSClusterStaticIdentity', (accessKey, secretKey) =>
   cy.goToHome();
   cy.burgerMenuOperate('open');
 
-  cy.readFile('./fixtures/capa-aws-cluster-identity.yaml').then((data) => {
+  cy.readFile('./fixtures/aws/capa-aws-cluster-identity.yaml').then((data) => {
     data = data.replace(/replace_access_key_id/g, accessKey)
     data = data.replace(/replace_secret_access_key/g, secretKey)
     cy.importYAML(data)
@@ -818,7 +818,7 @@ Cypress.Commands.add('createAWSClusterStaticIdentity', (accessKey, secretKey) =>
 Cypress.Commands.add('createCAPIProvider', (providerName) => {
   cy.goToHome();
   cy.burgerMenuOperate('open');
-  cy.readFile('./fixtures/capi-' + providerName + '-provider.yaml').then((data) => {
+  cy.readFile('./fixtures/' + providerName + '/capi-' + providerName + '-provider.yaml').then((data) => {
     cy.importYAML(data)
   });
 });

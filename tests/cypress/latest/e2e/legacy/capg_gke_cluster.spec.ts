@@ -21,7 +21,7 @@ describe('Import CAPG GKE Cluster', { tags: '@full' }, () => {
   });
 
   it('Create the helm values secret', () => {
-    cy.readFile('./fixtures/capg-helm-values-secret.yaml').then((data) => {
+    cy.readFile('./fixtures/gcp/capg-helm-values-secret.yaml').then((data) => {
       data = data.replace(/replace_gcp_project/g, gcpProject)
       cy.importYAML(data)
     });

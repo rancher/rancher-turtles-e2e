@@ -32,7 +32,7 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
 
   it('Create values.yaml Secret', () => {
     let encodedData = ''
-    cy.readFile('./fixtures/capv-helm-values.yaml').then((data) => {
+    cy.readFile('./fixtures/vsphere/capv-helm-values.yaml').then((data) => {
       data = data.replace(/replace_vsphere_server/g, JSON.stringify(vsphere_secrets_json.vsphere_server))
       data = data.replace(/replace_vsphere_username/g, JSON.stringify(vsphere_secrets_json.vsphere_username))
       data = data.replace(/replace_vsphere_password/g, JSON.stringify(vsphere_secrets_json.vsphere_password))
@@ -53,7 +53,7 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
       encodedData = Buffer.from(data).toString('base64')
     })
 
-    cy.readFile('./fixtures/capv-helm-values-secret.yaml').then((data) => {
+    cy.readFile('./fixtures/vsphere/capv-helm-values-secret.yaml').then((data) => {
       data = data.replace(/replace_values/g, encodedData)
       cy.importYAML(data)
     });
