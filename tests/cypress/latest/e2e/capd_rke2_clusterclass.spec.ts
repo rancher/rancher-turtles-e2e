@@ -49,7 +49,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
   })
 
   it('Create values.yaml ConfigMap', () => {
-    cy.readFile('./fixtures/capd-helm-values.yaml').then((data) => {
+    cy.readFile('./fixtures/docker/capd-helm-values.yaml').then((data) => {
       cy.importYAML(data)
     });
   })
@@ -105,7 +105,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
 
   qase(8,
     it("Scale up imported CAPD class-cluster by updating values and forcefully updating the repo", () => {
-      cy.readFile('./fixtures/capd-helm-values.yaml').then((data) => {
+      cy.readFile('./fixtures/docker/capd-helm-values.yaml').then((data) => {
         data = data.replace(/worker_machine_count: 2/g, 'worker_machine_count: 3')
         cy.importYAML(data)
       });

@@ -33,7 +33,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
 
   it('Create values.yaml Secret', () => {
     let encodedData = ''
-    cy.readFile('./fixtures/capv-helm-values.yaml').then((data) => {
+    cy.readFile('./fixtures/vsphere/capv-helm-values.yaml').then((data) => {
       // Deploy HA cluster with 3 control plane and 3 worker nodes, instead of default 1+1
       data = data.replace(/control_plane_machine_count: 1/g, "control_plane_machine_count: 3")
       data = data.replace(/worker_machine_count: 1/g, "worker_machine_count: 3")
@@ -62,7 +62,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
       encodedData = Buffer.from(data).toString('base64')
     })
 
-    cy.readFile('./fixtures/capv-helm-values-secret.yaml').then((data) => {
+    cy.readFile('./fixtures/vsphere/capv-helm-values-secret.yaml').then((data) => {
       data = data.replace(/replace_values/g, encodedData)
       cy.importYAML(data)
     });
@@ -81,7 +81,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
 
   it('Create Docker Auth Secret', () => {
     // Prevention for Docker.io rate limiting
-    cy.readFile('./fixtures/capv-docker-auth-token-secret.yaml').then((data) => {
+    cy.readFile('./fixtures/vsphere/capv-docker-auth-token-secret.yaml').then((data) => {
       const dockerAuthPasswordBase64 = Buffer.from(vsphere_secrets_json.cluster_docker_auth_password).toString('base64')
       const dockerAuthUsernameBase64 = Buffer.from(vsphere_secrets_json.cluster_docker_auth_username).toString('base64')
       data = data.replace(/replace_cluster_docker_auth_username/, dockerAuthUsernameBase64)

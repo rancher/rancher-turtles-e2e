@@ -43,7 +43,7 @@ describe('Create Azure RKE2 Cluster', { tags: '@short' }, () => {
   })
 
   it('Create the AzureConfig', () => {
-    cy.readFile('./fixtures/azure-rke-config.yaml').then((data) => {
+    cy.readFile('./fixtures/azure/azure-rke-config.yaml').then((data) => {
       data = data.replace(/replace_user_id/g, userID)
       data = data.replace(/replace_cluster_name/g, clusterName)
       cy.importYAML(data)
@@ -66,7 +66,7 @@ describe('Create Azure RKE2 Cluster', { tags: '@short' }, () => {
     cy.clickButton('Save and Continue');
     cy.getBySel('yaml-editor-code-mirror').should('be.visible');
 
-    cy.readFile('./fixtures/azure-rke2-cluster.yaml').then((data) => {
+    cy.readFile('./fixtures/azure/azure-rke2-cluster.yaml').then((data) => {
       cy.get('.CodeMirror')
         .then((editor) => {
           data = data.replace(/replace_user_id/g, userID)
