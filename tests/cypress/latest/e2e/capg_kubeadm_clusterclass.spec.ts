@@ -1,16 +1,14 @@
 import '~/support/commands';
+import * as randomstring from "randomstring";
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPG Kubeadm Class-Cluster', { tags: '@full' }, () => {
-  let clusterName: string
+  const separator = '-'
   const timeout = 1200000
-  const className = 'gcp-kubeadm-example'
-  const repoName = 'class-clusters-gcp-kb'
-  const branch = 'main'
-  const path = '/tests/assets/rancher-turtles-fleet-example/capg/kubeadm/class-clusters'
-  const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
+  const classNamePrefix = 'gcp-kubeadm'
+  const clusterName = 'turtles-qa'.concat(separator, classNamePrefix, separator, randomstring.generate({ length: 4, capitalization: 'lowercase' }), separator, Cypress.env('cluster_name_suffix'))
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/gcp/kubeadm'
   const clusterClassRepoName = 'gcp-kubeadm-clusterclass'
@@ -37,7 +35,7 @@ describe('Import CAPG Kubeadm Class-Cluster', { tags: '@full' }, () => {
     it('Add CAPG Kubeadm ClusterClass Fleet Repo and check GCP CCM', () => {
       cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
-      cy.checkCAPIClusterClass(className);
+      cy.checkCAPIClusterClass(classNamePrefix);
 
       // Navigate to `local` cluster, More Resources > Fleet > Helm Apps and ensure the charts are active.
       cy.burgerMenuOperate('open');
@@ -53,16 +51,14 @@ describe('Import CAPG Kubeadm Class-Cluster', { tags: '@full' }, () => {
   );
 
   qase(143,
-    it('Add GitRepo for class-cluster and get cluster name', () => {
-      cy.addFleetGitRepo(repoName, repoUrl, branch, path);
-      // Check CAPI cluster using its name prefix i.e. className
-      cy.checkCAPICluster(className);
-
-      // Get the cluster name by its prefix and use it across the test
-      cy.getBySel('sortable-cell-0-1').then(($cell) => {
-        clusterName = $cell.text();
-        cy.log('CAPI Cluster Name:', clusterName);
+    it('Import CAPG Kubeadm class-cluster using YAML', () => {
+      cy.readFile('./fixtures/gcp/capg-kubeadm-class-cluster.yaml').then((data) => {
+        data = data.replace(/replace_cluster_name/g, clusterName)
+        data = data.replace(/replace_gcp_project/g, gcpProject)
+        cy.importYAML(data,'capi-clusters')
       });
+      // Check CAPI cluster using its name
+      cy.checkCAPICluster(clusterName);
     })
   );
 
@@ -96,10 +92,27 @@ describe('Import CAPG Kubeadm Class-Cluster', { tags: '@full' }, () => {
     })
   );
 
+  it("Scale up imported CAPG cluster by patching class-cluster yaml", () => {
+    cy.readFile('./fixtures/gcp/capg-kubeadm-class-cluster.yaml').then((data) => {
+      data = data.replace(/replicas: 2/g, 'replicas: 3')
+
+      // workaround; these values need to be re-replaced before applying the scaling changes
+      data = data.replace(/replace_cluster_name/g, clusterName)
+      data = data.replace(/replace_gcp_project/g, gcpProject)
+      cy.importYAML(data, 'capi-clusters')
+
+      // Check CAPI cluster status
+      cy.checkCAPIMenu();
+      cy.contains('Machine Deployments').click();
+      cy.typeInFilter(clusterName);
+      cy.get('.content > .count', { timeout: timeout }).should('have.text', '3');
+      cy.checkCAPIClusterActive(clusterName);
+    })
+  })
+
   if (skipClusterDeletion) {
     qase(146,
-      it('Remove imported CAPG cluster from Rancher Manager', { retries: 1 }, () => {
-
+      it('Remove imported CAPG cluster from Rancher Manager and Delete the CAPG cluster', { retries: 1 }, () => {
         // Check cluster is not deleted after removal
         cy.deleteCluster(clusterName);
         cy.goToHome();
@@ -107,25 +120,18 @@ describe('Import CAPG Kubeadm Class-Cluster', { tags: '@full' }, () => {
         // This is checked by ensuring the cluster is not available in navigation menu
         cy.contains(clusterName).should('not.exist');
         cy.checkCAPIClusterProvisioned(clusterName);
+
+        // Delete CAPI cluster
+        cy.removeCAPIResource('Clusters', clusterName, timeout);
       })
     );
 
     qase(147,
-      it('Delete the CAPG cluster fleet repo', () => {
-
-        // Remove the fleet git repo
-        cy.removeFleetGitRepo(repoName);
-        // Wait until the following returns no clusters found
-        // This is checked by ensuring the cluster is not available in CAPI menu
-        cy.checkCAPIClusterDeleted(clusterName, timeout);
-
+      it('Delete the ClusterClass fleet repo and other resources', () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
+        cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "capg-helm-values", namespace)
       })
     );
-
-    it('Delete the helm values secret', () => {
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "capg-helm-values", namespace)
-    });
   }
 });

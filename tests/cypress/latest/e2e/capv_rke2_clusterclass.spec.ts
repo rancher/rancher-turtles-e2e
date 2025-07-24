@@ -160,15 +160,15 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
 
     // Modify the helper job resource to use the initial leader name
     cy.get('@initialLeader').then((leader) => {
-      cy.readFile('fixtures/capv-kube-vip-static-pod-toggle-job.yaml').then((data) => {
+      cy.readFile('fixtures/vsphere/capv-kube-vip-static-pod-toggle-job.yaml').then((data) => {
         data = data.replace(/nodeName:.*/, `nodeName: ${leader}`);
-        cy.writeFile('fixtures/capv-kube-vip-static-pod-toggle-job.yaml', data);
+        cy.writeFile('fixtures/vsphere/capv-kube-vip-static-pod-toggle-job.yaml', data);
       });
     });
 
     // Trigger the job to disable kube-vip static pod on initial leader node
     // Leader role of kube-vip should be taken over by another node immediately
-    cy.importYAML('fixtures/capv-kube-vip-static-pod-toggle-job.yaml', 'kube-system', clusterName);
+    cy.importYAML('fixtures/vsphere/capv-kube-vip-static-pod-toggle-job.yaml', 'kube-system', clusterName);
 
     // Wait for the job to complete
     // TODO: poll https://kubevip_address:6443 until 401 is returned
@@ -191,7 +191,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     });
 
     // Trigger the same job once again to restore the kube-vip static pod on initial leader node
-    cy.importYAML('fixtures/capv-kube-vip-static-pod-toggle-job.yaml', 'kube-system', clusterName);
+    cy.importYAML('fixtures/vsphere/capv-kube-vip-static-pod-toggle-job.yaml', 'kube-system', clusterName);
 
     // Count of kube-vip pods should be back on initial value (one for each control plane node)
     cy.verifyResourceCount(clusterName, ['Workloads', 'Pods'], 'kube-vip', 'kube-system', 3);

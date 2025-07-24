@@ -1,0 +1,37 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  labels:
+    owner: turtles-qa
+    cloud-provider: gcp
+    cni: calico
+    cluster-api.cattle.io/rancher-auto-import: "true"
+  name: replace_cluster_name
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+      - 192.168.0.0/16
+  topology:
+    class: gcp-kubeadm-example
+    classNamespace: capi-classes
+    controlPlane:
+      replicas: 3
+    workers:
+      machineDeployments:
+      - class: default-worker
+        name: md-0
+        replicas: 2
+    variables:
+    - name: gcpProject
+      value: replace_gcp_project
+    - name: region
+      value: asia-south2
+    - name: gcpNetworkName
+      value: rancher-turtles-e2e-ci
+    - name: clusterFailureDomains
+      value:
+        - asia-south2-a
+    - name: imageId
+      value: projects/replace_gcp_project/global/images/cluster-api-ubuntu-2404-v1-31-4-1749799816
+    version: v1.31.4

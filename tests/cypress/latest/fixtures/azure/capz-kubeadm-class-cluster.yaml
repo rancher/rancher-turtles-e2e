@@ -1,0 +1,34 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  labels:
+    owner: turtles-qa
+    cloud-provider: azure
+    cni: calico
+    cluster-api.cattle.io/rancher-auto-import: "true"
+  name: replace_cluster_name
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+      - 192.168.0.0/16
+  topology:
+    class: azure-kubeadm-example
+    classNamespace: capi-classes
+    controlPlane:
+      replicas: 3
+    variables:
+    - name: subscriptionID
+      value: "replace_subscription_id"
+    - name: location
+      value: westeurope # the community image for provisioning Azure VM is only available in certain locations
+    - name: resourceGroup
+      value: replace_cluster_name
+    - name: azureClusterIdentityName
+      value: cluster-identity
+    version: v1.31.2
+    workers:
+      machineDeployments:
+      - class: kubeadm-default-worker
+        name: md-0
+        replicas: 2

@@ -1,0 +1,40 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  labels:
+    cni: calico
+    cloud-provider: aws
+    csi: aws-ebs-csi-driver
+    cluster-api.cattle.io/rancher-auto-import: "true"
+  name: replace_cluster_name
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+      - 192.168.0.0/16
+  topology:
+    class: aws-rke2-example
+    classNamespace: capi-classes
+    controlPlane:
+      replicas: 3
+    variables:
+    - name: region
+      value: ap-south-2
+    - name: sshKeyName
+      value: turtles-qa-rke2
+    - name: controlPlaneMachineType
+      value: t3.2xlarge
+    - name: workerMachineType
+      value: t3.2xlarge
+    - name: amiID
+      value: ami-035c9a1657ffc50bb # Private copy of ami-012e88f0aa221423a from eu-west-2
+    - name: cni
+      value: none
+    - name: awsClusterIdentityName
+      value: cluster-identity
+    version: v1.31.7+rke2r1
+    workers:
+      machineDeployments:
+      - class: default-worker
+        name: md-0
+        replicas: 2

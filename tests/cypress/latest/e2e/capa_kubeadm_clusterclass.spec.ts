@@ -1,17 +1,14 @@
 import '~/support/commands';
-import * as cypressLib from '@rancher-ecp-qa/cypress-library';
+import * as randomstring from "randomstring";
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
-  let clusterName: string
+  const separator = '-'
   const timeout = 1200000
-  const className = 'aws-kubeadm-example'
-  const repoName = 'class-clusters-aws-kb'
-  const branch = 'main'
-  const path = '/tests/assets/rancher-turtles-fleet-example/capa/kubeadm/class-clusters'
-  const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
+  const classNamePrefix = 'aws-kubeadm'
+  const clusterName = 'turtles-qa'.concat(separator, classNamePrefix, separator, randomstring.generate({ length: 4, capitalization: 'lowercase' }), separator, Cypress.env('cluster_name_suffix'))
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/aws/kubeadm'
   const clusterClassRepoName = 'aws-kb-clusterclass'
@@ -40,7 +37,7 @@ describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
     it('Add CAPA Kubeadm ClusterClass Fleet Repo and check Applications', () => {
       cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
-      cy.checkCAPIClusterClass(className);
+      cy.checkCAPIClusterClass(classNamePrefix);
 
       // Navigate to `local` cluster, More Resources > Fleet > Helm Apps and ensure the charts are active.
       cy.burgerMenuOperate('open');
@@ -54,20 +51,13 @@ describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
   );
 
   qase(124,
-    it('Add CAPA class-clusters fleet repo and get cluster name', () => {
-      cypressLib.checkNavIcon('cluster-management')
-        .should('exist');
-
-      // Add CAPA fleet repository
-      cy.addFleetGitRepo(repoName, repoUrl, branch, path);
-      // Check CAPI cluster using its name prefix i.e. className
-      cy.checkCAPICluster(className);
-
-      // Get the cluster name by its prefix and use it across the test
-      cy.getBySel('sortable-cell-0-1').then(($cell) => {
-        clusterName = $cell.text();
-        cy.log('CAPI Cluster Name:', clusterName);
+    it('Import CAPA Kubeadm class-cluster using YAML', () => {
+      cy.readFile('./fixtures/aws/capa-kubeadm-class-cluster.yaml').then((data) => {
+        data = data.replace(/replace_cluster_name/g, clusterName)
+        cy.importYAML(data, 'capi-clusters')
       });
+      // Check CAPI cluster using its name
+      cy.checkCAPICluster(clusterName);
     })
   );
 
@@ -102,9 +92,26 @@ describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
     })
   );
 
+  it("Scale up imported CAPA cluster by patching class-cluster yaml", () => {
+    cy.readFile('./fixtures/aws/capa-kubeadm-class-cluster.yaml').then((data) => {
+      data = data.replace(/replicas: 2/g, 'replicas: 3')
+
+      // workaround; these values need to be re-replaced before applying the scaling changes
+      data = data.replace(/replace_cluster_name/g, clusterName)
+      cy.importYAML(data, 'capi-clusters')
+
+      // Check CAPI cluster status
+      cy.checkCAPIMenu();
+      cy.contains('Machine Deployments').click();
+      cy.typeInFilter(clusterName);
+      cy.get('.content > .count', { timeout: timeout }).should('have.text', '3');
+      cy.checkCAPIClusterActive(clusterName);
+    })
+  })
+
   if (skipClusterDeletion) {
     qase(127,
-      it('Remove imported CAPA cluster from Rancher Manager', { retries: 1 }, () => {
+      it('Remove imported CAPA cluster from Rancher Manager and Delete the CAPA cluster', { retries: 1 }, () => {
         // Check cluster is not deleted after removal
         cy.deleteCluster(clusterName);
         cy.goToHome();
@@ -112,17 +119,14 @@ describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
         // This is checked by ensuring the cluster is not available in navigation menu
         cy.contains(clusterName).should('not.exist');
         cy.checkCAPIClusterProvisioned(clusterName);
+
+        // Delete CAPI cluster
+        cy.removeCAPIResource('Clusters', clusterName, timeout);
       })
     );
 
     qase(128,
-      it('Delete the CAPA cluster and ClusterClass fleet repo', () => {
-        // Remove the fleet git repo
-        cy.removeFleetGitRepo(repoName);
-        // Wait until the following returns no clusters found
-        // This is checked by ensuring the cluster is not available in CAPI menu
-        cy.checkCAPIClusterDeleted(clusterName, timeout);
-
+      it('Delete the ClusterClass fleet repo and other resources', () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
 

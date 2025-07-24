@@ -1,16 +1,14 @@
 import '~/support/commands';
+import * as randomstring from "randomstring";
 import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
-  let clusterName: string;
+  const separator = '-'
   const timeout = 1200000
   const namespace = 'capz-system'
-  const repoName = 'class-clusters-azure-kubeadm'
-  const className = 'azure-kubeadm-example'
-  const branch = 'main'
-  const path = '/tests/assets/rancher-turtles-fleet-example/capz/kubeadm/class-clusters'
-  const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
+  const classNamePrefix = 'azure-kubeadm'
+  const clusterName = 'turtles-qa'.concat(separator, classNamePrefix, separator, randomstring.generate({ length: 4, capitalization: 'lowercase' }), separator, Cypress.env('cluster_name_suffix'))
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/azure/kubeadm'
   const clusterClassRepoName = "azure-kubeadm-clusterclass"
@@ -48,7 +46,7 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
   it('Add CAPZ Kubeadm ClusterClass Fleet Repo and check Azure CCM', () => {
     cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
     // Go to CAPI > ClusterClass to ensure the clusterclass is created
-    cy.checkCAPIClusterClass(className);
+    cy.checkCAPIClusterClass(classNamePrefix);
 
     // Navigate to `local` cluster, More Resources > Fleet > Helm Apps and ensure the charts are active.
     cy.burgerMenuOperate('open');
@@ -60,17 +58,15 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
     })
   });
 
-  it('Add GitRepo for class-cluster and get cluster name', () => {
-    cy.addFleetGitRepo(repoName, repoUrl, branch, path);
-    // Check CAPI cluster using its name prefix i.e. className
-    cy.checkCAPICluster(className);
-
-    // Get the cluster name by its prefix and use it across the test
-    cy.getBySel('sortable-cell-0-1').then(($cell) => {
-      clusterName = $cell.text();
-      cy.log('CAPI Cluster Name:', clusterName);
+  it('Import CAPZ Kubeadm class-cluster using YAML', () => {
+    cy.readFile('./fixtures/azure/capz-kubeadm-class-cluster.yaml').then((data) => {
+      data = data.replace(/replace_cluster_name/g, clusterName)
+      data = data.replace(/replace_subscription_id/g, subscriptionID)
+      cy.importYAML(data, 'capi-clusters')
     });
-  });
+    // Check CAPI cluster using its name
+    cy.checkCAPICluster(clusterName);
+  })
 
   it('Auto import child CAPZ Kubeadm cluster', () => {
     // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
@@ -99,9 +95,26 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
     cy.checkChart('Install', 'Logging', 'cattle-logging-system');
   });
 
+  it("Scale up imported CAPZ cluster by patching class-cluster yaml", () => {
+    cy.readFile('./fixtures/azure/capz-kubeadm-class-cluster.yaml').then((data) => {
+      data = data.replace(/replicas: 2/g, 'replicas: 3')
+
+      // workaround; these values need to be re-replaced before applying the scaling changes
+      data = data.replace(/replace_cluster_name/g, clusterName)
+      data = data.replace(/replace_subscription_id/g, subscriptionID)
+      cy.importYAML(data, 'capi-clusters')
+
+      // Check CAPI cluster status
+      cy.checkCAPIMenu();
+      cy.contains('Machine Deployments').click();
+      cy.typeInFilter(clusterName);
+      cy.get('.content > .count', { timeout: timeout }).should('have.text', '3');
+      cy.checkCAPIClusterActive(clusterName);
+    })
+  })
 
   if (skipClusterDeletion) {
-    it('Remove imported CAPZ cluster from Rancher Manager', { retries: 1 }, () => {
+    it('Remove imported CAPZ cluster from Rancher Manager and Delete the CAPZ cluster', { retries: 1 }, () => {
       // Check cluster is not deleted after removal
       cy.deleteCluster(clusterName);
       cy.goToHome();
@@ -109,16 +122,12 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
       // This is checked by ensuring the cluster is not available in navigation menu
       cy.contains(clusterName).should('not.exist');
       cy.checkCAPIClusterProvisioned(clusterName);
-    });
 
-    it('Delete the CAPZ cluster and clusterclasses fleet repo and other resources', () => {
+      // Delete CAPI cluster
+      cy.removeCAPIResource('Clusters', clusterName, timeout);
+    })
 
-      // Remove the fleet git repo
-      cy.removeFleetGitRepo(repoName);
-      // Wait until the following returns no clusters found
-      // This is checked by ensuring the cluster is not available in CAPI menu
-      cy.checkCAPIClusterDeleted(clusterName, timeout);
-
+    it('Delete the ClusterClass fleet repo and other resources', () => {
       // Remove the clusterclass repo
       cy.removeFleetGitRepo(clusterClassRepoName);
 

@@ -1,0 +1,33 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  labels:
+    owner: turtles-qa
+    cluster-api.cattle.io/rancher-auto-import: "true"
+  name: replace_cluster_name
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+      - 192.168.0.0/16
+  topology:
+    class: azure-aks-example
+    classNamespace: capi-classes
+    variables:
+    - name: subscriptionID
+      value: "replace_subscription_id"
+    - name: location
+      value: westeurope # this is one of the regions supported by ClusterClass definition
+    - name: resourceGroup
+      value: replace_cluster_name
+    - name: azureClusterIdentityName
+      value: cluster-identity
+    version: v1.31.4
+    workers:
+      machinePools:
+      - class: default-system
+        name: system-1
+        replicas: 3
+      - class: default-worker
+        name: worker-1
+        replicas: 3
