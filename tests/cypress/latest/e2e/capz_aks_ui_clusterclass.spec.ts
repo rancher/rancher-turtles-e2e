@@ -1,17 +1,21 @@
 import '~/support/commands';
 import * as randomstring from "randomstring";
+import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
+import { ClusterClassVariablesInput } from '~/support/structs';
 
 Cypress.config();
-describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
+describe('Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
   const timeout = 1200000
-  const namespace = 'capz-system'
-  const repoName = 'class-clusters-azure-kubeadm'
-  const className = 'azure-kubeadm-example'
+  const className = 'azure-aks-example'
   const clusterName = 'turtles-qa-' + className + randomstring.generate({ length: 4, capitalization: "lowercase" })
+  const k8sVersion = 'v1.31.4'
+  const podCIDR = '192.168.0.0/16'
+  const location = "westeurope" // this is one of the regions supported by ClusterClass definition
+  const namespace = "capz-system"
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
-  const classesPath = 'examples/clusterclasses/azure/kubeadm'
-  const clusterClassRepoName = "azure-kubeadm-clusterclass"
+  const classesPath = 'examples/clusterclasses/azure/aks'
+  const clusterClassRepoName = "azure-aks-clusterclass"
   const providerName = 'azure'
 
   const clientID = Cypress.env("azure_client_id")
@@ -40,63 +44,45 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
   })
 
   it('Create AzureClusterIdentity', () => {
-    cy.createAzureClusterIdentity(clientID, tenantID, clientSecret)
+    cy.createAzureClusterIdentity(clientID, tenantID, clientSecret);
   })
 
-  it('Add CAPZ Kubeadm ClusterClass Fleet Repo and check Azure CCM', () => {
-    cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
+  it('Add CAPZ AKS ClusterClass using fleet', () => {
+    // TODO: Change to capi-classes (capi-ui-extension/issues/111)
+    cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-clusters')
     // Go to CAPI > ClusterClass to ensure the clusterclass is created
     cy.checkCAPIClusterClass(className);
-
-    // Navigate to `local` cluster, More Resources > Fleet > Helm Apps and ensure the charts are active.
-    cy.burgerMenuOperate('open');
-    cy.contains('local').click();
-    cy.accesMenuSelection(['More Resources', 'Fleet', 'HelmApps']);
-    ["azure-ccm", "calico-cni"].forEach((app) => {
-      cy.typeInFilter(app);
-      cy.getBySel('sortable-cell-0-1').should('exist');
-    })
-  });
-
-  it('Import CAPZ Kubeadm class-cluster using YAML', () => {
-    cy.readFile('./fixtures/azure/capz-kubeadm-class-cluster.yaml').then((data) => {
-      data = data.replace(/replace_cluster_name/g, clusterName)
-      cy.importYAML(data, 'capi-clusters')
-    });
-    // Check CAPI cluster using its name
-    cy.checkCAPICluster(clusterName);
   })
 
-  it('Auto import child CAPZ Kubeadm cluster', () => {
-    // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-    cy.checkCAPIClusterProvisioned(clusterName, timeout);
+  qase(45, it('Create CAPZ AKS from Clusterclass via UI', () => {
+    // Create cluster from Clusterclass UI
+    const machines: Record<string, string> = { 'mp-system': 'default-system', 'mp-worker': 'default-worker' }
+    const extraVariables: ClusterClassVariablesInput[] = [
+      { name: 'subscriptionID', value: subscriptionID, type: 'string' },
+      { name: 'location', value: location, type: 'dropdown' },
+      { name: 'resourceGroup', value: clusterName, type: 'string' }
+    ]
+    cy.createCAPICluster(className, clusterName, machines, k8sVersion, podCIDR, undefined, extraVariables);
+    cy.checkCAPIMenu();
+    cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
 
-    // Check child cluster is created and auto-imported
-    // This is checked by ensuring the cluster is available in navigation menu
-    cy.goToHome();
-    cy.contains(clusterName).should('exist');
-
-    // Check cluster is Active
+    // Check child cluster is auto-imported
+    cy.clusterAutoImport(clusterName, 'Enable');
     cy.searchCluster(clusterName);
     cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+  })
+  );
 
-    // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-    // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
-    cy.checkCAPIClusterActive(clusterName, timeout);
-  });
-
-  it('Install App on imported cluster', () => {
-    // Click on imported CAPZ cluster
+  it('Install App on created cluster', () => {
+    // Click on created CAPZ cluster
     cy.contains(clusterName).click();
 
     // Install Chart
-    // We install Logging chart instead of Monitoring, since this is relatively lightweight.
     cy.checkChart('Install', 'Logging', 'cattle-logging-system');
-  });
-
+  })
 
   if (skipClusterDeletion) {
-    it('Remove imported CAPZ cluster from Rancher Manager and Delete the CAPZ cluster', { retries: 1 }, () => {
+    it('Remove created CAPZ cluster from Rancher Manager and Delete the CAPZ cluster', { retries: 1 }, () => {
       // Check cluster is not deleted after removal
       cy.deleteCluster(clusterName);
       cy.goToHome();
@@ -105,11 +91,11 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
       cy.contains(clusterName).should('not.exist');
       cy.checkCAPIClusterProvisioned(clusterName);
 
-      // Delete CAPI cluster
+      // Delete CAPI cluster created via UI
       cy.removeCAPIResource('Clusters', clusterName, timeout);
     })
 
-    it('Delete the ClusterClass fleet repo and other resources', () => {
+    it('Delete the CAPZ clusterclasses fleet repo and other resources', () => {
       // Remove the clusterclass repo
       cy.removeFleetGitRepo(clusterClassRepoName);
 
@@ -117,7 +103,6 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
       cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'azure-creds-secret', namespace)
       cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', 'capi-clusters')
       cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'cluster-identity', namespace)
-    });
+    })
   }
-
 });

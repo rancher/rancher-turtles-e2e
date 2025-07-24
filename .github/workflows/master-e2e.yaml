@@ -411,6 +411,7 @@ jobs:
             e2e/capa_kubeadm_clusterclass.spec.ts
             e2e/capg_kubeadm_clusterclass.spec.ts
             e2e/capz_aks_clusterclass.spec.ts
+            e2e/capz_aks_ui_clusterclass.spec
             e2e/capz_rke2_clusterclass.spec.ts
             e2e/capz_kubeadm_clusterclass.spec.ts
           UI_ACCOUNT: ${{ inputs.ui_account }}

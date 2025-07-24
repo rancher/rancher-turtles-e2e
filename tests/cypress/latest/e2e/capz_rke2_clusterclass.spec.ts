@@ -1,17 +1,15 @@
 import '~/support/commands';
+import * as randomstring from "randomstring";
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 import { skipClusterDeletion } from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
-  let clusterName: string;
   const timeout = 1200000
   const namespace = 'capz-system'
   const repoName = 'class-clusters-azure-rke2'
   const className = 'azure-rke2-example'
-  const branch = 'main'
-  const path = '/tests/assets/rancher-turtles-fleet-example/capz/rke2/class-clusters'
-  const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
+  const clusterName = 'turtles-qa-' + className + randomstring.generate({ length: 4, capitalization: "lowercase" })
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/azure/rke2'
   const clusterClassRepoName = "azure-rke2-clusterclass"
@@ -62,17 +60,15 @@ describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
   })
   );
 
-  qase(78, it('Add GitRepo for class-cluster and get cluster name', () => {
-    cy.addFleetGitRepo(repoName, repoUrl, branch, path);
-    // Check CAPI cluster using its name prefix i.e. className
-    cy.checkCAPICluster(className);
-
-    // Get the cluster name by its prefix and use it across the test
-    cy.getBySel('sortable-cell-0-1').then(($cell) => {
-      clusterName = $cell.text();
-      cy.log('CAPI Cluster Name:', clusterName);
-    });
-  })
+  qase(78,
+    it('Import CAPZ RKE2 class-cluster using YAML', () => {
+      cy.readFile('./fixtures/azure/capz-rke2-class-cluster.yaml').then((data) => {
+        data = data.replace(/replace_cluster_name/g, clusterName)
+        cy.importYAML(data, 'capi-clusters')
+      });
+      // Check CAPI cluster using its name
+      cy.checkCAPICluster(clusterName);
+    })
   );
 
   qase(79, it('Auto import child CAPZ RKE2 cluster', () => {
@@ -106,25 +102,22 @@ describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
 
 
   if (skipClusterDeletion) {
-    qase(82, it('Remove imported CAPZ cluster from Rancher Manager', { retries: 1 }, () => {
-      // Check cluster is not deleted after removal
-      cy.deleteCluster(clusterName);
-      cy.goToHome();
-      // kubectl get clusters.cluster.x-k8s.io
-      // This is checked by ensuring the cluster is not available in navigation menu
-      cy.contains(clusterName).should('not.exist');
-      cy.checkCAPIClusterProvisioned(clusterName);
-    })
+    qase(82,
+      it('Remove imported CAPZ cluster from Rancher Manager and Delete the CAPZ cluster', { retries: 1 }, () => {
+        // Check cluster is not deleted after removal
+        cy.deleteCluster(clusterName);
+        cy.goToHome();
+        // kubectl get clusters.cluster.x-k8s.io
+        // This is checked by ensuring the cluster is not available in navigation menu
+        cy.contains(clusterName).should('not.exist');
+        cy.checkCAPIClusterProvisioned(clusterName);
+
+        // Delete CAPI cluster
+        cy.removeCAPIResource('Clusters', clusterName, timeout);
+      })
     );
 
-    qase(83, it('Delete the CAPZ cluster and clusterclasses fleet repo and other resources', () => {
-
-      // Remove the fleet git repo
-      cy.removeFleetGitRepo(repoName);
-      // Wait until the following returns no clusters found
-      // This is checked by ensuring the cluster is not available in CAPI menu
-      cy.checkCAPIClusterDeleted(clusterName, timeout);
-
+    qase(83, it('Delete the ClusterClass fleet repo and other resources', () => {
       // Remove the clusterclass repo
       cy.removeFleetGitRepo(clusterClassRepoName);
 
