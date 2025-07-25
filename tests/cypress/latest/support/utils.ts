@@ -21,3 +21,4 @@ export const isUIVersion = (version: string) => {
 }
 
 export const skipClusterDeletion = Cypress.env("skip_cluster_delete") == "false"
+export const clusterNameSuffix = Cypress.env("cluster_name_suffix")

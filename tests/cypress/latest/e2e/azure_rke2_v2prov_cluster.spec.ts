@@ -1,15 +1,14 @@
 import '~/support/commands';
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
-import * as randomstring from "randomstring";
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {clusterNameSuffix, skipClusterDeletion} from '~/support/utils';
 
 Cypress.config();
-describe('Create Azure RKE2 Cluster', { tags: '@short' }, () => {
+describe('Create Azure RKE2 Cluster', {tags: '@short'}, () => {
   let userID: string, ccID: string;
   const timeout = 1200000
   const userName = 'admin'
   const k8sVersion = 'v1.31.7+rke2r1'
-  const clusterName = 'turtles-qa-azure-v2-' + randomstring.generate({ length: 4, capitalization: "lowercase" })
+  const clusterName = 'turtles-qa-azure-v2-' + clusterNameSuffix
 
   beforeEach(() => {
     cy.login();
@@ -52,42 +51,43 @@ describe('Create Azure RKE2 Cluster', { tags: '@short' }, () => {
 
   // Create Azure RKE2 Cluster using YAML
   qase(132, it('Create Azure RKE2 Cluster', () => {
-    cy.goToHome();
-    cy.clickButton('Manage');
-    cy.getBySel('cluster-list').should('be.visible');
-    cy.clickButton('Create');
+      cy.goToHome();
+      cy.clickButton('Manage');
+      cy.getBySel('cluster-list').should('be.visible');
+      cy.clickButton('Create');
 
-    cy.getBySel('cluster-manager-create-grid-Azure')
-      .should('be.visible')
-      .click();
+      cy.getBySel('cluster-manager-create-grid-Azure')
+        .should('be.visible')
+        .click();
 
-    cy.getBySel('name-ns-description-name').should('be.visible');
-    cy.getBySel('rke2-custom-create-yaml').click();
-    cy.clickButton('Save and Continue');
-    cy.getBySel('yaml-editor-code-mirror').should('be.visible');
+      cy.getBySel('name-ns-description-name').should('be.visible');
+      cy.getBySel('rke2-custom-create-yaml').click();
+      cy.clickButton('Save and Continue');
+      cy.getBySel('yaml-editor-code-mirror').should('be.visible');
 
-    cy.readFile('./fixtures/azure-rke2-cluster.yaml').then((data) => {
-      cy.get('.CodeMirror')
-        .then((editor) => {
-          data = data.replace(/replace_user_id/g, userID)
-          data = data.replace(/replace_cluster_name/g, clusterName)
-          data = data.replace(/replace_cloudcred_id/g, ccID)
-          data = data.replace(/replace_rke2_version/g, k8sVersion)
-          editor[0].CodeMirror.setValue(data);
-        })
-    });
-    cy.clickButton('Create');
-    cy.getBySel('cluster-list').should('be.visible');
+      cy.readFile('./fixtures/azure-rke2-cluster.yaml').then((data) => {
+        cy.get('.CodeMirror')
+          .then((editor) => {
+            data = data.replace(/replace_user_id/g, userID)
+            data = data.replace(/replace_cluster_name/g, clusterName)
+            data = data.replace(/replace_cloudcred_id/g, ccID)
+            data = data.replace(/replace_rke2_version/g, k8sVersion)
+            // @ts-expect-error CodeMirror error can be ignored
+            editor[0].CodeMirror.setValue(data);
+          })
+      });
+      cy.clickButton('Create');
+      cy.getBySel('cluster-list').should('be.visible');
 
-    // Check cluster is Active
-    cy.searchCluster(clusterName);
-    cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+      // Check cluster is Active
+      cy.searchCluster(clusterName);
+      cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
 
-    // Check provisioning status
-    cy.getBySel('sortable-cell-0-1').click();
-    cy.getBySel('log').click();
-    cy.contains('[INFO ] provisioning done');
-  })
+      // Check provisioning status
+      cy.getBySel('sortable-cell-0-1').click();
+      cy.getBySel('log').click();
+      cy.contains('[INFO ] provisioning done');
+    })
   );
 
   if (skipClusterDeletion) {

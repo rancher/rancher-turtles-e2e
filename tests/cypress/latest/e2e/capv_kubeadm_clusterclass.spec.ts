@@ -1,9 +1,9 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import { skipClusterDeletion } from '~/support/utils';
+import {skipClusterDeletion} from '~/support/utils';
 
 Cypress.config();
-describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
+describe('Import CAPV Kubeadm Class-Cluster', {tags: '@vsphere'}, () => {
   const timeout = 1200000
   const clusterRepoName = 'class-clusters-capv-kb'
   const classRepoName = 'vsphere-kb-clusterclass'
@@ -106,7 +106,7 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
 
     // Check cluster is Active
     cy.searchCluster(clusterName);
-    cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+    cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
 
     // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
     // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
@@ -123,7 +123,7 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
   })
 
   if (skipClusterDeletion) {
-    it('Remove imported CAPV cluster from Rancher Manager', { retries: 1 }, () => {
+    it('Remove imported CAPV cluster from Rancher Manager', {retries: 1}, () => {
       // Check cluster is not deleted after removal
       cy.deleteCluster(clusterName);
       cy.goToHome();

@@ -1,10 +1,10 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {skipClusterDeletion} from '~/support/utils';
 
 Cypress.config();
-describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
+describe('Import CAPV RKE2 Class-Cluster', {tags: '@vsphere'}, () => {
   const timeout = 1200000
   const clusterRepoName = 'class-clusters-capv-rke2'
   const classRepoName = 'vsphere-rke2-clusterclass'
@@ -125,7 +125,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
 
     // Check cluster is Active
     cy.searchCluster(clusterName);
-    cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+    cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
 
     // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
     // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
@@ -137,66 +137,66 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
   })
 
   qase(131, it('Validate kube-vip leader election ability across CPs', () => {
-    function getActiveKubeVipLeaderNode() {
-      cy.burgerMenuOperate('open');
-      cy.contains(clusterName).click();
-      cy.accesMenuSelection(['More Resources', 'Coordination', 'Leases']);
-      cy.setNamespace('All Namespaces', 'all_user');
-      // Filter out kube-vip lease resource
-      cy.typeInFilter('plndr-cp-lock');
-      // Ensure the kube-vip lease is present
-      cy.getBySel('sortable-cell-0-1').should('exist');
-      return cy.getBySel('sortable-cell-0-2').invoke('text');
-    }
+      function getActiveKubeVipLeaderNode() {
+        cy.burgerMenuOperate('open');
+        cy.contains(clusterName).click();
+        cy.accesMenuSelection(['More Resources', 'Coordination', 'Leases']);
+        cy.setNamespace('All Namespaces', 'all_user');
+        // Filter out kube-vip lease resource
+        cy.typeInFilter('plndr-cp-lock');
+        // Ensure the kube-vip lease is present
+        cy.getBySel('sortable-cell-0-1').should('exist');
+        return cy.getBySel('sortable-cell-0-2').invoke('text');
+      }
 
-    // Initial count of kube-vip pods should be 3 (one for each control plane node)
-    cy.verifyResourceCount(clusterName, ['Workloads', 'Pods'], 'kube-vip', 'kube-system', 3);
-    cy.waitForAllRowsInState('Running', 300000);
+      // Initial count of kube-vip pods should be 3 (one for each control plane node)
+      cy.verifyResourceCount(clusterName, ['Workloads', 'Pods'], 'kube-vip', 'kube-system', 3);
+      cy.waitForAllRowsInState('Running', 300000);
 
-    // Get initial kube-vip leader node name and store it as an alias
-    getActiveKubeVipLeaderNode().then((leader) => {
-      cy.wrap(leader).as('initialLeader');
-    });
-
-    // Modify the helper job resource to use the initial leader name
-    cy.get('@initialLeader').then((leader) => {
-      cy.readFile('fixtures/capv-kube-vip-static-pod-toggle-job.yaml').then((data) => {
-        data = data.replace(/nodeName:.*/, `nodeName: ${leader}`);
-        cy.writeFile('fixtures/capv-kube-vip-static-pod-toggle-job.yaml', data);
+      // Get initial kube-vip leader node name and store it as an alias
+      getActiveKubeVipLeaderNode().then((leader) => {
+        cy.wrap(leader).as('initialLeader');
       });
-    });
 
-    // Trigger the job to disable kube-vip static pod on initial leader node
-    // Leader role of kube-vip should be taken over by another node immediately
-    cy.importYAML('fixtures/capv-kube-vip-static-pod-toggle-job.yaml', 'kube-system', clusterName);
-
-    // Wait for the job to complete
-    // TODO: poll https://kubevip_address:6443 until 401 is returned
-    cy.wait(10000);
-
-    // Count of kube-vip pods should be one less than initial count
-    cy.verifyResourceCount(clusterName, ['Workloads', 'Pods'], 'kube-vip', 'kube-system', 2);
-    cy.waitForAllRowsInState('Running', 300000);
-
-    // Get enforced kube-vip leader node name and store it as an alias
-    getActiveKubeVipLeaderNode().then((leader) => {
-      cy.wrap(leader).as('enforcedLeader');
-    });
-
-    // Ensure the enforced leader node name is different from the initial one
-    cy.get('@initialLeader').then((initial) => {
-      cy.get('@enforcedLeader').then((enforced) => {
-        expect(initial).not.to.eq(enforced);
+      // Modify the helper job resource to use the initial leader name
+      cy.get('@initialLeader').then((leader) => {
+        cy.readFile('fixtures/capv-kube-vip-static-pod-toggle-job.yaml').then((data) => {
+          data = data.replace(/nodeName:.*/, `nodeName: ${leader}`);
+          cy.writeFile('fixtures/capv-kube-vip-static-pod-toggle-job.yaml', data);
+        });
       });
-    });
 
-    // Trigger the same job once again to restore the kube-vip static pod on initial leader node
-    cy.importYAML('fixtures/capv-kube-vip-static-pod-toggle-job.yaml', 'kube-system', clusterName);
+      // Trigger the job to disable kube-vip static pod on initial leader node
+      // Leader role of kube-vip should be taken over by another node immediately
+      cy.importYAML('fixtures/capv-kube-vip-static-pod-toggle-job.yaml', 'kube-system', clusterName);
 
-    // Count of kube-vip pods should be back on initial value (one for each control plane node)
-    cy.verifyResourceCount(clusterName, ['Workloads', 'Pods'], 'kube-vip', 'kube-system', 3);
-    cy.waitForAllRowsInState('Running', 300000);
-  })
+      // Wait for the job to complete
+      // TODO: poll https://kubevip_address:6443 until 401 is returned
+      cy.wait(10000);
+
+      // Count of kube-vip pods should be one less than initial count
+      cy.verifyResourceCount(clusterName, ['Workloads', 'Pods'], 'kube-vip', 'kube-system', 2);
+      cy.waitForAllRowsInState('Running', 300000);
+
+      // Get enforced kube-vip leader node name and store it as an alias
+      getActiveKubeVipLeaderNode().then((leader) => {
+        cy.wrap(leader).as('enforcedLeader');
+      });
+
+      // Ensure the enforced leader node name is different from the initial one
+      cy.get('@initialLeader').then((initial) => {
+        cy.get('@enforcedLeader').then((enforced) => {
+          expect(initial).not.to.eq(enforced);
+        });
+      });
+
+      // Trigger the same job once again to restore the kube-vip static pod on initial leader node
+      cy.importYAML('fixtures/capv-kube-vip-static-pod-toggle-job.yaml', 'kube-system', clusterName);
+
+      // Count of kube-vip pods should be back on initial value (one for each control plane node)
+      cy.verifyResourceCount(clusterName, ['Workloads', 'Pods'], 'kube-vip', 'kube-system', 3);
+      cy.waitForAllRowsInState('Running', 300000);
+    })
   );
 
   it('Install App on imported cluster', () => {
@@ -209,7 +209,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
   })
 
   if (skipClusterDeletion) {
-    it('Remove imported CAPV cluster from Rancher Manager', { retries: 1 }, () => {
+    it('Remove imported CAPV cluster from Rancher Manager', {retries: 1}, () => {
       // Check cluster is not deleted after removal
       cy.deleteCluster(clusterName);
       cy.goToHome();

@@ -13,16 +13,16 @@ limitations under the License.
 
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
-import { Question } from '~/support/structs';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {clusterNameSuffix, skipClusterDeletion} from '~/support/utils';
+import {Question} from '~/support/structs';
 
 
 Cypress.config();
-describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
+describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
   const timeout = 600000
   const className = 'docker-rke2-example'
-  const clusterName = className + '-cluster'
+  const clusterName = className + '-cluster-' + clusterNameSuffix
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const path = '/tests/assets/rancher-turtles-fleet-example/capd/rke2/class-clusters'
   const branch = 'main'
@@ -84,7 +84,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
 
       // Check cluster is Active
       cy.searchCluster(clusterName);
-      cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+      cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
 
       // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
       // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
@@ -109,15 +109,15 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
         data = data.replace(/worker_machine_count: 2/g, 'worker_machine_count: 3')
         cy.importYAML(data)
       });
-  
+
       cy.burgerMenuOperate('open');
       cy.forceUpdateFleetGitRepo(clustersRepoName);
-  
+
       // Check CAPI cluster status
       cy.checkCAPIMenu();
       cy.contains('Machine Deployments').click();
       cy.typeInFilter(clusterName);
-      cy.get('.content > .count', { timeout: timeout }).should('have.text', '3');
+      cy.get('.content > .count', {timeout: timeout}).should('have.text', '3');
       cy.checkCAPIClusterActive(clusterName);
     })
   );
@@ -129,13 +129,13 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
 
       // Check cluster is Active
       cy.searchCluster(clusterName);
-      cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+      cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
     })
   );
 
   if (skipClusterDeletion) {
     qase(103,
-      it('Remove imported CAPD cluster from Rancher Manager', { retries: 1 }, () => {
+      it('Remove imported CAPD cluster from Rancher Manager', {retries: 1}, () => {
         // Check cluster is not deleted after removal
         cy.deleteCluster(clusterName);
         cy.goToHome();

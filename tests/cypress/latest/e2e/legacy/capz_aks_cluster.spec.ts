@@ -1,10 +1,10 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {skipClusterDeletion} from '~/support/utils';
 
 Cypress.config();
-describe('Import CAPZ AKS Cluster', { tags: '@full' }, () => {
+describe('Import CAPZ AKS Cluster', {tags: '@full'}, () => {
   let clusterName: string
   const timeout = 1200000
   const repoName = 'clusters-azure-aks'
@@ -36,67 +36,67 @@ describe('Import CAPZ AKS Cluster', { tags: '@full' }, () => {
   })
 
   qase(21, it('Add CAPZ cluster fleet repo and get cluster name', () => {
-    cypressLib.checkNavIcon('cluster-management')
-      .should('exist');
+      cypressLib.checkNavIcon('cluster-management')
+        .should('exist');
 
-    // Add CAPZ fleet repository
-    cy.addFleetGitRepo(repoName, repoUrl, branch, path);
-    // Check CAPI cluster using its name prefix
-    cy.checkCAPICluster(clusterNamePrefix);
+      // Add CAPZ fleet repository
+      cy.addFleetGitRepo(repoName, repoUrl, branch, path);
+      // Check CAPI cluster using its name prefix
+      cy.checkCAPICluster(clusterNamePrefix);
 
-    // Get the cluster name by its prefix and use it across the test
-    cy.getBySel('sortable-cell-0-1').then(($cell) => {
-      clusterName = $cell.text();
-      cy.log('CAPI Cluster Name:', clusterName);
-    });
-  })
+      // Get the cluster name by its prefix and use it across the test
+      cy.getBySel('sortable-cell-0-1').then(($cell) => {
+        clusterName = $cell.text();
+        cy.log('CAPI Cluster Name:', clusterName);
+      });
+    })
   );
 
   qase(22, it('Auto import child CAPZ cluster', () => {
-    // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-    cy.checkCAPIClusterProvisioned(clusterName, timeout);
+      // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+      cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
-    // Check child cluster is created and auto-imported
-    // This is checked by ensuring the cluster is available in navigation menu
-    cy.goToHome();
-    cy.contains(clusterName).should('exist');
+      // Check child cluster is created and auto-imported
+      // This is checked by ensuring the cluster is available in navigation menu
+      cy.goToHome();
+      cy.contains(clusterName).should('exist');
 
-    // Check cluster is Active
-    cy.searchCluster(clusterName);
-    cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
-  })
+      // Check cluster is Active
+      cy.searchCluster(clusterName);
+      cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
+    })
   );
   qase(23, it('Install App on imported cluster', () => {
-    // Click on imported CAPZ cluster
-    cy.contains(clusterName).click();
+      // Click on imported CAPZ cluster
+      cy.contains(clusterName).click();
 
-    // Install Chart
-    cy.checkChart('Install', 'Logging', 'cattle-logging-system');
-  })
+      // Install Chart
+      cy.checkChart('Install', 'Logging', 'cattle-logging-system');
+    })
   );
 
   if (skipClusterDeletion) {
-    qase(25, it('Remove imported CAPZ cluster from Rancher Manager', { retries: 1 }, () => {
+    qase(25, it('Remove imported CAPZ cluster from Rancher Manager', {retries: 1}, () => {
 
-      // Check cluster is not deleted after removal
-      cy.deleteCluster(clusterName);
-      cy.goToHome();
-      // kubectl get clusters.cluster.x-k8s.io
-      // This is checked by ensuring the cluster is not available in navigation menu
-      cy.contains(clusterName).should('not.exist');
-      cy.checkCAPIClusterProvisioned(clusterName);
+        // Check cluster is not deleted after removal
+        cy.deleteCluster(clusterName);
+        cy.goToHome();
+        // kubectl get clusters.cluster.x-k8s.io
+        // This is checked by ensuring the cluster is not available in navigation menu
+        cy.contains(clusterName).should('not.exist');
+        cy.checkCAPIClusterProvisioned(clusterName);
 
-    })
+      })
     );
 
     qase(26, it('Delete the CAPZ cluster fleet repo and other resources', () => {
 
-      // Remove the fleet git repo
-      cy.removeFleetGitRepo(repoName);
-      // Wait until the following returns no clusters found
-      // This is checked by ensuring the cluster is not available in CAPI menu
-      cy.checkCAPIClusterDeleted(clusterName, timeout);
-    })
+        // Remove the fleet git repo
+        cy.removeFleetGitRepo(repoName);
+        // Wait until the following returns no clusters found
+        // This is checked by ensuring the cluster is not available in CAPI menu
+        cy.checkCAPIClusterDeleted(clusterName, timeout);
+      })
     );
 
     it('Delete the secrets', () => {

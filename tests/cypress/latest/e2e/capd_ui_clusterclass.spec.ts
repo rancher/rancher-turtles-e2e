@@ -12,16 +12,14 @@ limitations under the License.
 */
 
 import '~/support/commands';
-import * as randomstring from "randomstring";
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {clusterNameSuffix, skipClusterDeletion} from '~/support/utils';
 
 Cypress.config();
-describe('Create CAPD', { tags: '@short' }, () => {
+describe('Create CAPD', {tags: '@short'}, () => {
   const timeout = 600000
   const className = 'docker-kubeadm-example'
-  const clusterNamePrefix = className + '-cluster'
-  const clusterName = clusterNamePrefix + randomstring.generate({ length: 4, capitalization: "lowercase" })
+  const clusterName = className + '-cluster-' + clusterNameSuffix
   const k8sVersion = 'v1.31.4'
   const pathNames = ['kubeadm'] // TODO: Add rke2 path (capi-ui-extension/issues/121)
   const namespace = 'capi-classes' // TODO: Change to capi-clusters (capi-ui-extension/issues/111)
@@ -52,7 +50,7 @@ describe('Create CAPD', { tags: '@short' }, () => {
 
     qase(44,
       it('Create child CAPD cluster from Clusterclass', () => {
-        const machines: Record<string, string> = { 'md-0': 'default-worker' }
+        const machines: Record<string, string> = {'md-0': 'default-worker'}
         cy.createCAPICluster(className, clusterName, machines, k8sVersion, '192.168.0.0/16', serviceCIDR);
 
         // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
@@ -60,7 +58,7 @@ describe('Create CAPD', { tags: '@short' }, () => {
         cy.clusterAutoImport(clusterName, 'Enable');
         // Check child cluster is auto-imported
         cy.searchCluster(clusterName);
-        cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+        cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
       })
     );
 
@@ -75,7 +73,7 @@ describe('Create CAPD', { tags: '@short' }, () => {
 
 
     if (skipClusterDeletion) {
-      it('Remove CAPD cluster from Rancher Manager & Delete the CAPI cluster', { retries: 1 }, () => {
+      it('Remove CAPD cluster from Rancher Manager & Delete the CAPI cluster', {retries: 1}, () => {
         // Check cluster is not deleted after removal
         cy.deleteCluster(clusterName);
         cy.goToHome();

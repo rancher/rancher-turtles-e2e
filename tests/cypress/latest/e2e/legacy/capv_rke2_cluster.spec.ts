@@ -1,9 +1,9 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import { skipClusterDeletion } from '~/support/utils';
+import {skipClusterDeletion} from '~/support/utils';
 
 Cypress.config();
-describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
+describe('Import CAPV RKE2 Cluster', {tags: '@vsphere'}, () => {
   const timeout = 1200000
   const repoName = 'clusters-capv-rke2'
   const clusterName = "turtles-qa-capv-rke2"
@@ -102,7 +102,7 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
 
     // Check cluster is Active
     cy.searchCluster(clusterName);
-    cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+    cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
 
     // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
     // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
@@ -166,11 +166,11 @@ describe('Import CAPV RKE2 Cluster', { tags: '@vsphere' }, () => {
     // Go to Cluster Management > CAPI > Clusters and check if the cluster has started provisioning
     cy.burgerMenuOperate('open');
     cy.checkCAPIMenu();
-    cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
+    cy.contains(new RegExp('Provisioned.*' + clusterName), {timeout: timeout});
   })
 
   if (skipClusterDeletion) {
-    it('Remove imported CAPV cluster from Rancher Manager', { retries: 1 }, () => {
+    it('Remove imported CAPV cluster from Rancher Manager', {retries: 1}, () => {
       // Check cluster is not deleted after removal
       cy.deleteCluster(clusterName);
       cy.goToHome();

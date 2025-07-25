@@ -1,10 +1,10 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {skipClusterDeletion} from '~/support/utils';
 
 Cypress.config();
-describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
+describe('Import CAPA Kubeadm Class-Cluster', {tags: '@full'}, () => {
   let clusterName: string
   const timeout = 1200000
   const className = 'aws-kubeadm-example'
@@ -83,7 +83,7 @@ describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
 
       // Check cluster is Active
       cy.searchCluster(clusterName);
-      cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+      cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
 
       // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
       // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
@@ -104,7 +104,7 @@ describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
 
   if (skipClusterDeletion) {
     qase(127,
-      it('Remove imported CAPA cluster from Rancher Manager', { retries: 1 }, () => {
+      it('Remove imported CAPA cluster from Rancher Manager', {retries: 1}, () => {
         // Check cluster is not deleted after removal
         cy.deleteCluster(clusterName);
         cy.goToHome();

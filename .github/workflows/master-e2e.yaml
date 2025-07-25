@@ -55,7 +55,7 @@ on:
         description: Version of cert-manager to use
         type: string
       cluster_name:
-        description: Name of the provisioned cluster
+        description: Name of the provisioned management cluster
         required: true
         type: string
       destroy_runner:
@@ -113,6 +113,9 @@ on:
       skip_cluster_delete:
         description: Skip CAPI cluster and fleet repo deletion tests
         type: boolean
+      cluster_name_suffix:
+        description: Suffix to use for naming clusters
+        type: string
 
 jobs:
   determine-runner:
@@ -123,15 +126,15 @@ jobs:
       - name: Set Runner
         id: set-runner
         run: |
-            if [[ "${{ inputs.grep_test_by_tag }}" =~ "@vsphere" ]]; then
-              echo "initial-runner=vsphere" >> $GITHUB_OUTPUT
-              if [[ "${{ inputs.grep_test_by_tag }}" =~ "@full" || "${{ inputs.grep_test_by_tag }}" =~ "@short" ]]; then
-                echo "ERROR: @vsphere tests cannot be combined with @full and @short"
-                exit 1
-              fi
-            else
-              echo "initial-runner=ubuntu-latest" >> $GITHUB_OUTPUT
+          if [[ "${{ inputs.grep_test_by_tag }}" =~ "@vsphere" ]]; then
+            echo "initial-runner=vsphere" >> $GITHUB_OUTPUT
+            if [[ "${{ inputs.grep_test_by_tag }}" =~ "@full" || "${{ inputs.grep_test_by_tag }}" =~ "@short" ]]; then
+              echo "ERROR: @vsphere tests cannot be combined with @full and @short"
+              exit 1
             fi
+          else
+            echo "initial-runner=ubuntu-latest" >> $GITHUB_OUTPUT
+          fi
 
   create-runner:
     needs: determine-runner
@@ -274,7 +277,7 @@ jobs:
           esac
 
   e2e:
-    needs: [create-runner, pre-qase]
+    needs: [ create-runner, pre-qase ]
     runs-on: ${{ needs.create-runner.outputs.uuid }}
     env:
       CERT_MANAGER_VERSION: ${{ inputs.cert-manager_version }}
@@ -395,6 +398,7 @@ jobs:
           GREPTAGS: ${{ inputs.grep_test_by_tag }}
           TURTLES_OPERATOR_VERSION: ${{inputs.turtles_operator_version}}
           SKIP_CLUSTER_DELETE: ${{ inputs.skip_cluster_delete }}
+          CLUSTER_NAME_SUFFIX: ${{ inputs.cluster_name_suffix }}
           SPEC: |
             e2e/first_connection.spec.ts
             e2e/turtles_operator.spec.ts
@@ -428,7 +432,7 @@ jobs:
           fi
           cd tests && make start-cypress-tests
       - name: Upload Cypress screenshots (Basics)
-        if: failure() 
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-screenshots-basics-${{ inputs.cluster_name }}
@@ -466,7 +470,7 @@ jobs:
 
   delete-runner:
     if: ${{ always() && needs.create-runner.outputs.uuid != 'vsphere' }}
-    needs: [create-runner, e2e]
+    needs: [ create-runner, e2e ]
     runs-on: ubuntu-latest
     steps:
       # actions/checkout MUST come before auth
@@ -491,7 +495,7 @@ jobs:
 
   post-qase:
     if: ${{ always() && needs.pre-qase.outputs.qase_run_id != '' }}
-    needs: [e2e, pre-qase]
+    needs: [ e2e, pre-qase ]
     runs-on: ubuntu-latest
     env:
       QASE_API_TOKEN: ${{ secrets.qase_api_token }}
@@ -502,7 +506,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4          
+        uses: actions/checkout@v4
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
@@ -535,7 +539,7 @@ jobs:
 
   cleanup-vsphere-runner:
     if: ${{ always() && needs.create-runner.outputs.uuid == 'vsphere' && inputs.destroy_runner == true }}
-    needs: [create-runner, e2e]
+    needs: [ create-runner, e2e ]
     runs-on: vsphere
     steps:
       - name: Cleanup vsphere runner

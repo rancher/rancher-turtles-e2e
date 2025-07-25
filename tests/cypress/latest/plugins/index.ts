@@ -26,13 +26,14 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   const url = process.env.RANCHER_URL || 'https://localhost:8005';
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { isFileExist, findFiles } = require('cy-verify-downloads');
-  on('task', { isFileExist, findFiles })
+  const {isFileExist, findFiles} = require('cy-verify-downloads');
+  on('task', {isFileExist, findFiles})
 
   config.baseUrl = url.replace(/\/$/,);
   config.env.cache_session = process.env.CACHE_SESSION || false;
-  config.env.chartmuseum_repo = process.env.CHARTMUSEUM_REPO || '';
+  config.env.chartmuseum_repo = process.env.CHARTMUSEUM_REPO;
   config.env.turtles_operator_version = process.env.TURTLES_OPERATOR_VERSION;
+  config.env.cluster_name_suffix = process.env.CLUSTER_NAME_SUFFIX;
   config.env.cluster = process.env.CLUSTER_NAME;
   config.env.capi_ui_version = process.env.CAPI_UI_VERSION;
   config.env.k8s_version = process.env.K8S_VERSION_TO_PROVISION;
