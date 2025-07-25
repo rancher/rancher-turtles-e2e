@@ -1,6 +1,6 @@
 import '~/support/commands';
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {skipClusterDeletion} from '~/support/utils';
 import * as randomstring from "randomstring";
 
 Cypress.config();
@@ -73,6 +73,7 @@ describe('Create Azure RKE2 Cluster', { tags: '@short' }, () => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_cloudcred_id/g, ccID)
           data = data.replace(/replace_rke2_version/g, k8sVersion)
+          // @ts-expect-error expected error with CodeMirror
           editor[0].CodeMirror.setValue(data);
         })
     });
@@ -92,11 +93,7 @@ describe('Create Azure RKE2 Cluster', { tags: '@short' }, () => {
 
   if (skipClusterDeletion) {
     it('Delete Azure RKE2 cluster from Rancher Manager', () => {
-      cy.deleteCluster(clusterName, timeout);
-      cy.goToHome();
-      // kubectl get clusters.cluster.x-k8s.io
-      // This is checked by ensuring the cluster is not available in navigation menu
-      cy.contains(clusterName).should('not.exist');
+      cy.deleteCluster(clusterName, timeout, true, false);
     })
   }
 });

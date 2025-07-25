@@ -1,7 +1,7 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {skipClusterDeletion} from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPZ AKS Cluster', { tags: '@full' }, () => {
@@ -99,14 +99,8 @@ describe('Import CAPZ AKS Cluster', { tags: '@full' }, () => {
     })
     );
 
-    it('Delete the secrets', () => {
-      ['azure-creds-secret', 'cluster-identity'].forEach((resourceName) => {
-        cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], resourceName, namespace)
-      })
-    })
-
-    it('Delete AzureClusterIdentities resource', () => {
-      cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', 'capi-clusters')
+    it('Delete other resources', () => {
+      cy.capzResourcesCleanup(namespace);
     })
   }
 

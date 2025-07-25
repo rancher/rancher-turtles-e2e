@@ -1,11 +1,10 @@
 import '~/support/commands';
-import { skipClusterDeletion } from '~/support/utils';
+import {skipClusterDeletion} from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
   let clusterName: string;
   const timeout = 1200000
-  const namespace = 'capz-system'
   const repoName = 'class-clusters-azure-kubeadm'
   const className = 'azure-kubeadm-example'
   const branch = 'main'
@@ -101,32 +100,14 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
 
 
   if (skipClusterDeletion) {
-    it('Remove imported CAPZ cluster from Rancher Manager', { retries: 1 }, () => {
-      // Check cluster is not deleted after removal
-      cy.deleteCluster(clusterName);
-      cy.goToHome();
-      // kubectl get clusters.cluster.x-k8s.io
-      // This is checked by ensuring the cluster is not available in navigation menu
-      cy.contains(clusterName).should('not.exist');
-      cy.checkCAPIClusterProvisioned(clusterName);
+    it('Delete the cluster, and fleet repos', () => {
+      cy.cleanupFunc(clusterName, repoName, clusterClassRepoName, timeout);
     });
 
-    it('Delete the CAPZ cluster and clusterclasses fleet repo and other resources', () => {
+    it('Delete other resources', () => {
+      cy.capzResourcesCleanup();
+    })
 
-      // Remove the fleet git repo
-      cy.removeFleetGitRepo(repoName);
-      // Wait until the following returns no clusters found
-      // This is checked by ensuring the cluster is not available in CAPI menu
-      cy.checkCAPIClusterDeleted(clusterName, timeout);
-
-      // Remove the clusterclass repo
-      cy.removeFleetGitRepo(clusterClassRepoName);
-
-      // Delete secret and AzureClusterIdentity
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'azure-creds-secret', namespace)
-      cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', 'capi-clusters')
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'cluster-identity', namespace)
-    });
   }
 
 });

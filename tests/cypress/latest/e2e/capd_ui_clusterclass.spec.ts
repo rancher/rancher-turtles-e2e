@@ -13,8 +13,8 @@ limitations under the License.
 
 import '~/support/commands';
 import * as randomstring from "randomstring";
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {skipClusterDeletion} from '~/support/utils';
 
 Cypress.config();
 describe('Create CAPD', { tags: '@short' }, () => {
@@ -75,31 +75,12 @@ describe('Create CAPD', { tags: '@short' }, () => {
 
 
     if (skipClusterDeletion) {
-      it('Remove CAPD cluster from Rancher Manager & Delete the CAPI cluster', { retries: 1 }, () => {
-        // Check cluster is not deleted after removal
-        cy.deleteCluster(clusterName);
-        cy.goToHome();
-        // kubectl get clusters.cluster.x-k8s.io
-        // This is checked by ensuring the cluster is not available in navigation menu
-        cy.contains(clusterName).should('not.exist');
-        cy.checkCAPIClusterProvisioned(clusterName);
-
-        cy.removeCAPIResource('Clusters', clusterName, timeout);
-        // Ensure the cluster is not available in navigation menu
-        cy.getBySel('side-menu').then(($menu) => {
-          if ($menu.text().includes(clusterName)) {
-            cy.deleteCluster(clusterName);
-          }
-        })
+      it('Delete the cluster, and fleet repos', () => {
+        cy.cleanupFunc(clusterName, '', clusterClassRepoName, timeout, true, true);
       })
 
       it('Delete the Kindnet Config Map', () => {
-        cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'ConfigMaps'], "cni-docker-kubeadm-example-crs-0", namespace);
-        cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'ClusterResourceSets'], "docker-kubeadm-example-crs-0", namespace);
-      })
-
-      it('Remove the CAPD ClusterClass fleet repo', () => {
-        cy.removeFleetGitRepo(clusterClassRepoName)
+        cy.capdResourcesCleanup(true);
       })
     }
   })

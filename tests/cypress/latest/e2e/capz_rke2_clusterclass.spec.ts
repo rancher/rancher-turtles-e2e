@@ -1,12 +1,11 @@
 import '~/support/commands';
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {skipClusterDeletion} from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
   let clusterName: string;
   const timeout = 1200000
-  const namespace = 'capz-system'
   const repoName = 'class-clusters-azure-rke2'
   const className = 'azure-rke2-example'
   const branch = 'main'
@@ -106,34 +105,14 @@ describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
 
 
   if (skipClusterDeletion) {
-    qase(82, it('Remove imported CAPZ cluster from Rancher Manager', { retries: 1 }, () => {
-      // Check cluster is not deleted after removal
-      cy.deleteCluster(clusterName);
-      cy.goToHome();
-      // kubectl get clusters.cluster.x-k8s.io
-      // This is checked by ensuring the cluster is not available in navigation menu
-      cy.contains(clusterName).should('not.exist');
-      cy.checkCAPIClusterProvisioned(clusterName);
+    qase(82, it('Delete the cluster, and fleet repos', () => {
+        cy.cleanupFunc(clusterName, repoName, clusterClassRepoName, timeout);
     })
     );
 
-    qase(83, it('Delete the CAPZ cluster and clusterclasses fleet repo and other resources', () => {
-
-      // Remove the fleet git repo
-      cy.removeFleetGitRepo(repoName);
-      // Wait until the following returns no clusters found
-      // This is checked by ensuring the cluster is not available in CAPI menu
-      cy.checkCAPIClusterDeleted(clusterName, timeout);
-
-      // Remove the clusterclass repo
-      cy.removeFleetGitRepo(clusterClassRepoName);
-
-      // Delete secret and AzureClusterIdentity
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'azure-creds-secret', namespace)
-      cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', 'capi-clusters')
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'cluster-identity', namespace)
+    it('Delete other resources', () => {
+      cy.capzResourcesCleanup();
     })
-    );
   }
 
 });

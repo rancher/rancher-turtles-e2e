@@ -13,9 +13,9 @@ limitations under the License.
 
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
-import { Question } from '~/support/structs';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {skipClusterDeletion} from '~/support/utils';
+import {Question} from '~/support/structs';
 
 
 Cypress.config();
@@ -134,41 +134,14 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
   );
 
   if (skipClusterDeletion) {
-    qase(103,
-      it('Remove imported CAPD cluster from Rancher Manager', { retries: 1 }, () => {
-        // Check cluster is not deleted after removal
-        cy.deleteCluster(clusterName);
-        cy.goToHome();
-        // kubectl get clusters.cluster.x-k8s.io
-        // This is checked by ensuring the cluster is not available in navigation menu
-        cy.contains(clusterName).should('not.exist');
-        cy.checkCAPIClusterProvisioned(clusterName);
-      })
-    );
-
-    qase(104,
-      it('Delete the CAPD fleet repos', () => {
-        // Remove the clusters fleet repo
-        cy.removeFleetGitRepo(clustersRepoName);
-
-        // Wait until the following returns no clusters found
-        // This is checked by ensuring the cluster is not available in CAPI menu
-        cy.checkCAPIClusterDeleted(clusterName, timeout);
-
-        // Remove the clusterclass repo
-        cy.removeFleetGitRepo(clusterClassRepoName);
-
-        // Ensure the cluster is not available in navigation menu
-        cy.getBySel('side-menu').then(($menu) => {
-          if ($menu.text().includes(clusterName)) {
-            cy.deleteCluster(clusterName);
-          }
-        })
+    qase([103, 104],
+      it('Delete the cluster, and fleet repos', () => {
+        cy.cleanupFunc(clusterName, clustersRepoName, clusterClassRepoName, timeout, true);
       })
     );
 
     it('Delete the helm values ConfigMap', () => {
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'ConfigMaps'], "capd-helm-values", 'capi-clusters')
+      cy.capdResourcesCleanup();
     })
   }
 });

@@ -13,8 +13,8 @@ limitations under the License.
 
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {skipClusterDeletion} from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPD RKE2', { tags: '@short' }, () => {
@@ -120,7 +120,7 @@ describe('Import CAPD RKE2', { tags: '@short' }, () => {
     );
 
     qase(10,
-      it('Delete the CAPD fleet repos', () => {
+      it('Delete the cluster, and fleet repos', () => {
         // Remove the clusters fleet repo
         cy.removeFleetGitRepo(clustersRepoName);
 

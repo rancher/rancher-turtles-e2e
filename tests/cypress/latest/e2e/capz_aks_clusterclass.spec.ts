@@ -1,9 +1,9 @@
 import '~/support/commands';
 
 import * as randomstring from "randomstring";
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
-import { ClusterClassVariablesInput } from '~/support/structs';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {skipClusterDeletion} from '~/support/utils';
+import {ClusterClassVariablesInput} from '~/support/structs';
 
 Cypress.config();
 describe('Import/Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
@@ -17,7 +17,6 @@ describe('Import/Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
   const path = '/tests/assets/rancher-turtles-fleet-example/capz/aks/class-clusters'
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
   const location = "westeurope" // this is one of the regions supported by ClusterClass definition
-  const namespace = "capz-system"
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/azure/aks'
   const clusterClassRepoName = "azure-aks-clusterclass"
@@ -92,18 +91,11 @@ describe('Import/Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
     qase(60, it('Delete the imported cluster and remove the fleet repo', () => {
       // Check cluster is not deleted after removal
       cy.deleteCluster(fleetClusterName);
-      cy.goToHome();
-      // kubectl get clusters.cluster.x-k8s.io
-      // This is checked by ensuring the cluster is not available in navigation menu
-      cy.contains(fleetClusterName).should('not.exist');
-      cy.checkCAPIClusterProvisioned(fleetClusterName);
-
       // Remove the fleet git repo
       cy.removeFleetGitRepo(repoName);
       // Wait until the following returns no clusters found
       // This is checked by ensuring the cluster is not available in CAPI menu
       cy.checkCAPIClusterDeleted(fleetClusterName, timeout);
-
     })
     );
   }
@@ -138,28 +130,13 @@ describe('Import/Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
   );
 
   if (skipClusterDeletion) {
-    qase(89, it('Remove created CAPZ cluster from Rancher Manager and Delete the CAPZ cluster', { retries: 1 }, () => {
-      // Check cluster is not deleted after removal
-      cy.deleteCluster(clusterName);
-      cy.goToHome();
-      // kubectl get clusters.cluster.x-k8s.io
-      // This is checked by ensuring the cluster is not available in navigation menu
-      cy.contains(clusterName).should('not.exist');
-      cy.checkCAPIClusterProvisioned(clusterName);
-
-      // Delete CAPI cluster created via UI
-      cy.removeCAPIResource('Clusters', clusterName, timeout);
-    })
+    qase(89, it('Delete the cluster, and fleet repos', () => {
+        cy.cleanupFunc(clusterName, '', clusterClassRepoName, timeout, false, true);
+      })
     );
 
-    it('Delete the CAPZ clusterclasses fleet repo and other resources', () => {
-      // Remove the clusterclass repo
-      cy.removeFleetGitRepo(clusterClassRepoName);
-
-      // Delete secret and AzureClusterIdentity
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'azure-creds-secret', namespace)
-      cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', 'capi-clusters')
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'cluster-identity', namespace)
+    it('Delete other resources', () => {
+      cy.capzResourcesCleanup();
     })
   }
 

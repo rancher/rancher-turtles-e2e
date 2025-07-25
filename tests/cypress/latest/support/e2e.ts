@@ -15,7 +15,10 @@ limitations under the License.
 import './commands';
 import yaml from 'js-yaml';
 import './capz_support';
-import { ClusterClassVariablesInput, Question } from './structs';
+import './cleanup_support';
+import {ClusterClassVariablesInput, Question} from './structs';
+// @ts-expect-error ignore the error
+import registerCypressGrep from '@cypress/grep'
 
 declare global {
   // In Cypress functions should be declared with 'namespace'
@@ -36,7 +39,8 @@ declare global {
       accesMenuSelection(menuPaths: string[]): Chainable<Element>;
       burgerMenuOperate(operation: 'open' | 'close'): Chainable<Element>;
       checkChart(operation: string, chartName: string, namespace: string, version?: string, questions?: Question[], refreshRepo?: boolean): Chainable<Element>;
-      deleteCluster(clusterName: string, timeout?: number): Chainable<Element>;
+
+      deleteCluster(clusterName: string, timeout?: number, checkHome?: boolean, checkClusterProvisioned?: boolean): Chainable<Element>;
       searchCluster(clusterName: string): Chainable<Element>;
       createNamespace(namespace: string): Chainable<Element>;
       setNamespace(namespace: string, namespaceID?: string): Chainable<Element>;
@@ -70,6 +74,16 @@ declare global {
       createCAPZValuesSecret(clientID: string, tenantID: string, subscriptionID: string): Chainable<Element>;
       createAzureClusterIdentity(clientID: string, tenantID: string, clientSecret: string): Chainable<Element>;
       deleteKubernetesResource(clusterName: string, resourcePath: string[], resourceName: string, namespace?: string): Chainable<Element>;
+
+      cleanupFunc(clusterName: string, clusterRepoName: string, clusterClassRepoName: string, timeout: number, extraDeleteSteps?: boolean, uiCleanup?: boolean): null;
+
+      capzResourcesCleanup(): null;
+
+      capaResourcesCleanup(): null;
+
+      capdResourcesCleanup(uiCleanup?: boolean): null;
+
+      capvResourcesCleanup(provider: 'kubeadm' | 'rke2'): null;
     }
   }
 }
@@ -98,8 +112,6 @@ require('cypress-dark');
 require('cy-verify-downloads').addCustomCommand();
 require('cypress-plugin-tab');
 require('@rancher-ecp-qa/cypress-library');
-// @ts-expect-error ignore the error
-import registerCypressGrep from '@cypress/grep'
 registerCypressGrep()
 
 // Abort on first failure in @install tests

@@ -1,7 +1,7 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {skipClusterDeletion} from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
@@ -103,33 +103,14 @@ describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
   );
 
   if (skipClusterDeletion) {
-    qase(127,
-      it('Remove imported CAPA cluster from Rancher Manager', { retries: 1 }, () => {
-        // Check cluster is not deleted after removal
-        cy.deleteCluster(clusterName);
-        cy.goToHome();
-        // kubectl get clusters.cluster.x-k8s.io
-        // This is checked by ensuring the cluster is not available in navigation menu
-        cy.contains(clusterName).should('not.exist');
-        cy.checkCAPIClusterProvisioned(clusterName);
+    qase([127, 128],
+      it('Delete the cluster, and fleet repos', () => {
+        cy.cleanupFunc(clusterName, repoName, clusterClassRepoName, timeout);
       })
     );
 
-    qase(128,
-      it('Delete the CAPA cluster and ClusterClass fleet repo', () => {
-        // Remove the fleet git repo
-        cy.removeFleetGitRepo(repoName);
-        // Wait until the following returns no clusters found
-        // This is checked by ensuring the cluster is not available in CAPI menu
-        cy.checkCAPIClusterDeleted(clusterName, timeout);
-
-        // Remove the clusterclass repo
-        cy.removeFleetGitRepo(clusterClassRepoName);
-
-        // Delete secret and AWSClusterStaticIdentity
-        cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'cluster-identity', 'capa-system')
-        cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AWSClusterStaticIdentities'], 'cluster-identity')
-      })
-    );
+    it('delete other resources', () => {
+      cy.capaResourcesCleanup();
+    })
   }
 });
