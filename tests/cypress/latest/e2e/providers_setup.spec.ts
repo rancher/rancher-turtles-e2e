@@ -12,7 +12,7 @@ limitations under the License.
 */
 
 import '~/support/commands';
-import { qase } from 'cypress-qase-reporter/dist/mocha';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
 
 Cypress.config();
 describe('Enable CAPI Providers', () => {
@@ -37,7 +37,7 @@ describe('Enable CAPI Providers', () => {
       vsphere: 'v1.12.0',
       amazon: 'v2.8.1',
       google: 'v1.10.0',
-      azure: 'v1.19.1'
+      azure: 'v1.20.1'
     },
     dev: {
       kubeadm: 'v1.9.5',
