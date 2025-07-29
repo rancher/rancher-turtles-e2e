@@ -395,7 +395,7 @@ jobs:
           GREPTAGS: ${{ inputs.grep_test_by_tag }}
           TURTLES_OPERATOR_VERSION: ${{inputs.turtles_operator_version}}
           SKIP_CLUSTER_DELETE: ${{ inputs.skip_cluster_delete }}
-          CLUSTER_NAME_SUFFIX: ${{ github.actor }}
+          CLUSTER_USER_SUFFIX: ${{ github.actor }}
           SPEC: |
             e2e/first_connection.spec.ts
             e2e/turtles_operator.spec.ts

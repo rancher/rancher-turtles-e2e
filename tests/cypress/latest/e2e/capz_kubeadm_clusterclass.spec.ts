@@ -8,7 +8,7 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
   const timeout = 1200000
   const namespace = 'capz-system'
   const classNamePrefix = 'azure-kubeadm'
-  const clusterName = 'turtles-qa'.concat(separator, classNamePrefix, separator, randomstring.generate({ length: 4, capitalization: 'lowercase' }), separator, Cypress.env('cluster_name_suffix'))
+  const clusterName = 'turtles-qa'.concat(separator, classNamePrefix, separator, randomstring.generate({ length: 4, capitalization: 'lowercase' }), separator, Cypress.env('cluster_user_suffix'))
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/azure/kubeadm'
   const clusterClassRepoName = "azure-kubeadm-clusterclass"
@@ -33,10 +33,6 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
 
   it('Setup the namespace for importing', () => {
     cy.namespaceAutoImport('Disable');
-  })
-
-  it('Create values.yaml Secret', () => {
-    cy.createCAPZValuesSecret(clientID, tenantID, subscriptionID);
   })
 
   it('Create AzureClusterIdentity', () => {
@@ -132,7 +128,6 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
       cy.removeFleetGitRepo(clusterClassRepoName);
 
       // Delete secret and AzureClusterIdentity
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'azure-creds-secret', namespace)
       cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', 'capi-clusters')
       cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'cluster-identity', namespace)
     });

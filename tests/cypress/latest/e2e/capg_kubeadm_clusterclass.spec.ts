@@ -8,24 +8,16 @@ describe('Import CAPG Kubeadm Class-Cluster', { tags: '@full' }, () => {
   const separator = '-'
   const timeout = 1200000
   const classNamePrefix = 'gcp-kubeadm'
-  const clusterName = 'turtles-qa'.concat(separator, classNamePrefix, separator, randomstring.generate({ length: 4, capitalization: 'lowercase' }), separator, Cypress.env('cluster_name_suffix'))
+  const clusterName = 'turtles-qa'.concat(separator, classNamePrefix, separator, randomstring.generate({ length: 4, capitalization: 'lowercase' }), separator, Cypress.env('cluster_user_suffix'))
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/gcp/kubeadm'
   const clusterClassRepoName = 'gcp-kubeadm-clusterclass'
   const gcpProject = Cypress.env("gcp_project")
-  const namespace = 'capg-system'
 
   beforeEach(() => {
     cy.login();
     cy.burgerMenuOperate('open');
   });
-
-  it('Create the helm values secret', () => {
-    cy.readFile('./fixtures/gcp/capg-helm-values-secret.yaml').then((data) => {
-      data = data.replace(/replace_gcp_project/g, gcpProject)
-      cy.importYAML(data)
-    });
-  })
 
   it('Setup the namespace for importing', () => {
     cy.namespaceAutoImport('Disable');
@@ -130,7 +122,6 @@ describe('Import CAPG Kubeadm Class-Cluster', { tags: '@full' }, () => {
       it('Delete the ClusterClass fleet repo and other resources', () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
-        cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], "capg-helm-values", namespace)
       })
     );
   }

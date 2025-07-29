@@ -10,7 +10,7 @@ describe('Import/Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
   const separator = '-'
   const timeout = 1200000
   const classNamePrefix = 'azure-aks'
-  const clusterName = 'turtles-qa'.concat(separator, classNamePrefix, separator, randomstring.generate({ length: 4, capitalization: 'lowercase' }), separator, Cypress.env('cluster_name_suffix'))
+  const clusterName = 'turtles-qa'.concat(separator, classNamePrefix, separator, randomstring.generate({ length: 4, capitalization: 'lowercase' }), separator, Cypress.env('cluster_user_suffix'))
   const k8sVersion = 'v1.31.4'
   const podCIDR = '192.168.0.0/16'
   const location = "westeurope" // this is one of the regions supported by ClusterClass definition
@@ -39,10 +39,6 @@ describe('Import/Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
 
   it('Setup the namespace for importing', () => {
     cy.namespaceAutoImport('Disable');
-  })
-
-  it('Create values.yaml Secret', () => {
-    cy.createCAPZValuesSecret(clientID, tenantID, subscriptionID);
   })
 
   it('Create AzureClusterIdentity', () => {
@@ -95,14 +91,15 @@ describe('Import/Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
 
       // Delete CAPI cluster
       cy.removeCAPIResource('Clusters', clusterName, timeout);
-
-      // Remove the clusterclass repo
-      cy.removeFleetGitRepo(clusterClassRepoName);
     })
     );
   }
 
   it('Add CAPZ AKS ClusterClass using fleet for UI Cluster', () => {
+    // Remove the previous clusterclass repo
+    cy.removeFleetGitRepo(clusterClassRepoName);
+
+    cy.burgerMenuOperate('open')
     cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-clusters') // TODO: Change to capi-classes (capi-ui-extension/issues/111)
     // Go to CAPI > ClusterClass to ensure the clusterclass is created
     cy.checkCAPIClusterClass(classNamePrefix);
@@ -158,7 +155,6 @@ describe('Import/Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
       cy.removeFleetGitRepo(clusterClassRepoName);
 
       // Delete secret and AzureClusterIdentity
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'azure-creds-secret', namespace)
       cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', 'capi-clusters')
       cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'cluster-identity', namespace)
     })
