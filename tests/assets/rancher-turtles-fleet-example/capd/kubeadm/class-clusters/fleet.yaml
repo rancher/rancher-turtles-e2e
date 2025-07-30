@@ -1,8 +1,0 @@
-namespace: capi-clusters
-
-helm:
-  valuesFrom:
-    - configMapKeyRef:
-        name: capd-helm-values
-        namespace: capi-clusters
-        key: values.yaml

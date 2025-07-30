@@ -1,7 +1,7 @@
 import '~/support/commands';
 import * as randomstring from "randomstring";
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {skipClusterDeletion} from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPA RKE2 Class-Cluster', { tags: '@full' }, () => {
@@ -99,14 +99,14 @@ describe('Import CAPA RKE2 Class-Cluster', { tags: '@full' }, () => {
       // workaround; these values need to be re-replaced before applying the scaling changes
       data = data.replace(/replace_cluster_name/g, clusterName)
       cy.importYAML(data, 'capi-clusters')
-
-      // Check CAPI cluster status
-      cy.checkCAPIMenu();
-      cy.contains('Machine Deployments').click();
-      cy.typeInFilter(clusterName);
-      cy.get('.content > .count', { timeout: timeout }).should('have.text', '3');
-      cy.checkCAPIClusterActive(clusterName);
     })
+
+    // Check CAPI cluster status
+    cy.checkCAPIMenu();
+    cy.contains('Machine Deployments').click();
+    cy.typeInFilter(clusterName);
+    cy.get('.content > .count', {timeout: timeout}).should('have.text', '3');
+    cy.checkCAPIClusterActive(clusterName);
   })
 
   if (skipClusterDeletion) {

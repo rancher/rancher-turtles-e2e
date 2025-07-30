@@ -13,17 +13,19 @@ limitations under the License.
 
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {skipClusterDeletion} from '~/support/utils';
+import * as randomstring from "randomstring";
 
 Cypress.config();
 describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
+  const separator = '-'
   const timeout = 600000
-  const className = 'docker-kubeadm-example'
-  const clusterName = className + '-cluster'
-  const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
-  const path = '/tests/assets/rancher-turtles-fleet-example/capd/kubeadm/class-clusters'
-  const branch = 'main'
+  const classNamePrefix = 'docker-kubeadm'
+  const clusterName = 'turtles-qa'.concat(separator, classNamePrefix, separator, randomstring.generate({
+    length: 4,
+    capitalization: 'lowercase'
+  }), separator, Cypress.env('cluster_user_suffix'))
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/docker/kubeadm'
   const clustersRepoName = 'docker-kb-class-clusters'
@@ -39,24 +41,20 @@ describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
     cy.namespaceAutoImport('Enable');
   })
 
-  it('Create values.yaml ConfigMap', () => {
-    cy.readFile('./fixtures/docker/capd-helm-values.yaml').then((data) => {
-      cy.importYAML(data)
-    });
-  })
-
   qase(92,
     it('Add CAPD Kubeadm ClusterClass using fleet', () => {
       cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
-      cy.checkCAPIClusterClass(className);
+      cy.checkCAPIClusterClass(classNamePrefix);
     })
   );
 
   qase(6,
-    it('Add CAPD Kubeadm class-clusters fleet repo', () => {
-      cypressLib.checkNavIcon('cluster-management').should('exist');
-      cy.addFleetGitRepo(clustersRepoName, repoUrl, branch, path);
+    it('Import CAPD Kubeadm class-clusters using YAML', () => {
+      cy.readFile('./fixtures/docker/capd-kubeadm-class-cluster.yaml').then((data) => {
+        data = data.replace(/replace_cluster_name/g, clusterName)
+        cy.importYAML(data, 'capi-clusters')
+      });
 
       // Check CAPI cluster using its name
       cy.checkCAPICluster(clusterName);
@@ -107,6 +105,7 @@ describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
       cy.contains('View YAML').click();
       const annotation = 'provisioning.cattle.io/externally-managed: \'true\'';
       cy.get('.CodeMirror').then((editor) => {
+        // @ts-expect-error expected error with CodeMirror
         const text = editor[0].CodeMirror.getValue();
         expect(text).to.include(annotation);
       });
@@ -125,13 +124,11 @@ describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
 
   qase(95,
     it("Scale up imported CAPD class-cluster by updating values and forcefully updating the repo", () => {
-      cy.readFile('./fixtures/docker/capd-helm-values.yaml').then((data) => {
-        data = data.replace(/worker_machine_count: 2/g, 'worker_machine_count: 3')
-        cy.importYAML(data)
+      cy.readFile('./fixtures/docker/capd-kubeadm-class-cluster.yaml').then((data) => {
+        data = data.replace(/replace_cluster_name/g, clusterName)
+        data = data.replace(/replicas: 2/g, 'replicas: 3')
+        cy.importYAML(data, 'capi-clusters')
       });
-
-      cy.burgerMenuOperate('open');
-      cy.forceUpdateFleetGitRepo(clustersRepoName);
 
       // Check CAPI cluster status
       cy.checkCAPIMenu();
@@ -175,9 +172,5 @@ describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
         })
       })
     );
-
-    it('Delete the helm values ConfigMap', () => {
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'ConfigMaps'], "capd-helm-values", 'capi-clusters')
-    })
   }
 });
