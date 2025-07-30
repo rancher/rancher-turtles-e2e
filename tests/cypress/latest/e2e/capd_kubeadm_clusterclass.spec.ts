@@ -28,7 +28,6 @@ describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
   }), separator, Cypress.env('cluster_user_suffix'))
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/docker/kubeadm'
-  const clustersRepoName = 'docker-kb-class-clusters'
   const clusterClassRepoName = 'docker-kb-clusterclass'
 
   beforeEach(() => {
@@ -149,27 +148,16 @@ describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
         // This is checked by ensuring the cluster is not available in navigation menu
         cy.contains(clusterName).should('not.exist');
         cy.checkCAPIClusterProvisioned(clusterName);
+
+        // Delete CAPI cluster
+        cy.removeCAPIResource('Clusters', clusterName, timeout);
       })
     );
 
     qase(99,
       it('Delete the CAPD fleet repos', () => {
-        // Remove the clusters fleet repo
-        cy.removeFleetGitRepo(clustersRepoName);
-
-        // Wait until the following returns no clusters found
-        // This is checked by ensuring the cluster is not available in CAPI menu
-        cy.checkCAPIClusterDeleted(clusterName, timeout);
-
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
-
-        // Ensure the cluster is not available in navigation menu
-        cy.getBySel('side-menu').then(($menu) => {
-          if ($menu.text().includes(clusterName)) {
-            cy.deleteCluster(clusterName);
-          }
-        })
       })
     );
   }
