@@ -12,6 +12,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+import randomstring from "randomstring";
+
 /// <reference types="cypress" />
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
@@ -49,7 +51,9 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   config.env.azure_client_secret = process.env.AZURE_CLIENT_SECRET;
   config.env.azure_subscription_id = process.env.AZURE_SUBSCRIPTION_ID;
   config.env.skip_cluster_delete = process.env.SKIP_CLUSTER_DELETE || "false";
-  config.env.cluster_user_suffix = process.env.CLUSTER_USER_SUFFIX || "";
+
+  const clusterNameSuffixDefault: string = randomstring.generate({length: 4, capitalization: 'lowercase'})
+  config.env.cluster_name_suffix = process.env.CLUSTER_NAME_SUFFIX || clusterNameSuffixDefault;
   // VMware vSphere
   config.env.vsphere_secrets_json_base64 = process.env.VSPHERE_SECRETS_JSON_BASE64;
 

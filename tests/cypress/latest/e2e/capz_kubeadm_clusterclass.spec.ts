@@ -1,14 +1,11 @@
 import '~/support/commands';
-import * as randomstring from "randomstring";
-import { skipClusterDeletion } from '~/support/utils';
+import {getClusterName, skipClusterDeletion} from '~/support/utils';
 
 Cypress.config();
 describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
-  const separator = '-'
   const timeout = 1200000
-  const namespace = 'capz-system'
   const classNamePrefix = 'azure-kubeadm'
-  const clusterName = 'turtles-qa'.concat(separator, classNamePrefix, separator, randomstring.generate({ length: 4, capitalization: 'lowercase' }), separator, Cypress.env('cluster_user_suffix'))
+  const clusterName = getClusterName(classNamePrefix)
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/azure/kubeadm'
   const clusterClassRepoName = "azure-kubeadm-clusterclass"
@@ -110,26 +107,9 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
   })
 
   if (skipClusterDeletion) {
-    it('Remove imported CAPZ cluster from Rancher Manager and Delete the CAPZ cluster', { retries: 1 }, () => {
-      // Check cluster is not deleted after removal
-      cy.deleteCluster(clusterName);
-      cy.goToHome();
-      // kubectl get clusters.cluster.x-k8s.io
-      // This is checked by ensuring the cluster is not available in navigation menu
-      cy.contains(clusterName).should('not.exist');
-      cy.checkCAPIClusterProvisioned(clusterName);
-
-      // Delete CAPI cluster
-      cy.removeCAPIResource('Clusters', clusterName, timeout);
-    })
-
-    it('Delete the ClusterClass fleet repo and other resources', () => {
-      // Remove the clusterclass repo
-      cy.removeFleetGitRepo(clusterClassRepoName);
-
-      // Delete secret and AzureClusterIdentity
-      cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', 'capi-clusters')
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'cluster-identity', namespace)
+    it('Delete the cluster, fleet repos, and other resources', () => {
+      cy.cleanupFunc(clusterName, clusterClassRepoName, timeout);
+      cy.capzResourcesCleanup();
     });
   }
 

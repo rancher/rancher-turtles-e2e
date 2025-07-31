@@ -544,6 +544,7 @@ Cypress.Commands.add('patchYamlResource', (clusterName, namespace, resourceKind,
 
   // Do the CodeMirror magic here
   cy.get('.CodeMirror').then((editor) => {
+    // @ts-expect-error known error with CodeMirror
     const yaml = editor[0].CodeMirror.getValue();
     const yamlObject = jsyaml.load(yaml);
 
@@ -575,6 +576,7 @@ Cypress.Commands.add('patchYamlResource', (clusterName, namespace, resourceKind,
 
     const patchedYaml = jsyaml.dump(yamlObject);
     // Set the modified YAML back to the editor
+    // @ts-expect-error known error with CodeMirror
     editor[0].CodeMirror.setValue(patchedYaml);
     cy.clickButton('Save');
   });
