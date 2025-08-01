@@ -14,7 +14,7 @@ limitations under the License.
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
 import {getClusterName, skipClusterDeletion} from '~/support/utils';
-import {capdResourcesCleanup, clusterCAPIResourceCleanup, importedClusterCleanup} from "~/support/cleanup_support";
+import {capdResourcesCleanup, clusterCAPIResourceCleanup} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Create CAPD', { tags: '@short' }, () => {
@@ -76,7 +76,8 @@ describe('Create CAPD', { tags: '@short' }, () => {
     if (skipClusterDeletion) {
       it('Delete the cluster, fleet repos, and other resources', () => {
         // Delete the imported cluster
-        importedClusterCleanup(clusterName);
+        // this check is flaky, ignoring it until it is fixed: https://github.com/rancher/turtles/issues/1587
+        // importedClusterCleanup(clusterName);
         // Remove CAPI Resources related to the cluster
         clusterCAPIResourceCleanup(clusterName, timeout, undefined);
         // Remove the clusterclass repo

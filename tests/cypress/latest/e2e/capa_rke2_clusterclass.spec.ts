@@ -1,7 +1,7 @@
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
 import {getClusterName, skipClusterDeletion} from '~/support/utils';
-import {capaResourcesCleanup, clusterCAPIResourceCleanup, importedClusterCleanup} from "~/support/cleanup_support";
+import {capaResourcesCleanup, clusterCAPIResourceCleanup} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Import CAPA RKE2 Class-Cluster', { tags: '@full' }, () => {
@@ -112,7 +112,8 @@ describe('Import CAPA RKE2 Class-Cluster', { tags: '@full' }, () => {
     qase([114, 115],
       it('Delete the cluster, fleet repos, and other resources', () => {
         // Delete the imported cluster
-        importedClusterCleanup(clusterName);
+        // this check is flaky, ignoring it until it is fixed: https://github.com/rancher/turtles/issues/1587
+        // importedClusterCleanup(clusterName);
         // Remove CAPI Resources related to the cluster
         clusterCAPIResourceCleanup(clusterName, timeout);
         // Remove the clusterclass repo

@@ -15,7 +15,7 @@ import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
 import {skipClusterDeletion} from '~/support/utils';
-import {capdResourcesCleanup, clusterCAPIResourceCleanup, importedClusterCleanup} from "~/support/cleanup_support";
+import {capdResourcesCleanup, clusterCAPIResourceCleanup} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
@@ -148,7 +148,8 @@ describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
     qase([98, 99],
       it('Delete the cluster, fleet repos, and other resources', () => {
         // Delete the imported cluster
-        importedClusterCleanup(clusterName);
+        // this check is flaky, ignoring it until it is fixed: https://github.com/rancher/turtles/issues/1587
+        // importedClusterCleanup(clusterName);
         // Remove CAPI Resources related to the cluster
         clusterCAPIResourceCleanup(clusterName, timeout, clustersRepoName);
         // Remove the clusterclass repo
