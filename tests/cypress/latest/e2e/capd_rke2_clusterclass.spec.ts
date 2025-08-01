@@ -136,7 +136,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
   if (skipClusterDeletion) {
     qase([103, 104],
       it('Delete the cluster, fleet repos, and other resources', () => {
-        cy.cleanupFunc(clusterName, clusterClassRepoName, timeout, false, clustersRepoName);
+        cy.cleanupClusterResources(clusterName, clusterClassRepoName, timeout, false, clustersRepoName);
         cy.capdResourcesCleanup();
       })
     );

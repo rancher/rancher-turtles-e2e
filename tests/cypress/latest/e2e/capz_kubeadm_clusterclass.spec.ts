@@ -108,7 +108,7 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
 
   if (skipClusterDeletion) {
     it('Delete the cluster, fleet repos, and other resources', () => {
-      cy.cleanupFunc(clusterName, clusterClassRepoName, timeout);
+      cy.cleanupClusterResources(clusterName, clusterClassRepoName, timeout);
       cy.capzResourcesCleanup();
     });
   }

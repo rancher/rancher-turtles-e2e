@@ -146,7 +146,7 @@ describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
   if (skipClusterDeletion) {
     qase([98, 99],
       it('Delete the cluster, fleet repos, and other resources', () => {
-        cy.cleanupFunc(clusterName, clusterClassRepoName, timeout, false, clustersRepoName);
+        cy.cleanupClusterResources(clusterName, clusterClassRepoName, timeout, false, clustersRepoName);
         cy.capdResourcesCleanup();
       })
     );

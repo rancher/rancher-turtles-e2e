@@ -89,4 +89,4 @@ jobs:
       turtles_operator_version: ${{ inputs.turtles_operator_version }}
       skip_cluster_delete: ${{ inputs.skip_cluster_delete || (github.event_name == 'schedule' && false) }}
       runner_template: ${{ inputs.runner_template || 'capi-e2e-ci-runner-spot-n2-highmem-16-template-v3' }}
-      cluster_name_suffix: ${{ inputs.cluster_name_suffix || github.actor }}
+      cluster_name_suffix: ${{ inputs.cluster_name_suffix || github.run_number-github.actor }}

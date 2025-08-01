@@ -74,7 +74,7 @@ describe('Create CAPD', { tags: '@short' }, () => {
 
     if (skipClusterDeletion) {
       it('Delete the cluster, fleet repos, and other resources', () => {
-        cy.cleanupFunc(clusterName, clusterClassRepoName, timeout, true);
+        cy.cleanupClusterResources(clusterName, clusterClassRepoName, timeout, true);
         cy.capdResourcesCleanup(true);
       })
     }

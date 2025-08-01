@@ -110,7 +110,7 @@ describe('Import CAPA RKE2 Class-Cluster', { tags: '@full' }, () => {
   if (skipClusterDeletion) {
     qase([114, 115],
       it('Delete the cluster, fleet repos, and other resources', () => {
-        cy.cleanupFunc(clusterName, clusterClassRepoName, timeout);
+        cy.cleanupClusterResources(clusterName, clusterClassRepoName, timeout);
         cy.capaResourcesCleanup();
       })
     );

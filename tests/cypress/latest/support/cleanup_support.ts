@@ -1,4 +1,4 @@
-Cypress.Commands.add('cleanupFunc', (clusterName, clusterClassRepoName, timeout, extraDeleteSteps = false, clusterRepoName) => {
+Cypress.Commands.add('cleanupClusterResources', (clusterName, clusterClassRepoName, timeout, extraDeleteSteps = false, clusterRepoName) => {
   // Check cluster is not deleted after removal
   cy.deleteCluster(clusterName);
   cy.goToHome();

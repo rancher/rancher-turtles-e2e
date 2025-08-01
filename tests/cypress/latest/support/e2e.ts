@@ -75,7 +75,7 @@ declare global {
       createAzureClusterIdentity(clientID: string, tenantID: string, clientSecret: string): Chainable<Element>;
       deleteKubernetesResource(clusterName: string, resourcePath: string[], resourceName: string, namespace?: string): Chainable<Element>;
 
-      cleanupFunc(clusterName: string, clusterClassRepoName: string, timeout: number, extraDeleteSteps?: boolean, clusterRepoName?: string): null;
+      cleanupClusterResources(clusterName: string, clusterClassRepoName: string, timeout: number, extraDeleteSteps?: boolean, clusterRepoName?: string): null;
 
       capzResourcesCleanup(): null;
 

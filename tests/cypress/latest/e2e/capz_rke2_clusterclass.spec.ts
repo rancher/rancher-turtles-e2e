@@ -114,7 +114,7 @@ describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
 
   if (skipClusterDeletion) {
     qase(82, it('Delete the cluster, and fleet repos', () => {
-        cy.cleanupFunc(clusterName, clusterClassRepoName, timeout);
+      cy.cleanupClusterResources(clusterName, clusterClassRepoName, timeout);
         cy.capzResourcesCleanup();
       })
     );

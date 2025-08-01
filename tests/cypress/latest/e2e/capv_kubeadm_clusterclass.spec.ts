@@ -123,7 +123,7 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
 
   if (skipClusterDeletion) {
     it('Delete the cluster, fleet repos, and other resources', () => {
-      cy.cleanupFunc(clusterName, classRepoName, timeout, false, clusterRepoName);
+      cy.cleanupClusterResources(clusterName, classRepoName, timeout, false, clusterRepoName);
       cy.capvResourcesCleanup('kubeadm');
     })
   }

@@ -209,7 +209,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
 
   if (skipClusterDeletion) {
     it('Delete the cluster, fleet repos, and other resources', () => {
-      cy.cleanupFunc(clusterName, classRepoName, timeout, false, clusterRepoName);
+      cy.cleanupClusterResources(clusterName, classRepoName, timeout, false, clusterRepoName);
       cy.capvResourcesCleanup('rke2')
     })
   }
