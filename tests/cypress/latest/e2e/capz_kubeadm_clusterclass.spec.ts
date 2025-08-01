@@ -1,5 +1,6 @@
 import '~/support/commands';
 import {getClusterName, skipClusterDeletion} from '~/support/utils';
+import {capzResourcesCleanup, clusterCAPIResourceCleanup, importedClusterCleanup} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
@@ -108,8 +109,14 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
 
   if (skipClusterDeletion) {
     it('Delete the cluster, fleet repos, and other resources', () => {
-      cy.cleanupClusterResources(clusterName, clusterClassRepoName, timeout);
-      cy.capzResourcesCleanup();
+      // Delete the imported cluster
+      importedClusterCleanup(clusterName);
+      // Remove CAPI Resources related to the cluster
+      clusterCAPIResourceCleanup(clusterName, timeout);
+      // Remove the clusterclass repo
+      cy.removeFleetGitRepo(clusterClassRepoName);
+      // Cleanup other resources
+      capzResourcesCleanup();
     });
   }
 

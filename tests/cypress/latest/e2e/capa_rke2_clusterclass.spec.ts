@@ -1,6 +1,7 @@
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
 import {getClusterName, skipClusterDeletion} from '~/support/utils';
+import {capaResourcesCleanup, clusterCAPIResourceCleanup, importedClusterCleanup} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Import CAPA RKE2 Class-Cluster', { tags: '@full' }, () => {
@@ -110,8 +111,14 @@ describe('Import CAPA RKE2 Class-Cluster', { tags: '@full' }, () => {
   if (skipClusterDeletion) {
     qase([114, 115],
       it('Delete the cluster, fleet repos, and other resources', () => {
-        cy.cleanupClusterResources(clusterName, clusterClassRepoName, timeout);
-        cy.capaResourcesCleanup();
+        // Delete the imported cluster
+        importedClusterCleanup(clusterName);
+        // Remove CAPI Resources related to the cluster
+        clusterCAPIResourceCleanup(clusterName, timeout);
+        // Remove the clusterclass repo
+        cy.removeFleetGitRepo(clusterClassRepoName);
+        // Cleanup other resources
+        capaResourcesCleanup();
       })
     );
   }

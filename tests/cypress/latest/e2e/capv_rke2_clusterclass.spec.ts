@@ -2,6 +2,7 @@ import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
 import {skipClusterDeletion} from '~/support/utils';
+import {capvResourcesCleanup, clusterCAPIResourceCleanup, importedClusterCleanup} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
@@ -209,8 +210,14 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
 
   if (skipClusterDeletion) {
     it('Delete the cluster, fleet repos, and other resources', () => {
-      cy.cleanupClusterResources(clusterName, classRepoName, timeout, false, clusterRepoName);
-      cy.capvResourcesCleanup('rke2')
+      // Delete the imported cluster
+      importedClusterCleanup(clusterName);
+      // Remove CAPI Resources related to the cluster
+      clusterCAPIResourceCleanup(clusterName, timeout, clusterRepoName);
+      // Remove the clusterclass repo
+      cy.removeFleetGitRepo(classRepoName);
+      // Cleanup other resources
+      capvResourcesCleanup('rke2')
     })
   }
 });

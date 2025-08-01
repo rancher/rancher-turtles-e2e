@@ -14,6 +14,7 @@ limitations under the License.
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
 import {getClusterName, skipClusterDeletion} from '~/support/utils';
+import {capdResourcesCleanup, clusterCAPIResourceCleanup, importedClusterCleanup} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Create CAPD', { tags: '@short' }, () => {
@@ -74,8 +75,14 @@ describe('Create CAPD', { tags: '@short' }, () => {
 
     if (skipClusterDeletion) {
       it('Delete the cluster, fleet repos, and other resources', () => {
-        cy.cleanupClusterResources(clusterName, clusterClassRepoName, timeout, true);
-        cy.capdResourcesCleanup(true);
+        // Delete the imported cluster
+        importedClusterCleanup(clusterName);
+        // Remove CAPI Resources related to the cluster
+        clusterCAPIResourceCleanup(clusterName, timeout, undefined, true);
+        // Remove the clusterclass repo
+        cy.removeFleetGitRepo(clusterClassRepoName);
+        // Cleanup other resources
+        capdResourcesCleanup(true);
       })
     }
   })

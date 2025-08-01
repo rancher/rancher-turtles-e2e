@@ -74,16 +74,6 @@ declare global {
       createCAPZValuesSecret(clientID: string, tenantID: string, subscriptionID: string): Chainable<Element>;
       createAzureClusterIdentity(clientID: string, tenantID: string, clientSecret: string): Chainable<Element>;
       deleteKubernetesResource(clusterName: string, resourcePath: string[], resourceName: string, namespace?: string): Chainable<Element>;
-
-      cleanupClusterResources(clusterName: string, clusterClassRepoName: string, timeout: number, extraDeleteSteps?: boolean, clusterRepoName?: string): null;
-
-      capzResourcesCleanup(): null;
-
-      capaResourcesCleanup(): null;
-
-      capdResourcesCleanup(isUI?: boolean): null;
-
-      capvResourcesCleanup(provider: 'kubeadm' | 'rke2'): null;
     }
   }
 }

@@ -1,6 +1,7 @@
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
 import {getClusterName, skipClusterDeletion} from '~/support/utils';
+import {capzResourcesCleanup, clusterCAPIResourceCleanup, importedClusterCleanup} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
@@ -114,8 +115,14 @@ describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
 
   if (skipClusterDeletion) {
     qase(82, it('Delete the cluster, and fleet repos', () => {
-      cy.cleanupClusterResources(clusterName, clusterClassRepoName, timeout);
-        cy.capzResourcesCleanup();
+      // Delete the imported cluster
+      importedClusterCleanup(clusterName);
+      // Remove CAPI Resources related to the cluster
+      clusterCAPIResourceCleanup(clusterName, timeout);
+      // Remove the clusterclass repo
+      cy.removeFleetGitRepo(clusterClassRepoName);
+      // Cleanup other resources
+      capzResourcesCleanup();
       })
     );
   }

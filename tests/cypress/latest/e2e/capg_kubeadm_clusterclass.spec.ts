@@ -2,6 +2,7 @@ import '~/support/commands';
 
 import {qase} from 'cypress-qase-reporter/dist/mocha';
 import {getClusterName, skipClusterDeletion} from '~/support/utils';
+import {clusterCAPIResourceCleanup, importedClusterCleanup} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Import CAPG Kubeadm Class-Cluster', { tags: '@full' }, () => {
@@ -104,7 +105,12 @@ describe('Import CAPG Kubeadm Class-Cluster', { tags: '@full' }, () => {
   if (skipClusterDeletion) {
     qase([146, 147],
       it('Delete the cluster, and fleet repos', () => {
-        cy.cleanupClusterResources(clusterName, clusterClassRepoName, timeout);
+        // Delete the imported cluster
+        importedClusterCleanup(clusterName);
+        // Remove CAPI Resources related to the cluster
+        clusterCAPIResourceCleanup(clusterName, timeout);
+        // Remove the clusterclass repo
+        cy.removeFleetGitRepo(clusterClassRepoName);
       })
     );
   }
