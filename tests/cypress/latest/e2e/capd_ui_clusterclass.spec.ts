@@ -78,7 +78,7 @@ describe('Create CAPD', { tags: '@short' }, () => {
         // Delete the imported cluster
         importedClusterCleanup(clusterName);
         // Remove CAPI Resources related to the cluster
-        clusterCAPIResourceCleanup(clusterName, timeout, undefined, true);
+        clusterCAPIResourceCleanup(clusterName, timeout, undefined);
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
         // Cleanup other resources

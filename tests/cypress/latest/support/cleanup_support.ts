@@ -11,7 +11,7 @@ export function importedClusterCleanup(clusterName: string) {
   cy.checkCAPIClusterProvisioned(clusterName);
 }
 
-export function clusterCAPIResourceCleanup(clusterName: string, timeout: number, clusterRepoName?: string, extraDeleteSteps?: boolean) {
+export function clusterCAPIResourceCleanup(clusterName: string, timeout: number, clusterRepoName?: string) {
   if (clusterRepoName) {
     // Remove the fleet git repo used to add cluster CAPI resources
     cy.removeFleetGitRepo(clusterRepoName);
@@ -21,15 +21,6 @@ export function clusterCAPIResourceCleanup(clusterName: string, timeout: number,
   } else {
     // Delete CAPI cluster created via UI
     cy.removeCAPIResource('Clusters', clusterName, timeout);
-  }
-
-  if (extraDeleteSteps) {
-    // Ensure the cluster is not available in the navigation menu
-    cy.getBySel('side-menu').then(($menu) => {
-      if ($menu.text().includes(clusterName)) {
-        cy.deleteCluster(clusterName);
-      }
-    })
   }
 }
 

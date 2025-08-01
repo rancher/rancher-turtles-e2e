@@ -43,7 +43,7 @@ docker run --init -v $PWD:/workdir -w /workdir \
     -e QASE_RUN_ID=$QASE_RUN_ID \
     -e QASE_REPORT=$QASE_REPORT \
     -e SKIP_CLUSTER_DELETE=$SKIP_CLUSTER_DELETE \
-    -e CLUSTER_USER_SUFFIX=$CLUSTER_USER_SUFFIX \
+    -e CLUSTER_NAME_SUFFIX=$CLUSTER_NAME_SUFFIX \
     -e "GREP=$GREP" \
     -e "GREPTAGS=$GREPTAGS" \
     -e "CI=$CI" \
