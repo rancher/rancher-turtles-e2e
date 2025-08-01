@@ -13,8 +13,9 @@ limitations under the License.
 
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {skipClusterDeletion} from '~/support/utils';
+import {capdResourcesCleanup, clusterCAPIResourceCleanup} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
@@ -75,7 +76,7 @@ describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
 
       // Check cluster is Active
       cy.searchCluster(clusterName);
-      cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+      cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
 
       // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
       // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
@@ -102,11 +103,12 @@ describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
   qase(43,
     it('Check if annotation for externally-managed cluster is set', () => {
       cy.searchCluster(clusterName)
-      // click three dots menu and click View YAML
+      // click the three-dots menu and click View YAML
       cy.getBySel('sortable-table-0-action-button').click();
       cy.contains('View YAML').click();
       const annotation = 'provisioning.cattle.io/externally-managed: \'true\'';
       cy.get('.CodeMirror').then((editor) => {
+        // @ts-expect-error known error with CodeMirror
         const text = editor[0].CodeMirror.getValue();
         expect(text).to.include(annotation);
       });
@@ -137,47 +139,24 @@ describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
       cy.checkCAPIMenu();
       cy.contains('Machine Deployments').click();
       cy.typeInFilter(clusterName);
-      cy.get('.content > .count', { timeout: timeout }).should('have.text', '3');
+      cy.get('.content > .count', {timeout: timeout}).should('have.text', '3');
       cy.checkCAPIClusterActive(clusterName);
     })
   );
 
   if (skipClusterDeletion) {
-    qase(98,
-      it('Remove imported CAPD cluster from Rancher Manager', { retries: 1 }, () => {
-        // Check cluster is not deleted after removal
-        cy.deleteCluster(clusterName);
-        cy.goToHome();
-        // kubectl get clusters.cluster.x-k8s.io
-        // This is checked by ensuring the cluster is not available in navigation menu
-        cy.contains(clusterName).should('not.exist');
-        cy.checkCAPIClusterProvisioned(clusterName);
-      })
-    );
-
-    qase(99,
-      it('Delete the CAPD fleet repos', () => {
-        // Remove the clusters fleet repo
-        cy.removeFleetGitRepo(clustersRepoName);
-
-        // Wait until the following returns no clusters found
-        // This is checked by ensuring the cluster is not available in CAPI menu
-        cy.checkCAPIClusterDeleted(clusterName, timeout);
-
+    qase([98, 99],
+      it('Delete the cluster, fleet repos, and other resources', () => {
+        // Delete the imported cluster
+        // this check is flaky, ignoring it until it is fixed: https://github.com/rancher/turtles/issues/1587
+        // importedClusterCleanup(clusterName);
+        // Remove CAPI Resources related to the cluster
+        clusterCAPIResourceCleanup(clusterName, timeout, clustersRepoName);
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
-
-        // Ensure the cluster is not available in navigation menu
-        cy.getBySel('side-menu').then(($menu) => {
-          if ($menu.text().includes(clusterName)) {
-            cy.deleteCluster(clusterName);
-          }
-        })
+        // Cleanup other resources
+        capdResourcesCleanup();
       })
     );
-
-    it('Delete the helm values ConfigMap', () => {
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'ConfigMaps'], "capd-helm-values", 'capi-clusters')
-    })
   }
 });

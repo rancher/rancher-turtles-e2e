@@ -1,16 +1,13 @@
 import '~/support/commands';
-
-import * as randomstring from "randomstring";
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
-import { ClusterClassVariablesInput } from '~/support/structs';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {getClusterName, skipClusterDeletion} from '~/support/utils';
+import {ClusterClassVariablesInput} from '~/support/structs';
 
 Cypress.config();
 describe('Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
-  const separator = '-'
   const timeout = 1200000
   const classNamePrefix = 'azure-aks'
-  const clusterName = 'turtles-qa'.concat(separator, classNamePrefix, separator, randomstring.generate({ length: 4, capitalization: 'lowercase' }), separator, Cypress.env('cluster_user_suffix'))
+  const clusterName = getClusterName(classNamePrefix)
   const k8sVersion = 'v1.31.4'
   const podCIDR = '192.168.0.0/16'
   const location = "westeurope" // this is one of the regions supported by ClusterClass definition

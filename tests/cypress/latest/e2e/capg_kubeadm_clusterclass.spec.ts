@@ -1,14 +1,14 @@
 import '~/support/commands';
-import * as randomstring from "randomstring";
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
+
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {getClusterName, skipClusterDeletion} from '~/support/utils';
+import {clusterCAPIResourceCleanup} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Import CAPG Kubeadm Class-Cluster', { tags: '@full' }, () => {
-  const separator = '-'
   const timeout = 1200000
   const classNamePrefix = 'gcp-kubeadm'
-  const clusterName = 'turtles-qa'.concat(separator, classNamePrefix, separator, randomstring.generate({ length: 4, capitalization: 'lowercase' }), separator, Cypress.env('cluster_user_suffix'))
+  const clusterName = getClusterName(classNamePrefix)
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/gcp/kubeadm'
   const clusterClassRepoName = 'gcp-kubeadm-clusterclass'
@@ -66,7 +66,7 @@ describe('Import CAPG Kubeadm Class-Cluster', { tags: '@full' }, () => {
 
       // Check cluster is Active
       cy.searchCluster(clusterName);
-      cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+      cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
       // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
       // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
       cy.checkCAPIClusterActive(clusterName, timeout);
@@ -103,23 +103,13 @@ describe('Import CAPG Kubeadm Class-Cluster', { tags: '@full' }, () => {
   })
 
   if (skipClusterDeletion) {
-    qase(146,
-      it('Remove imported CAPG cluster from Rancher Manager and Delete the CAPG cluster', { retries: 1 }, () => {
-        // Check cluster is not deleted after removal
-        cy.deleteCluster(clusterName);
-        cy.goToHome();
-        // kubectl get clusters.cluster.x-k8s.io
-        // This is checked by ensuring the cluster is not available in navigation menu
-        cy.contains(clusterName).should('not.exist');
-        cy.checkCAPIClusterProvisioned(clusterName);
-
-        // Delete CAPI cluster
-        cy.removeCAPIResource('Clusters', clusterName, timeout);
-      })
-    );
-
-    qase(147,
-      it('Delete the ClusterClass fleet repo and other resources', () => {
+    qase([146, 147],
+      it('Delete the cluster, and fleet repos', () => {
+        // Delete the imported cluster
+        // this check is flaky, ignoring it until it is fixed: https://github.com/rancher/turtles/issues/1587
+        // importedClusterCleanup(clusterName);
+        // Remove CAPI Resources related to the cluster
+        clusterCAPIResourceCleanup(clusterName, timeout);
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
       })

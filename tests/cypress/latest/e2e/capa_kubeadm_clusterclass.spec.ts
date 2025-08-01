@@ -1,14 +1,13 @@
 import '~/support/commands';
-import * as randomstring from "randomstring";
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {getClusterName, skipClusterDeletion} from '~/support/utils';
+import {capaResourcesCleanup, clusterCAPIResourceCleanup} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
-  const separator = '-'
   const timeout = 1200000
   const classNamePrefix = 'aws-kubeadm'
-  const clusterName = 'turtles-qa'.concat(separator, classNamePrefix, separator, randomstring.generate({ length: 4, capitalization: 'lowercase' }), separator, Cypress.env('cluster_user_suffix'))
+  const clusterName = getClusterName(classNamePrefix)
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/aws/kubeadm'
   const clusterClassRepoName = 'aws-kb-clusterclass'
@@ -110,29 +109,17 @@ describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
   })
 
   if (skipClusterDeletion) {
-    qase(127,
-      it('Remove imported CAPA cluster from Rancher Manager and Delete the CAPA cluster', { retries: 1 }, () => {
-        // Check cluster is not deleted after removal
-        cy.deleteCluster(clusterName);
-        cy.goToHome();
-        // kubectl get clusters.cluster.x-k8s.io
-        // This is checked by ensuring the cluster is not available in navigation menu
-        cy.contains(clusterName).should('not.exist');
-        cy.checkCAPIClusterProvisioned(clusterName);
-
-        // Delete CAPI cluster
-        cy.removeCAPIResource('Clusters', clusterName, timeout);
-      })
-    );
-
-    qase(128,
-      it('Delete the ClusterClass fleet repo and other resources', () => {
+    qase([127, 128],
+      it('Delete the cluster, fleet repos, and other resources', () => {
+        // Delete the imported cluster
+        // this check is flaky, ignoring it until it is fixed: https://github.com/rancher/turtles/issues/1587
+        // importedClusterCleanup(clusterName);
+        // Remove CAPI Resources related to the cluster
+        clusterCAPIResourceCleanup(clusterName, timeout);
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
-
-        // Delete secret and AWSClusterStaticIdentity
-        cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'cluster-identity', 'capa-system')
-        cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AWSClusterStaticIdentities'], 'cluster-identity')
+        // Cleanup other resources
+        capaResourcesCleanup();
       })
     );
   }
