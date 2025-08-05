@@ -1,7 +1,9 @@
+{{- $cluster_name := printf "%s-%s" .Values.clustername_prefix (randAlphaNum 4) | lower -}}
+---
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
-  name: docker-rke2-example-cluster
+  name: {{ $cluster_name }}
   annotations:
     cluster-api.cattle.io/upstream-system-agent: "true"
   labels:
@@ -20,16 +22,15 @@ spec:
     class: docker-rke2-example
     classNamespace: capi-classes
     controlPlane:
-      replicas: {{ .Values.cp_machine_count }}
+      replicas: 3
     variables:
     - name: rke2CNI
       value: none
     - name: dockerImage
       value: kindest/node:v1.31.4
-    version: {{ .Values.rke2_k8s_version }}
+    version: v1.31.7+rke2r1
     workers:
       machineDeployments:
       - class: default-worker
         name: md-0
-        replicas: {{ .Values.worker_machine_count }}
-
+        replicas: 3
