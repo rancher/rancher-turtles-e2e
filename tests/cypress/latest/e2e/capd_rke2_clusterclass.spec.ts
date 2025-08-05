@@ -12,20 +12,21 @@ limitations under the License.
 */
 
 import '~/support/commands';
-import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
-import { Question } from '~/support/structs';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {skipClusterDeletion} from '~/support/utils';
+import {Question} from '~/support/structs';
+import * as randomstring from "randomstring";
 
 
 Cypress.config();
 describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
+  const separator = '-'
   const timeout = 600000
-  const className = 'docker-rke2-example'
-  const clusterName = className + '-cluster'
-  const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
-  const path = '/tests/assets/rancher-turtles-fleet-example/capd/rke2/class-clusters'
-  const branch = 'main'
+  const classNamePrefix = 'docker-rke2'
+  const clusterName = 'turtles-qa'.concat(separator, classNamePrefix, separator, randomstring.generate({
+    length: 4,
+    capitalization: 'lowercase'
+  }), separator, Cypress.env('cluster_user_suffix'))
   const questions: Question[] = [
     {
       menuEntry: 'Rancher Turtles Features Settings',
@@ -36,7 +37,6 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
 
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/docker/rke2'
-  const clustersRepoName = 'docker-rke2-class-clusters'
   const clusterClassRepoName = "docker-rke2-clusterclass"
 
   beforeEach(() => {
@@ -48,24 +48,20 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
     cy.namespaceAutoImport('Disable');
   })
 
-  it('Create values.yaml ConfigMap', () => {
-    cy.readFile('./fixtures/docker/capd-helm-values.yaml').then((data) => {
-      cy.importYAML(data)
-    });
-  })
-
   qase(91,
     it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
       cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
-      cy.checkCAPIClusterClass(className);
+      cy.checkCAPIClusterClass(classNamePrefix);
     })
   );
 
   qase(29,
-    it('Add CAPD RKE2 class-clusters fleet repo', () => {
-      cypressLib.checkNavIcon('cluster-management').should('exist');
-      cy.addFleetGitRepo(clustersRepoName, repoUrl, branch, path);
+    it('Import CAPD RKE2 class-clusters using YAML', () => {
+      cy.readFile('./fixtures/docker/capd-rke2-class-cluster.yaml').then((data) => {
+        data = data.replace(/replace_cluster_name/g, clusterName)
+        cy.importYAML(data, 'capi-clusters')
+      });
 
       // Check CAPI cluster using its name
       cy.checkCAPICluster(clusterName);
@@ -104,15 +100,13 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
   );
 
   qase(8,
-    it("Scale up imported CAPD class-cluster by updating values and forcefully updating the repo", () => {
-      cy.readFile('./fixtures/docker/capd-helm-values.yaml').then((data) => {
-        data = data.replace(/worker_machine_count: 2/g, 'worker_machine_count: 3')
-        cy.importYAML(data)
+    it("Scale up imported CAPD cluster by patching class-cluster yaml", () => {
+      cy.readFile('./fixtures/docker/capd-rke2-class-cluster.yaml').then((data) => {
+        data = data.replace(/replace_cluster_name/g, clusterName)
+        data = data.replace(/replicas: 2/g, 'replicas: 3')
+        cy.importYAML(data, 'capi-clusters')
       });
-  
-      cy.burgerMenuOperate('open');
-      cy.forceUpdateFleetGitRepo(clustersRepoName);
-  
+
       // Check CAPI cluster status
       cy.checkCAPIMenu();
       cy.contains('Machine Deployments').click();
@@ -135,7 +129,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
 
   if (skipClusterDeletion) {
     qase(103,
-      it('Remove imported CAPD cluster from Rancher Manager', { retries: 1 }, () => {
+      it('Remove imported CAPD cluster from Rancher Manager and Delete the CAPD cluster', {retries: 1}, () => {
         // Check cluster is not deleted after removal
         cy.deleteCluster(clusterName);
         cy.goToHome();
@@ -143,32 +137,18 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
         // This is checked by ensuring the cluster is not available in navigation menu
         cy.contains(clusterName).should('not.exist');
         cy.checkCAPIClusterProvisioned(clusterName);
+
+        // Delete CAPI cluster
+        cy.removeCAPIResource('Clusters', clusterName, timeout);
       })
     );
 
     qase(104,
-      it('Delete the CAPD fleet repos', () => {
-        // Remove the clusters fleet repo
-        cy.removeFleetGitRepo(clustersRepoName);
-
-        // Wait until the following returns no clusters found
-        // This is checked by ensuring the cluster is not available in CAPI menu
-        cy.checkCAPIClusterDeleted(clusterName, timeout);
-
+      it('Delete the ClusterClass fleet repo', () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
 
-        // Ensure the cluster is not available in navigation menu
-        cy.getBySel('side-menu').then(($menu) => {
-          if ($menu.text().includes(clusterName)) {
-            cy.deleteCluster(clusterName);
-          }
-        })
       })
     );
-
-    it('Delete the helm values ConfigMap', () => {
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'ConfigMaps'], "capd-helm-values", 'capi-clusters')
-    })
   }
 });
