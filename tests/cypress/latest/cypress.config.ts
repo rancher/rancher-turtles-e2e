@@ -33,9 +33,9 @@ export default defineConfig({
     },
     supportFile: './support/e2e.ts',
     fixturesFolder: './fixtures',
-    downloadsFolder: '/tmp/cypress/downloads',
-    screenshotsFolder: '/tmp/cypress/screenshots',
-    videosFolder: '/tmp/cypress/videos',
+    screenshotsFolder: './screenshots',
+    videosFolder: './videos',
+    downloadsFolder: './downloads',
     specPattern: 'e2e/*.spec.ts',
   },
 })

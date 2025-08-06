@@ -82,7 +82,7 @@ on:
         type: string
       runner_template:
         description: Runner template to use
-        default: capi-e2e-ci-runner-spot-n2-highmem-16-template-v5
+        default: capi-e2e-ci-runner-spot-n2-highmem-16-template-v3
         type: string
       test_description:
         description: Short description of the test
@@ -326,7 +326,6 @@ jobs:
           TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} make e2e-image-build
           RELEASE_TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} CONTROLLER_IMAGE_VERSION=v${{ env.TAG }} make build-chart
           docker run -d -p 5000:5000 --name registry registry:2
-          sleep 3
           docker push ${{ env.CONTROLLER_IMG }}:v${{ env.TAG }}
 
       - name: Copy chart file
@@ -435,7 +434,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cypress-screenshots-basics-${{ inputs.cluster_name }}
-          path: /tmp/cypress/screenshots
+          path: tests/cypress/latest/screenshots
           retention-days: 7
           if-no-files-found: ignore
       - name: Upload Cypress videos (Basics)
@@ -444,7 +443,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cypress-videos-basics-${{ inputs.cluster_name }}
-          path: /tmp/cypress/videos
+          path: tests/cypress/latest/videos
           retention-days: 7
       - name: Add summary
         if: ${{ always() }}
