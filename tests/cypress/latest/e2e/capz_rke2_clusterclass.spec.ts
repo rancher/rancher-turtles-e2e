@@ -118,6 +118,7 @@ describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
       it('Remove imported CAPZ cluster from Rancher Manager and Delete the CAPZ cluster', { retries: 1 }, () => {
         // Delete the imported cluster
         // Ensure that the provisioned CAPI cluster still exists
+        // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
         importedRancherClusterDeletion(clusterName);
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout);

@@ -88,6 +88,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
   if (skipClusterDeletion) {
     it('Remove imported CAPD cluster from Rancher Manager and Delete the CAPD cluster', {retries: 1}, () => {
       // Delete the imported cluster
+      // Ensure that the provisioned CAPI cluster still exists
       // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
       importedRancherClusterDeletion(clusterName);
       // Remove CAPI Resources related to the cluster

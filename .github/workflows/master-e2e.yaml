@@ -117,7 +117,7 @@ on:
         description: Skip CAPI cluster and fleet repo deletion tests
         type: boolean
       cluster_name_suffix:
-        description: Suffix to be used in cluster name
+        description: Suffix to be used in cluster name (default - github.run_number)
         type: string
 
 jobs:
