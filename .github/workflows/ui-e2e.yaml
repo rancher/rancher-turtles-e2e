@@ -74,6 +74,7 @@ jobs:
       rancher_password: ${{ secrets.RANCHER_PASSWORD }}
       vsphere_secrets_json_base64: ${{ secrets.VSPHERE_SECRETS_JSON_BASE64 }}
       vsphere_endpoints_list: ${{ secrets.VSPHERE_ENDPOINTS_LIST }}
+      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
     with:
       test_description: "CI/Manual - UI - Deployment test with Standard K3s"
       cluster_name: cluster-k3s
