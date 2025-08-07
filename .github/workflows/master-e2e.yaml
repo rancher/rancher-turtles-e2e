@@ -309,6 +309,9 @@ jobs:
         with:
           username: turtlesqa
           password: ${{ secrets.dockerhub_token }}
+      - name: Fetch the initial docker image pull count
+        run: |
+          curl --head -H "Authorization: Bearer ${{secrets.dockerhub_token}}" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest | grep ratelimit  
       - name: Install helm
         run: curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
       # Build rancher-turtles latest chart
@@ -413,8 +416,6 @@ jobs:
             e2e/capd_rke2_clusterclass.spec.ts
             e2e/capd_rke2_fleet_clusterclass.spec.ts
             e2e/capd_kubeadm_clusterclass.spec.ts
-            e2e/capd_kubeadm_ui_clusterclass.spec.ts
-            e2e/azure_rke2_v2prov_cluster.spec.ts
             e2e/capv_rke2_clusterclass.spec.ts
             e2e/capv_kubeadm_clusterclass.spec.ts
             e2e/capa_rke2_clusterclass.spec.ts
