@@ -1,5 +1,6 @@
 // Check the Cypress tags
 // Implemented but not used yet
+
 export const isCypressTag = (tag: string) => {
   return (new RegExp(tag)).test(Cypress.env("cypress_tags"));
 }
@@ -21,3 +22,8 @@ export const isUIVersion = (version: string) => {
 }
 
 export const skipClusterDeletion = Cypress.env("skip_cluster_delete") == "false"
+
+export const getClusterName = (className: string): string => {
+  const separator = '-'
+  return 'turtles-qa'.concat(separator, className, separator, Cypress.env('cluster_name_suffix'))
+}

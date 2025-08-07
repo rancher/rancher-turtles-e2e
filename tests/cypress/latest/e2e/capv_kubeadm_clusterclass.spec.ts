@@ -1,6 +1,7 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import { skipClusterDeletion } from '~/support/utils';
+import {skipClusterDeletion} from '~/support/utils';
+import {capvResourcesCleanup, clusterCAPIResourceCleanup, importedClusterCleanup} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
@@ -15,7 +16,6 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/vsphere/kubeadm'
   const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
-  const namespace = 'capv-system'
   const providerName = 'vsphere'
 
   // Decode the base64 encoded secrets and make json object
@@ -123,29 +123,18 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
   })
 
   if (skipClusterDeletion) {
-    it('Remove imported CAPV cluster from Rancher Manager', { retries: 1 }, () => {
-      // Check cluster is not deleted after removal
-      cy.deleteCluster(clusterName);
-      cy.goToHome();
-      // kubectl get clusters.cluster.x-k8s.io
-      // This is checked by ensuring the cluster is not available in navigation menu
-      cy.contains(clusterName).should('not.exist');
-      cy.checkCAPIClusterProvisioned(clusterName);
+    it('Remove imported CAPV cluster from Rancher Manager and Delete the CAPV cluster', {retries: 1}, () => {
+      // Delete the imported cluster
+      importedClusterCleanup(clusterName);
+      // Remove CAPI Resources related to the cluster
+      clusterCAPIResourceCleanup(clusterName, timeout, clusterRepoName);
     })
 
-    it('Delete the CAPV cluster and ClusterClass fleet repo', () => {
-      // Remove the fleet git repo
-      cy.removeFleetGitRepo(clusterRepoName);
-      // Wait until the following returns no clusters found
-      // This is checked by ensuring the cluster is not available in CAPI menu
-      cy.checkCAPIClusterDeleted(clusterName, timeout);
-
+    it('Delete the ClusterClass fleet repo and other resources', () => {
       // Remove the clusterclass repo
       cy.removeFleetGitRepo(classRepoName);
-
-      // Delete secret and VSphereClusterIdentity
-      cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'VSphereClusterIdentities'], 'cluster-identity');
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'capv-helm-values', namespace);
+      // Cleanup other resources
+      capvResourcesCleanup('kubeadm');
     })
   }
 });

@@ -13,7 +13,8 @@ limitations under the License.
 
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import { skipClusterDeletion } from '~/support/utils';
+import {skipClusterDeletion} from '~/support/utils';
+import {clusterCAPIResourceCleanup, importedClusterCleanup} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
@@ -85,33 +86,17 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
   })
 
   if (skipClusterDeletion) {
-    it('Remove imported CAPD cluster from Rancher Manager', { retries: 1 }, () => {
-      // Check cluster is not deleted after removal
-      cy.deleteCluster(clusterName);
-      cy.goToHome();
-      // kubectl get clusters.cluster.x-k8s.io
-      // This is checked by ensuring the cluster is not available in navigation menu
-      cy.contains(clusterName).should('not.exist');
-      cy.checkCAPIClusterProvisioned(clusterName);
+    it('Remove imported CAPD cluster from Rancher Manager and Delete the CAPD cluster', {retries: 1}, () => {
+      // Delete the imported cluster
+      // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
+      importedClusterCleanup(clusterName);
+      // Remove CAPI Resources related to the cluster
+      clusterCAPIResourceCleanup(clusterName, timeout, clustersRepoName, true);
     })
 
-    it('Delete the CAPD fleet repos', () => {
-      // Remove the clusters fleet repo
-      cy.removeFleetGitRepo(clustersRepoName);
-
-      // Wait until the following returns no clusters found
-      // This is checked by ensuring the cluster is not available in CAPI menu
-      cy.checkCAPIClusterDeleted(clusterName, timeout);
-
+    it('Delete the ClusterClass fleet repo', () => {
       // Remove the clusterclass repo
       cy.removeFleetGitRepo(clusterClassRepoName);
-
-      // Ensure the cluster is not available in navigation menu
-      cy.getBySel('side-menu').then(($menu) => {
-        if ($menu.text().includes(clusterName)) {
-          cy.deleteCluster(clusterName);
-        }
-      })
     })
   }
 });

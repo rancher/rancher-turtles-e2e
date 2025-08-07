@@ -15,7 +15,10 @@ limitations under the License.
 import './commands';
 import yaml from 'js-yaml';
 import './capz_support';
-import { ClusterClassVariablesInput, Question } from './structs';
+import './cleanup_support';
+import {ClusterClassVariablesInput, Question} from './structs';
+// @ts-expect-error ignore the error
+import registerCypressGrep from '@cypress/grep'
 
 declare global {
   // In Cypress functions should be declared with 'namespace'
@@ -36,6 +39,7 @@ declare global {
       accesMenuSelection(menuPaths: string[]): Chainable<Element>;
       burgerMenuOperate(operation: 'open' | 'close'): Chainable<Element>;
       checkChart(operation: string, chartName: string, namespace: string, version?: string, questions?: Question[], refreshRepo?: boolean): Chainable<Element>;
+
       deleteCluster(clusterName: string, timeout?: number): Chainable<Element>;
       searchCluster(clusterName: string): Chainable<Element>;
       createNamespace(namespace: string): Chainable<Element>;
@@ -98,8 +102,6 @@ require('cypress-dark');
 require('cy-verify-downloads').addCustomCommand();
 require('cypress-plugin-tab');
 require('@rancher-ecp-qa/cypress-library');
-// @ts-expect-error ignore the error
-import registerCypressGrep from '@cypress/grep'
 registerCypressGrep()
 
 // Abort on first failure in @install tests
@@ -109,6 +111,7 @@ beforeEach(() => {
     cy.log('Running in GitHub Actions - checking previous test result');
     cy.readFile(resultFile).then((data) => {
       const content = yaml.load(data)
+      // @ts-expect-error ignore 'any' error
       const result = content['test_result']
       cy.log('Previous Test Result: ' + result);
       if (result == 'failed') {

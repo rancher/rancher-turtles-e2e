@@ -2,13 +2,13 @@
 name: UI-E2E
 run-name: >-
   ${{ github.event_name == 'workflow_dispatch' &&
-      format('Rancher-`{0}` - `{1}` destroy={2} dev={3}',
+      format('[{4}] Rancher-`{0}` - `{1}` destroy={2} dev={3}',
              inputs.rancher_version, inputs.grep_test_by_tag,
-             inputs.destroy_runner, inputs.operator_dev_chart) ||
+             inputs.destroy_runner, inputs.operator_dev_chart, github.run_number) ||
       github.event_name == 'schedule' &&
-      (github.event.schedule == '0 3 * * *' && 'Nightly e2e job for `@short`' ||
-       github.event.schedule == '0 4 * * *' && 'Nightly e2e job for `@vsphere`' ||
-       github.event.schedule == '0 5 * * 6' && 'Weekly e2e job for `@full`' ||
+      (github.event.schedule == '0 3 * * *' && format('[{0}] Nightly e2e job for `@short`', github.run_number) ||
+       github.event.schedule == '0 4 * * *' && format('[{0}] Nightly e2e job for `@vsphere`', github.run_number) ||
+       github.event.schedule == '0 5 * * 6' && format('[{0}] Weekly e2e job for `@full`', github.run_number) ||
        'Unknown scheduled job') }}
 
 on:
@@ -45,6 +45,9 @@ on:
         description: Skip CAPI cluster and fleet repo deletion tests
         default: false
         type: boolean
+      cluster_name_suffix:
+        description: Suffix to be used in cluster name
+        type: string
       runner_template:
         description: Runner template to use
         default: capi-e2e-ci-runner-spot-n2-highmem-16-template-v3
@@ -87,3 +90,4 @@ jobs:
       turtles_operator_version: ${{ inputs.turtles_operator_version }}
       skip_cluster_delete: ${{ inputs.skip_cluster_delete || (github.event_name == 'schedule' && false) }}
       runner_template: ${{ inputs.runner_template || 'capi-e2e-ci-runner-spot-n2-highmem-16-template-v3' }}
+      cluster_name_suffix: ${{ inputs.cluster_name_suffix || github.run_number }}

@@ -116,6 +116,9 @@ on:
       skip_cluster_delete:
         description: Skip CAPI cluster and fleet repo deletion tests
         type: boolean
+      cluster_name_suffix:
+        description: Suffix to be used in cluster name
+        type: string
 
 jobs:
   determine-runner:
@@ -362,7 +365,7 @@ jobs:
         env:
           PUBLIC_DNS: ${{ needs.create-runner.outputs.public_dns }}
         run: cd tests && make e2e-install-rancher
-      - name: Extract component versions/informations
+      - name: Extract component versions/information
         id: component
         run: |
           # Extract CertManager version
@@ -404,7 +407,7 @@ jobs:
           GREPTAGS: ${{ inputs.grep_test_by_tag }}
           TURTLES_OPERATOR_VERSION: ${{inputs.turtles_operator_version}}
           SKIP_CLUSTER_DELETE: ${{ inputs.skip_cluster_delete }}
-          CLUSTER_USER_SUFFIX: ${{ github.actor }}
+          CLUSTER_NAME_SUFFIX: ${{ inputs.cluster_name_suffix }}
           SPEC: |
             e2e/first_connection.spec.ts
             e2e/turtles_operator.spec.ts

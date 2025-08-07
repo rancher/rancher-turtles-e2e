@@ -13,20 +13,16 @@ limitations under the License.
 
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
-import {skipClusterDeletion} from '~/support/utils';
+import {getClusterName, skipClusterDeletion} from '~/support/utils';
 import {Question} from '~/support/structs';
-import * as randomstring from "randomstring";
+import {clusterCAPIResourceCleanup, importedClusterCleanup} from "~/support/cleanup_support";
 
 
 Cypress.config();
 describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
-  const separator = '-'
   const timeout = 600000
   const classNamePrefix = 'docker-rke2'
-  const clusterName = 'turtles-qa'.concat(separator, classNamePrefix, separator, randomstring.generate({
-    length: 4,
-    capitalization: 'lowercase'
-  }), separator, Cypress.env('cluster_user_suffix'))
+  const clusterName = getClusterName(classNamePrefix)
   const questions: Question[] = [
     {
       menuEntry: 'Rancher Turtles Features Settings',
@@ -130,16 +126,11 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
   if (skipClusterDeletion) {
     qase(103,
       it('Remove imported CAPD cluster from Rancher Manager and Delete the CAPD cluster', {retries: 1}, () => {
-        // Check cluster is not deleted after removal
-        cy.deleteCluster(clusterName);
-        cy.goToHome();
-        // kubectl get clusters.cluster.x-k8s.io
-        // This is checked by ensuring the cluster is not available in navigation menu
-        cy.contains(clusterName).should('not.exist');
-        cy.checkCAPIClusterProvisioned(clusterName);
-
-        // Delete CAPI cluster
-        cy.removeCAPIResource('Clusters', clusterName, timeout);
+        // Delete the imported cluster
+        // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
+        importedClusterCleanup(clusterName);
+        // Remove CAPI Resources related to the cluster
+        clusterCAPIResourceCleanup(clusterName, timeout);
       })
     );
 

@@ -12,16 +12,15 @@ limitations under the License.
 */
 
 import '~/support/commands';
-import * as randomstring from "randomstring";
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {getClusterName, skipClusterDeletion} from '~/support/utils';
+import {capdResourcesCleanup, clusterCAPIResourceCleanup, importedClusterCleanup} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Create CAPD', { tags: '@short' }, () => {
   const timeout = 600000
   const className = 'docker-kubeadm-example'
-  const clusterNamePrefix = className + '-cluster'
-  const clusterName = clusterNamePrefix + randomstring.generate({ length: 4, capitalization: "lowercase" })
+  const clusterName = getClusterName(className)
   const k8sVersion = 'v1.31.4'
   const pathNames = ['kubeadm'] // TODO: Add rke2 path (capi-ui-extension/issues/121)
   const namespace = 'capi-classes' // TODO: Change to capi-clusters (capi-ui-extension/issues/111)
@@ -75,31 +74,19 @@ describe('Create CAPD', { tags: '@short' }, () => {
 
 
     if (skipClusterDeletion) {
-      it('Remove CAPD cluster from Rancher Manager & Delete the CAPI cluster', { retries: 1 }, () => {
-        // Check cluster is not deleted after removal
-        cy.deleteCluster(clusterName);
-        cy.goToHome();
-        // kubectl get clusters.cluster.x-k8s.io
-        // This is checked by ensuring the cluster is not available in navigation menu
-        cy.contains(clusterName).should('not.exist');
-        cy.checkCAPIClusterProvisioned(clusterName);
-
-        cy.removeCAPIResource('Clusters', clusterName, timeout);
-        // Ensure the cluster is not available in navigation menu
-        cy.getBySel('side-menu').then(($menu) => {
-          if ($menu.text().includes(clusterName)) {
-            cy.deleteCluster(clusterName);
-          }
-        })
+      it('Remove imported CAPD cluster and Delete the CAPI resources from Rancher Manager', {retries: 1}, () => {
+        // Delete the imported cluster
+        // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
+        importedClusterCleanup(clusterName);
+        // Remove CAPI Resources related to the cluster
+        clusterCAPIResourceCleanup(clusterName, timeout, undefined, true);
       })
 
-      it('Delete the Kindnet Config Map', () => {
-        cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'ConfigMaps'], "cni-docker-kubeadm-example-crs-0", namespace);
-        cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'ClusterResourceSets'], "docker-kubeadm-example-crs-0", namespace);
-      })
-
-      it('Remove the CAPD ClusterClass fleet repo', () => {
-        cy.removeFleetGitRepo(clusterClassRepoName)
+      it('Remove the ClusterClass fleet repo and other resources', () => {
+        // Remove the clusterclass repo
+        cy.removeFleetGitRepo(clusterClassRepoName);
+        // Cleanup other resources
+        capdResourcesCleanup();
       })
     }
   })

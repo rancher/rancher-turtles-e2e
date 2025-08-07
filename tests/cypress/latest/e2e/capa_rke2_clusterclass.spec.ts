@@ -1,14 +1,13 @@
 import '~/support/commands';
-import * as randomstring from "randomstring";
-import { qase } from 'cypress-qase-reporter/dist/mocha';
-import { skipClusterDeletion } from '~/support/utils';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {getClusterName, skipClusterDeletion} from '~/support/utils';
+import {capaResourcesCleanup, clusterCAPIResourceCleanup, importedClusterCleanup} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Import CAPA RKE2 Class-Cluster', { tags: '@full' }, () => {
-  const separator = '-'
   const timeout = 1200000
   const classNamePrefix = 'aws-rke2'
-  const clusterName = 'turtles-qa'.concat(separator, classNamePrefix, separator, randomstring.generate({ length: 4, capitalization: 'lowercase' }), separator, Cypress.env('cluster_user_suffix'))
+  const clusterName = getClusterName(classNamePrefix)
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/aws/rke2'
   const clusterClassRepoName = 'aws-rke2-clusterclass'
@@ -99,29 +98,24 @@ describe('Import CAPA RKE2 Class-Cluster', { tags: '@full' }, () => {
       // workaround; these values need to be re-replaced before applying the scaling changes
       data = data.replace(/replace_cluster_name/g, clusterName)
       cy.importYAML(data, 'capi-clusters')
-
-      // Check CAPI cluster status
-      cy.checkCAPIMenu();
-      cy.contains('Machine Deployments').click();
-      cy.typeInFilter(clusterName);
-      cy.get('.content > .count', { timeout: timeout }).should('have.text', '3');
-      cy.checkCAPIClusterActive(clusterName);
     })
+
+    // Check CAPI cluster status
+    cy.checkCAPIMenu();
+    cy.contains('Machine Deployments').click();
+    cy.typeInFilter(clusterName);
+    cy.get('.content > .count', {timeout: timeout}).should('have.text', '3');
+    cy.checkCAPIClusterActive(clusterName);
   })
 
   if (skipClusterDeletion) {
     qase(114,
       it('Remove imported CAPA cluster from Rancher Manager and Delete the CAPA cluster', { retries: 1 }, () => {
-        // Check cluster is not deleted after removal
-        cy.deleteCluster(clusterName);
-        cy.goToHome();
-        // kubectl get clusters.cluster.x-k8s.io
-        // This is checked by ensuring the cluster is not available in navigation menu
-        cy.contains(clusterName).should('not.exist');
-        cy.checkCAPIClusterProvisioned(clusterName);
-
-        // Delete CAPI cluster
-        cy.removeCAPIResource('Clusters', clusterName, timeout);
+        // Delete the imported cluster
+        // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
+        importedClusterCleanup(clusterName);
+        // Remove CAPI Resources related to the cluster
+        clusterCAPIResourceCleanup(clusterName, timeout);
       })
     );
 
@@ -129,10 +123,8 @@ describe('Import CAPA RKE2 Class-Cluster', { tags: '@full' }, () => {
       it('Delete the ClusterClass fleet repo and other resources', () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
-
-        // Delete secret and AWSClusterStaticIdentity
-        cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'cluster-identity', 'capa-system')
-        cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AWSClusterStaticIdentities'], 'cluster-identity')
+        // Cleanup other resources
+        capaResourcesCleanup();
       })
     );
   }

@@ -1,14 +1,12 @@
 import '~/support/commands';
-import * as randomstring from "randomstring";
-import { skipClusterDeletion } from '~/support/utils';
+import {getClusterName, skipClusterDeletion} from '~/support/utils';
+import {capzResourcesCleanup, clusterCAPIResourceCleanup, importedClusterCleanup} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
-  const separator = '-'
   const timeout = 1200000
-  const namespace = 'capz-system'
   const classNamePrefix = 'azure-kubeadm'
-  const clusterName = 'turtles-qa'.concat(separator, classNamePrefix, separator, randomstring.generate({ length: 4, capitalization: 'lowercase' }), separator, Cypress.env('cluster_user_suffix'))
+  const clusterName = getClusterName(classNamePrefix)
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/azure/kubeadm'
   const clusterClassRepoName = "azure-kubeadm-clusterclass"
@@ -99,37 +97,29 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
       data = data.replace(/replace_cluster_name/g, clusterName)
       data = data.replace(/replace_subscription_id/g, subscriptionID)
       cy.importYAML(data, 'capi-clusters')
-
-      // Check CAPI cluster status
-      cy.checkCAPIMenu();
-      cy.contains('Machine Deployments').click();
-      cy.typeInFilter(clusterName);
-      cy.get('.content > .count', { timeout: timeout }).should('have.text', '3');
-      cy.checkCAPIClusterActive(clusterName);
     })
+
+    // Check CAPI cluster status
+    cy.checkCAPIMenu();
+    cy.contains('Machine Deployments').click();
+    cy.typeInFilter(clusterName);
+    cy.get('.content > .count', {timeout: timeout}).should('have.text', '3');
+    cy.checkCAPIClusterActive(clusterName);
   })
 
   if (skipClusterDeletion) {
     it('Remove imported CAPZ cluster from Rancher Manager and Delete the CAPZ cluster', { retries: 1 }, () => {
-      // Check cluster is not deleted after removal
-      cy.deleteCluster(clusterName);
-      cy.goToHome();
-      // kubectl get clusters.cluster.x-k8s.io
-      // This is checked by ensuring the cluster is not available in navigation menu
-      cy.contains(clusterName).should('not.exist');
-      cy.checkCAPIClusterProvisioned(clusterName);
-
-      // Delete CAPI cluster
-      cy.removeCAPIResource('Clusters', clusterName, timeout);
+      // Delete the imported cluster
+      importedClusterCleanup(clusterName);
+      // Remove CAPI Resources related to the cluster
+      clusterCAPIResourceCleanup(clusterName, timeout);
     })
 
     it('Delete the ClusterClass fleet repo and other resources', () => {
       // Remove the clusterclass repo
       cy.removeFleetGitRepo(clusterClassRepoName);
-
-      // Delete secret and AzureClusterIdentity
-      cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', 'capi-clusters')
-      cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'cluster-identity', namespace)
+      // Cleanup other resources
+      capzResourcesCleanup();
     });
   }
 
