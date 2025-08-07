@@ -1,7 +1,7 @@
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
 import {getClusterName, skipClusterDeletion} from '~/support/utils';
-import {capzResourcesCleanup, clusterCAPIResourceCleanup, importedClusterCleanup} from "~/support/cleanup_support";
+import {capiClusterDeletion, capzResourcesCleanup, importedRancherClusterDeletion} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
@@ -117,9 +117,10 @@ describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
     qase(82,
       it('Remove imported CAPZ cluster from Rancher Manager and Delete the CAPZ cluster', { retries: 1 }, () => {
         // Delete the imported cluster
-        importedClusterCleanup(clusterName);
+        // Ensure that the provisioned CAPI cluster still exists
+        importedRancherClusterDeletion(clusterName);
         // Remove CAPI Resources related to the cluster
-        clusterCAPIResourceCleanup(clusterName, timeout);
+        capiClusterDeletion(clusterName, timeout);
       })
     );
 

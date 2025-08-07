@@ -15,7 +15,7 @@ import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
 import {getClusterName, skipClusterDeletion} from '~/support/utils';
-import {clusterCAPIResourceCleanup, importedClusterCleanup} from "~/support/cleanup_support";
+import {capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
@@ -138,10 +138,11 @@ describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
     qase(98,
       it('Remove imported CAPD cluster from Rancher Manager and Delete the CAPD cluster', {retries: 1}, () => {
         // Delete the imported cluster
+        // Ensure that the provisioned CAPI cluster still exists
         // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
-        importedClusterCleanup(clusterName);
+        importedRancherClusterDeletion(clusterName);
         // Remove CAPI Resources related to the cluster
-        clusterCAPIResourceCleanup(clusterName, timeout);
+        capiClusterDeletion(clusterName, timeout);
       })
     );
 

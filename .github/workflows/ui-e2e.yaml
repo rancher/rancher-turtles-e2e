@@ -46,7 +46,7 @@ on:
         default: false
         type: boolean
       cluster_name_suffix:
-        description: Suffix to be used in cluster name
+        description: Suffix to be used in cluster name (default - github.run_number)
         type: string
       runner_template:
         description: Runner template to use

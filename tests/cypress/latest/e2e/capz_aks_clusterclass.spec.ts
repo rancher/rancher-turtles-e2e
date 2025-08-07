@@ -1,7 +1,7 @@
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
 import {getClusterName, skipClusterDeletion} from '~/support/utils';
-import {capzResourcesCleanup, clusterCAPIResourceCleanup, importedClusterCleanup} from "~/support/cleanup_support";
+import {capiClusterDeletion, capzResourcesCleanup, importedRancherClusterDeletion} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Import CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
@@ -84,10 +84,11 @@ describe('Import CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
   if (skipClusterDeletion) {
     qase(60, it('Remove imported CAPZ cluster from Rancher Manager and Delete the CAPZ cluster', () => {
         // Delete the imported cluster
+        // Ensure that the provisioned CAPI cluster still exists
         // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
-        importedClusterCleanup(clusterName);
+        importedRancherClusterDeletion(clusterName);
         // Remove CAPI Resources related to the cluster
-        clusterCAPIResourceCleanup(clusterName, timeout);
+        capiClusterDeletion(clusterName, timeout);
     })
     );
 

@@ -1,4 +1,4 @@
-export function importedClusterCleanup(clusterName: string) {
+export function importedRancherClusterDeletion(clusterName: string) {
   // Delete the imported cluster from Cluster Management
   cy.deleteCluster(clusterName);
 
@@ -11,7 +11,7 @@ export function importedClusterCleanup(clusterName: string) {
   cy.checkCAPIClusterProvisioned(clusterName);
 }
 
-export function clusterCAPIResourceCleanup(clusterName: string, timeout: number, clusterRepoName?: string,extraDeleteSteps:boolean=false) {
+export function capiClusterDeletion(clusterName: string, timeout: number, clusterRepoName?: string, extraDeleteSteps: boolean = false) {
   if (clusterRepoName) {
     // Remove the fleet git repo used to add cluster CAPI resources
     cy.removeFleetGitRepo(clusterRepoName);
@@ -50,10 +50,8 @@ export function capaResourcesCleanup() {
 export function capvResourcesCleanup(provider: 'kubeadm' | 'rke2') {
   // Delete secret and VSphereClusterIdentity
   cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'VSphereClusterIdentities'], 'cluster-identity');
-  if (provider === 'kubeadm') {
-    cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'capv-helm-values', 'capv-system');
-  } else {
-    cy.deleteKubernetesResource('local', ['Storage', 'Secrets'], "capv-helm-values", 'capv-system')
+  cy.deleteKubernetesResource('local', ['Storage', 'Secrets'], "capv-helm-values", 'capv-system')
+  if (provider === 'rke2') {
     cy.deleteKubernetesResource('local', ['Storage', 'Secrets'], "capv-docker-token", capiClustersNS)
   }
 }

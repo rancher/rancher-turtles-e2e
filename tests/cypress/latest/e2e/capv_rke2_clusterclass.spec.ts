@@ -2,7 +2,7 @@ import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
 import {skipClusterDeletion} from '~/support/utils';
-import {capvResourcesCleanup, clusterCAPIResourceCleanup, importedClusterCleanup} from "~/support/cleanup_support";
+import {capiClusterDeletion, capvResourcesCleanup, importedRancherClusterDeletion} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
@@ -212,9 +212,9 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     it('Remove imported CAPV cluster from Rancher Manager and Delete the CAPV cluster', {retries: 1}, () => {
       // Delete the imported cluster
       // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
-      importedClusterCleanup(clusterName);
+      importedRancherClusterDeletion(clusterName);
       // Remove CAPI Resources related to the cluster
-      clusterCAPIResourceCleanup(clusterName, timeout, clusterRepoName);
+      capiClusterDeletion(clusterName, timeout, clusterRepoName);
     })
 
     it('Delete the ClusterClass fleet repo and other resources', () => {
