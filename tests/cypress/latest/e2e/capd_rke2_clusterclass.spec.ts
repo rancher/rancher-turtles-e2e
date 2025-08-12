@@ -34,6 +34,9 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/docker/rke2'
   const clusterClassRepoName = "docker-rke2-clusterclass"
+  const dockerAuthUsernameBase64 = btoa(Cypress.env("docker_auth_username"))
+  const dockerAuthPasswordBase64 = btoa(Cypress.env("docker_auth_password"))
+  const capiClustersNS = 'capi-clusters'
 
   beforeEach(() => {
     cy.login();
@@ -43,6 +46,15 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
   it('Setup the namespace for importing', () => {
     cy.namespaceAutoImport('Disable');
   })
+
+  it('Create Docker Auth Secret', () => {
+    // Prevention for Docker.io rate limiting
+    cy.readFile('./fixtures/docker/capd-auth-token-secret.yaml').then((data) => {
+      data = data.replace(/replace_cluster_docker_auth_username/, dockerAuthUsernameBase64)
+      data = data.replace(/replace_cluster_docker_auth_password/, dockerAuthPasswordBase64)
+      cy.importYAML(data, capiClustersNS)
+    })
+  });
 
   qase(91,
     it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
@@ -56,7 +68,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
     it('Import CAPD RKE2 class-clusters using YAML', () => {
       cy.readFile('./fixtures/docker/capd-rke2-class-cluster.yaml').then((data) => {
         data = data.replace(/replace_cluster_name/g, clusterName)
-        cy.importYAML(data, 'capi-clusters')
+        cy.importYAML(data, capiClustersNS)
       });
 
       // Check CAPI cluster using its name
@@ -100,7 +112,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
       cy.readFile('./fixtures/docker/capd-rke2-class-cluster.yaml').then((data) => {
         data = data.replace(/replace_cluster_name/g, clusterName)
         data = data.replace(/replicas: 2/g, 'replicas: 3')
-        cy.importYAML(data, 'capi-clusters')
+        cy.importYAML(data, capiClustersNS)
       });
 
       // Check CAPI cluster status
@@ -139,7 +151,8 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
       it('Delete the ClusterClass fleet repo', () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
-
+        // Cleanup other resources
+        cy.deleteKubernetesResource('local', ['Storage', 'Secrets'], 'capd-docker-token', capiClustersNS)
       })
     );
   }

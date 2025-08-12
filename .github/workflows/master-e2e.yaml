@@ -50,8 +50,14 @@ on:
       vsphere_endpoints_list:
         description: VSPHERE_ENDPOINTS_LIST contains space separated list of IPs for kube-vip
         required: true
-      dockerhub_token:
-        description: DOCKERHUB_TOKEN to perform docker login
+      docker_auth_username:
+          description: DOCKER_AUTH_USERNAME to perform docker login
+          required: true
+      docker_auth_password:
+        description: DOCKER_AUTH_PASSWORD to perform docker login
+        required: true
+      docker_registry_config:
+        description: DOCKER_REGISTRY_CONFIG to perform docker login
         required: true
     inputs:
       cert-manager_version:
@@ -311,8 +317,8 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: turtlesqa
-          password: ${{ secrets.dockerhub_token }}
+          username: ${{ secrets.docker_auth_username }}
+          password: ${{ secrets.docker_auth_password }}
       - name: Install helm
         run: curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
       # Build rancher-turtles latest chart
@@ -388,12 +394,19 @@ jobs:
         env:
           BROWSER: chrome
           CYPRESS_DOCKER: 'cypress/included:14.5.0'
+          RANCHER_USER: admin
+          RANCHER_VERSION: ${{ steps.component.outputs.rm_version }}
+          RANCHER_URL: https://${{ needs.create-runner.outputs.public_dns }}/dashboard
+          QASE_RUN_ID: ${{ needs.pre-qase.outputs.qase_run_id }}
+          # Inputs
           CAPI_UI_VERSION: ${{ inputs.capi_ui_version }}
           K8S_UPSTREAM_VERSION: ${{ inputs.upstream_cluster_version }}
-          RANCHER_VERSION: ${{ steps.component.outputs.rm_version }}
+          GREPTAGS: ${{ inputs.grep_test_by_tag }}
+          TURTLES_CHART_VERSION: ${{ inputs.turtles_chart_version }}
+          SKIP_CLUSTER_DELETE: ${{ inputs.skip_cluster_delete }}
+          CLUSTER_NAME_SUFFIX: ${{ inputs.cluster_name_suffix }}
+          # Secrets
           RANCHER_PASSWORD: ${{ secrets.rancher_password }}
-          RANCHER_URL: https://${{ needs.create-runner.outputs.public_dns }}/dashboard
-          RANCHER_USER: admin
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
           GCP_CREDENTIALS: ${{ secrets.gcp_credentials }}
@@ -403,11 +416,9 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.azure_tenant_id }}
           AZURE_SUBSCRIPTION_ID: ${{ secrets.azure_subscription_id }}
           VSPHERE_SECRETS_JSON_BASE64: ${{ secrets.vsphere_secrets_json_base64 }}
-          QASE_RUN_ID: ${{ needs.pre-qase.outputs.qase_run_id }}
-          GREPTAGS: ${{ inputs.grep_test_by_tag }}
-          TURTLES_CHART_VERSION: ${{inputs.turtles_chart_version}}
-          SKIP_CLUSTER_DELETE: ${{ inputs.skip_cluster_delete }}
-          CLUSTER_NAME_SUFFIX: ${{ inputs.cluster_name_suffix }}
+          DOCKER_AUTH_USERNAME: ${{ secrets.docker_auth_username }}
+          DOCKER_AUTH_PASSWORD: ${{ secrets.docker_auth_password }}
+          DOCKER_REGISTRY_CONFIG: ${{ secrets.docker_registry_config }}
           SPEC: |
             e2e/first_connection.spec.ts
             e2e/turtles_chart.spec.ts

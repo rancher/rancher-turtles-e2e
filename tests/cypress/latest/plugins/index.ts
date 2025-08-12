@@ -38,10 +38,17 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   config.env.cluster = process.env.CLUSTER_NAME;
   config.env.capi_ui_version = process.env.CAPI_UI_VERSION;
   config.env.k8s_version = process.env.K8S_VERSION_TO_PROVISION;
-  config.env.password = process.env.RANCHER_PASSWORD;
   config.env.rancher_version = process.env.RANCHER_VERSION;
   config.env.ui_account = process.env.UI_ACCOUNT;
   config.env.username = process.env.RANCHER_USER;
+  config.env.grep = process.env.GREP;
+  config.env.grepTags = process.env.GREPTAGS;
+  config.env.skip_cluster_delete = process.env.SKIP_CLUSTER_DELETE || "false";
+  const clusterNameSuffixDefault: string = randomstring.generate({length: 4, capitalization: 'lowercase'})
+  config.env.cluster_name_suffix = process.env.CLUSTER_NAME_SUFFIX || clusterNameSuffixDefault;
+
+  // Secrets
+  config.env.password = process.env.RANCHER_PASSWORD;
   config.env.aws_access_key = process.env.AWS_ACCESS_KEY_ID;
   config.env.aws_secret_key = process.env.AWS_SECRET_ACCESS_KEY;
   config.env.gcp_credentials = process.env.GCP_CREDENTIALS;
@@ -50,15 +57,11 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   config.env.azure_client_id = process.env.AZURE_CLIENT_ID;
   config.env.azure_client_secret = process.env.AZURE_CLIENT_SECRET;
   config.env.azure_subscription_id = process.env.AZURE_SUBSCRIPTION_ID;
-  config.env.skip_cluster_delete = process.env.SKIP_CLUSTER_DELETE || "false";
-
-  const clusterNameSuffixDefault: string = randomstring.generate({length: 4, capitalization: 'lowercase'})
-  config.env.cluster_name_suffix = process.env.CLUSTER_NAME_SUFFIX || clusterNameSuffixDefault;
+  config.env.docker_auth_username = process.env.DOCKER_AUTH_USERNAME;
+  config.env.docker_auth_password = process.env.DOCKER_AUTH_PASSWORD;
+  config.env.docker_registry_config = process.env.DOCKER_REGISTRY_CONFIG;
   // VMware vSphere
   config.env.vsphere_secrets_json_base64 = process.env.VSPHERE_SECRETS_JSON_BASE64;
-
-  config.env.grep = process.env.GREP;
-  config.env.grepTags = process.env.GREPTAGS;
 
   // To know if tests are running in a CI environment
   config.env.ci = process.env.CI;

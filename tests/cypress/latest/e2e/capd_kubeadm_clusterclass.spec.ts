@@ -25,6 +25,8 @@ describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/docker/kubeadm'
   const clusterClassRepoName = 'docker-kb-clusterclass'
+  const dockerRegistryConfigBase64 = btoa(Cypress.env('docker_registry_config'))
+  const capiClustersNS = 'capi-clusters'
 
   beforeEach(() => {
     cy.login();
@@ -44,11 +46,20 @@ describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
     })
   );
 
+  it('Create Docker Pull Secret', () => {
+    // Prevention for Docker.io rate limiting
+    cy.readFile('./fixtures/docker/capd-image-pull-secret.yaml').then((data) => {
+      data = data.replace(/replace_docker_registry_config/, dockerRegistryConfigBase64)
+      data = data.replace(/replace_cluster_name/g, clusterName)
+      cy.importYAML(data, capiClustersNS)
+    })
+  });
+
   qase(6,
     it('Import CAPD Kubeadm class-clusters using YAML', () => {
       cy.readFile('./fixtures/docker/capd-kubeadm-class-cluster.yaml').then((data) => {
         data = data.replace(/replace_cluster_name/g, clusterName)
-        cy.importYAML(data, 'capi-clusters')
+        cy.importYAML(data, capiClustersNS)
       });
 
       // Check CAPI cluster using its name

@@ -17,7 +17,7 @@ import {qase} from 'cypress-qase-reporter/dist/mocha';
 Cypress.config();
 describe('Enable CAPI Providers', () => {
   const statusReady = 'Ready'
-  const branch = 'main'
+  const branch = 'release-0.23' // TODO: Change to main in rancher-turtles-e2e/issues/243
   const turtlesRepoUrl = 'https://github.com/rancher/turtles.git'
 
   // Providers names
