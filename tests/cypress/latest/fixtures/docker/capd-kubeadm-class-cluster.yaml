@@ -32,6 +32,8 @@ spec:
           enabled: false
           enforce: baseline
           warn: restricted
+      - name: imagePullSecret
+        value: docker-config
     version: v1.31.4
     workers:
       machineDeployments:
