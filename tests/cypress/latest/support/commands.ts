@@ -396,8 +396,8 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
   cy.contains(new RegExp('Active.*' + repositoryName), { timeout: 150000 });
 });
 
-// Command to Install or Update App from Charts menu
-// Operation types: Install, Update
+// Command to Install, Update or Upgrade App from Charts menu
+// Operation types: Install, Update, Upgrade
 // You can optionally provide an array of questions and answer them before the installation starts
 // Example1: cy.checkChart('Alerting', 'default', [{ menuEntry: '(None)', checkbox: 'Enable Microsoft Teams' }]);
 // Example2: cy.checkChart('Rancher Turtles', 'rancher-turtles-system', [{ menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Seamless integration with Fleet and CAPI'},{ menuEntry: 'Rancher webhook cleanup settings', inputBoxTitle: 'Webhook Cleanup Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.28.0'}]);
@@ -446,11 +446,13 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
     cy.url().should("contain", version)
   }
 
-  cy.get('body').invoke('text').then((bodyText) => {
-    if (bodyText.includes('Current')) {
-      cy.contains('Current').click();
-    }
-  });
+  if (chartName == 'Rancher Turtles' && operation == 'Update') {
+    cy.get('body').invoke('text').then((bodyText) => {
+      if (bodyText.includes('Current')) {
+        cy.contains('Current').click();
+      }
+    });
+  }
 
   cy.getBySel('btn-chart-install').click();
   cy.contains(operation + ': Step 1')
@@ -516,9 +518,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
     cy.setNamespace(namespace);
     cy.waitForAllRowsInState('Deployed', 180000);
     cy.namespaceReset();
-  }
-
-  if (operation == 'Update') {
+  } else {
     cy.contains(new RegExp('Installed App:.*Deployed'), { timeout: 120000 }).should('be.visible');
     cy.waitForAllRowsInState('Active');
   }

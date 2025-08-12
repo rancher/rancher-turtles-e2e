@@ -1,0 +1,125 @@
+/*
+Copyright © 2022 - 2025 SUSE LLC
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+import '~/support/commands';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {getClusterName} from '~/support/utils';
+import {capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
+
+Cypress.config();
+describe('Import CAPD RKE2 Class-Cluster', { tags: '@upgrade' }, () => {
+  const timeout = 600000
+  const classNamePrefix = 'docker-rke2'
+  const clusterName = getClusterName(classNamePrefix)
+  const turtlesRepoUrl = 'https://github.com/rancher/turtles'
+  const classesPath = 'examples/clusterclasses/docker/rke2'
+  const clusterClassRepoName = "docker-rke2-clusterclass"
+
+  beforeEach(() => {
+    cy.login();
+    cy.burgerMenuOperate('open');
+  });
+
+  it('Setup the namespace for importing', () => {
+    cy.namespaceAutoImport('Disable');
+  })
+
+  qase(91,
+    it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
+      cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
+      // Go to CAPI > ClusterClass to ensure the clusterclass is created
+      cy.checkCAPIClusterClass(classNamePrefix);
+    })
+  );
+
+
+  it('Import CAPD RKE2 class-clusters using YAML', () => {
+    cy.readFile('./fixtures/docker/capd-rke2-class-cluster.yaml').then((data) => {
+      data = data.replace(/replace_cluster_name/g, clusterName)
+      cy.importYAML(data, 'capi-clusters')
+    });
+
+    // Check CAPI cluster using its name
+    cy.checkCAPICluster(clusterName);
+  })
+
+  it('Auto import child CAPD cluster', () => {
+    // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+    cy.checkCAPIClusterProvisioned(clusterName, timeout);
+
+    // Check child cluster is created and auto-imported
+    // This is checked by ensuring the cluster is available in navigation menu
+    cy.goToHome();
+    cy.contains(clusterName).should('exist');
+
+    // Check cluster is Active
+    cy.searchCluster(clusterName);
+    cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+
+    // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+    // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
+    cy.checkCAPIClusterActive(clusterName, timeout);
+  })
+
+  it('Upgrade turtles chart and check cluster status', () => {
+    cy.contains('local').click();
+    cy.checkChart('Upgrade', 'Rancher Turtles', 'rancher-turtles-system', ''); // This upgrades Turtles chart to latest dev version
+
+    // Check cluster is Active
+    cy.searchCluster(clusterName);
+    cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+    cy.exploreCluster('local');
+    cy.accesMenuSelection(['Workloads', 'Pods']);
+    cy.waitForAllRowsInState('Running', 300000);
+  })
+
+
+  it('Install App on imported cluster', () => {
+    // Click on imported CAPD cluster
+    cy.contains(clusterName).click();
+
+    // Install Chart
+    // We install Logging chart instead of Monitoring, since this is relatively lightweight.
+    cy.checkChart('Install', 'Logging', 'cattle-logging-system');
+  })
+
+
+  it("Scale up imported CAPD cluster by patching class-cluster yaml", () => {
+    cy.readFile('./fixtures/docker/capd-rke2-class-cluster.yaml').then((data) => {
+      data = data.replace(/replace_cluster_name/g, clusterName)
+      data = data.replace(/replicas: 2/g, 'replicas: 3')
+      cy.importYAML(data, 'capi-clusters')
+    });
+
+    // Check CAPI cluster status
+    cy.checkCAPIMenu();
+    cy.contains('Machine Deployments').click();
+    cy.typeInFilter(clusterName);
+    cy.get('.content > .count', { timeout: timeout }).should('have.text', '3');
+    cy.checkCAPIClusterActive(clusterName);
+  })
+
+  it('Remove imported CAPD cluster from Rancher Manager and Delete the CAPD cluster', {retries: 1}, () => {
+    // Delete the imported cluster
+    // Ensure that the provisioned CAPI cluster still exists
+    // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
+    importedRancherClusterDeletion(clusterName);
+    // Remove CAPI Resources related to the cluster
+    capiClusterDeletion(clusterName, timeout);
+  })
+
+  it('Delete the ClusterClass fleet repo', () => {
+    // Remove the clusterclass repo
+    cy.removeFleetGitRepo(clusterClassRepoName);
+  })
+});

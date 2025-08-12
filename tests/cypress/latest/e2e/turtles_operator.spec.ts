@@ -60,6 +60,10 @@ describe('Install Turtles Operator - @install', { tags: '@install' }, () => {
         turtlesVersion = ""
       }
 
+      if ((Cypress.env('grepTags')).includes('@upgrade')) {
+        // Required to validate turtles/issues/1395
+        turtlesVersion = '0.21.0'
+      }
       cy.checkChart('Install', 'Rancher Turtles', 'rancher-turtles-system', turtlesVersion);
     })
   );

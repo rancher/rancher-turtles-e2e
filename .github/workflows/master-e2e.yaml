@@ -414,6 +414,7 @@ jobs:
             e2e/turtles_extension.spec.ts
             e2e/menu.spec.ts
             e2e/providers_setup.spec.ts
+            e2e/capd_rke2_upgrade_clusterclass.spec.ts
             e2e/capd_rke2_clusterclass.spec.ts
             e2e/capd_rke2_fleet_clusterclass.spec.ts
             e2e/capd_kubeadm_clusterclass.spec.ts
@@ -471,7 +472,7 @@ jobs:
           UI_VERSION=$(helm list -n cattle-ui-plugin-system -o json 2> /dev/null |  jq -r '.[] | .chart')
           TURTLES_VERSION=$(helm list -n rancher-turtles-system -o json 2> /dev/null | jq -r '.[] | .chart')
           echo "CAPI UI Extension Version: $UI_VERSION" >> ${GITHUB_STEP_SUMMARY}
-          echo "Rancher Turtles Operator Version: $TURTLES_VERSION" >> ${GITHUB_STEP_SUMMARY}
+          echo "Rancher Turtles Installed/Upgraded Operator Version: $TURTLES_VERSION" >> ${GITHUB_STEP_SUMMARY}
           if ${{ inputs.ui_account != '' }}; then
             echo "UI User: ${{ inputs.ui_account }}" >> ${GITHUB_STEP_SUMMARY}
           fi

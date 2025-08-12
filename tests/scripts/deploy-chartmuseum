@@ -45,3 +45,6 @@ helm repo add chartmuseum http://localhost:8080
 
 # Push helm chart to local repo even when exists already
 helm cm-push --force ./assets/rancher-turtles-*.tgz chartmuseum
+# For chart-upgrade checks
+helm pull https://github.com/rancher/turtles/releases/download/v0.21.0/rancher-turtles-0.21.0.tgz
+helm cm-push --force rancher-turtles-0.21.0.tgz chartmuseum
