@@ -74,13 +74,19 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@upgrade' }, () => {
   it('Upgrade turtles chart and check cluster status', () => {
     cy.contains('local').click();
     cy.checkChart('Upgrade', 'Rancher Turtles', 'rancher-turtles-system', ''); // This upgrades Turtles chart to latest dev version
-
-    // Check cluster is Active
-    cy.searchCluster(clusterName);
-    cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+    
+    // Check CAPI operator deployment to be removed
     cy.exploreCluster('local');
+    cy.accesMenuSelection(['Workloads', 'Deployments']);
+    cy.typeInFilter('rancher-turtles-cluster-api-operator');
+    cy.getBySel('sortable-cell-0-1').should('not.exist');
     cy.accesMenuSelection(['Workloads', 'Pods']);
     cy.waitForAllRowsInState('Running', 300000);
+
+    // Check CAPI cluster is Active
+    cy.searchCluster(clusterName);
+    cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+    cy.checkCAPIClusterActive(clusterName, timeout);
   })
 
 

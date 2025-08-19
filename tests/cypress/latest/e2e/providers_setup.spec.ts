@@ -111,10 +111,12 @@ describe('Enable CAPI Providers', () => {
     qase(4,
       it('Create CAPD provider', () => {
         // Create Docker Infrastructure provider
-        cy.addInfraProvider('Docker', dockerProvider, 'capd-system');
+        const namespace = 'capd-system'
+        cy.addInfraProvider('Docker', dockerProvider, namespace);
         const readyStatus = statusReady.concat(dockerProvider, 'infrastructure', dockerProvider, kubeadmProviderVersion)
         // TODO: add actual vs expected
         cy.contains(readyStatus);
+        cy.verifyCAPIProviderImage(dockerProvider, namespace);
       })
     );
 
@@ -170,6 +172,7 @@ describe('Enable CAPI Providers', () => {
         cy.addInfraProvider('vsphere', vsphereProvider, vsphereProviderNamespace, vsphereProvider);
         const readyStatus = statusReady.concat(vsphereProvider, 'infrastructure', vsphereProvider, vsphereProviderVersion)
         cy.contains(readyStatus);
+        cy.verifyCAPIProviderImage(vsphereProvider, vsphereProviderNamespace);
       })
     );
   })
@@ -184,33 +187,39 @@ describe('Enable CAPI Providers', () => {
 
     qase(13,
       it('Create CAPA provider', () => {
+        const namespace = 'capa-system'
         // Create AWS Infrastructure provider
         cy.addCloudCredsAWS(amazonProvider, Cypress.env('aws_access_key'), Cypress.env('aws_secret_key'));
         cy.burgerMenuOperate('open');
-        cy.addInfraProvider('Amazon', amazonProvider, 'capa-system', amazonProvider);
+        cy.addInfraProvider('Amazon', amazonProvider, namespace, amazonProvider);
         const readyStatus = statusReady.concat(amazonProvider, providerType, amazonProvider, amazonProviderVersion)
         cy.contains(readyStatus);
+        cy.verifyCAPIProviderImage(amazonProvider, namespace);
       })
     );
 
     qase(28,
       it('Create CAPG provider', () => {
+        const namespace = 'capg-system'
         // Create GCP Infrastructure provider
         cy.addCloudCredsGCP(googleProvider, Cypress.env('gcp_credentials'));
         cy.burgerMenuOperate('open');
-        cy.addInfraProvider('Google', googleProvider, 'capg-system', googleProvider);
+        cy.addInfraProvider('Google', googleProvider, namespace, googleProvider);
         const readyStatus = statusReady.concat(googleProvider, providerType, googleProvider, googleProviderVersion)
         cy.contains(readyStatus, { timeout: 120000 });
+        cy.verifyCAPIProviderImage(googleProvider, namespace);
       })
     );
 
     qase(20, it('Create CAPZ provider', () => {
+      const namespace = 'capz-system'
       // Create Azure Infrastructure provider
       cy.addCloudCredsAzure(azureProvider, Cypress.env('azure_client_id'), Cypress.env('azure_client_secret'), Cypress.env('azure_subscription_id'));
       cy.burgerMenuOperate('open');
-      cy.addInfraProvider('Azure', azureProvider, 'capz-system', azureProvider);
+      cy.addInfraProvider('Azure', azureProvider, namespace, azureProvider);
       const readyStatus = statusReady.concat(azureProvider, providerType, azureProvider, azureProviderVersion)
       cy.contains(readyStatus, { timeout: 180000 });
+      cy.verifyCAPIProviderImage(azureProvider, namespace);
     })
     );
   })

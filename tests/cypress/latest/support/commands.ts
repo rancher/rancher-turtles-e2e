@@ -883,3 +883,18 @@ Cypress.Commands.add('verifyResourceCount', (clusterName, resourcePath, resource
     expect($rows.length).to.be.equal(expectedCount);
   });
 });
+
+// Command to verify CAPIProvider image registry
+Cypress.Commands.add('verifyCAPIProviderImage', (providerName, providerNamespace) => {
+  let providerImageRegistry: string;
+  if (providerName == 'docker') {
+    providerImageRegistry = 'gcr.io/k8s-staging-cluster-api'
+  } else {
+    providerImageRegistry = 'registry.suse.com/rancher'
+  }
+
+  cy.exploreCluster('local');
+  cy.accesMenuSelection(['Workloads', 'Deployments']);
+  cy.setNamespace(providerNamespace);
+  cy.contains(providerImageRegistry).should('be.visible');
+});
