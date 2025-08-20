@@ -73,10 +73,13 @@ Cypress.Commands.add('createNamespace', (namespace) => {
   cy.contains('local')
     .click();
   cypressLib.accesMenu('Projects/Namespaces');
-  cy.setNamespace('Not', 'all_orphans');
+  cy.contains('Create Project').should('be.visible');
 
-  // Create namespace
-  cy.contains('Create Namespace').click();
+  // Workaround for 2.12 is to find a row which contains 'Not in a Project' and button 'Create Namespace'
+  // cy.setNamespace('Not', 'all_orphans');
+  // Ref. https://github.com/rancher/dashboard/issues/15193
+  cy.contains('Not in a Project').parents('tr').find('a').contains('Create Namespace').click();
+
   cy.typeValue('Name', namespace);
   cy.clickButton('Create');
   cy.contains(new RegExp('Active.*' + namespace));
@@ -86,15 +89,13 @@ Cypress.Commands.add('createNamespace', (namespace) => {
 // Command to set namespace selection
 Cypress.Commands.add('setNamespace', (namespace, namespaceID) => {
   const nsID: string = namespaceID || (namespace.startsWith('Project:')) ? '' : `ns_${namespace}`
-  cy.get('.ns-dropdown', { timeout: 18000 }).trigger('click');
-  cy.get('.ns-clear').should('be.visible').click().then(() =>  {
+  cy.getBySel('namespaces-dropdown', { timeout: 18000 }).trigger('click');
+  cy.get('.ns-clear').click();
+  cy.get('.ns-options').within(() => {
     if (nsID != '') {
       cy.get(`div[id='${nsID}']`).click();
     } else {
-        if (isRancherManagerVersion('2.12') && (namespace == 'Not')) {
-          cy.get('.ns-filter').type(namespace).type('{downarrow}{enter}'); // this does something but then in next step there is extra Not string
-        }
-        cy.contains('.ns-option', namespace).click();
+      cy.contains('.ns-option', namespace).click();
     }
   });
   cy.get('.ns-filter-input').type('{esc}');
@@ -103,10 +104,6 @@ Cypress.Commands.add('setNamespace', (namespace, namespaceID) => {
 
 // Command to reset namespace selection to default 'Only User Namespaces'
 Cypress.Commands.add('namespaceReset', () => {
-  if (isRancherManagerVersion('2.12')) {
-    cy.get('.ns-dropdown', { timeout: 18000 }).trigger('click');
-    cy.get('.ns-input .ns-filter-clear .icon-close').click();
-  }
   cy.setNamespace('Only User Namespaces', 'all_user');
 });
 
@@ -522,7 +519,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
   if (isRancherManagerVersion('2.12')) {
     cy.getBySel('charts-header-title').should('be.visible');
   } else {
-   cy.contains('Featured Charts').should('be.visible'); // TODO check if this cannot be unified with 2.12
+    cy.contains('Featured Charts').should('be.visible'); // TODO check if this cannot be unified with 2.12
   }
 
   const findChart = (retries = 10) => {
