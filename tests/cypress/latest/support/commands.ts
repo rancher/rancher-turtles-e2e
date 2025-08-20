@@ -18,6 +18,7 @@ import 'cypress-file-upload';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import jsyaml from 'js-yaml';
 import _ from 'lodash';
+import { isRancherManagerVersion } from '~/support/utils';
 
 // Generic commands
 // Go to specific Sub Menu from Access Menu
@@ -85,13 +86,15 @@ Cypress.Commands.add('createNamespace', (namespace) => {
 // Command to set namespace selection
 Cypress.Commands.add('setNamespace', (namespace, namespaceID) => {
   const nsID: string = namespaceID || (namespace.startsWith('Project:')) ? '' : `ns_${namespace}`
-  cy.getBySel('namespaces-dropdown', { timeout: 18000 }).trigger('click');
-  cy.get('.ns-clear').click();
-  cy.get('.ns-options').within(() => {
+  cy.get('.ns-dropdown', { timeout: 18000 }).trigger('click');
+  cy.get('.ns-clear').should('be.visible').click().then(() =>  {
     if (nsID != '') {
       cy.get(`div[id='${nsID}']`).click();
     } else {
-      cy.contains('.ns-option', namespace).click();
+        if (isRancherManagerVersion('2.12') && (namespace == 'Not')) {
+          cy.get('.ns-filter').type(namespace).type('{downarrow}{enter}'); // this does something but then in next step there is extra Not string
+        }
+        cy.contains('.ns-option', namespace).click();
     }
   });
   cy.get('.ns-filter-input').type('{esc}');
@@ -100,6 +103,10 @@ Cypress.Commands.add('setNamespace', (namespace, namespaceID) => {
 
 // Command to reset namespace selection to default 'Only User Namespaces'
 Cypress.Commands.add('namespaceReset', () => {
+  if (isRancherManagerVersion('2.12')) {
+    cy.get('.ns-dropdown', { timeout: 18000 }).trigger('click');
+    cy.get('.ns-input .ns-filter-clear .icon-close').click();
+  }
   cy.setNamespace('Only User Namespaces', 'all_user');
 });
 
@@ -511,11 +518,24 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
   }
 
   cy.get('.nav').contains('Charts').click();
-  cy.contains('Featured Charts').should('be.visible');
+
+  if (isRancherManagerVersion('2.12')) {
+    cy.getBySel('charts-header-title').should('be.visible');
+  } else {
+   cy.contains('Featured Charts').should('be.visible'); // TODO check if this cannot be unified with 2.12
+  }
 
   const findChart = (retries = 10) => {
-    cy.typeInFilter(chartName);
-    cy.getBySel('chart-selection-grid').within(() => {
+
+    // Chart filter input is not normal filter in 2.12 :(
+    if (isRancherManagerVersion('2.12')) {
+      cy.getBySel('charts-filter-input').clear().type(chartName);
+    } else {
+      cy.typeInFilter(chartName);
+    }
+
+    const chartSelector = isRancherManagerVersion('2.12') ? 'app-chart-cards-container' : 'chart-selection-grid';
+    cy.getBySel(chartSelector).within(() => {
       cy.contains(chartName, { timeout: 10000 }).then($el => {
         if ($el.length) {
           // Chart found, proceed with click
