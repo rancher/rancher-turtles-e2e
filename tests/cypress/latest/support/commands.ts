@@ -75,9 +75,9 @@ Cypress.Commands.add('createNamespace', (namespace) => {
   cypressLib.accesMenu('Projects/Namespaces');
   cy.contains('Create Project').should('be.visible');
 
-  // Workaround for 2.12 is to find a row which contains 'Not in a Project' and button 'Create Namespace'
-  // cy.setNamespace('Not', 'all_orphans');
+  // Workaround for 2.12, find a row with 'Not in a Project' and press button 'Create Namespace'
   // Ref. https://github.com/rancher/dashboard/issues/15193
+  // cy.setNamespace('Not', 'all_orphans');
   cy.contains('Not in a Project').parents('tr').find('a').contains('Create Namespace').click();
 
   cy.typeValue('Name', namespace);
