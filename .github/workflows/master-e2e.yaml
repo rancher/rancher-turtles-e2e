@@ -50,8 +50,14 @@ on:
       vsphere_endpoints_list:
         description: VSPHERE_ENDPOINTS_LIST contains space separated list of IPs for kube-vip
         required: true
-      dockerhub_token:
-        description: DOCKERHUB_TOKEN to perform docker login
+      docker_auth_username:
+          description: DOCKER_AUTH_USERNAME to perform docker login
+          required: true
+      docker_auth_password:
+        description: DOCKER_AUTH_PASSWORD to perform docker login
+        required: true
+      docker_registry_config:
+        description: DOCKER_REGISTRY_CONFIG to perform docker login
         required: true
     inputs:
       cert-manager_version:
@@ -311,8 +317,8 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: turtlesqa
-          password: ${{ secrets.dockerhub_token }}
+          username: ${{ secrets.docker_auth_username }}
+          password: ${{ secrets.docker_auth_password }}
       - name: Install helm
         run: curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
       # Build rancher-turtles latest chart

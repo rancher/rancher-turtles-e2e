@@ -26,6 +26,8 @@ spec:
         value: none
       - name: dockerImage
         value: kindest/node:v1.31.4
+      - name: dockerAuthSecret
+        value: capd-docker-token
     version: v1.31.7+rke2r1
     workers:
       machineDeployments:
