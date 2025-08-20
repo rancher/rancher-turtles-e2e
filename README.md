@@ -4,7 +4,7 @@
 
 What tests are doing:
 1. Create the infra stack ( GCP runner, cert-manager, rancher )
-2. Install the Turtles operator with locally built latest chart
+2. Install the Turtles chart with locally built latest chart
 3. Deploy the Turtles UI extension
 4. Test the Turtles menu, namespaces import features
 5. Perform CAPI setup prerequisites
@@ -19,7 +19,7 @@ What tests are doing:
 
 ### Pre-requisites
 1. Install Rancher.
-2. Install Rancher Turtles operator.
+2. Install Rancher Turtles chart.
 3. Install CAPI UI Extension.
 
 ### Running the test

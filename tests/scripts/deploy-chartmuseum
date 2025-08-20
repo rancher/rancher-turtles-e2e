@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script deploys a local helm repo to host the dev operator chart
+# This script deploys a local helm repo to host the turtles dev chart
 # because it is not exported anywhere else.
 
 set -e -x

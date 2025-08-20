@@ -4,7 +4,7 @@ run-name: >-
   ${{ github.event_name == 'workflow_dispatch' &&
       format('[{4}] Rancher-`{0}` - `{1}` destroy={2} dev={3}',
              inputs.rancher_version, inputs.grep_test_by_tag,
-             inputs.destroy_runner, inputs.operator_dev_chart, github.run_number) ||
+             inputs.destroy_runner, inputs.turtles_dev_chart, github.run_number) ||
       github.event_name == 'schedule' &&
       (github.event.schedule == '0 3 * * *' && format('[{0}] Nightly e2e job for `@short`', github.run_number) ||
        github.event.schedule == '0 4 * * *' && format('[{0}] Nightly e2e job for `@vsphere`', github.run_number) ||
@@ -22,18 +22,19 @@ on:
         description: Rancher Manager channel/<version|head_version>[/head_version] to use for installation
         default: head/2.11
         type: string
-      turtles_operator_version:
-        description: Rancher Turtles operator version to test (eg. 0.16.0)
+      turtles_chart_version:
+        description: Rancher Turtles chart version to test (eg. 0.21.0)
         type: string
       capi_ui_version:
         description: Version of the capi-ui-extension to test (eg. 0.8.1)
+        default: '0.8.3-rc1'
         type: string
       grep_test_by_tag:
         description: Test tags. For multiple selection separate with spaces (Available options - @install [@short @full|@vsphere]). Keep always @install
         required: true
         type: string
         default: '@install @short'
-      operator_dev_chart:
+      turtles_dev_chart:
         description: Install rancher turtles dev chart
         default: true
         type: boolean
@@ -82,12 +83,12 @@ jobs:
       test_description: "CI/Manual - UI - Deployment test with Standard K3s"
       cluster_name: cluster-k3s
       destroy_runner: ${{ github.event_name == 'schedule' && true || inputs.destroy_runner }}
-      capi_ui_version: ${{ inputs.capi_ui_version }}
+      capi_ui_version: ${{ inputs.capi_ui_version || '0.8.3-rc1' }}
       rancher_version: ${{ inputs.rancher_version || 'head/2.11' }}
       qase_run_id: ${{ inputs.qase_run_id || 'auto' }}
       grep_test_by_tag: ${{ inputs.grep_test_by_tag || (github.event.schedule == '0 3 * * *' && '@install @short') || (github.event.schedule == '0 4 * * *' && '@install @vsphere') || (github.event.schedule == '0 5 * * 6' && '@install @full') }}
-      operator_dev_chart: ${{ inputs.operator_dev_chart == true || (github.event_name == 'schedule' && true) }}
-      turtles_operator_version: ${{ inputs.turtles_operator_version }}
+      turtles_dev_chart: ${{ inputs.turtles_dev_chart == true || (github.event_name == 'schedule' && true) }}
+      turtles_chart_version: ${{ inputs.turtles_chart_version }}
       skip_cluster_delete: ${{ inputs.skip_cluster_delete || (github.event_name == 'schedule' && false) }}
       runner_template: ${{ inputs.runner_template || 'capi-e2e-ci-runner-spot-n2-highmem-16-template-v3' }}
       cluster_name_suffix: ${{ inputs.cluster_name_suffix || github.run_number }}

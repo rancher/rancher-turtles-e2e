@@ -76,7 +76,7 @@ on:
         description: Rancher Manager channel/version/head_version to use for installation
         default: stable/latest/none
         type: string
-      operator_dev_chart:
+      turtles_dev_chart:
         description: Install rancher turtles dev chart
         required: true
         type: boolean
@@ -110,8 +110,8 @@ on:
         required: true
         type: string
         default: '@install @short @full'
-      turtles_operator_version:
-        description: Turtles Operator Version; only to be used when dev chart is set to false; default - latest stable version
+      turtles_chart_version:
+        description: Turtles Chart Version; only to be used when dev chart is set to false; default - latest stable version
         type: string
       skip_cluster_delete:
         description: Skip CAPI cluster and fleet repo deletion tests
@@ -317,12 +317,12 @@ jobs:
         run: curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
       # Build rancher-turtles latest chart
       - name: Check out rancher-turtles repo
-        if: ${{ inputs.operator_dev_chart == true }}
+        if: ${{ inputs.turtles_dev_chart == true }}
         uses: actions/checkout@v4
         with:
           repository: ${{ env.TURTLES_REPO }}
       - name: Install Go
-        if: ${{ inputs.operator_dev_chart == true }}
+        if: ${{ inputs.turtles_dev_chart == true }}
         uses: actions/setup-go@v5
         with:
           cache: false
@@ -333,7 +333,7 @@ jobs:
         run: |
           echo "TAG=$(date "+%Y.%m.%d")" >> ${GITHUB_ENV}
       - name: Make chart
-        if: ${{ inputs.operator_dev_chart == true }}
+        if: ${{ inputs.turtles_dev_chart == true }}
         run: |
           TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} make e2e-image-build
           RELEASE_TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} CONTROLLER_IMAGE_VERSION=v${{ env.TAG }} make build-chart
@@ -341,7 +341,7 @@ jobs:
           docker push ${{ env.CONTROLLER_IMG }}:v${{ env.TAG }}
 
       - name: Copy chart file
-        if: ${{ inputs.operator_dev_chart == true }}
+        if: ${{ inputs.turtles_dev_chart == true }}
         run: cp ${{ github.workspace }}/out/package/rancher-turtles-${{ env.TAG }}.tgz ${{ runner.temp }}
 
       - name: Checkout
@@ -352,7 +352,7 @@ jobs:
           cache: false
           go-version-file: tests/go.mod
       - name: Copy chart file for chartmuseum
-        if: ${{ inputs.operator_dev_chart == true }}
+        if: ${{ inputs.turtles_dev_chart == true }}
         run: cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
       - name: Inject kube-vip controlplane IP for vsphere into capv-helm-values.yaml
         if: ${{ needs.create-runner.outputs.uuid == 'vsphere' }}
@@ -382,7 +382,7 @@ jobs:
           echo "cert_manager_version=${CERT_MANAGER_VERSION}" >> ${GITHUB_OUTPUT}
           echo "rm_version=${RM_VERSION}" >> ${GITHUB_OUTPUT}
       - name: Install Chartmuseum
-        if: ${{ inputs.operator_dev_chart == true }}
+        if: ${{ inputs.turtles_dev_chart == true }}
         run: cd tests && make e2e-install-chartmuseum
       - name: Cypress tests
         env:
@@ -405,13 +405,13 @@ jobs:
           VSPHERE_SECRETS_JSON_BASE64: ${{ secrets.vsphere_secrets_json_base64 }}
           QASE_RUN_ID: ${{ needs.pre-qase.outputs.qase_run_id }}
           GREPTAGS: ${{ inputs.grep_test_by_tag }}
-          TURTLES_OPERATOR_VERSION: ${{inputs.turtles_operator_version}}
+          TURTLES_CHART_VERSION: ${{inputs.turtles_chart_version}}
           SKIP_CLUSTER_DELETE: ${{ inputs.skip_cluster_delete }}
           CLUSTER_NAME_SUFFIX: ${{ inputs.cluster_name_suffix }}
           SPEC: |
             e2e/first_connection.spec.ts
-            e2e/turtles_operator.spec.ts
-            e2e/turtles_extension.spec.ts
+            e2e/turtles_chart.spec.ts
+            e2e/turtles_ui_extension.spec.ts
             e2e/menu.spec.ts
             e2e/providers_setup.spec.ts
             e2e/capd_rke2_upgrade_clusterclass.spec.ts
@@ -438,7 +438,7 @@ jobs:
             # QASE_RUN_ID is empty string already
           fi
 
-          if [ ${{ inputs.operator_dev_chart }} == true ]; then
+          if [ ${{ inputs.turtles_dev_chart }} == true ]; then
             export CHARTMUSEUM_REPO=http://${{ needs.create-runner.outputs.public_dns }}
           fi
           cd tests && make start-cypress-tests
@@ -472,7 +472,7 @@ jobs:
           UI_VERSION=$(helm list -n cattle-ui-plugin-system -o json 2> /dev/null |  jq -r '.[] | .chart')
           TURTLES_VERSION=$(helm list -n rancher-turtles-system -o json 2> /dev/null | jq -r '.[] | .chart')
           echo "CAPI UI Extension Version: $UI_VERSION" >> ${GITHUB_STEP_SUMMARY}
-          echo "Rancher Turtles Installed/Upgraded Operator Version: $TURTLES_VERSION" >> ${GITHUB_STEP_SUMMARY}
+          echo "Rancher Turtles Installed/Upgraded Chart Version: $TURTLES_VERSION" >> ${GITHUB_STEP_SUMMARY}
           if ${{ inputs.ui_account != '' }}; then
             echo "UI User: ${{ inputs.ui_account }}" >> ${GITHUB_STEP_SUMMARY}
           fi

@@ -16,7 +16,7 @@ import '~/support/commands';
 import { qase } from 'cypress-qase-reporter/dist/mocha';
 
 Cypress.config();
-describe('Install Turtles Operator - @install', { tags: '@install' }, () => {
+describe('Install Turtles Chart - @install', { tags: '@install' }, () => {
 
   beforeEach(() => {
     cy.login();
@@ -45,16 +45,16 @@ describe('Install Turtles Operator - @install', { tags: '@install' }, () => {
     } else {
       turtlesHelmRepo += ':8080'
     }
-    cy.addRepository('turtles-operator', turtlesHelmRepo, 'http', 'none');
+    cy.addRepository('turtles-chart', turtlesHelmRepo, 'http', 'none');
   })
 
   qase([2, 11],
-    it('Install Turtles operator', { retries: 1 }, () => {
+    it('Install Turtles chart', { retries: 1 }, () => {
       cy.contains('local').click();
 
-      let turtlesVersion = Cypress.env('turtles_operator_version')
+      let turtlesVersion = Cypress.env('turtles_chart_version')
 
-      // if operator dev chart is to be used, ignore the turtles version
+      // if turtles dev chart is to be used, ignore the turtles chart version
       const turtlesHelmRepo = Cypress.env('chartmuseum_repo')
       if (turtlesHelmRepo != "" && turtlesHelmRepo != undefined) {
         turtlesVersion = ""
