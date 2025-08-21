@@ -306,7 +306,7 @@ jobs:
       QASE_RUN_ID: ${{ needs.pre-qase.outputs.qase_run_id }}
       # NOTE: this REPORT var is needed for Cypress!
       QASE_REPORT: 1
-      TURTLES_REPO: rancher/turtles
+      TURTLES_REPO: furkatgofurov7/rancher-turtles # CHANGEME
       CONTROLLER_IMG: localhost:5000/$TURTLES_REPO
     steps:
       - name: Add /usr/local/bin into PATH
@@ -327,6 +327,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ env.TURTLES_REPO }}
+          ref: bump-rancher-2-12 # DELETEME
       - name: Install Go
         if: ${{ inputs.turtles_dev_chart == true }}
         uses: actions/setup-go@v5
@@ -454,7 +455,7 @@ jobs:
           fi
           cd tests && make start-cypress-tests
       - name: Upload Cypress screenshots (Basics)
-        if: failure() 
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-screenshots-basics-${{ inputs.cluster_name }}
@@ -528,7 +529,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4          
+        uses: actions/checkout@v4
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
