@@ -237,7 +237,7 @@ Cypress.Commands.add('addCustomProvider', (name, namespace, providerName, provid
   cy.checkCAPIMenu();
   cy.contains('Providers').click();
   cy.clickButton('Create');
-  cy.contains('Custom').click();
+  cy.getBySel('select-icon-grid-custom').click();
 
   // Select provider type
   cy.contains('Provider type').click();
@@ -257,24 +257,22 @@ Cypress.Commands.add('addCustomProvider', (name, namespace, providerName, provid
 });
 
 // Command to add CAPI Infrastructure provider
-Cypress.Commands.add('addInfraProvider', (providerType, name, namespace, cloudCredentials) => {
+Cypress.Commands.add('addInfraProvider', (providerType, namespace, cloudCredentials) => {
   // Navigate to providers Menu
   cy.checkCAPIMenu();
   cy.contains('Providers').click();
   cy.clickButton('Create');
-  const selector = 'select-icon-grid-' + providerType
+  const selector = "'select-icon-grid-" + providerType + "'"
   cy.getBySel(selector).click();
-  cy.contains('Provider: Create ' + providerType, { matchCase: false }).should('be.visible');
-
   // TODO: Add variables support after capi-ui-extension/issues/49
   cy.getBySel('name-ns-description-namespace').type(namespace + '{enter}');
-  cy.typeValue('Name', name);
 
-  // Select Cloud credentials name
-  if (providerType != 'Docker') {
+  if (providerType != 'Docker' && providerType != 'Azure') {
     cy.getBySel('cluster-prov-select-credential').trigger('click');
     cy.contains(cloudCredentials).click();
   }
+  
+  cy.getBySel('capi-provider-create-save').should('be.visible');
   cy.clickButton('Create');
   cy.contains('Providers').should('be.visible');
 });

@@ -17,7 +17,8 @@ import {getClusterName, skipClusterDeletion} from '~/support/utils';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 
 Cypress.config();
-describe('Create CAPD', { tags: '@short' }, () => {
+// TODO: Re-add to suite, rancher-turtles-e2e/issues/256
+describe('Create CAPD', { tags: '@skip' }, () => {
   const timeout = 600000
   const className = 'docker-kubeadm-example'
   const clusterName = getClusterName(className)

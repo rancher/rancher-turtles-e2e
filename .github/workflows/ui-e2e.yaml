@@ -27,7 +27,6 @@ on:
         type: string
       capi_ui_version:
         description: Version of the capi-ui-extension to test (eg. 0.8.1)
-        default: '0.8.3-rc1'
         type: string
       grep_test_by_tag:
         description: Test tags. For multiple selection separate with spaces (Available options - @install [@short @full|@vsphere]). Keep always @install
@@ -83,7 +82,7 @@ jobs:
       test_description: "CI/Manual - UI - Deployment test with Standard K3s"
       cluster_name: cluster-k3s
       destroy_runner: ${{ github.event_name == 'schedule' && true || inputs.destroy_runner }}
-      capi_ui_version: ${{ inputs.capi_ui_version || '0.8.3-rc1' }}
+      capi_ui_version: ${{ inputs.capi_ui_version }}
       rancher_version: ${{ inputs.rancher_version || 'head/2.11' }}
       qase_run_id: ${{ inputs.qase_run_id || 'auto' }}
       grep_test_by_tag: ${{ inputs.grep_test_by_tag || (github.event.schedule == '0 3 * * *' && '@install @short') || (github.event.schedule == '0 4 * * *' && '@install @vsphere') || (github.event.schedule == '0 5 * * 6' && '@install @full') }}

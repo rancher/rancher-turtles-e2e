@@ -60,7 +60,6 @@ describe('Enable CAPI Providers', () => {
   const googleProviderVersion = providerVersions[buildType].google
   const azureProviderVersion = providerVersions[buildType].azure
 
-  const kubeadmBaseURL = 'https://github.com/kubernetes-sigs/cluster-api/releases/'
   const kubeadmProviderTypes = ['bootstrap', 'control plane']
   const capiNamespaces = ['capi-clusters', 'capi-classes']
   const localProviderNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system', 'capd-system']
@@ -91,16 +90,14 @@ describe('Enable CAPI Providers', () => {
           // Create CAPI Kubeadm providers
           if (providerType == 'control plane') {
             // https://github.com/kubernetes-sigs/cluster-api/releases/v1.9.5/control-plane-components.yaml
-            const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + 'control-plane' + '-components.yaml'
             const providerName = kubeadmProvider + '-' + 'control-plane'
-            cy.addCustomProvider(providerName, 'capi-kubeadm-control-plane-system', kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
+            cy.addCustomProvider(providerName, 'capi-kubeadm-control-plane-system', kubeadmProvider, providerType);
             const readyStatus = statusReady.concat(providerName, 'controlPlane', kubeadmProvider, kubeadmProviderVersion)
             cy.contains(readyStatus);
           } else {
             // https://github.com/kubernetes-sigs/cluster-api/releases/v1.9.5/bootstrap-components.yaml
-            const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + providerType + '-components.yaml'
             const providerName = kubeadmProvider + '-' + providerType
-            cy.addCustomProvider(providerName, 'capi-kubeadm-bootstrap-system', kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
+            cy.addCustomProvider(providerName, 'capi-kubeadm-bootstrap-system', kubeadmProvider, providerType);
             const readyStatus = statusReady.concat(providerName, 'bootstrap', kubeadmProvider, kubeadmProviderVersion)
             cy.contains(readyStatus);
           }
@@ -112,7 +109,7 @@ describe('Enable CAPI Providers', () => {
       it('Create CAPD provider', () => {
         // Create Docker Infrastructure provider
         const namespace = 'capd-system'
-        cy.addInfraProvider('Docker', dockerProvider, namespace);
+        cy.addInfraProvider('Docker', namespace);
         const readyStatus = statusReady.concat(dockerProvider, 'infrastructure', dockerProvider, kubeadmProviderVersion)
         // TODO: add actual vs expected
         cy.contains(readyStatus);
@@ -169,7 +166,7 @@ describe('Enable CAPI Providers', () => {
         const vspherePort = '443';
         cy.addCloudCredsVMware(vsphereProvider, vsphereUsername, vspherePassword, vsphereServer, vspherePort);
         cy.burgerMenuOperate('open');
-        cy.addInfraProvider('vsphere', vsphereProvider, vsphereProviderNamespace, vsphereProvider);
+        cy.addInfraProvider('vSphere', vsphereProviderNamespace, vsphereProvider);
         const readyStatus = statusReady.concat(vsphereProvider, 'infrastructure', vsphereProvider, vsphereProviderVersion)
         cy.contains(readyStatus);
         cy.verifyCAPIProviderImage(vsphereProvider, vsphereProviderNamespace);
@@ -191,7 +188,7 @@ describe('Enable CAPI Providers', () => {
         // Create AWS Infrastructure provider
         cy.addCloudCredsAWS(amazonProvider, Cypress.env('aws_access_key'), Cypress.env('aws_secret_key'));
         cy.burgerMenuOperate('open');
-        cy.addInfraProvider('Amazon', amazonProvider, namespace, amazonProvider);
+        cy.addInfraProvider('Amazon', namespace, amazonProvider);
         const readyStatus = statusReady.concat(amazonProvider, providerType, amazonProvider, amazonProviderVersion)
         cy.contains(readyStatus);
         cy.verifyCAPIProviderImage(amazonProvider, namespace);
@@ -204,7 +201,7 @@ describe('Enable CAPI Providers', () => {
         // Create GCP Infrastructure provider
         cy.addCloudCredsGCP(googleProvider, Cypress.env('gcp_credentials'));
         cy.burgerMenuOperate('open');
-        cy.addInfraProvider('Google', googleProvider, namespace, googleProvider);
+        cy.addInfraProvider('Google Cloud Platform', namespace, googleProvider);
         const readyStatus = statusReady.concat(googleProvider, providerType, googleProvider, googleProviderVersion)
         cy.contains(readyStatus, { timeout: 120000 });
         cy.verifyCAPIProviderImage(googleProvider, namespace);
@@ -214,9 +211,7 @@ describe('Enable CAPI Providers', () => {
     qase(20, it('Create CAPZ provider', () => {
       const namespace = 'capz-system'
       // Create Azure Infrastructure provider
-      cy.addCloudCredsAzure(azureProvider, Cypress.env('azure_client_id'), Cypress.env('azure_client_secret'), Cypress.env('azure_subscription_id'));
-      cy.burgerMenuOperate('open');
-      cy.addInfraProvider('Azure', azureProvider, namespace, azureProvider);
+      cy.addInfraProvider('Azure', namespace, azureProvider);
       const readyStatus = statusReady.concat(azureProvider, providerType, azureProvider, azureProviderVersion)
       cy.contains(readyStatus, { timeout: 180000 });
       cy.verifyCAPIProviderImage(azureProvider, namespace);

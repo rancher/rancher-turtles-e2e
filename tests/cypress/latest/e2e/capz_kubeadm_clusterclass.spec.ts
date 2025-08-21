@@ -10,7 +10,6 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/azure/kubeadm'
   const clusterClassRepoName = "azure-kubeadm-clusterclass"
-  const providerName = 'azure'
 
   const clientID = Cypress.env("azure_client_id")
   const clientSecret = btoa(Cypress.env("azure_client_secret"))
@@ -21,13 +20,6 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
     cy.login();
     cy.burgerMenuOperate('open')
   });
-
-  // TODO: Create Provider via UI, ref: capi-ui-extension/issues/128
-  it('Create Azure CAPIProvider', () => {
-    cy.removeCAPIResource('Providers', providerName);
-    cy.createCAPIProvider(providerName);
-    cy.checkCAPIProvider(providerName);
-  })
 
   it('Setup the namespace for importing', () => {
     cy.namespaceAutoImport('Disable');
