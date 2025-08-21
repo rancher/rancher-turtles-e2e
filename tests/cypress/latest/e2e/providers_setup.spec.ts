@@ -13,12 +13,15 @@ limitations under the License.
 
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
+import { isRancherManagerVersion } from '~/support/utils';
 
 Cypress.config();
 describe('Enable CAPI Providers', () => {
   const statusReady = ['Ready']
-  const branch = 'main'
-  const turtlesRepoUrl = 'https://github.com/rancher/turtles.git'
+
+  // Address repo and branch after merging https://github.com/rancher/turtles/pull/1589 - HelmApps vs HelmOps in 2.12
+  const branch = isRancherManagerVersion('2.12') ? 'bump-rancher-2-12' : 'main';
+  const turtlesRepoUrl = isRancherManagerVersion('2.12') ? 'https://github.com/furkatgofurov7/rancher-turtles.git' : 'https://github.com/rancher/turtles.git';
 
   // Providers names
   const kubeadmProvider = 'kubeadm'
