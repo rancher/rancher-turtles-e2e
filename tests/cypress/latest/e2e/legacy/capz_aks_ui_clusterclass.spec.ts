@@ -1,7 +1,12 @@
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
 import {getClusterName, skipClusterDeletion} from '~/support/utils';
-import {ClusterClassVariablesInput} from '~/support/structs';
+import {
+  ClusterClassVariablesInput,
+  GeneralClusterInformation,
+  NetworkingInformation,
+  WorkerInformation
+} from '~/support/structs';
 
 Cypress.config();
 describe('Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
@@ -51,19 +56,29 @@ describe('Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
 
   qase(45, it('Create CAPZ AKS from Clusterclass via UI', () => {
     // Create cluster from Clusterclass UI
-    const machines: Record<string, string> = { 'mp-system': 'default-system', 'mp-worker': 'default-worker' }
-    const extraVariables: ClusterClassVariablesInput[] = [
+      const workers: WorkerInformation[] = [
+        {name: 'mp-system', class: 'default-system', replicas: '1'},
+        {name: 'mp-worker', class: 'default-worker', replicas: '1'}
+      ]
+      const additionalConfiguration: ClusterClassVariablesInput[] = [
       { name: 'subscriptionID', value: subscriptionID, type: 'string' },
       { name: 'location', value: location, type: 'dropdown' },
       { name: 'resourceGroup', value: clusterName, type: 'string' }
-
     ]
-    cy.createCAPICluster(classNamePrefix, clusterName, machines, k8sVersion, podCIDR, undefined, extraVariables);
+      const generalData: GeneralClusterInformation = {
+        namespace: 'capi-classes',
+        clusterName: clusterName,
+        k8sVersion: k8sVersion,
+        autoImportCluster: true,
+      }
+      const networking: NetworkingInformation = {
+        podCIDR: [podCIDR],
+      }
+
+      cy.createCAPICluster(classNamePrefix, generalData, networking, workers, additionalConfiguration);
     cy.checkCAPIMenu();
     cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
-
-    // Check child cluster is auto-imported
-    cy.clusterAutoImport(clusterName, 'Enable');
+      // Check child cluster is auto-imported
     cy.searchCluster(clusterName);
     cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
   })

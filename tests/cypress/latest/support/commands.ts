@@ -103,8 +103,7 @@ Cypress.Commands.add('namespaceReset', () => {
   cy.setNamespace('Only User Namespaces', 'all_user');
 });
 
-// Command to create CAPI cluster from Clusterclass (ui-extn: v0.8.2)
-Cypress.Commands.add('createCAPICluster', (className, clusterName, machines, k8sVersion, podCIDR, serviceCIDR, extraVariables) => {
+Cypress.Commands.add('createCAPICluster', (className: string, general, networking, workers, additionalConfiguration, controlPlane, labels, annotations) => {
   // Navigate to Classes Menu
   cy.checkCAPIClusterClass(className);
   cy.getBySel('sortable-table-0-action-button').click();
@@ -112,61 +111,144 @@ Cypress.Commands.add('createCAPICluster', (className, clusterName, machines, k8s
   // Create Cluster from Classes Menu
   cy.contains('Create Cluster').click();
   cy.contains('Cluster: Create').should('be.visible');
-  cy.typeValue('Cluster Name', clusterName);
-  cy.typeValue('Kubernetes Version', k8sVersion);
 
-  // Networking details, Workaround for capi-ui-extension/issues/123
-  cy.typeValue('Service Domain', 'cluster.local');
-  cy.getBySel('remove-item-0').click();
-  cy.getBySel('array-list-button').click({ multiple: true });
-  const inputID = ' > :nth-child(1) > [data-testid="array-list-box0"] > '
+  // General
+  cy.get('.accordion-header').contains('General').parent().siblings('div').within(() => {
+    if (general.namespace) {
+      cy.getBySel('name-ns-description-namespace').type(general.namespace + '{enter}');
+    }
+    cy.typeValue('Cluster Name', general.clusterName);
+    cy.typeValue('Kubernetes Version', general.k8sVersion);
+    if (general.autoImportCluster) {
+      cy.get('.checkbox-outer-container').click();
+    }
+  })
 
-  // podCIDR details
-  cy.get(':nth-child(1)' + inputID + '.value > .labeled-input').type(podCIDR);
-  // serviceCIDR details
-  if (serviceCIDR != undefined) {
-    cy.get(':nth-child(2)' + inputID + '.value > .labeled-input').type(serviceCIDR);
-  } else {
-    cy.get(':nth-child(2)' + inputID + '.remove').click();
+  // Control Plane
+  if (controlPlane) {
+    cy.get('.accordion-header').contains('Control Plane').parent().siblings('div').within(() => {
+      if (controlPlane.host) {
+        cy.typeValue('Host', controlPlane.host);
+      }
+      if (controlPlane.port) {
+        cy.typeValue('Port', controlPlane.port);
+      }
+      if (controlPlane.replicas) {
+        cy.typeValue('Replicas', controlPlane.replicas);
+      }
+    })
   }
 
-  // Machine Deployment/Pool details
-  Object.entries(machines).forEach(([key, value], index, array) => {
-    cy.get('h2').contains('Workers').parents('div.block').within(() => {
-      cy.getBySel(`array-list-box${index}`).within(() => {
-        cy.typeValue('Name', key);
-        cy.get('.vs__selected-options').click();
+  // Networking
+  cy.get('.accordion-header').contains('Networking').parent().siblings('div').within(() => {
+    if (networking.serviceDomain) {
+      cy.typeValue('Service Domain', networking.serviceDomain);
+    }
+    if (networking.apiServerPort) {
+      cy.typeValue('API Server Port', networking.apiServerPort);
+    }
+    if (networking.podCIDR) {
+      networking.podCIDR.forEach((cidr, index) => {
+        cy.getBySel('pods-cidr-button').click();
+        cy.getBySel('pods-cidr-box' + index).type(cidr);
       })
-    })
-    // The options list is located somewhere outside the <body> block; so it needs to be called outside the above block.
-    cy.contains(value).click();
-    // Ensure there are more entries to be made before clicking the `Add` button.
-    const isLast = index === array.length - 1;
-    if (!isLast) {
-      cy.get('h2').contains('Workers').parents('div.block').within(() => {
-        cy.clickButton('Add');
+    }
+
+    if (networking.serviceCIDR) {
+      networking.serviceCIDR.forEach((cidr, index) => {
+        cy.getBySel('services-cidr-button').click();
+        cy.getBySel('services-cidr-box' + index).type(cidr);
       })
     }
   })
 
-  cy.clickButton('Next');
 
-  if (extraVariables) {
-    extraVariables.forEach((variable) => {
-      if (variable.type == "string") {
-        cy.typeValue(variable.name, variable.value);
-      }
-      if (variable.type == 'dropdown') {
-        cy.get(`div[title=${variable.name}]`).click();
-        cy.contains(variable.value).click();
+  // Workers
+  if (workers) {
+    // The only reason this section is not wrapped within .accordion-header section like others is because of Class dropdown;
+    // It's select options are somewhere outside the <body> block;
+    // Also, the worker form has data-testid worker-item-box<index> that is unique across <body>
+    workers.forEach((worker, index) => {
+      cy.getBySel(`worker-item-box${index}`).within(() => {
+        cy.typeValue('Name', worker.name);
+        cy.typeValue('Replicas', worker.replicas);
+        cy.get('.vs__selected-options').click();
+      })
+      // The options list is located somewhere outside the <body> block; so it needs to be called outside the worker-item-box<index> block.
+      cy.get("ul.vs__dropdown-menu").contains(worker.class).click();
+
+      // Ensure there are more entries to be made before clicking the `Add` button.
+      const isLast = index === workers.length - 1;
+      if (!isLast) {
+        cy.get('.accordion-header').contains('Workers').parent().siblings('div').within(() => {
+          cy.getBySel('array-list-button').click();
+        })
       }
     })
+
   }
+
+  // Additional Configuration
+  if (additionalConfiguration) {
+    cy.get('.accordion-header').contains('Additional Configuration').parent().siblings('div').within(() => {
+      additionalConfiguration.forEach((variable) => {
+        if (variable.type == "string") {
+          cy.typeValue(variable.name, variable.value);
+        }
+        if (variable.type == 'dropdown') {
+          cy.get(`div[title=${variable.name}]`).click();
+          cy.contains(variable.value).click();
+        }
+        if (variable.type == 'codeMirror') {
+          cy.get(`div[title=${variable.name}]`).within(() => {
+            cy.get('.CodeMirror').then((editor) => {
+              // @ts-expect-error expected error with CodeMirror
+              editor[0].CodeMirror.setValue(variable.value);
+            })
+          })
+        }
+      })
+    })
+  }
+
+  // Labels and Annotations
+  if (labels || annotations) {
+    // This section is collapsed by default and needs to be expanded if either label or annotation or both is provided
+    cy.get('.accordion-header').contains('Labels and Annotations').click();
+  }
+
+  if (labels) {
+    cy.get('.accordion-header').contains('Labels and Annotations').parent().siblings('div').within(() => {
+      cy.get('.labels').within(() => {
+        Object.entries(labels).forEach(([key, value], index) => {
+          cy.clickButton('Add Label');
+          cy.getBySel(`input-kv-item-key-${index}`).type(key);
+          cy.getBySel(`kv-item-value-${index}`).type(value);
+        })
+      })
+    })
+  }
+  if (annotations) {
+    cy.get('.accordion-header').contains('Labels and Annotations').parent().siblings('div').within(() => {
+      cy.get('[aria-label=Annotations]').parent('.key-value').within(() => {
+        Object.entries(annotations).forEach(([key, value], index) => {
+          cy.clickButton('Add Annotation');
+          if (index == 0) {
+            // Workaround: for some reason, the key and value fields do not become visible unless the button is clicked twice
+            cy.clickButton('Add Annotation');
+          }
+          cy.getBySel(`input-kv-item-key-${index}`).type(key);
+          cy.getBySel(`kv-item-value-${index}`).type(value);
+        })
+      })
+    })
+  }
+
   cy.clickButton('Create');
   // Add a check to ensure there are no errors
   cy.wait(3000)
   cy.get('div[id=cru-errors]').should('not.exist');
-});
+})
 
 
 // Command to check CAPI cluster presence under CAPI Menu

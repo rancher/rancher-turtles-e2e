@@ -15,10 +15,10 @@ import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
 import {getClusterName, skipClusterDeletion} from '~/support/utils';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
+import {GeneralClusterInformation, NetworkingInformation, WorkerInformation} from "~/support/structs";
 
 Cypress.config();
-// TODO: Re-add to suite, rancher-turtles-e2e/issues/256
-describe('Create CAPD', { tags: '@skip' }, () => {
+describe('Create CAPD', {tags: '@short'}, () => {
   const timeout = 600000
   const className = 'docker-kubeadm-example'
   const clusterName = getClusterName(className)
@@ -52,12 +52,24 @@ describe('Create CAPD', { tags: '@skip' }, () => {
 
     qase(44,
       it('Create child CAPD cluster from Clusterclass', () => {
-        const machines: Record<string, string> = { 'md-0': 'default-worker' }
-        cy.createCAPICluster(className, clusterName, machines, k8sVersion, '192.168.0.0/16', serviceCIDR);
+        const generalData: GeneralClusterInformation = {
+          namespace: 'capi-classes',
+          clusterName: clusterName,
+          k8sVersion: k8sVersion,
+          autoImportCluster: true,
+        }
 
+        const networking: NetworkingInformation = {
+          serviceCIDR: [serviceCIDR],
+          podCIDR: ['192.168.0.0/16'],
+        }
+        const workers: WorkerInformation[] = [
+          {class: 'default-worker', name: 'md-0', replicas: '1'},
+        ]
+
+        cy.createCAPICluster(className, generalData, networking, workers)
         // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
         cy.checkCAPIClusterActive(clusterName, timeout);
-        cy.clusterAutoImport(clusterName, 'Enable');
         // Check child cluster is auto-imported
         cy.searchCluster(clusterName);
         cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
