@@ -371,7 +371,7 @@ Cypress.Commands.add('addInfraProvider', (providerType, namespace, cloudCredenti
     cy.getBySel('cluster-prov-select-credential').trigger('click');
     cy.contains(cloudCredentials).click();
   }
-  
+
   cy.getBySel('capi-provider-create-save').should('be.visible');
   cy.clickButton('Create');
   cy.contains('Providers').should('be.visible');
@@ -548,7 +548,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
         }
       });
     })
-    cy.contains('Charts: ' + chartName);
+    cy.contains('Charts: ' + chartName).should('be.visible');
   };
   findChart();
 
