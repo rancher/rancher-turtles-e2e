@@ -306,7 +306,7 @@ jobs:
       QASE_RUN_ID: ${{ needs.pre-qase.outputs.qase_run_id }}
       # NOTE: this REPORT var is needed for Cypress!
       QASE_REPORT: 1
-      TURTLES_REPO: furkatgofurov7/rancher-turtles # CHANGEME
+      TURTLES_REPO: rancher/turtles
       CONTROLLER_IMG: localhost:5000/$TURTLES_REPO
     steps:
       - name: Add /usr/local/bin into PATH
@@ -327,7 +327,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ env.TURTLES_REPO }}
-          ref: bump-rancher-2-12 # DELETEME
       - name: Install Go
         if: ${{ inputs.turtles_dev_chart == true }}
         uses: actions/setup-go@v5
