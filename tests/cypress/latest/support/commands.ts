@@ -149,14 +149,16 @@ Cypress.Commands.add('createCAPICluster', (className: string, general, networkin
     }
     if (networking.podCIDR) {
       networking.podCIDR.forEach((cidr, index) => {
-        cy.getBySel('pods-cidr-button').click();
+        cy.clickButton('Add Pod CIDR Block');
+        // cy.getBySel('pods-cidr-button').click();
         cy.getBySel('pods-cidr-box' + index).type(cidr);
       })
     }
 
     if (networking.serviceCIDR) {
       networking.serviceCIDR.forEach((cidr, index) => {
-        cy.getBySel('services-cidr-button').click();
+        cy.clickButton('Add Service VIP CIDR Block');
+        // cy.getBySel('services-cidr-button').click();
         cy.getBySel('services-cidr-box' + index).type(cidr);
       })
     }
@@ -228,6 +230,7 @@ Cypress.Commands.add('createCAPICluster', (className: string, general, networkin
       })
     })
   }
+
   if (annotations) {
     cy.get('.accordion-header').contains('Labels and Annotations').parent().siblings('div').within(() => {
       cy.get('[aria-label=Annotations]').parent('.key-value').within(() => {
