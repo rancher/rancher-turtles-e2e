@@ -16,14 +16,7 @@ import './commands';
 import yaml from 'js-yaml';
 import './capz_support';
 import './cleanup_support';
-import {
-  ClusterClassVariablesInput,
-  ControlPlaneData,
-  GeneralClusterInformation,
-  NetworkingInformation,
-  Question,
-  WorkerInformation
-} from './structs';
+import {Cluster, Question} from './structs';
 // @ts-expect-error ignore the error
 import registerCypressGrep from '@cypress/grep'
 
@@ -52,7 +45,7 @@ declare global {
       createNamespace(namespace: string): Chainable<Element>;
       setNamespace(namespace: string, namespaceID?: string): Chainable<Element>;
 
-      createCAPICluster(className: string, general: GeneralClusterInformation, networking: NetworkingInformation, workers: WorkerInformation[], additionalConfiguration?: ClusterClassVariablesInput[], controlPlane?: ControlPlaneData, labels?: Record<string, string>, annotations?: Record<string, string>): Chainable<Element>;
+      createCAPICluster(cluster: Cluster): Chainable<Element>;
       checkCAPICluster(clustername: string): Chainable<Element>;
       checkCAPIClusterClass(classname: string): Chainable<Element>;
       checkCAPIClusterActive(clustername: string, timeout?: number): Chainable<Element>;

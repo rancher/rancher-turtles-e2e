@@ -15,13 +15,7 @@ import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
 import {getClusterName, skipClusterDeletion} from '~/support/utils';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
-import {
-  ClusterClassVariablesInput,
-  ControlPlaneData,
-  GeneralClusterInformation,
-  NetworkingInformation,
-  WorkerInformation
-} from "~/support/structs";
+import {Cluster} from "~/support/structs";
 
 Cypress.config();
 describe('Create CAPD', {tags: '@short'}, () => {
@@ -30,7 +24,7 @@ describe('Create CAPD', {tags: '@short'}, () => {
   const clusterName = getClusterName(className)
   const k8sVersion = 'v1.31.4'
   const pathNames = ['kubeadm'] // TODO: Add rke2 path (capi-ui-extension/issues/121)
-  const namespace = 'capi-classes' // TODO: Change to capi-clusters (capi-ui-extension/issues/111)
+  const namespace = 'capi-clusters'
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/docker/'
   const clusterClassRepoName = "docker-ui-clusterclass"
@@ -47,6 +41,7 @@ describe('Create CAPD', {tags: '@short'}, () => {
     }
 
     it('Add CAPD ClusterClass fleet repo', () => {
+      // TODO: Change the targetNamespace to capi-classes to test cross-namespace cluster provisioning (capi-ui-extension/issues/111)
       cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath + path, namespace)
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(className);
@@ -54,32 +49,37 @@ describe('Create CAPD', {tags: '@short'}, () => {
 
     qase(44,
       it('Create child CAPD cluster from Clusterclass', () => {
-        const generalData: GeneralClusterInformation = {
-          namespace: 'capi-clusters', clusterName: clusterName, k8sVersion: k8sVersion, autoImportCluster: true,
-        }
-        const networking: NetworkingInformation = {
-          serviceCIDR: [serviceCIDR], podCIDR: ['192.168.0.0/16'], serviceDomain: 'cluster.local'
-        }
-        const controlPlane: ControlPlaneData = {
-          replicas: '3'
-        }
-        const workers: WorkerInformation[] = [
-          {class: 'default-worker', name: 'md-0', replicas: '3'},
-        ]
-        const additionalConfiguration: ClusterClassVariablesInput[] = [
-          {
-            name: "podSecurityStandard",
-            value: `audit: restricted
+
+        const cluster: Cluster = {
+          className: className,
+          metadata: {
+            namespace: namespace, clusterName: clusterName, k8sVersion: k8sVersion, autoImportCluster: true,
+          },
+          clusterNetwork: {
+            serviceCIDR: [serviceCIDR], podCIDR: ['192.168.0.0/16'], serviceDomain: 'cluster.local'
+          },
+          controlPlane: {
+            replicas: '3'
+          },
+          workers: [
+            {class: 'default-worker', name: 'md-0', replicas: '3'},
+          ],
+          variables: [
+            {
+              name: "podSecurityStandard",
+              value: `audit: restricted
 enabled: false
 enforce: baseline
 warn: restricted`,
-            type: "codeMirror"
+              type: "codeMirror"
+            }
+          ],
+          labels: {
+            "cni": "calico",
+            "owner": "valaparthvi"
           }
-        ]
-        const labels: Record<string, string> = {
-          "cni": "calico"
         }
-        cy.createCAPICluster(className, generalData, networking, workers, additionalConfiguration, controlPlane, labels)
+        cy.createCAPICluster(cluster)
 
         // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
         cy.checkCAPIClusterActive(clusterName, timeout);

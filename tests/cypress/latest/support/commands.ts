@@ -103,9 +103,9 @@ Cypress.Commands.add('namespaceReset', () => {
   cy.setNamespace('Only User Namespaces', 'all_user');
 });
 
-Cypress.Commands.add('createCAPICluster', (className: string, general, networking, workers, additionalConfiguration, controlPlane, labels, annotations) => {
+Cypress.Commands.add('createCAPICluster', (cluster) => {
   // Navigate to Classes Menu
-  cy.checkCAPIClusterClass(className);
+  cy.checkCAPIClusterClass(cluster.className);
   cy.getBySel('sortable-table-0-action-button').click();
 
   // Create Cluster from Classes Menu
@@ -114,51 +114,55 @@ Cypress.Commands.add('createCAPICluster', (className: string, general, networkin
 
   // General
   cy.get('.accordion-header').contains('General').parent().siblings('div').within(() => {
-    if (general.namespace) {
-      cy.getBySel('name-ns-description-namespace').type(general.namespace + '{enter}');
+    if (cluster.metadata.namespace) {
+      cy.getBySel('name-ns-description-namespace').type(cluster.metadata.namespace + '{enter}');
     }
-    cy.typeValue('Cluster Name', general.clusterName);
-    cy.typeValue('Kubernetes Version', general.k8sVersion);
-    if (general.autoImportCluster) {
+    cy.typeValue('Cluster Name', cluster.metadata.clusterName);
+    cy.typeValue('Kubernetes Version', cluster.metadata.k8sVersion);
+    if (cluster.metadata.autoImportCluster) {
       cy.get('.checkbox-outer-container').click();
     }
   })
 
   // Control Plane
-  if (controlPlane) {
+  if (cluster.controlPlane) {
     cy.get('.accordion-header').contains('Control Plane').parent().siblings('div').within(() => {
-      if (controlPlane.host) {
-        cy.typeValue('Host', controlPlane.host);
+      // @ts-expect-error Suppressing the error related to optional cluster.controlPlane.host; we only access it if cluster.cluster.controlPlane.host != undefined
+      if (cluster.controlPlane.host) {
+        // @ts-expect-error Suppressing the error related to optional cluster.controlPlane.host; we only access it if cluster.cluster.controlPlane.host != undefined
+        cy.typeValue('Host', cluster.controlPlane.host);
       }
-      if (controlPlane.port) {
-        cy.typeValue('Port', controlPlane.port);
+      // @ts-expect-error Suppressing the error related to optional cluster.controlPlane.port; we only access it if cluster.cluster.controlPlane.port != undefined
+      if (cluster.controlPlane.port) {
+        // @ts-expect-error Suppressing the error related to optional cluster.controlPlane.port; we only access it if cluster.cluster.controlPlane.port != undefined
+        cy.typeValue('Port', cluster.controlPlane.port);
       }
-      if (controlPlane.replicas) {
-        cy.typeValue('Replicas', controlPlane.replicas);
+      // @ts-expect-error Suppressing the error related to optional cluster.controlPlane.replicas; we only access it if cluster.cluster.controlPlane.replicas != undefined
+      if (cluster.controlPlane.replicas) {
+        // @ts-expect-error Suppressing the error related to optional cluster.controlPlane.replicas; we only access it if cluster.cluster.controlPlane.replicas != undefined
+        cy.typeValue('Replicas', cluster.controlPlane.replicas);
       }
     })
   }
 
   // Networking
   cy.get('.accordion-header').contains('Networking').parent().siblings('div').within(() => {
-    if (networking.serviceDomain) {
-      cy.typeValue('Service Domain', networking.serviceDomain);
+    if (cluster.clusterNetwork.serviceDomain) {
+      cy.typeValue('Service Domain', cluster.clusterNetwork.serviceDomain);
     }
-    if (networking.apiServerPort) {
-      cy.typeValue('API Server Port', networking.apiServerPort);
+    if (cluster.clusterNetwork.apiServerPort) {
+      cy.typeValue('API Server Port', cluster.clusterNetwork.apiServerPort);
     }
-    if (networking.podCIDR) {
-      networking.podCIDR.forEach((cidr, index) => {
+    if (cluster.clusterNetwork.podCIDR) {
+      cluster.clusterNetwork.podCIDR.forEach((cidr, index) => {
         cy.clickButton('Add Pod CIDR Block');
-        // cy.getBySel('pods-cidr-button').click();
         cy.getBySel('pods-cidr-box' + index).type(cidr);
       })
     }
 
-    if (networking.serviceCIDR) {
-      networking.serviceCIDR.forEach((cidr, index) => {
+    if (cluster.clusterNetwork.serviceCIDR) {
+      cluster.clusterNetwork.serviceCIDR.forEach((cidr, index) => {
         cy.clickButton('Add Service VIP CIDR Block');
-        // cy.getBySel('services-cidr-button').click();
         cy.getBySel('services-cidr-box' + index).type(cidr);
       })
     }
@@ -166,11 +170,11 @@ Cypress.Commands.add('createCAPICluster', (className: string, general, networkin
 
 
   // Workers
-  if (workers) {
+  if (cluster.workers) {
     // The only reason this section is not wrapped within .accordion-header section like others is because of Class dropdown;
     // It's select options are somewhere outside the <body> block;
     // Also, the worker form has data-testid worker-item-box<index> that is unique across <body>
-    workers.forEach((worker, index) => {
+    cluster.workers.forEach((worker, index) => {
       cy.getBySel(`worker-item-box${index}`).within(() => {
         cy.typeValue('Name', worker.name);
         cy.typeValue('Replicas', worker.replicas);
@@ -180,7 +184,7 @@ Cypress.Commands.add('createCAPICluster', (className: string, general, networkin
       cy.get("ul.vs__dropdown-menu").contains(worker.class).click();
 
       // Ensure there are more entries to be made before clicking the `Add` button.
-      const isLast = index === workers.length - 1;
+      const isLast = index === cluster.workers.length - 1;
       if (!isLast) {
         cy.get('.accordion-header').contains('Workers').parent().siblings('div').within(() => {
           cy.getBySel('array-list-button').click();
@@ -191,9 +195,9 @@ Cypress.Commands.add('createCAPICluster', (className: string, general, networkin
   }
 
   // Additional Configuration
-  if (additionalConfiguration) {
+  if (cluster.variables) {
     cy.get('.accordion-header').contains('Additional Configuration').parent().siblings('div').within(() => {
-      additionalConfiguration.forEach((variable) => {
+      cluster.variables.forEach((variable) => {
         if (variable.type == "string") {
           cy.typeValue(variable.name, variable.value);
         }
@@ -213,16 +217,18 @@ Cypress.Commands.add('createCAPICluster', (className: string, general, networkin
     })
   }
 
+
   // Labels and Annotations
-  if (labels || annotations) {
+  if (cluster.labels || cluster.annotations) {
     // This section is collapsed by default and needs to be expanded if either label or annotation or both is provided
     cy.get('.accordion-header').contains('Labels and Annotations').click();
   }
 
-  if (labels) {
+  if (cluster.labels) {
     cy.get('.accordion-header').contains('Labels and Annotations').parent().siblings('div').within(() => {
       cy.get('.labels').within(() => {
-        Object.entries(labels).forEach(([key, value], index) => {
+        // @ts-expect-error Suppressing the error related to optional cluster.labels; we only access it if cluster.labels != undefined
+        Object.entries(cluster.labels).forEach(([key, value], index) => {
           cy.clickButton('Add Label');
           cy.getBySel(`input-kv-item-key-${index}`).type(key);
           cy.getBySel(`kv-item-value-${index}`).type(value);
@@ -231,10 +237,11 @@ Cypress.Commands.add('createCAPICluster', (className: string, general, networkin
     })
   }
 
-  if (annotations) {
+  if (cluster.annotations) {
     cy.get('.accordion-header').contains('Labels and Annotations').parent().siblings('div').within(() => {
       cy.get('[aria-label=Annotations]').parent('.key-value').within(() => {
-        Object.entries(annotations).forEach(([key, value], index) => {
+        // @ts-expect-error Suppressing the error related to optional cluster.annotations; we only access it if cluster.annotations != undefined
+        Object.entries(cluster.annotations).forEach(([key, value], index) => {
           cy.clickButton('Add Annotation');
           if (index == 0) {
             // Workaround: for some reason, the key and value fields do not become visible unless the button is clicked twice
@@ -247,6 +254,10 @@ Cypress.Commands.add('createCAPICluster', (className: string, general, networkin
     })
   }
 
+  // wait() workaround to ensure all the data is correctly applied;
+  // sometimes the label and annotations added via automation are lost
+  // this is the minimum wait time that works
+  cy.wait(500);
   cy.clickButton('Create');
   // Add a check to ensure there are no errors
   cy.wait(3000)

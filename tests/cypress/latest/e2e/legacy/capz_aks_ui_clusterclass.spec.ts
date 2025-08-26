@@ -1,12 +1,7 @@
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
 import {getClusterName, skipClusterDeletion} from '~/support/utils';
-import {
-  ClusterClassVariablesInput,
-  GeneralClusterInformation,
-  NetworkingInformation,
-  WorkerInformation
-} from '~/support/structs';
+import {Cluster} from '~/support/structs';
 
 Cypress.config();
 describe('Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
@@ -56,26 +51,29 @@ describe('Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
 
   qase(45, it('Create CAPZ AKS from Clusterclass via UI', () => {
     // Create cluster from Clusterclass UI
-      const workers: WorkerInformation[] = [
-        {name: 'mp-system', class: 'default-system', replicas: '1'},
-        {name: 'mp-worker', class: 'default-worker', replicas: '1'}
-      ]
-      const additionalConfiguration: ClusterClassVariablesInput[] = [
-      { name: 'subscriptionID', value: subscriptionID, type: 'string' },
-      { name: 'location', value: location, type: 'dropdown' },
-      { name: 'resourceGroup', value: clusterName, type: 'string' }
-    ]
-      const generalData: GeneralClusterInformation = {
-        namespace: 'capi-classes',
-        clusterName: clusterName,
-        k8sVersion: k8sVersion,
-        autoImportCluster: true,
-      }
-      const networking: NetworkingInformation = {
-        podCIDR: [podCIDR],
-      }
+      const cluster: Cluster = {
+        className: classNamePrefix,
+        metadata: {
+          namespace: 'capi-classes',
+          clusterName: clusterName,
+          k8sVersion: k8sVersion,
+          autoImportCluster: true,
+        },
+        clusterNetwork: {
+          podCIDR: [podCIDR],
+        },
+        workers: [
+          {name: 'mp-system', class: 'default-system', replicas: '1'},
+          {name: 'mp-worker', class: 'default-worker', replicas: '1'}
+        ],
+        variables: [
+          {name: 'subscriptionID', value: subscriptionID, type: 'string'},
+          {name: 'location', value: location, type: 'dropdown'},
+          {name: 'resourceGroup', value: clusterName, type: 'string'}
+        ]
 
-      cy.createCAPICluster(classNamePrefix, generalData, networking, workers, additionalConfiguration);
+      }
+      cy.createCAPICluster(cluster);
     cy.checkCAPIMenu();
     cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
       // Check child cluster is auto-imported
