@@ -14,7 +14,7 @@ limitations under the License.
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
 import {getClusterName, skipClusterDeletion} from '~/support/utils';
-import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
+import {capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 import {Cluster} from "~/support/structs";
 
 Cypress.config();
@@ -109,11 +109,9 @@ warn: restricted`,
         capiClusterDeletion(clusterName, timeout, undefined, true);
       })
 
-      it('Remove the ClusterClass fleet repo and other resources', () => {
+      it('Remove the ClusterClass fleet repo', () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
-        // Cleanup other resources
-        capdResourcesCleanup();
       })
     }
   })
