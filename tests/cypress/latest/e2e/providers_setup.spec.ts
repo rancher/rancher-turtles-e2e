@@ -13,11 +13,12 @@ limitations under the License.
 
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {isRancherManagerVersion} from '~/support/utils';
 
 Cypress.config();
 describe('Enable CAPI Providers', () => {
   const statusReady = ['Ready']
-  const branch = 'main';
+  const branch = isRancherManagerVersion('2.12') ? 'main' : 'release-0.23';
   const turtlesRepoUrl = 'https://github.com/rancher/turtles.git';
 
   // Providers names
