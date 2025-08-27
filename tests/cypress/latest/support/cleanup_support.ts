@@ -34,7 +34,6 @@ export function capiClusterDeletion(clusterName: string, timeout: number, cluste
 }
 
 const capiClustersNS = 'capi-clusters'
-const capiClassesNS = 'capi-classes'
 
 export function capzResourcesCleanup() {
   cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', capiClustersNS)
