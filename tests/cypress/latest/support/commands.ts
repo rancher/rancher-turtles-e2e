@@ -337,7 +337,7 @@ Cypress.Commands.add('addCustomProvider', (name, namespace, providerName, provid
   cy.checkCAPIMenu();
   cy.contains('Providers').click();
   cy.clickButton('Create');
-  cy.getBySel('select-icon-grid-custom').click();
+  cy.contains('Custom').click();
 
   // Select provider type
   cy.contains('Provider type').click();
@@ -357,22 +357,24 @@ Cypress.Commands.add('addCustomProvider', (name, namespace, providerName, provid
 });
 
 // Command to add CAPI Infrastructure provider
-Cypress.Commands.add('addInfraProvider', (providerType, namespace, cloudCredentials) => {
+Cypress.Commands.add('addInfraProvider', (providerType, name, namespace, cloudCredentials) => {
   // Navigate to providers Menu
   cy.checkCAPIMenu();
   cy.contains('Providers').click();
   cy.clickButton('Create');
-  const selector = "'select-icon-grid-" + providerType + "'"
+  const selector = 'select-icon-grid-' + providerType
   cy.getBySel(selector).click();
+  cy.contains('Provider: Create ' + providerType, { matchCase: false }).should('be.visible');
+
   // TODO: Add variables support after capi-ui-extension/issues/49
   cy.getBySel('name-ns-description-namespace').type(namespace + '{enter}');
+  cy.typeValue('Name', name);
 
-  if (providerType != 'Docker' && providerType != 'Azure') {
+  // Select Cloud credentials name
+  if (providerType != 'Docker') {
     cy.getBySel('cluster-prov-select-credential').trigger('click');
     cy.contains(cloudCredentials).click();
   }
-
-  cy.getBySel('capi-provider-create-save').should('be.visible');
   cy.clickButton('Create');
   cy.contains('Providers').should('be.visible');
 });
@@ -522,36 +524,19 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
     cy.contains('Featured Charts').should('be.visible'); // TODO check if this cannot be unified with 2.12
   }
 
-  const findChart = (retries = 10) => {
-
-    // Chart filter input is not normal filter in 2.12 :(
-    if (isRancherManagerVersion('2.12')) {
-      cy.getBySel('charts-filter-input').clear().type(chartName);
-    } else {
-      cy.typeInFilter(chartName);
-    }
-
-    const chartSelector = isRancherManagerVersion('2.12') ? 'app-chart-cards-container' : 'chart-selection-grid';
-    cy.getBySel(chartSelector).within(() => {
-      cy.contains(chartName, { timeout: 10000 }).then($el => {
-        if ($el.length) {
-          // Chart found, proceed with click
-          cy.wait(500);
-          cy.wrap($el).click();
-        } else if (retries > 0) {
-          // Chart not found, refresh and try again
-          cy.get('.icon.icon-lg.icon-refresh').click();
-          cy.get('.icon.icon-lg.icon-checkmark', { timeout: 60000 }).should('be.visible');
-          findChart(retries - 1);
-        } else {
-          // Max attempts reached, fail the test
-          throw new Error(`Chart ${chartName} not found`);
-        }
-      });
-    })
-    cy.contains('Charts: ' + chartName).should('be.visible');
-  };
-  findChart();
+  // Chart filter input is not normal filter in 2.12 :(
+  if (isRancherManagerVersion('2.12')) {
+    cy.getBySel('charts-filter-input').clear().type(chartName);
+  } else {
+    cy.typeInFilter(chartName);
+  }
+  const chartSelector = isRancherManagerVersion('2.12') ? 'app-chart-cards-container' : 'chart-selection-grid';
+  cy.getBySel(chartSelector).within(() => {
+    cy.contains(chartName, { timeout: 10000 }).then($el => {
+      cy.wrap($el).should('be.visible').click();
+    });
+  })
+  cy.contains('Charts: ' + chartName);
 
   if (version && version != "") {
     cy.contains(version).click();
@@ -735,33 +720,15 @@ Cypress.Commands.add('goToHome', () => {
 // Fleet commands
 // Command add Fleet Git Repository
 Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, paths, targetNamespace, workspace) => {
-  function selectWorkspace(workspace?: string) {
-    // Select workspace
-    cy.getBySel('workspace-switcher').click();
-    if (!workspace) {
-      workspace = 'fleet-local';
-    }
-    cy.contains(workspace).should('be.visible').click();
+  cy.accesMenuSelection(['Continuous Delivery', 'Git Repos']);
+  cy.getBySel('masthead-create').should('be.visible');
+  cy.getBySel('workspace-switcher').click();
+  if (!workspace) {
+    workspace = 'fleet-local';
   }
-
-  if (isRancherManagerVersion('2.12')) {
-    cy.accesMenuSelection(['Continuous Delivery', 'App Bundles']);
-    // replacement for cy.getBySel('masthead-create').should('be.visible');
-    cy.contains('Create App Bundle').should('be.visible');
-    selectWorkspace(workspace);
-    cy.clickButton('Create App Bundle');
-    // Click on gitrepo container
-    cy.contains('Git Repos').should('be.visible').click();
-    cy.contains('App Bundle:').should('be.visible');
-
-  } else {
-    cy.accesMenuSelection(['Continuous Delivery', 'Git Repos']);
-    cy.getBySel('masthead-create').should('be.visible');
-    selectWorkspace(workspace);
-    cy.clickButton('Add Repository');
-    cy.contains('Git Repo:').should('be.visible');
-  }
-
+  cy.contains(workspace).should('be.visible').click();
+  cy.clickButton('Add Repository');
+  cy.contains('Git Repo:').should('be.visible');
   cy.typeValue('Name', repoName);
   cy.clickButton("Next");
   cy.get('button.btn').contains('Previous').should('be.visible');
@@ -771,7 +738,9 @@ Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, paths, targe
   const pathsArray = Array.isArray(paths) ? paths : [paths];
   pathsArray.forEach((path, index) => {
     cy.clickButton('Add Path');
-    cy.get(`[data-testid="array-list-box${ index }"] input[placeholder="e.g. /directory/in/your/repo"]`).type(path);
+    cy.getBySel('gitRepo-paths').within(() => {
+      cy.getBySel('input-' + index).type(path);
+    })
   })
   cy.clickButton('Next');
   cy.get('button.btn').contains('Previous').should('be.visible');
@@ -781,7 +750,7 @@ Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, paths, targe
   }
   cy.clickButton("Next");
   cy.get('button.btn').contains('Previous').should('be.visible');
-  cy.clickButton('Create'); // TODO Check there is no error after clicking
+  cy.clickButton('Create');
 
   // Navigate to fleet repo
   cy.checkFleetGitRepo(repoName, workspace); // Wait until the repo details are loaded
@@ -810,9 +779,7 @@ Cypress.Commands.add('forceUpdateFleetGitRepo', (repoName, workspace) => {
 Cypress.Commands.add('checkFleetGitRepo', (repoName, workspace) => {
   // Go to 'Continuous Delivery' > 'Git Repos'
   cy.burgerMenuOperate('open');
-  // Here I would need to add another string 'Resources' in the array bellow if version is 2.12
-  const gitRepoMenuLocation = isRancherManagerVersion('2.12') ? ['Continuous Delivery', 'Resources', 'Git Repos'] : ['Continuous Delivery', 'Git Repos'];
-  cy.accesMenuSelection(gitRepoMenuLocation);
+  cy.accesMenuSelection(['Continuous Delivery', 'Git Repos']);
   cy.getBySel('masthead-create').should('be.visible');
   // Change the workspace using the dropdown on the top bar
   cy.getBySel('workspace-switcher').click();
@@ -825,7 +792,7 @@ Cypress.Commands.add('checkFleetGitRepo', (repoName, workspace) => {
   cy.url().should("include", "fleet/fleet.cattle.io.gitrepo/" + workspace + "/" + repoName)
   // Ensure there are no errors after waiting for a few seconds
   cy.wait(5000);
-  cy.get('.badge-state').should("not.contain", "Err Applied");
+  cy.get('.badge-state.masthead-state').should("not.contain", "Err Applied");
 
 })
 
