@@ -95,14 +95,24 @@ describe('Enable CAPI Providers', () => {
             cy.addCustomProvider(providerName, 'capi-kubeadm-control-plane-system', kubeadmProvider, providerType);
             const readyStatus = statusReady.concat(providerName, 'controlPlane', kubeadmProvider, kubeadmProviderVersion)
             const readyStatusRegex = new RegExp(readyStatus.join('.*'), 's')
-            cy.contains(readyStatusRegex)
+            // Ugly workaround for Unavailable state of installed provider
+            if (isRancherManagerVersion('2.12')) {
+              cy.wait(5000);
+              cy.reload();
+            }
+            cy.contains(readyStatusRegex).should('be.visible');
           } else {
             // https://github.com/kubernetes-sigs/cluster-api/releases/v1.9.5/bootstrap-components.yaml
             const providerName = kubeadmProvider + '-' + providerType
             cy.addCustomProvider(providerName, 'capi-kubeadm-bootstrap-system', kubeadmProvider, providerType);
             const readyStatus = statusReady.concat(providerName, 'bootstrap', kubeadmProvider, kubeadmProviderVersion)
             const readyStatusRegex = new RegExp(readyStatus.join('.*'), 's')
-            cy.contains(readyStatusRegex)
+            // Ugly workaround for Unavailable state of installed provider
+            if (isRancherManagerVersion('2.12')) {
+              cy.wait(5000);
+              cy.reload();
+            }
+            cy.contains(readyStatusRegex).should('be.visible');
           }
         })
       );
@@ -114,9 +124,13 @@ describe('Enable CAPI Providers', () => {
         const namespace = 'capd-system'
         cy.addInfraProvider('Docker', namespace);
         const readyStatus = statusReady.concat(dockerProvider, 'infrastructure', dockerProvider, kubeadmProviderVersion)
-        // TODO: add actual vs expected
         const readyStatusRegex = new RegExp(readyStatus.join('.*'), 's')
-        cy.contains(readyStatusRegex)
+        // Ugly workaround for Unavailable state of installed provider
+        if (isRancherManagerVersion('2.12')) {
+          cy.wait(5000);
+          cy.reload();
+        }
+        cy.contains(readyStatusRegex).should('be.visible');
         cy.verifyCAPIProviderImage(dockerProvider, namespace);
       })
     );
@@ -174,7 +188,12 @@ describe('Enable CAPI Providers', () => {
         cy.addInfraProvider('vSphere', vsphereProviderNamespace, vsphereProvider);
         const readyStatus = statusReady.concat(vsphereProvider, 'infrastructure', vsphereProvider, vsphereProviderVersion)
         const readyStatusRegex = new RegExp(readyStatus.join('.*'), 's')
-        cy.contains(readyStatusRegex);
+        // Ugly workaround for Unavailable state of installed provider
+        if (isRancherManagerVersion('2.12')) {
+          cy.wait(5000);
+          cy.reload();
+        }
+        cy.contains(readyStatusRegex).should('be.visible');
         cy.verifyCAPIProviderImage(vsphereProvider, vsphereProviderNamespace);
       })
     );
@@ -197,7 +216,12 @@ describe('Enable CAPI Providers', () => {
         cy.addInfraProvider('Amazon', namespace, amazonProvider);
         const readyStatus = statusReady.concat(amazonProvider, providerType, amazonProvider, amazonProviderVersion)
         const readyStatusRegex = new RegExp(readyStatus.join('.*'), 's')
-        cy.contains(readyStatusRegex)
+        // Ugly workaround for Unavailable state of installed provider
+        if (isRancherManagerVersion('2.12')) {
+          cy.wait(5000);
+          cy.reload();
+        }
+        cy.contains(readyStatusRegex).should('be.visible');
         cy.verifyCAPIProviderImage(amazonProvider, namespace);
       })
     );
@@ -211,7 +235,12 @@ describe('Enable CAPI Providers', () => {
         cy.addInfraProvider('Google Cloud Platform', namespace, googleProvider);
         const readyStatus = statusReady.concat(googleProvider, providerType, googleProvider, googleProviderVersion)
         const readyStatusRegex = new RegExp(readyStatus.join('.*'), 's')
-        cy.contains(readyStatusRegex, { timeout: 120000 });
+        // Ugly workaround for Unavailable state of installed provider
+        if (isRancherManagerVersion('2.12')) {
+          cy.wait(5000);
+          cy.reload();
+        }
+        cy.contains(readyStatusRegex, { timeout: 120000 }).should('be.visible');
         cy.verifyCAPIProviderImage(googleProvider, namespace);
       })
     );
@@ -222,7 +251,12 @@ describe('Enable CAPI Providers', () => {
       cy.addInfraProvider('Azure', namespace, azureProvider);
       const readyStatus = statusReady.concat(azureProvider, providerType, azureProvider, azureProviderVersion)
       const readyStatusRegex = new RegExp(readyStatus.join('.*'), 's')
-      cy.contains(readyStatusRegex, { timeout: 180000 });
+      // Ugly workaround for Unavailable state of installed provider
+      if (isRancherManagerVersion('2.12')) {
+        cy.wait(5000);
+        cy.reload();
+      }
+      cy.contains(readyStatusRegex, { timeout: 180000 }).should('be.visible');
       cy.verifyCAPIProviderImage(azureProvider, namespace);
     })
     );
