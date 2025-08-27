@@ -536,6 +536,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
       cy.contains(chartName, { timeout: 10000 }).then($el => {
         if ($el.length) {
           // Chart found, proceed with click
+          cy.wait(500);
           cy.wrap($el).click();
         } else if (retries > 0) {
           // Chart not found, refresh and try again
