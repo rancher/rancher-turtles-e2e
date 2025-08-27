@@ -337,7 +337,7 @@ Cypress.Commands.add('addCustomProvider', (name, namespace, providerName, provid
   cy.checkCAPIMenu();
   cy.contains('Providers').click();
   cy.clickButton('Create');
-  cy.contains('Custom').click();
+  cy.getBySel('select-icon-grid-custom').click();
 
   // Select provider type
   cy.contains('Provider type').click();
