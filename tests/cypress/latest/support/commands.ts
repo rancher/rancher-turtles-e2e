@@ -533,6 +533,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
   const chartSelector = isRancherManagerVersion('2.12') ? 'app-chart-cards-container' : 'chart-selection-grid';
   cy.getBySel(chartSelector).within(() => {
     cy.contains(chartName, { timeout: 10000 }).then($el => {
+      cy.wait(500);
       cy.wrap($el).should('be.visible').click();
     });
   })
