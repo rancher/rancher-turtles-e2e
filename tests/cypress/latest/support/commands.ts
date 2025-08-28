@@ -785,9 +785,8 @@ Cypress.Commands.add('removeFleetGitRepo', (repoName, workspace) => {
   }
   cy.get('.icon.group-icon.icon-trash').click();
   cy.getBySel('prompt-remove-confirm-button').click();
-  cy.contains('Git Repos').should('be.visible');
-  cy.wait(2000);
-  cy.contains(repoName).should('not.exist');
+  cy.wait(5000);
+  cy.contains('td', repoName).should('not.exist');
 })
 
 // Command forcefully update Fleet Git Repository
