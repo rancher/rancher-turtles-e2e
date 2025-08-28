@@ -777,7 +777,11 @@ Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, paths, targe
 Cypress.Commands.add('removeFleetGitRepo', (repoName, workspace) => {
   cy.checkFleetGitRepo(repoName, workspace);
   // Click on the actions menu and select 'Delete' from the menu
-  cy.get('.actions .btn.actions').click();
+  if (isRancherManagerVersion('2.12')) {
+    cy.getBySel('masthead-action-menu').should('be.visible').click();
+  } else {
+    cy.get('.actions .btn.actions').click();
+  }
   cy.get('.icon.group-icon.icon-trash').click();
   cypressLib.confirmDelete();
   cy.contains(repoName).should('not.exist');
@@ -787,7 +791,11 @@ Cypress.Commands.add('removeFleetGitRepo', (repoName, workspace) => {
 Cypress.Commands.add('forceUpdateFleetGitRepo', (repoName, workspace) => {
   cy.checkFleetGitRepo(repoName, workspace);
   // Click on the actions menu and select 'Force Update' from the menu
-  cy.get('.actions .btn.actions').click();
+  if (isRancherManagerVersion('2.12')) {
+    cy.getBySel('masthead-action-menu').should('be.visible').click();
+  } else {
+    cy.get('.actions .btn.actions').click();
+  }
   cy.get('.icon.group-icon.icon-refresh').click();
   cy.clickButton('Update')
 })
