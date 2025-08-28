@@ -1023,4 +1023,5 @@ Cypress.Commands.add('verifyCAPIProviderImage', (providerName, providerNamespace
   cy.accesMenuSelection(['Workloads', 'Deployments']);
   cy.setNamespace(providerNamespace);
   cy.contains(providerImageRegistry).should('be.visible');
+  cy.namespaceReset();
 });
