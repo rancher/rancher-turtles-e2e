@@ -393,6 +393,7 @@ Cypress.Commands.add('removeCAPIResource', (resourcetype, resourceName, timeout)
   cy.getBySel('sortable-table_check_select_all').click();
   cy.getBySel('sortable-table-promptRemove').click();
   cy.getBySel('prompt-remove-confirm-button').click();
+  cy.wait(2000);
   cy.typeInFilter(resourceName);
   if (timeout != undefined) {
     cy.getBySel('sortable-cell-0-1', { timeout: timeout }).should('not.exist');
@@ -783,7 +784,9 @@ Cypress.Commands.add('removeFleetGitRepo', (repoName, workspace) => {
     cy.get('.actions .btn.actions').click();
   }
   cy.get('.icon.group-icon.icon-trash').click();
-  cypressLib.confirmDelete();
+  cy.getBySel('prompt-remove-confirm-button').click();
+  cy.contains('Git Repos').should('be.visible');
+  cy.wait(2000);
   cy.contains(repoName).should('not.exist');
 })
 
@@ -804,7 +807,6 @@ Cypress.Commands.add('forceUpdateFleetGitRepo', (repoName, workspace) => {
 Cypress.Commands.add('checkFleetGitRepo', (repoName, workspace) => {
   // Go to 'Continuous Delivery' > 'Git Repos'
   cy.burgerMenuOperate('open');
-  // Here I would need to add another string 'Resources' in the array bellow if version is 2.12
   const gitRepoMenuLocation = isRancherManagerVersion('2.12') ? ['Continuous Delivery', 'Resources', 'Git Repos'] : ['Continuous Delivery', 'Git Repos'];
   cy.accesMenuSelection(gitRepoMenuLocation);
   cy.getBySel('masthead-create').should('be.visible');
