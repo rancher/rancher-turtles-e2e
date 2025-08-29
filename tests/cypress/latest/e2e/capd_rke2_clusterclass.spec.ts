@@ -15,7 +15,7 @@ import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
 import {getClusterName, skipClusterDeletion} from '~/support/utils';
 import {Question} from '~/support/structs';
-import {capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
+import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 
 
 Cypress.config();
@@ -152,7 +152,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
         // Cleanup other resources
-        cy.deleteKubernetesResource('local', ['Storage', 'Secrets'], 'capd-docker-token', capiClustersNS)
+        capdResourcesCleanup();
       })
     );
   }

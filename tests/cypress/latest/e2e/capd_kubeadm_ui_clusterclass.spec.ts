@@ -75,8 +75,7 @@ warn: restricted`,
             }
           ],
           labels: {
-            "cni": "calico",
-            "owner": "valaparthvi"
+            "cni": "calico"
           }
         }
         cy.createCAPICluster(cluster)

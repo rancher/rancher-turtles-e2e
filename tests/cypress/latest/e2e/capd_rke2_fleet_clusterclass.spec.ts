@@ -14,7 +14,7 @@ limitations under the License.
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import {skipClusterDeletion} from '~/support/utils';
-import {capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
+import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
@@ -111,7 +111,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
       // Remove the clusterclass repo
       cy.removeFleetGitRepo(clusterClassRepoName);
       // Cleanup other resources
-      cy.deleteKubernetesResource('local', ['Storage', 'Secrets'], 'capd-docker-token', capiClustersNS)
+      capdResourcesCleanup();
     })
   }
 });

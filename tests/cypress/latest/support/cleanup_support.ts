@@ -54,3 +54,7 @@ export function capvResourcesCleanup(provider: 'kubeadm' | 'rke2') {
     cy.deleteKubernetesResource('local', ['Storage', 'Secrets'], "capv-docker-token", capiClustersNS)
   }
 }
+
+export function capdResourcesCleanup() {
+  cy.deleteKubernetesResource('local', ['Storage', 'Secrets'], 'capd-docker-token', capiClustersNS)
+}

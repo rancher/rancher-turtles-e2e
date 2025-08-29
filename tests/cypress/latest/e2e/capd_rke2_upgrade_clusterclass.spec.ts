@@ -14,7 +14,7 @@ limitations under the License.
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
 import {getClusterName} from '~/support/utils';
-import {capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
+import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 
 Cypress.config();
 describe('Import CAPD RKE2 Class-Cluster', { tags: '@upgrade' }, () => {
@@ -24,6 +24,9 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@upgrade' }, () => {
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/docker/rke2'
   const clusterClassRepoName = "docker-rke2-clusterclass"
+  const dockerAuthUsernameBase64 = btoa(Cypress.env("docker_auth_username"))
+  const dockerAuthPasswordBase64 = btoa(Cypress.env("docker_auth_password"))
+  const capiClustersNS = 'capi-clusters'
 
   beforeEach(() => {
     cy.login();
@@ -33,6 +36,15 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@upgrade' }, () => {
   it('Setup the namespace for importing', () => {
     cy.namespaceAutoImport('Disable');
   })
+
+  it('Create Docker Auth Secret', () => {
+    // Prevention for Docker.io rate limiting
+    cy.readFile('./fixtures/docker/capd-auth-token-secret.yaml').then((data) => {
+      data = data.replace(/replace_cluster_docker_auth_username/, dockerAuthUsernameBase64)
+      data = data.replace(/replace_cluster_docker_auth_password/, dockerAuthPasswordBase64)
+      cy.importYAML(data, capiClustersNS)
+    })
+  });
 
   qase(91,
     it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
@@ -46,7 +58,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@upgrade' }, () => {
   it('Import CAPD RKE2 class-clusters using YAML', () => {
     cy.readFile('./fixtures/docker/capd-rke2-class-cluster.yaml').then((data) => {
       data = data.replace(/replace_cluster_name/g, clusterName)
-      cy.importYAML(data, 'capi-clusters')
+      cy.importYAML(data, capiClustersNS)
     });
 
     // Check CAPI cluster using its name
@@ -73,7 +85,8 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@upgrade' }, () => {
 
   it('Upgrade turtles chart and check cluster status', () => {
     cy.contains('local').click();
-    cy.checkChart('Upgrade', 'Rancher Turtles', 'rancher-turtles-system', ''); // This upgrades Turtles chart to latest dev version
+    // This upgrades Turtles chart from v0.21.0 to latest dev version
+    cy.checkChart('Upgrade', 'Rancher Turtles', 'rancher-turtles-system', '');
     
     // Check CAPI operator deployment to be removed
     cy.exploreCluster('local');
@@ -104,7 +117,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@upgrade' }, () => {
     cy.readFile('./fixtures/docker/capd-rke2-class-cluster.yaml').then((data) => {
       data = data.replace(/replace_cluster_name/g, clusterName)
       data = data.replace(/replicas: 2/g, 'replicas: 3')
-      cy.importYAML(data, 'capi-clusters')
+      cy.importYAML(data, capiClustersNS)
     });
 
     // Check CAPI cluster status
@@ -127,5 +140,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@upgrade' }, () => {
   it('Delete the ClusterClass fleet repo', () => {
     // Remove the clusterclass repo
     cy.removeFleetGitRepo(clusterClassRepoName);
+    // Cleanup other resources
+    capdResourcesCleanup();
   })
 });

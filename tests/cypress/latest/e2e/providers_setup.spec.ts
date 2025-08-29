@@ -60,6 +60,7 @@ describe('Enable CAPI Providers', () => {
   const googleProviderVersion = providerVersions[buildType].google
   const azureProviderVersion = providerVersions[buildType].azure
 
+  const kubeadmBaseURL = 'https://github.com/kubernetes-sigs/cluster-api/releases/'
   const kubeadmProviderTypes = ['bootstrap', 'control plane']
   const capiNamespaces = ['capi-clusters', 'capi-classes']
   const localProviderNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system', 'capd-system']
@@ -84,20 +85,23 @@ describe('Enable CAPI Providers', () => {
       })
     })
 
+    // TODO: Use wizard to create providers, capi-ui-extension/issues/177
     kubeadmProviderTypes.forEach(providerType => {
       qase(27,
         it('Create Kubeadm Providers - ' + providerType, () => {
           // Create CAPI Kubeadm providers
           if (providerType == 'control plane') {
             // https://github.com/kubernetes-sigs/cluster-api/releases/v1.9.5/control-plane-components.yaml
+            const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + 'control-plane' + '-components.yaml'
             const providerName = kubeadmProvider + '-' + 'control-plane'
-            cy.addCustomProvider(providerName, 'capi-kubeadm-control-plane-system', kubeadmProvider, providerType);
+            cy.addCustomProvider(providerName, 'capi-kubeadm-control-plane-system', kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
             const readyStatus = statusReady.concat(providerName, 'controlPlane', kubeadmProvider, kubeadmProviderVersion)
             cy.contains(readyStatus);
           } else {
             // https://github.com/kubernetes-sigs/cluster-api/releases/v1.9.5/bootstrap-components.yaml
+            const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + providerType + '-components.yaml'
             const providerName = kubeadmProvider + '-' + providerType
-            cy.addCustomProvider(providerName, 'capi-kubeadm-bootstrap-system', kubeadmProvider, providerType);
+            cy.addCustomProvider(providerName, 'capi-kubeadm-bootstrap-system', kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
             const readyStatus = statusReady.concat(providerName, 'bootstrap', kubeadmProvider, kubeadmProviderVersion)
             cy.contains(readyStatus);
           }
