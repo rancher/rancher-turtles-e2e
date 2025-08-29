@@ -1,5 +1,5 @@
 import '~/support/commands';
-import {getClusterName, skipClusterDeletion} from '~/support/utils';
+import {getClusterName, skipClusterDeletion, isRancherManagerVersion} from '~/support/utils';
 import {capiClusterDeletion, capzResourcesCleanup, importedRancherClusterDeletion} from "~/support/cleanup_support";
 
 Cypress.config();
@@ -34,10 +34,11 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
     // Go to CAPI > ClusterClass to ensure the clusterclass is created
     cy.checkCAPIClusterClass(classNamePrefix);
 
-    // Navigate to `local` cluster, More Resources > Fleet > Helm Apps and ensure the charts are active.
+    // Navigate to `local` cluster, More Resources > Fleet > Helm [O]|[Ap]ps and ensure the charts are active.
     cy.burgerMenuOperate('open');
     cy.contains('local').click();
-    cy.accesMenuSelection(['More Resources', 'Fleet', 'HelmApps']);
+    const helmPsMenuLocation = isRancherManagerVersion('2.12') ? ['More Resources', 'Fleet', 'Helm Ops'] : ['More Resources', 'Fleet', 'HelmApps'];
+    cy.accesMenuSelection(helmPsMenuLocation);
     ["azure-ccm", "calico-cni"].forEach((app) => {
       cy.typeInFilter(app);
       cy.getBySel('sortable-cell-0-1').should('exist');

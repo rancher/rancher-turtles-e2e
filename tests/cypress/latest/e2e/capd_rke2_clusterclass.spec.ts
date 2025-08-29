@@ -34,8 +34,8 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
   const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/docker/rke2'
   const clusterClassRepoName = "docker-rke2-clusterclass"
-  const dockerAuthUsernameBase64 = btoa(Cypress.env("docker_auth_username"))
-  const dockerAuthPasswordBase64 = btoa(Cypress.env("docker_auth_password"))
+  const dockerAuthUsernameBase64 = btoa(Cypress.env("docker_auth_username") || "")
+  const dockerAuthPasswordBase64 = btoa(Cypress.env("docker_auth_password") || "")
   const capiClustersNS = 'capi-clusters'
 
   beforeEach(() => {
@@ -49,11 +49,13 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
 
   it('Create Docker Auth Secret', () => {
     // Prevention for Docker.io rate limiting
-    cy.readFile('./fixtures/docker/capd-auth-token-secret.yaml').then((data) => {
-      data = data.replace(/replace_cluster_docker_auth_username/, dockerAuthUsernameBase64)
-      data = data.replace(/replace_cluster_docker_auth_password/, dockerAuthPasswordBase64)
-      cy.importYAML(data, capiClustersNS)
-    })
+    if (dockerAuthUsernameBase64) {
+      cy.readFile('./fixtures/docker/capd-auth-token-secret.yaml').then((data) => {
+        data = data.replace(/replace_cluster_docker_auth_username/, dockerAuthUsernameBase64)
+        data = data.replace(/replace_cluster_docker_auth_password/, dockerAuthPasswordBase64)
+        cy.importYAML(data, capiClustersNS)
+      });
+    }
   });
 
   qase(91,
