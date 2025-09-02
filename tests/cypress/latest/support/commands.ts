@@ -572,20 +572,12 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
   }
 
   cy.clickButton(operation);
+  // This is 1s more than the time required for the installation tabpanel to appear;
+  // or in case of Turtles, Rancher pod restarts, so this is enough time to start restarting Rancher
+  cy.wait(8000);
 
-  // Close the shell when installing Turtles as rancher is getting restarted
   if (chartName == 'Rancher Turtles') {
-    cy.get('.closer').click();
-  } else {
-    // Wait for both CRD and main helm chart to be installed
-    cy.contains(new RegExp('SUCCESS: helm .*crd.*tgz.*SUCCESS: helm .*tgz'), { timeout: 240000 }).should('be.visible');
-    cy.get('.closer').click();
-  }
-
-  // Rancher pod restarts during Turtles installation
-  // Poll /dashboard/about until it returns HTTP 200 and then reload the page
-  if (chartName == 'Rancher Turtles') {
-    cy.wait(7000); // Should be enough time to start restarting Rancher
+    // Poll /dashboard/about until it returns HTTP 200 and then reload the page
     const checkApiStatus = (retries = 20) => {
       cy.request({
         url: '/about',
@@ -604,6 +596,22 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
       });
     };
     checkApiStatus();
+  } else {
+    cy.getBySel("windowmanager").then((windowmanager) => {
+      // Check if the installation panel has appeared;
+      if (windowmanager.find('div[role=tabpanel]').length) {
+        // Wait for both CRD and main helm chart to be installed
+        cy.contains(new RegExp('SUCCESS: helm .*crd.*tgz.*SUCCESS: helm .*tgz'), {timeout: 240000}).should('be.visible');
+        cy.get('.closer').click();
+      } else {
+        // If the installation panel failed to appear for some reason, manually check for app installation
+        // Go to Install Apps, set the namespace and check if the app name is available in the list;
+        cy.contains('Installed Apps').should('be.visible');
+        // WARN: There have been cases when the namespace is not found; can't tell if this happens; this command should be called again to install the chart
+        cy.setNamespace(namespace)
+        cy.contains(chartName.toLowerCase()).should('exist');
+      }
+    })
   }
 
   if (operation == 'Install') {

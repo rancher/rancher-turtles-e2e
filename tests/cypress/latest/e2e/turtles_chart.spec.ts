@@ -13,7 +13,7 @@ limitations under the License.
 */
 
 import '~/support/commands';
-import { qase } from 'cypress-qase-reporter/dist/mocha';
+import {qase} from 'cypress-qase-reporter/dist/mocha';
 
 Cypress.config();
 describe('Install Turtles Chart - @install', { tags: '@install' }, () => {
@@ -49,7 +49,7 @@ describe('Install Turtles Chart - @install', { tags: '@install' }, () => {
   })
 
   qase([2, 11],
-    it('Install Turtles chart', { retries: 1 }, () => {
+    it('Install Turtles chart', {retries: 1}, () => {
       cy.contains('local').click();
 
       let turtlesVersion = Cypress.env('turtles_chart_version')
@@ -60,7 +60,7 @@ describe('Install Turtles Chart - @install', { tags: '@install' }, () => {
         turtlesVersion = ""
       }
 
-      if ((Cypress.env('grepTags')).includes('@upgrade')) {
+      if (Cypress.env('grepTags') && (Cypress.env('grepTags')).includes('@upgrade')) {
         // Required to validate turtles/issues/1395
         turtlesVersion = '0.21.0'
       }
