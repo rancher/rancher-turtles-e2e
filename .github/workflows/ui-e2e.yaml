@@ -30,7 +30,7 @@ on:
         description: Version of the capi-ui-extension to test (eg. 0.8.2)
         type: string
       grep_test_by_tag:
-        description: Test tags. For multiple selection separate with spaces (Available options - @install [@short @full|@vsphere]). Keep always @install
+        description: Test tags. For multiple selection separate with spaces (Available options - @install [@upgrade @short @full | @vsphere]). Keep always @install
         required: true
         type: string
         default: '@install @short'
@@ -83,8 +83,8 @@ jobs:
       docker_auth_password: ${{ secrets.DOCKER_AUTH_PASSWORD }}
       docker_registry_config: ${{ secrets.DOCKER_REGISTRY_CONFIG }}
     with:
-      test_description: "CI/Manual - UI - Deployment test with Standard K3s"
-      cluster_name: cluster-k3s
+      test_description: "UI - e2e tests with Standard K3s"
+      cluster_name: rancher-k3s-cluster
       destroy_runner: ${{ github.event_name == 'schedule' && true || inputs.destroy_runner }}
       capi_ui_version: ${{ inputs.capi_ui_version }}
       rancher_version: ${{ inputs.rancher_version || 'head/2.11' }}
