@@ -574,7 +574,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
   cy.clickButton(operation);
   // This is 1s more than the time required for the installation tabpanel to appear;
   // or in case of Turtles, Rancher pod restarts, so this is enough time to start restarting Rancher
-  cy.wait(8000);
+  cy.wait(10000);
 
   if (chartName == 'Rancher Turtles') {
     // Poll /dashboard/about until it returns HTTP 200 and then reload the page
@@ -605,11 +605,12 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
         cy.get('.closer').click();
       } else {
         // If the installation panel failed to appear for some reason, manually check for app installation
-        // Go to Install Apps, set the namespace and check if the app name is available in the list;
+        // Go to Installed Apps, set the namespace and check if the app name is available in the list;
         cy.contains('Installed Apps').should('be.visible');
         // WARN: There have been cases when the namespace is not found; can't tell if this happens; this command should be called again to install the chart
         cy.setNamespace(namespace)
-        cy.contains(chartName.toLowerCase()).should('exist');
+        cy.typeInFilter(chartName);
+  		cy.getBySel('sortable-cell-0-1').should('exist');
       }
     })
   }
