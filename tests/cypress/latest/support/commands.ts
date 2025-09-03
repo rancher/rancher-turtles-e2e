@@ -601,16 +601,16 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
       // Check if the installation panel has appeared;
       if (windowmanager.find('div[role=tabpanel]').length) {
         // Wait for both CRD and main helm chart to be installed
-        cy.contains(new RegExp('SUCCESS: helm .*crd.*tgz.*SUCCESS: helm .*tgz'), {timeout: 240000}).should('be.visible');
+        cy.contains(new RegExp('SUCCESS: helm .*crd.*tgz.*SUCCESS: helm .*tgz'), {timeout: 140000}).should('be.visible');
         cy.get('.closer').click();
       } else {
         // If the installation panel failed to appear for some reason, manually check for app installation
-        // Go to Installed Apps, set the namespace and check if the app name is available in the list;
+        // Installed Apps should have loaded by now, set the namespace and check if the app name is available in the list;
         cy.contains('Installed Apps').should('be.visible');
         // WARN: There have been cases when the namespace is not found; can't tell if this happens; this command should be called again to install the chart
         cy.setNamespace(namespace)
-        cy.typeInFilter(chartName);
-  		cy.getBySel('sortable-cell-0-1').should('exist');
+        cy.typeInFilter(chartName, 'input[aria-label="Filter table results"]');
+        cy.getBySel('sortable-cell-0-1').should('exist');
       }
     })
   }
@@ -709,8 +709,8 @@ Cypress.Commands.add('deleteCluster', (clusterName, timeout = 120000) => {
 });
 
 // Command to type in Filter input
-Cypress.Commands.add('typeInFilter', (text) => {
-  cy.get('.input-sm')
+Cypress.Commands.add('typeInFilter', (text, locator = '.input-sm') => {
+  cy.get(locator)
     .click()
     .clear()
     .type(text)
