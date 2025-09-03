@@ -572,6 +572,17 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
   }
 
   cy.clickButton(operation);
+
+  // If 'namespaces <namespace> not found' error or `Error` button is visible,
+  // wait for `Error` button to disappear and click on the `Install` button again
+  cy.get('.main-layout').then((mainLayout) => {
+    if (mainLayout.find('div.banner.error.footer-error').length) {
+      // Wait for the `Error` button to disappear; it changes to `Install` after a few seconds
+      cy.get('button.btn.bg-error', {timeout: 10000}).should('not.exist');
+      cy.clickButton(operation);
+    }
+  })
+
   // This is 1s more than the time required for the installation tabpanel to appear;
   // or in case of Turtles, Rancher pod restarts, so this is enough time to start restarting Rancher
   cy.wait(10000);
@@ -607,7 +618,6 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
         // If the installation panel failed to appear for some reason, manually check for app installation
         // Installed Apps should have loaded by now, set the namespace and check if the app name is available in the list;
         cy.contains('Installed Apps').should('be.visible');
-        // WARN: There have been cases when the namespace is not found; can't tell if this happens; this command should be called again to install the chart
         cy.setNamespace(namespace)
         cy.typeInFilter(chartName, 'input[aria-label="Filter table results"]');
         cy.getBySel('sortable-cell-0-1').should('exist');
