@@ -709,8 +709,8 @@ Cypress.Commands.add('deleteCluster', (clusterName, timeout = 120000) => {
 });
 
 // Command to type in Filter input
-Cypress.Commands.add('typeInFilter', (text, locator = '.input-sm') => {
-  cy.get(locator)
+Cypress.Commands.add('typeInFilter', (text, selector = '.input-sm') => {
+  cy.get(selector)
     .click()
     .clear()
     .type(text)

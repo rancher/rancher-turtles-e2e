@@ -62,7 +62,7 @@ declare global {
       addCloudCredsVMware(name: string, vsphere_username: string, vsphere_password: string, vsphere_server: string, vsphere_server_port: string): Chainable<Element>;
       addRepository(repositoryName: string, repositoryURL: string, repositoryType: string, repositoryBranch: string): Chainable<Element>;
 
-      typeInFilter(text: string, locator?: string): Chainable<Element>;
+      typeInFilter(text: string, selector?: string): Chainable<Element>;
       goToHome(): Chainable<Element>;
       patchYamlResource(clusterName: string, namespace: string, resourceKind: string, resourceName: string, patch: object): Chainable<Element>;
       importYAML(yamlOrPath: string, namespace?: string, clusterName?: string): Chainable<Element>;
