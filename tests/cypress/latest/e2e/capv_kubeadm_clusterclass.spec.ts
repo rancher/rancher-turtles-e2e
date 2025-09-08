@@ -1,6 +1,6 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import {skipClusterDeletion} from '~/support/utils';
+import {skipClusterDeletion, isRancherManagerVersion} from '~/support/utils';
 import {capiClusterDeletion, capvResourcesCleanup, importedRancherClusterDeletion} from "~/support/cleanup_support";
 
 Cypress.config();
@@ -75,10 +75,11 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
     // Go to CAPI > ClusterClass to ensure the clusterclass is created
     cy.checkCAPIClusterClass(className);
 
-    // Navigate to `local` cluster, More Resources > Fleet > Helm Apps and ensure the charts are active.
+    // Navigate to `local` cluster, More Resources > Fleet > Helm [O]|[Ap]ps and ensure the charts are active.
     cy.burgerMenuOperate('open');
     cy.contains('local').click();
-    cy.accesMenuSelection(['More Resources', 'Fleet', 'HelmApps']);
+    const helmPsMenuLocation = isRancherManagerVersion('2.12') ? ['More Resources', 'Fleet', 'Helm Ops'] : ['More Resources', 'Fleet', 'HelmApps'];
+    cy.accesMenuSelection(helmPsMenuLocation);
     cy.typeInFilter('vsphere-ccm');
     cy.getBySel('sortable-cell-0-1').should('exist');
   });

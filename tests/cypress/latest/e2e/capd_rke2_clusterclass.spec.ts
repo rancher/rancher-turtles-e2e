@@ -53,7 +53,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
       data = data.replace(/replace_cluster_docker_auth_username/, dockerAuthUsernameBase64)
       data = data.replace(/replace_cluster_docker_auth_password/, dockerAuthPasswordBase64)
       cy.importYAML(data, capiClustersNS)
-    })
+    });
   });
 
   qase(91,

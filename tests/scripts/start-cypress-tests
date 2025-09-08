@@ -51,4 +51,5 @@ docker run --init -v $PWD:/workdir -w /workdir \
     --add-host host.docker.internal:host-gateway \
     --ipc=host \
     $CYPRESS_DOCKER \
-    -s $SPEC
+    --browser=$BROWSER \
+    --spec $(echo $SPEC | tr ' ' ',')

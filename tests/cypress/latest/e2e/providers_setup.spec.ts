@@ -13,12 +13,33 @@ limitations under the License.
 
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {isRancherManagerVersion} from '~/support/utils';
+
+function matchAndWaitForReadyProvider(
+  providerString: string,
+  providerType: string,
+  providerName: string,
+  providerVersion: string,
+  timeout: number = 60000,
+) {
+  const readyState = 'Ready'; // Default state
+  cy.get('tr.main-row', { timeout: timeout })
+    .contains('a', providerString)
+    .closest('tr')
+    .within(() => {
+      //cy.get('td').eq(1).should('contain.text', readyState);    // State - unreliable in 2.12 - often Unavailable, using Phase instead
+      cy.get('td').eq(2).should('contain.text', providerString);  // Name
+      cy.get('td').eq(3).should('contain.text', providerType);    // Type
+      cy.get('td').eq(4).should('contain.text', providerName);    // ProviderName
+      cy.get('td').eq(5).should('contain.text', providerVersion); // InstalledVersion
+      cy.get('td').eq(6).should('contain.text', readyState);      // Phase
+    });
+}
 
 Cypress.config();
 describe('Enable CAPI Providers', () => {
-  const statusReady = 'Ready'
-  const branch = 'release-0.23' // TODO: Change to main in rancher-turtles-e2e/issues/243
-  const turtlesRepoUrl = 'https://github.com/rancher/turtles.git'
+  const branch = isRancherManagerVersion('2.12') ? 'main' : 'release-0.23';
+  const turtlesRepoUrl = 'https://github.com/rancher/turtles.git';
 
   // Providers names
   const kubeadmProvider = 'kubeadm'
@@ -95,15 +116,25 @@ describe('Enable CAPI Providers', () => {
             const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + 'control-plane' + '-components.yaml'
             const providerName = kubeadmProvider + '-' + 'control-plane'
             cy.addCustomProvider(providerName, 'capi-kubeadm-control-plane-system', kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
-            const readyStatus = statusReady.concat(providerName, 'controlPlane', kubeadmProvider, kubeadmProviderVersion)
-            cy.contains(readyStatus);
+            matchAndWaitForReadyProvider(
+              providerName,
+              'controlPlane',
+              kubeadmProvider,
+              kubeadmProviderVersion,
+              120000
+            );
           } else {
             // https://github.com/kubernetes-sigs/cluster-api/releases/v1.10.5/bootstrap-components.yaml
             const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + providerType + '-components.yaml'
             const providerName = kubeadmProvider + '-' + providerType
             cy.addCustomProvider(providerName, 'capi-kubeadm-bootstrap-system', kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
-            const readyStatus = statusReady.concat(providerName, 'bootstrap', kubeadmProvider, kubeadmProviderVersion)
-            cy.contains(readyStatus);
+            matchAndWaitForReadyProvider(
+              providerName,
+              providerType,
+              kubeadmProvider,
+              kubeadmProviderVersion,
+              120000
+            );
           }
         })
       );
@@ -114,9 +145,13 @@ describe('Enable CAPI Providers', () => {
         // Create Docker Infrastructure provider
         const namespace = 'capd-system'
         cy.addInfraProvider('Docker', namespace);
-        const readyStatus = statusReady.concat(dockerProvider, 'infrastructure', dockerProvider, kubeadmProviderVersion)
-        // TODO: add actual vs expected
-        cy.contains(readyStatus);
+        matchAndWaitForReadyProvider(
+          dockerProvider,
+          'infrastructure',
+          dockerProvider,
+          kubeadmProviderVersion,
+          120000
+        );
         cy.verifyCAPIProviderImage(dockerProvider, namespace);
       })
     );
@@ -147,8 +182,7 @@ describe('Enable CAPI Providers', () => {
       // Fleet addon provider is provisioned automatically when enabled during installation
       cy.checkCAPIMenu();
       cy.contains('Providers').click();
-      const readyStatus = statusReady.concat(fleetProvider, 'addon', fleetProvider, fleetProviderVersion);
-      cy.contains(readyStatus).scrollIntoView();
+      matchAndWaitForReadyProvider(fleetProvider, 'addon', fleetProvider, fleetProviderVersion, 30000);
     });
   });
 
@@ -171,8 +205,13 @@ describe('Enable CAPI Providers', () => {
         cy.addCloudCredsVMware(vsphereProvider, vsphereUsername, vspherePassword, vsphereServer, vspherePort);
         cy.burgerMenuOperate('open');
         cy.addInfraProvider('vSphere', vsphereProviderNamespace, vsphereProvider);
-        const readyStatus = statusReady.concat(vsphereProvider, 'infrastructure', vsphereProvider, vsphereProviderVersion)
-        cy.contains(readyStatus);
+        matchAndWaitForReadyProvider(
+          vsphereProvider,
+          'infrastructure',
+          vsphereProvider,
+          vsphereProviderVersion,
+          120000
+        );
         cy.verifyCAPIProviderImage(vsphereProvider, vsphereProviderNamespace);
       })
     );
@@ -193,8 +232,13 @@ describe('Enable CAPI Providers', () => {
         cy.addCloudCredsAWS(amazonProvider, Cypress.env('aws_access_key'), Cypress.env('aws_secret_key'));
         cy.burgerMenuOperate('open');
         cy.addInfraProvider('Amazon', namespace, amazonProvider);
-        const readyStatus = statusReady.concat(amazonProvider, providerType, amazonProvider, amazonProviderVersion)
-        cy.contains(readyStatus);
+        matchAndWaitForReadyProvider(
+          amazonProvider,
+          providerType,
+          amazonProvider,
+          amazonProviderVersion,
+          120000
+        );
         cy.verifyCAPIProviderImage(amazonProvider, namespace);
       })
     );
@@ -206,8 +250,13 @@ describe('Enable CAPI Providers', () => {
         cy.addCloudCredsGCP(googleProvider, Cypress.env('gcp_credentials'));
         cy.burgerMenuOperate('open');
         cy.addInfraProvider('Google Cloud Platform', namespace, googleProvider);
-        const readyStatus = statusReady.concat(googleProvider, providerType, googleProvider, googleProviderVersion)
-        cy.contains(readyStatus, { timeout: 120000 });
+        matchAndWaitForReadyProvider(
+          googleProvider,
+          providerType,
+          googleProvider,
+          googleProviderVersion,
+          120000
+        );
         cy.verifyCAPIProviderImage(googleProvider, namespace);
       })
     );
@@ -216,8 +265,13 @@ describe('Enable CAPI Providers', () => {
       const namespace = 'capz-system'
       // Create Azure Infrastructure provider
       cy.addInfraProvider('Azure', namespace, azureProvider);
-      const readyStatus = statusReady.concat(azureProvider, providerType, azureProvider, azureProviderVersion)
-      cy.contains(readyStatus, { timeout: 180000 });
+      matchAndWaitForReadyProvider(
+        azureProvider,
+        providerType,
+        azureProvider,
+        azureProviderVersion,
+        180000
+      );
       cy.verifyCAPIProviderImage(azureProvider, namespace);
     })
     );
