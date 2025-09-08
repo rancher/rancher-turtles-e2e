@@ -30,7 +30,8 @@ declare global {
       addFleetGitRepo(repoName: string, repoUrl: string, branch: string, paths: string | string[], targetNamespace?: string, workspace?: string): Chainable<Element>;
       removeFleetGitRepo(repoName: string, workspace?: string): Chainable<Element>;
       forceUpdateFleetGitRepo(repoName: string, workspace?: string): Chainable<Element>;
-      checkFleetGitRepo(repoName: string, workspace?: string): Chainable<Element>;
+      goToFleetGitRepos(workspace?: string): Chainable<Element>;
+      checkFleetGitRepoActive(repoName: string, workspace?: string): Chainable<Element>;
       fleetNamespaceToggle(toggleOption: string): Chainable<Element>;
       verifyTableRow(rowNumber: number, expectedText1?: string | RegExp, expectedText2?: string | RegExp): Chainable<Element>;
       waitForAllRowsInState(desiredState: string, timeout?: number): Chainable<Element>;
@@ -40,7 +41,8 @@ declare global {
 
       deleteCluster(clusterName: string, timeout?: number): Chainable<Element>;
       searchCluster(clusterName: string): Chainable<Element>;
-      createNamespace(namespace: string): Chainable<Element>;
+      createNamespace(namespaces: string[]): Chainable<Element>;
+      deleteNamespace(namespaces: string[]): Chainable<Element>;
       setNamespace(namespace: string, namespaceID?: string): Chainable<Element>;
 
       createCAPICluster(cluster: Cluster): Chainable<Element>;

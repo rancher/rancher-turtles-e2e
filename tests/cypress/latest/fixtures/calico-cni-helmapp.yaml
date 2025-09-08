@@ -1,0 +1,46 @@
+apiVersion: fleet.cattle.io/v1alpha1
+kind: HelmApp
+metadata:
+  name: calico-cni
+spec:
+  keepResources: true
+  helm:
+    version: v3.29.3
+    releaseName: projectcalico
+    repo: https://docs.tigera.io/calico/charts
+    chart: tigera-operator
+    templateValues:
+      installation: |-
+        cni:
+          type: Calico
+        calicoNetwork:
+          bgp: Disabled
+          mtu: 1350
+          ipPools:
+            ${- range $cidr := .ClusterValues.Cluster.spec.clusterNetwork.pods.cidrBlocks }
+            - cidr: "${ $cidr }"
+              encapsulation: VXLAN
+            ${- end}
+        ${- range $variable := .ClusterValues.Cluster.spec.topology.variables }
+          ${- if eq $variable.name "imagePullSecret" }
+        imagePullSecrets:
+        - name: "${ $variable.value }"
+          ${- end}
+        ${- end } 
+  diff:
+    comparePatches:
+    - apiVersion: operator.tigera.io/v1
+      kind: Installation
+      name: default
+      operations:
+      - {"op":"remove", "path":"/spec/kubernetesProvider"}
+  insecureSkipTLSVerify: true
+  targets:
+  - clusterSelector:
+      matchLabels:
+        cni: calico
+      matchExpressions:
+      - key: clusterclass-name.fleet.addons.cluster.x-k8s.io
+        operator: In
+        values:
+          - docker-rke2-example

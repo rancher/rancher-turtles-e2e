@@ -38,9 +38,6 @@ function matchAndWaitForProviderReadyStatus(
 
 Cypress.config();
 describe('Enable CAPI Providers', () => {
-  const branch = isRancherManagerVersion('2.12') ? 'main' : 'release-0.23';
-  const turtlesRepoUrl = 'https://github.com/rancher/turtles.git';
-
   // Providers names
   const kubeadmProvider = 'kubeadm'
   const dockerProvider = 'docker'
@@ -94,17 +91,15 @@ describe('Enable CAPI Providers', () => {
   });
 
   context('Local providers - @install', { tags: '@install' }, () => {
-    capiNamespaces.forEach(namespace => {
-      it('Create CAPI Namespaces - ' + namespace, () => {
-        cy.createNamespace(namespace);
-      })
+    
+    it('Create CAPI Namespaces', () => {
+      cy.createNamespace(capiNamespaces);
     })
-
-    localProviderNamespaces.forEach(namespace => {
-      it('Create CAPI Providers Namespaces - ' + namespace, () => {
-        cy.createNamespace(namespace);
-      })
+    
+    it('Create Local CAPIProviders Namespaces', () => {
+      cy.createNamespace(localProviderNamespaces);
     })
+    
 
     // TODO: Use wizard to create providers, capi-ui-extension/issues/177
     kubeadmProviderTypes.forEach(providerType => {
@@ -139,10 +134,10 @@ describe('Enable CAPI Providers', () => {
     );
 
     qase(90,
-      // HelmApps to be used across all specs
+      // Helmops to be used across all specs
       it('Add Applications fleet repo', () => {
         // Add upstream apps repo
-        cy.addFleetGitRepo('helm-apps', turtlesRepoUrl, branch, 'examples/applications/', 'capi-clusters');
+        cy.addFleetGitRepo('helmops', 'https://github.com/rancher/turtles.git', 'main', 'examples/applications/', 'capi-clusters');
       })
     );
 
@@ -169,8 +164,8 @@ describe('Enable CAPI Providers', () => {
   });
 
   context('vSphere provider', { tags: '@vsphere' }, () => {
-    it('Create CAPI Providers Namespace - ' + vsphereProviderNamespace, () => {
-      cy.createNamespace(vsphereProviderNamespace);
+    it('Create vSphere CAPIProvider Namespace', () => {
+      cy.createNamespace([vsphereProviderNamespace]);
     })
     qase(40,
       it('Create CAPV provider', () => {
@@ -195,11 +190,10 @@ describe('Enable CAPI Providers', () => {
 
   context('Cloud Providers', { tags: '@full' }, () => {
     const providerType = 'infrastructure'
-    cloudProviderNamespaces.forEach(namespace => {
-      it('Create CAPI Cloud Providers Namespaces - ' + namespace, () => {
-        cy.createNamespace(namespace);
-      })
+    it('Create Cloud CAPIProviders Namespaces', () => {
+      cy.createNamespace(cloudProviderNamespaces);
     })
+    
 
     qase(13,
       it('Create CAPA provider', () => {
