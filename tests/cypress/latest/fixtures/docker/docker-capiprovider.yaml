@@ -1,0 +1,9 @@
+apiVersion: turtles-capi.cattle.io/v1alpha1
+kind: CAPIProvider
+metadata:
+  name: docker
+  namespace: capd-system
+spec:
+  enableAutomaticUpdate: true # To auto-upgrade version post turtles chart upgrade
+  type: infrastructure
+  name: docker

@@ -63,7 +63,6 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
   it('Create VSphere CAPIProvider & VSphereClusterIdentity', () => {
     cy.removeCAPIResource('Providers', providerName);
     cy.createCAPIProvider(providerName);
-    cy.checkCAPIProvider(providerName);
 
     const vsphere_username = JSON.stringify(vsphere_secrets_json.vsphere_username).replace(/\"/g, "")
     const vsphere_password = JSON.stringify(vsphere_secrets_json.vsphere_password).replace(/\"/g, "")

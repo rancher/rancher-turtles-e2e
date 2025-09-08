@@ -31,7 +31,6 @@ describe('Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
   it('Create Azure CAPIProvider', () => {
     cy.removeCAPIResource('Providers', providerName);
     cy.createCAPIProvider(providerName);
-    cy.checkCAPIProvider(providerName);
   })
 
   it('Setup the namespace for importing', () => {

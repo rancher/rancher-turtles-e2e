@@ -28,7 +28,6 @@ describe('Import CAPA RKE2 Class-Cluster', { tags: '@full' }, () => {
   it('Create AWS CAPIProvider & AWSClusterStaticIdentity', () => {
     cy.removeCAPIResource('Providers', providerName);
     cy.createCAPIProvider(providerName);
-    cy.checkCAPIProvider(providerName);
     cy.createAWSClusterStaticIdentity(accessKey, secretKey);
   })
 

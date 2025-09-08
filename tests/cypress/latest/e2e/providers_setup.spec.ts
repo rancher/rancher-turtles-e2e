@@ -94,16 +94,13 @@ describe('Enable CAPI Providers', () => {
   });
 
   context('Local providers - @install', { tags: '@install' }, () => {
-    capiNamespaces.forEach(namespace => {
-      it('Create CAPI Namespaces - ' + namespace, () => {
-        cy.createNamespace(namespace);
-      })
+    it('Create CAPI Namespaces', () => {
+      cy.createNamespace(capiNamespaces);
     })
 
-    localProviderNamespaces.forEach(namespace => {
-      it('Create CAPI Providers Namespaces - ' + namespace, () => {
-        cy.createNamespace(namespace);
-      })
+
+    it('Create Local CAPIProviders Namespaces', () => {
+      cy.createNamespace(localProviderNamespaces);
     })
 
     // TODO: Use wizard to create providers, capi-ui-extension/issues/177
@@ -169,8 +166,8 @@ describe('Enable CAPI Providers', () => {
   });
 
   context('vSphere provider', { tags: '@vsphere' }, () => {
-    it('Create CAPI Providers Namespace - ' + vsphereProviderNamespace, () => {
-      cy.createNamespace(vsphereProviderNamespace);
+    it('Create vSphere CAPIProvider Namespace', () => {
+      cy.createNamespace([vsphereProviderNamespace]);
     })
     qase(40,
       it('Create CAPV provider', () => {
@@ -195,10 +192,9 @@ describe('Enable CAPI Providers', () => {
 
   context('Cloud Providers', { tags: '@full' }, () => {
     const providerType = 'infrastructure'
-    cloudProviderNamespaces.forEach(namespace => {
-      it('Create CAPI Cloud Providers Namespaces - ' + namespace, () => {
-        cy.createNamespace(namespace);
-      })
+
+    it('Create Cloud CAPIProviders Namespaces', () => {
+      cy.createNamespace(cloudProviderNamespaces);
     })
 
     qase(13,

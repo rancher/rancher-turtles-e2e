@@ -27,6 +27,18 @@ import (
 	"github.com/rancher-sandbox/ele-testhelpers/tools"
 )
 
+var (
+	// Define local Kubeconfig file
+	localKubeconfig = os.Getenv("HOME") + "/.kube/config"
+	// Create kubectl context
+	// Default timeout is too small, so New() cannot be used
+	k = &kubectl.Kubectl{
+		Namespace:    "",
+		PollTimeout:  tools.SetTimeout(300 * time.Second),
+		PollInterval: 500 * time.Millisecond,
+	}
+)
+
 func rolloutDeployment(ns, d string) {
 	// NOTE: 1st or 2nd rollout command can sporadically fail, so better to use Eventually here
 	Eventually(func() string {
@@ -44,17 +56,6 @@ func rolloutDeployment(ns, d string) {
 }
 
 var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgrade"), func() {
-	// Create kubectl context
-	// Default timeout is too small, so New() cannot be used
-	k := &kubectl.Kubectl{
-		Namespace:    "",
-		PollTimeout:  tools.SetTimeout(300 * time.Second),
-		PollInterval: 500 * time.Millisecond,
-	}
-
-	// Define local Kubeconfig file
-	localKubeconfig := os.Getenv("HOME") + "/.kube/config"
-
 	It("Install/Upgrade Rancher Manager", func() {
 		if Label("install").MatchesLabelFilter(GinkgoLabelFilter()) {
 			By("Installing K3s", func() {
@@ -137,9 +138,7 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 				}, tools.SetTimeout(4*time.Minute), 30*time.Second).Should(BeNil())
 			})
 		}
-		// Re-define Kubeconfig file in case of upgrade test (ginkgo label != install)
-		err := os.Setenv("KUBECONFIG", localKubeconfig)
-		Expect(err).To(Not(HaveOccurred()))
+
 		By("Installing/Upgrading Rancher Manager", func() {
 			err := rancher.DeployRancherManager(rancherHostname, rancherChannel, rancherVersion, rancherHeadVersion, "none", "none")
 			Expect(err).To(Not(HaveOccurred()))

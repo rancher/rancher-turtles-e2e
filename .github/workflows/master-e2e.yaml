@@ -273,6 +273,7 @@ jobs:
       DOCKER_REGISTRY_CONFIG: ${{ secrets.docker_registry_config }}
       # Common specs: @short @vsphere @full
       SPECS: |
+        e2e/providers_setup.spec.ts
         e2e/capd_rke2_clusterclass.spec.ts
         e2e/capd_rke2_fleet_clusterclass.spec.ts
         e2e/capd_kubeadm_clusterclass.spec.ts
@@ -351,6 +352,8 @@ jobs:
           if [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
             # Required for upgrade tests
             echo "RANCHER_VERSION=head/2.11" >> ${GITHUB_ENV}
+            echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> $GITHUB_ENV
+            echo "SPECS=" >> ${GITHUB_ENV}
           else
             echo "RANCHER_VERSION=${{ inputs.rancher_version }}" >> ${GITHUB_ENV}
           fi
@@ -393,9 +396,8 @@ jobs:
             e2e/turtles_chart.spec.ts
             e2e/turtles_ui_extension.spec.ts
             e2e/menu.spec.ts
-            e2e/providers_setup.spec.ts
-            ${{ env.SPECS }}
             e2e/capd_rke2_upgrade_clusterclass.spec.ts
+            ${{ env.SPECS }}
         run: |
           if [ ${{ inputs.turtles_dev_chart }} == true ]; then
             export CHARTMUSEUM_REPO=http://${{ needs.create-runner.outputs.public_dns }}
@@ -447,12 +449,12 @@ jobs:
       - name: Cypress tests - Upgraded Rancher
         if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:
-          RANCHER_VERSION: ${{ env.RANCHER_VERSION }}
+          RANCHER_VERSION: ${{ steps.upgraded_component.outputs.rm_upgraded_image_version }}
           RANCHER_PASSWORD: ${{ secrets.rancher_password }}
           QASE_TESTOPS_RUN_ID: ${{ steps.qase_run_id.outputs.qase_run_id }}
           SPEC: |
             e2e/capd_rke2_upgrade_clusterclass.spec.ts
-            ${{ env.SPECS }}
+            ${{ env.COMMON_SPECS }}
         run: |
           if [ ${{ inputs.turtles_dev_chart }} == true ]; then
             export CHARTMUSEUM_REPO=http://${{ needs.create-runner.outputs.public_dns }}

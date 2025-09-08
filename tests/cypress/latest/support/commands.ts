@@ -69,21 +69,33 @@ Cypress.Commands.add('clusterAutoImport', (clusterName, mode) => {
 });
 
 // Command to create namespace
-Cypress.Commands.add('createNamespace', (namespace) => {
-  cy.contains('local')
-    .click();
-  cypressLib.accesMenu('Projects/Namespaces');
-  cy.contains('Create Project').should('be.visible');
+Cypress.Commands.add('createNamespace', (namespaces: string[]) => {
+  namespaces.forEach((namespace) => {
+    cy.log('Creating Namespace:', namespace);
+    cy.burgerMenuOperate('open');
+    cy.contains('local')
+      .click();
+    cypressLib.accesMenu('Projects/Namespaces');
+    cy.contains('Create Project').should('be.visible');
 
-  // Workaround for 2.12, find a row with 'Not in a Project' and press button 'Create Namespace'
-  // Ref. https://github.com/rancher/dashboard/issues/15193
-  // cy.setNamespace('Not', 'all_orphans');
-  cy.contains('Not in a Project').parents('tr').find('a').contains('Create Namespace').click();
+    // Workaround for 2.12, find a row with 'Not in a Project' and press button 'Create Namespace'
+    // Ref. https://github.com/rancher/dashboard/issues/15193
+    // cy.setNamespace('Not', 'all_orphans');
+    cy.contains('Not in a Project').parents('tr').find('a').contains('Create Namespace').click();
 
-  cy.typeValue('Name', namespace);
-  cy.clickButton('Create');
-  cy.contains(new RegExp('Active.*' + namespace));
-  cy.namespaceReset();
+    cy.typeValue('Name', namespace);
+    cy.clickButton('Create');
+    cy.contains(new RegExp('Active.*' + namespace));
+    cy.log('Namespace created:', namespace);
+    cy.namespaceReset();
+  })
+});
+
+// Command to create namespace
+Cypress.Commands.add('deleteNamespace', (namespaces: string[]) => {
+  namespaces.forEach((namespace) => {
+    cy.deleteKubernetesResource('local', ['Projects/Namespaces'], namespace);
+  })
 });
 
 // Command to set namespace selection
@@ -759,13 +771,10 @@ Cypress.Commands.add('goToHome', () => {
 
 // Fleet commands
 // Command add Fleet Git Repository
-Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, paths, targetNamespace, workspace) => {
-  function selectWorkspace(workspace?: string) {
+Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, paths, targetNamespace, workspace = 'fleet-local') => {
+  function selectWorkspace(workspace: string) {
     // Select workspace
     cy.getBySel('workspace-switcher').click();
-    if (!workspace) {
-      workspace = 'fleet-local';
-    }
     cy.contains(workspace).should('be.visible').click();
   }
 
@@ -809,12 +818,12 @@ Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, paths, targe
   cy.clickButton('Create'); // TODO Check there is no error after clicking
 
   // Navigate to fleet repo
-  cy.checkFleetGitRepo(repoName, workspace); // Wait until the repo details are loaded
+  cy.checkFleetGitRepoActive(repoName, workspace); // Wait until the repo details are loaded
 })
 
 // Command remove Fleet Git Repository
-Cypress.Commands.add('removeFleetGitRepo', (repoName, workspace) => {
-  cy.checkFleetGitRepo(repoName, workspace);
+Cypress.Commands.add('removeFleetGitRepo', (repoName, workspace = 'fleet-local') => {
+  cy.checkFleetGitRepoActive(repoName, workspace);
   // Click on the actions menu and select 'Delete' from the menu
   if (isRancherManagerVersion('2.12')) {
     cy.getBySel('masthead-action-menu').should('be.visible').click();
@@ -823,13 +832,14 @@ Cypress.Commands.add('removeFleetGitRepo', (repoName, workspace) => {
   }
   cy.get('.icon.group-icon.icon-trash').click({ctrlKey: true}); // this will prevent to display confirmation dialog
   cy.wait(2000); // needed for 2.12
-  cy.getBySel('sortable-table-list-container').should('be.visible');
-  cy.contains('td', repoName, { timeout: 120000 }).should('not.exist');
+  cy.goToFleetGitRepos(workspace);
+  // Check the git repo
+  cy.contains(repoName).should('not.exist');
 })
 
 // Command forcefully update Fleet Git Repository
 Cypress.Commands.add('forceUpdateFleetGitRepo', (repoName, workspace) => {
-  cy.checkFleetGitRepo(repoName, workspace);
+  cy.checkFleetGitRepoActive(repoName, workspace);
   // Click on the actions menu and select 'Force Update' from the menu
   if (isRancherManagerVersion('2.12')) {
     cy.getBySel('masthead-action-menu').should('be.visible').click();
@@ -840,8 +850,8 @@ Cypress.Commands.add('forceUpdateFleetGitRepo', (repoName, workspace) => {
   cy.clickButton('Update')
 })
 
-// Command to check Fleet Git Repository
-Cypress.Commands.add('checkFleetGitRepo', (repoName, workspace) => {
+// Command to navigate to Fleet gitrepo page
+Cypress.Commands.add('goToFleetGitRepos', (workspace = 'fleet-local') => {
   // Go to 'Continuous Delivery' > 'Git Repos'
   cy.burgerMenuOperate('open');
   const gitRepoMenuLocation = isRancherManagerVersion('2.12') ? ['Continuous Delivery', 'Resources', 'Git Repos'] : ['Continuous Delivery', 'Git Repos'];
@@ -849,10 +859,12 @@ Cypress.Commands.add('checkFleetGitRepo', (repoName, workspace) => {
   cy.getBySel('masthead-create').should('be.visible');
   // Change the workspace using the dropdown on the top bar
   cy.getBySel('workspace-switcher').click();
-  if (!workspace) {
-    workspace = 'fleet-local';
-  }
   cy.contains(workspace).click();
+})
+
+// Command to check Fleet Git Repository is Active
+Cypress.Commands.add('checkFleetGitRepoActive', (repoName, workspace) => {
+  cy.goToFleetGitRepos(workspace);
   // Click the repo link
   cy.contains(repoName).click();
   cy.url().should("include", "fleet/fleet.cattle.io.gitrepo/" + workspace + "/" + repoName)
@@ -946,7 +958,8 @@ Cypress.Commands.add('deleteKubernetesResource', (clusterName = 'local', resourc
   cy.getBySel('sortable-table-promptRemove').click({ctrlKey: true}); // this will prevent to display confirmation dialog
   cy.wait(2000); // needed for 2.12
   cy.typeInFilter(resourceName);
-  cy.getBySel('sortable-cell-0-1').should('not.exist');
+  cy.getBySel('sortable-cell-0-1', { timeout: 60000 }).should('not.exist');
+  cy.namespaceReset();
 })
 
 Cypress.Commands.add('exploreCluster', (clusterName: string) => {
@@ -982,9 +995,10 @@ Cypress.Commands.add('createAWSClusterStaticIdentity', (accessKey, secretKey) =>
 Cypress.Commands.add('createCAPIProvider', (providerName) => {
   cy.goToHome();
   cy.burgerMenuOperate('open');
-  cy.readFile('./fixtures/' + providerName + '/capi-' + providerName + '-provider.yaml').then((data) => {
+  cy.readFile('./fixtures/' + providerName + '/' + providerName + '-capiprovider.yaml').then((data) => {
     cy.importYAML(data)
   });
+  cy.checkCAPIProvider(providerName);
 });
 
 // Check CAPIProvider ready status
