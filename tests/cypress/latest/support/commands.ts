@@ -365,7 +365,10 @@ Cypress.Commands.add('addInfraProvider', (providerType, namespace, cloudCredenti
   cy.clickButton('Create');
   const selector = "'select-icon-grid-" + providerType + "'"
   cy.getBySel(selector).click();
-  cy.contains('Provider: Create ' + providerType, { matchCase: false }).should('be.visible');
+
+  // Match only with the first word of the provider type to avoid issues with providers like 'Google Cloud Platform' in 2.12
+  const firstWordOfProviderType = providerType.includes(' ') ? providerType.split(' ')[0] : providerType;
+  cy.contains('Provider: Create ' + firstWordOfProviderType, { matchCase: false }).should('be.visible');
 
   // TODO: Add variables support after capi-ui-extension/issues/49
   cy.getBySel('name-ns-description-namespace').type(namespace + '{enter}');
