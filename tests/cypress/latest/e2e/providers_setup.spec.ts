@@ -53,12 +53,12 @@ describe('Enable CAPI Providers', () => {
   // Expected provider versions
   const providerVersions = {
     prod: {
-      kubeadm: 'v1.9.5',
+      kubeadm: 'v1.10.5',
       fleet: 'v0.11.0',
-      vsphere: 'v1.12.0',
-      amazon: 'v2.8.1',
+      vsphere: 'v1.13.1',
+      amazon: 'v2.9.0',
       google: 'v1.10.0',
-      azure: 'v1.20.1'
+      azure: 'v1.21.0'
     },
     dev: {
       kubeadm: 'v1.10.5',
