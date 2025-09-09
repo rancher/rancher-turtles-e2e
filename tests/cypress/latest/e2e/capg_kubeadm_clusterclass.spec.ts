@@ -1,7 +1,7 @@
 import '~/support/commands';
 
 import {qase} from 'cypress-qase-reporter/dist/mocha';
-import {getClusterName, skipClusterDeletion, isRancherManagerVersion} from '~/support/utils';
+import {getClusterName, skipClusterDeletion} from '~/support/utils';
 import {capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 
 Cypress.config();
@@ -29,17 +29,13 @@ describe('Import CAPG Kubeadm Class-Cluster', { tags: '@full' }, () => {
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(classNamePrefix);
 
-      // Navigate to `local` cluster, More Resources > Fleet > Helm [O]|[Ap]ps and ensure the charts are active.
-      cy.burgerMenuOperate('open');
-      cy.contains('local').click();
-      const helmPsMenuLocation = isRancherManagerVersion('2.12') ? ['More Resources', 'Fleet', 'Helm Ops'] : ['More Resources', 'Fleet', 'HelmApps'];
-      cy.accesMenuSelection(helmPsMenuLocation);
-      cy.typeInFilter("calico-cni");
-      cy.getBySel('sortable-cell-0-1').should('exist');
+      // Navigate to `local` cluster, More Resources > Fleet > HelmApps and ensure the charts are present.
+      cy.checkFleetHelmApps(['calico-cni']);
+
+      // Check GCP CCM bundle is available
       cy.accesMenuSelection(['More Resources', 'Fleet', 'Bundle']);
       cy.typeInFilter("cloud-controller-manager-gcp");
       cy.getBySel('sortable-cell-0-1').should('exist');
-
     })
   );
 

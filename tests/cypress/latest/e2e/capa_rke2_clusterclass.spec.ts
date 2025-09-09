@@ -1,6 +1,6 @@
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/dist/mocha';
-import {getClusterName, skipClusterDeletion, isRancherManagerVersion} from '~/support/utils';
+import {getClusterName, skipClusterDeletion} from '~/support/utils';
 import {capaResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 
 Cypress.config();
@@ -38,15 +38,8 @@ describe('Import CAPA RKE2 Class-Cluster', { tags: '@full' }, () => {
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(classNamePrefix);
 
-      // Navigate to `local` cluster, More Resources > Fleet > Helm [O]|[Ap]ps and ensure the charts are active.
-      cy.burgerMenuOperate('open');
-      cy.contains('local').click();
-      const helmPsMenuLocation = isRancherManagerVersion('2.12') ? ['More Resources', 'Fleet', 'Helm Ops'] : ['More Resources', 'Fleet', 'HelmApps'];
-      cy.accesMenuSelection(helmPsMenuLocation);
-      ['aws-ccm', 'aws-csi-driver'].forEach((app) => {
-        cy.typeInFilter(app);
-        cy.getBySel('sortable-cell-0-1').should('exist');
-      })
+      // Navigate to `local` cluster, More Resources > Fleet > HelmApps and ensure the charts are present.
+      cy.checkFleetHelmApps(['aws-ccm', 'aws-csi-driver']);
     })
   );
 

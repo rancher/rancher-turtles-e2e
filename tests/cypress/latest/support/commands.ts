@@ -268,7 +268,6 @@ Cypress.Commands.add('createCAPICluster', (cluster) => {
   cy.get('div[id=cru-errors]').should('not.exist');
 })
 
-
 // Command to check CAPI cluster presence under CAPI Menu
 Cypress.Commands.add('checkCAPICluster', (clusterName) => {
   cy.checkCAPIMenu();
@@ -330,6 +329,18 @@ Cypress.Commands.add('checkCAPIMenu', () => {
   cy.contains('.nav', 'Cluster Classes')
   cy.contains('.nav', 'Providers')
 });
+
+// Command to check presence of HelmApps under Fleet on local cluster
+Cypress.Commands.add('checkFleetHelmApps', (appList: string[]) => {
+  cy.burgerMenuOperate('open');
+  cy.contains('local').click();
+  const helmPsMenuLocation = isRancherManagerVersion('2.12') ? ['More Resources', 'Fleet', 'Helm Ops'] : ['More Resources', 'Fleet', 'HelmApps'];
+  cy.accesMenuSelection(helmPsMenuLocation);
+  appList.forEach((app) => {
+    cy.typeInFilter(app);
+    cy.getBySel('sortable-cell-0-1').should('exist');
+  })
+})
 
 // Command to add CAPI Custom provider
 Cypress.Commands.add('addCustomProvider', (name, namespace, providerName, providerType, version, url) => {

@@ -95,13 +95,8 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
     // Go to CAPI > ClusterClass to ensure the clusterclass is created
     cy.checkCAPIClusterClass(className);
 
-    // Navigate to `local` cluster, More Resources > Fleet > Helm [O]|[Ap]ps and ensure the charts are active.
-    cy.burgerMenuOperate('open');
-    cy.contains('local').click();
-    const helmPsMenuLocation = isRancherManagerVersion('2.12') ? ['More Resources', 'Fleet', 'Helm Ops'] : ['More Resources', 'Fleet', 'HelmApps'];
-    cy.accesMenuSelection(helmPsMenuLocation);
-    cy.typeInFilter('vsphere-ccm');
-    cy.getBySel('sortable-cell-0-1').should('exist');
+    // Navigate to `local` cluster, More Resources > Fleet > HelmApps and ensure the charts are present.
+    cy.checkFleetHelmApps(['vsphere-ccm']);
   });
 
   it('Add CAPV class-clusters fleet repo', () => {

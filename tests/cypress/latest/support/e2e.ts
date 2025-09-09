@@ -52,6 +52,7 @@ declare global {
       checkCAPIClusterProvisioned(clustername: string, timeout?: number): Chainable<Element>;
       checkCAPIClusterDeleted(clustername: string, timeout: number): Chainable<Element>;
       checkCAPIMenu(): Chainable<Element>;
+      checkFleetHelmApps(appList: string[]): Chainable<Element>;
       namespaceReset(): Chainable<Element>;
       addCustomProvider(name: string, namespace: string, providerName: string, providerType: string, version?: string, url?: string): Chainable<Element>;
       addInfraProvider(providerType: string, namespace: string, cloudCredentials?: string): Chainable<Element>;
