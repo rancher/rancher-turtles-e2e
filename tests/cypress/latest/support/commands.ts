@@ -507,7 +507,7 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
   cy.wait(1000);
   cy.get('.icon.group-icon.icon-refresh').click();
   cy.wait(1000);
-  cy.contains(new RegExp('Active.*' + repositoryName), { timeout: 150000 });
+  cy.contains(new RegExp('Active.*' + repositoryName), { timeout: 150000 }).should('be.visible');
 });
 
 // Command to Install, Update or Upgrade App from Charts menu
