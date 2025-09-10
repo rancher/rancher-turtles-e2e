@@ -1033,7 +1033,7 @@ Cypress.Commands.add('verifyResourceCount', (clusterName, resourcePath, resource
   if (namespace != '') {
     cy.setNamespace(namespace);
   }
-  cy.wait('1000'); // wait a second to let the table load properly
+  cy.wait(1000); // Let the table load properly
   cy.typeInFilter(resourceName);
   cy.get('table > tbody > tr.main-row', { timeout }).should(($rows) => {
     expect($rows.length).to.be.equal(expectedCount);
