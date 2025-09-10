@@ -739,11 +739,9 @@ Cypress.Commands.add('deleteCluster', (clusterName, timeout = 120000) => {
 
 // Command to type in Filter input
 Cypress.Commands.add('typeInFilter', (text, selector = '.input-sm') => {
-  cy.get(selector)
-    .click()
-    .clear()
-    .type(text + '{enter}')
-    .wait(2000);
+  cy.get(selector).clear().type(text);
+  cy.wait(1000); // wait for the filter to apply
+  cy.get('table > tbody > tr').should('have.length.greaterThan', 0);
 });
 
 // Command to navigate to Home page
