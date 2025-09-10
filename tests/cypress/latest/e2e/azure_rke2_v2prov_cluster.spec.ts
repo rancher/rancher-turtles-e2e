@@ -1,5 +1,5 @@
 import '~/support/commands';
-import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {qase} from 'cypress-qase-reporter/mocha';
 import {skipClusterDeletion} from '~/support/utils';
 import * as randomstring from "randomstring";
 

@@ -12,7 +12,7 @@ limitations under the License.
 */
 
 import '~/support/commands';
-import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {qase} from 'cypress-qase-reporter/mocha';
 import {getClusterName, isRancherManagerVersion} from '~/support/utils';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 
@@ -93,7 +93,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', { tags: '@upgrade' }, () 
         cy.contains('local').click();
         // This upgrades Turtles chart from v0.21.0 to latest dev version
         cy.checkChart('Upgrade', 'Rancher Turtles', 'rancher-turtles-system', '');
-    
+
         // Check CAPI operator deployment to be removed
         cy.exploreCluster('local');
         cy.accesMenuSelection(['Workloads', 'Deployments']);

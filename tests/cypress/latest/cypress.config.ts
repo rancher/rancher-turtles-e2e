@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress'
+import { afterSpecHook } from 'cypress-qase-reporter/hooks';
 
 const qaseAPIToken = process.env.QASE_API_TOKEN
 
@@ -13,10 +14,25 @@ export default defineConfig({
       charts: true,
     },
     cypressQaseReporterReporterOptions: {
-      apiToken: qaseAPIToken,
-      projectCode: 'RT',
-      logging: false,
-      basePath: 'https://api.qase.io/v1',
+      mode: "testops",
+        debug: true,
+        testops: {
+          api: {
+           token: qaseAPIToken,
+          },
+          project: 'RT',
+          uploadAttachments: true,
+          run: {
+            complete: true,
+          },
+        },
+      framework: {
+        cypress: {
+          screenshotsFolder: './screenshots',
+          videosFolder: './videos',
+          uploadDelay: 10, // Delay in seconds before uploading video files (default: 10)
+        },
+      },
     },
   },
   env: {
@@ -39,9 +55,14 @@ export default defineConfig({
         return launchOptions;
       });
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('./plugins/index.ts')(on, config)
+      require('./plugins/index.ts')(on, config);
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('@cypress/grep/src/plugin')(config);
+      require('cypress-qase-reporter/plugin')(on, config);
+      require('cypress-qase-reporter/metadata')(on);
+        on('after:spec', async (spec, results) => {
+          await afterSpecHook(spec, config);
+         });
       return config;
     },
     supportFile: './support/e2e.ts',
