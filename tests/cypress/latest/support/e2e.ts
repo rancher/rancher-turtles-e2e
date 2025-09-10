@@ -101,7 +101,6 @@ Cypress.on('uncaught:exception', (err, runnable, promise) => {
   return false
 });
 
-require('cypress-dark');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('cy-verify-downloads').addCustomCommand();
 require('cypress-plugin-tab');
