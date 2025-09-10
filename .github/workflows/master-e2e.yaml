@@ -307,7 +307,7 @@ jobs:
       TURTLES_REPO: rancher/turtles
       CONTROLLER_IMG: localhost:5000/$TURTLES_REPO
       BROWSER: electron
-      CYPRESS_DOCKER: 'cypress/included:14.5.0'
+      CYPRESS_DOCKER: 'cypress/included:15.2.0'
       # Inputs
       CAPI_UI_VERSION: ${{ inputs.capi_ui_version }}
       GREPTAGS: ${{ inputs.grep_test_by_tag }}
