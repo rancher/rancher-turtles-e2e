@@ -27,7 +27,7 @@ function matchAndWaitForProviderReadyStatus(
     .contains('a', providerString)
     .closest('tr')
     .within(() => {
-      //cy.get('td').eq(1).should('contain.text', readyState);    // State - unreliable in 2.12 - often Unavailable, using Phase instead
+      cy.get('td').eq(1).should('contain.text', readyState);    // State - unreliable in 2.12 - often Unavailable, using Phase instead
       cy.get('td').eq(2).should('contain.text', providerString);  // Name
       cy.get('td').eq(3).should('contain.text', providerType);    // Type
       cy.get('td').eq(4).should('contain.text', providerName);    // ProviderName
