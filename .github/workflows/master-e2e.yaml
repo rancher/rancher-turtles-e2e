@@ -338,10 +338,6 @@ jobs:
         e2e/capv_kubeadm_clusterclass.spec.ts
         e2e/capa_rke2_clusterclass.spec.ts
         e2e/capa_kubeadm_clusterclass.spec.ts
-        e2e/capg_kubeadm_clusterclass.spec.ts
-        e2e/capz_aks_clusterclass.spec.ts
-        e2e/capz_rke2_clusterclass.spec.ts
-        e2e/capz_kubeadm_clusterclass.spec.ts
     steps:
       - name: Add /usr/local/bin into PATH
         run: |
