@@ -107,9 +107,10 @@ on:
         description: GCP zone to host the runner
         default: asia-south1-a
         type: string
-      qase_run_id:
-        description: Qase run ID to use for reporting
-        type: string
+      qase_report:
+        description: Report to QASE
+        default: false
+        type: boolean
       grep_test_by_tag:
         description: Grep tags. For multiple selection separate with spaces
         required: true
@@ -225,68 +226,11 @@ jobs:
             fi
           fi
 
-  pre-qase:
-    runs-on: ubuntu-latest
-    env:
-      QASE_API_TOKEN: ${{ secrets.QASE_API_TOKEN }}
-      QASE_PROJECT_CODE: RT
-    outputs:
-      qase_run_description: ${{ steps.qase.outputs.qase_run_description }}
-      qase_run_id: ${{ steps.qase.outputs.qase_run_id }}
-      qase_run_name: ${{ steps.qase.outputs.qase_run_name }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Go
-        uses: actions/setup-go@v5
-        with:
-          cache: false
-          cache-dependency-path: tests/go.sum
-          go-version-file: tests/go.mod
-      - name: Create/Export Qase Run
-        id: qase
-        env:
-          QASE_RUN_NAME: ${{ github.event_name == 'workflow_dispatch' && inputs.rancher_version || github.workflow }}
-        run: |
-          case ${{ inputs.qase_run_id }} in
-            'auto')
-              # Define and export URL of GH test run in Qase run description
-              GH_RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-              QASE_DESC="${GH_RUN_URL}"
-              export QASE_RUN_DESCRIPTION="${QASE_DESC}"
-
-              # Use full rancher version
-              QASE_RUN_NAME=$(echo $QASE_RUN_NAME | grep -P '[0-9]+\.[0-9]+\.[0-9]+(-[a-z]+[0-9]+)?' || true)
-              # Or workflow name if the full rancher version is not found
-              if [ -z "$QASE_RUN_NAME" ]; then
-                QASE_RUN_NAME="${{ github.workflow }}"
-              fi
-
-              # Create a Qase run, get its ID
-              ID=$(cd tests && make create-qase-run)
-
-              # Export outputs for future use
-              echo "qase_run_description=${QASE_DESC}" >> ${GITHUB_OUTPUT}
-              echo "qase_run_id=${ID}" >> ${GITHUB_OUTPUT}
-              echo "qase_run_name=${QASE_RUN_NAME}" >> ${GITHUB_OUTPUT}
-
-              # Just an info for debugging purposes
-              echo -e "Exported values:\nQASE_RUN_ID=${ID}\nQASE_RUN_DESCRIPTION=${QASE_DESC}\nQASE_RUN_NAME=${QASE_RUN_NAME}"
-              ;;
-            'none')
-              echo "qase_run_id=" >> ${GITHUB_OUTPUT}
-              echo "### Test not reported in QASE!" >> ${GITHUB_STEP_SUMMARY}
-              ;;
-            [0-9]*)
-              # If the run ID has been specified
-              echo "qase_run_id=${{ inputs.qase_run_id }}" >> ${GITHUB_OUTPUT}
-              ;;
-          esac
-
   e2e:
-    needs: [create-runner, pre-qase]
+    needs: create-runner
     runs-on: ${{ needs.create-runner.outputs.uuid }}
+    outputs:
+      qase_run_id: ${{ steps.qase_run_id.outputs.qase_run_id }}
     env:
       # K3S flags to use for installation
       INSTALL_K3S_SKIP_ENABLE: true
@@ -300,14 +244,14 @@ jobs:
       # Qase
       QASE_API_TOKEN: ${{ secrets.qase_api_token }}
       QASE_PROJECT_CODE: RT
-      QASE_RUN_ID: ${{ needs.pre-qase.outputs.qase_run_id }}
-      # NOTE: this REPORT var is needed for Cypress!
-      QASE_REPORT: 1
+      QASE_MODE: ${{ inputs.qase_report == true && 'testops' || 'off' }}
+      QASE_TESTOPS_RUN_TITLE: ${{ format('[{4}] Rancher-{0} - {1} destroy={2} dev={3}', inputs.rancher_version, inputs.grep_test_by_tag, inputs.destroy_runner, inputs.turtles_dev_chart, github.run_number) }}
+      QASE_TESTOPS_RUN_DESCRIPTION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
       # Cypress
       TURTLES_REPO: rancher/turtles
       CONTROLLER_IMG: localhost:5000/$TURTLES_REPO
       BROWSER: chrome
-      CYPRESS_DOCKER: 'cypress/included:14.5.0'
+      CYPRESS_DOCKER: 'cypress/included:15.2.0'
       # Inputs
       CAPI_UI_VERSION: ${{ inputs.capi_ui_version }}
       GREPTAGS: ${{ inputs.grep_test_by_tag }}
@@ -434,7 +378,12 @@ jobs:
       - name: Install Chartmuseum
         if: ${{ inputs.turtles_dev_chart == true }}
         run: cd tests && make e2e-install-chartmuseum
+      - name: Setup node
+        uses: actions/setup-node@v5
+        with:
+          node-version: current
       - name: Cypress tests
+        id: cypress
         env:
           RANCHER_VERSION: ${{ env.RANCHER_VERSION }}
           RANCHER_PASSWORD: ${{ secrets.rancher_password }}
@@ -447,13 +396,6 @@ jobs:
             ${{ env.SPECS }}
             e2e/capd_rke2_upgrade_clusterclass.spec.ts
         run: |
-          if ${{ inputs.qase_run_id == 'none' }}; then
-            # Unset default QASE_* variables when reporting is disabled
-            unset QASE_REPORT
-            unset QASE_API_TOKEN
-            # QASE_RUN_ID is empty string already
-          fi
-
           if [ ${{ inputs.turtles_dev_chart }} == true ]; then
             export CHARTMUSEUM_REPO=http://${{ needs.create-runner.outputs.public_dns }}
           fi
@@ -474,6 +416,14 @@ jobs:
           name: cypress-videos-${{ inputs.cluster_name }}
           path: tests/cypress/latest/videos
           retention-days: 7
+      - name: Store QASE_TESTOPS_RUN_ID for later use
+        if: ${{ always() && inputs.qase_report == true }}
+        id: qase_run_id
+        run: |
+          if [ -f tests/cypress/latest/QASE_TESTOPS_RUN_ID.txt ]; then
+            QASE_TESTOPS_RUN_ID=$(cat tests/cypress/latest/QASE_TESTOPS_RUN_ID.txt)
+            echo "qase_run_id=${QASE_TESTOPS_RUN_ID}" >> ${GITHUB_OUTPUT}
+          fi
       - name: Upgrade Rancher Manager
         id: rancher_upgrade
         if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') }}
@@ -498,17 +448,11 @@ jobs:
         env:
           RANCHER_VERSION: ${{ env.RANCHER_VERSION }}
           RANCHER_PASSWORD: ${{ secrets.rancher_password }}
+          QASE_TESTOPS_RUN_ID: ${{ steps.qase_run_id.outputs.qase_run_id }}
           SPEC: |
             e2e/capd_rke2_upgrade_clusterclass.spec.ts
             ${{ env.SPECS }}
         run: |
-          if ${{ inputs.qase_run_id == 'none' }}; then
-            # Unset default QASE_* variables when reporting is disabled
-            unset QASE_REPORT
-            unset QASE_API_TOKEN
-            # QASE_RUN_ID is empty string already
-          fi
-
           if [ ${{ inputs.turtles_dev_chart }} == true ]; then
             export CHARTMUSEUM_REPO=http://${{ needs.create-runner.outputs.public_dns }}
           fi
@@ -549,6 +493,12 @@ jobs:
           fi
           echo "### Kubernetes" >> ${GITHUB_STEP_SUMMARY}
           echo "K3s on Rancher Manager: ${{ env.INSTALL_K3S_VERSION }}" >> ${GITHUB_STEP_SUMMARY}
+          if [[ -n "${{ steps.qase_run_id.outputs.qase_run_id }}" ]]; then
+            echo -e "\n### QASE Report" >> ${GITHUB_STEP_SUMMARY}
+            echo "View the detailed report [here](https://app.qase.io/run/RT/dashboard/${{ steps.qase_run_id.outputs.qase_run_id }})" >> ${GITHUB_STEP_SUMMARY}
+          else
+            echo -e "\n### Test not reported in QASE!" >> ${GITHUB_STEP_SUMMARY}
+          fi
 
   delete-runner:
     if: ${{ always() && needs.create-runner.outputs.uuid != 'vsphere' }}
@@ -575,41 +525,6 @@ jobs:
             --delete-disks all \
             --zone ${{ inputs.zone }}
 
-  post-qase:
-    if: ${{ always() && needs.pre-qase.outputs.qase_run_id != '' }}
-    needs: [e2e, pre-qase]
-    runs-on: ubuntu-latest
-    env:
-      QASE_API_TOKEN: ${{ secrets.qase_api_token }}
-      QASE_PROJECT_CODE: RT
-      QASE_REPORT: 1
-      QASE_RUN_COMPLETE: 1
-      QASE_RUN_ID: ${{ needs.pre-qase.outputs.qase_run_id }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          cache-dependency-path: tests/go.sum
-          go-version-file: tests/go.mod
-      - name: Finalize Qase Run and publish Results
-        if: ${{ always() && !contains(needs.e2e.result, 'cancelled') }}
-        run: |
-          REPORT=$(cd tests && make publish-qase-run)
-          echo "${REPORT}"
-
-          # Extract report URL and put it in summary
-          REPORT_URL=$(awk '/available:/ { print $NF }' <<<${REPORT})
-          if [[ -n "${REPORT_URL}" ]]; then
-            echo "## QASE Reporting" >> ${GITHUB_STEP_SUMMARY}
-            echo "Public Qase report: ${REPORT_URL}" >> ${GITHUB_STEP_SUMMARY}
-          fi
-      - name: Delete Qase Run if job cancelled or skipped and not using existing id
-        if: ${{ always() && (contains(needs.e2e.result, 'cancelled') || contains(needs.e2e.result, 'skipped')) && inputs.qase_run_id == 'auto' }}
-        run: cd tests && make delete-qase-run
-
   # Just to signify that something has been cancelled and it's not useful to check the test
   declare-cancelled:
     if: ${{ always() && contains(needs.e2e.result, 'cancelled') }}
@@ -618,7 +533,17 @@ jobs:
     steps:
       - name: Specify in summary if something has been cancelled
         run: echo "# TEST CANCELLED!" >> ${GITHUB_STEP_SUMMARY}
-
+      - name: Complete the QASE run if cancelled
+        # Otherwise the cancelled run would stay in "In Progress" state
+        run: |
+          RUN_ID=${{ needs.e2e.outputs.qase_run_id }}
+          if [ -n "$RUN_ID" ]; then
+            curl -X POST \
+              --url https://api.qase.io/v1/run/RT/${RUN_ID}/complete \
+              -H "Token: ${{ secrets.QASE_API_TOKEN }}" \
+              -H 'accept: application/json'
+          fi
+          echo "QASE run $RUN_ID marked as Completed" >> ${GITHUB_STEP_SUMMARY}
   cleanup-vsphere-runner:
     if: ${{ always() && needs.create-runner.outputs.uuid == 'vsphere' && inputs.destroy_runner == true }}
     needs: [create-runner, e2e]

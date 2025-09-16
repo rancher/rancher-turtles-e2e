@@ -1,6 +1,6 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import {qase} from 'cypress-qase-reporter/dist/mocha';
+import {qase} from 'cypress-qase-reporter/mocha';
 import {skipClusterDeletion, isRancherManagerVersion} from '~/support/utils';
 import {capiClusterDeletion, capvResourcesCleanup, importedRancherClusterDeletion} from "~/support/cleanup_support";
 

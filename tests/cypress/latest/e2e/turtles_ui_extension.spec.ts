@@ -13,7 +13,7 @@ limitations under the License.
 */
 
 import '~/support/commands';
-import { qase } from 'cypress-qase-reporter/dist/mocha';
+import {qase} from 'cypress-qase-reporter/mocha';
 
 Cypress.config();
 describe('Install CAPI extension - @install', { tags: '@install' }, () => {

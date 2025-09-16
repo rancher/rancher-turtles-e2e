@@ -1,4 +1,6 @@
 import { defineConfig } from 'cypress'
+import { afterSpecHook } from 'cypress-qase-reporter/hooks';
+import { writeFileSync } from 'fs';
 
 const qaseAPIToken = process.env.QASE_API_TOKEN
 
@@ -13,10 +15,23 @@ export default defineConfig({
       charts: true,
     },
     cypressQaseReporterReporterOptions: {
-      apiToken: qaseAPIToken,
-      projectCode: 'RT',
-      logging: false,
-      basePath: 'https://api.qase.io/v1',
+      mode: "testops",
+        debug: false,
+        testops: {
+          api: {
+           token: qaseAPIToken,
+          },
+          project: 'RT',
+          uploadAttachments: true,
+          run: {
+            complete: true,
+          },
+        },
+      framework: {
+        cypress: {
+          screenshotsFolder: './screenshots',
+        },
+      },
     },
   },
   env: {
@@ -26,6 +41,7 @@ export default defineConfig({
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {
+
       // Help for memory issues.
       // Ref: https://www.bigbinary.com/blog/how-we-fixed-the-cypress-out-of-memory-error-in-chromium-browsers
       on("before:browser:launch", (browser, launchOptions) => {
@@ -38,10 +54,32 @@ export default defineConfig({
         }
         return launchOptions;
       });
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('./plugins/index.ts')(on, config)
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('./plugins/index.ts')(on, config);
       require('@cypress/grep/src/plugin')(config);
+      require('cypress-qase-reporter/plugin')(on, config);
+      require('cypress-qase-reporter/metadata')(on);
+      on('after:spec', async (spec, results) => {
+        await afterSpecHook(spec, config);
+      });
+      on('before:spec', () => {
+        // Writes QASE_TESTOPS_RUN_ID to a file before running each spec
+        // and overwrites it with the same content over and over again
+        // but it is ok as the value is the same during the whole run.
+        // Later this file is used as output value in .github/workflows/master-e2e.yaml for:
+        // 1) Marking cancelled test run in Qase TestOps as Completed
+        // 2) Linking the run in the summary
+        const qaseRunId = process.env.QASE_TESTOPS_RUN_ID;
+        if (qaseRunId) {
+          // process.stdout.write(`QASE_TESTOPS_RUN_ID=${qaseRunId}\n`);
+          writeFileSync('./QASE_TESTOPS_RUN_ID.txt', qaseRunId, { encoding: 'utf8' });
+        } else {
+          // process.stdout.write('QASE_TESTOPS_RUN_ID is not set.\n');
+        }
+        // Output all environment variables to stdout for debugging purposes
+        // for (const [key, value] of Object.entries(process.env)) {
+        //   process.stdout.write(`${key}=${value}\n`);
+        // }
+      });
       return config;
     },
     supportFile: './support/e2e.ts',

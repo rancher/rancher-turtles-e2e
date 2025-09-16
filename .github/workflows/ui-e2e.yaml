@@ -15,10 +15,10 @@ run-name: >-
 on:
   workflow_dispatch:
     inputs:
-      qase_run_id:
-        description: Qase run ID where the results will be reported (auto|none|existing_run_id)
-        default: none
-        type: string
+      qase_report:
+        description: Report to QASE
+        default: false
+        type: boolean
       rancher_version:
         description: Rancher Manager channel/<version|head_version>[/head_version] to use for installation
         default: head/2.12
@@ -88,7 +88,7 @@ jobs:
       destroy_runner: ${{ github.event_name == 'schedule' && true || inputs.destroy_runner }}
       capi_ui_version: ${{ inputs.capi_ui_version }}
       rancher_version: ${{ inputs.rancher_version || 'head/2.12' }}
-      qase_run_id: ${{ inputs.qase_run_id || 'auto' }}
+      qase_report: ${{ inputs.qase_report == true || (github.event_name == 'schedule' && true) }}
       turtles_dev_chart: ${{ inputs.turtles_dev_chart == true || (github.event_name == 'schedule' && true) }}
       turtles_chart_version: ${{ inputs.turtles_chart_version }}
       skip_cluster_delete: ${{ inputs.skip_cluster_delete || (github.event_name == 'schedule' && false) }}

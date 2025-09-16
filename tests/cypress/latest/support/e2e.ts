@@ -21,8 +21,6 @@ import {Cluster, Question} from './structs';
 import registerCypressGrep from '@cypress/grep'
 
 declare global {
-  // In Cypress functions should be declared with 'namespace'
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
       // Functions declared in commands.ts
@@ -101,8 +99,6 @@ Cypress.on('uncaught:exception', (err, runnable, promise) => {
   return false
 });
 
-require('cypress-dark');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 require('cy-verify-downloads').addCustomCommand();
 require('cypress-plugin-tab');
 require('@rancher-ecp-qa/cypress-library');
@@ -115,7 +111,6 @@ beforeEach(() => {
     cy.log('Running in GitHub Actions - checking previous test result');
     cy.readFile(resultFile).then((data) => {
       const content = yaml.load(data)
-      // @ts-expect-error ignore 'any' error
       const result = content['test_result']
       cy.log('Previous Test Result: ' + result);
       if (result == 'failed') {
