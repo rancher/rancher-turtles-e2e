@@ -33,6 +33,8 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
       run: |
+        # Do not run on Dependabot PRs (no access to secrets)
+        if [[ -n "$GH_TOKEN" ]]; then return 0; fi
         OWNER=${{ github.repository_owner }}
         REPO=$(echo "${{ github.repositoryUrl }}" | sed -E 's/.*\/([^/]+)\.git/\1/')
         PR_NUMBER=$(( ${{ github.event.pull_request.number }} ))
