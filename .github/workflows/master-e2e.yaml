@@ -307,7 +307,7 @@ jobs:
           repository: ${{ env.TURTLES_REPO }}
       - name: Install Go
         if: ${{ inputs.turtles_dev_chart == true }}
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           cache: false
           go-version-file: go.mod
@@ -331,7 +331,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           cache: false
           go-version-file: tests/go.mod
