@@ -24,7 +24,7 @@
   "dependencies": {
     "@cypress/grep": "^4.1.1",
     "@rancher-ecp-qa/cypress-library": "2.0.1",
-    "cy-verify-downloads": "^0.2.6",
+    "cy-verify-downloads": "^0.3.0",
     "cypress-file-upload": "^5.0.8",
     "cypress-mochawesome-reporter": "^4.0.2",
     "cypress-multi-reporters": "^2.0.5",
