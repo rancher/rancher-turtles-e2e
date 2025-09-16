@@ -15,10 +15,6 @@ run-name: >-
 on:
   workflow_dispatch:
     inputs:
-      qase_report:
-        description: Report to QASE
-        default: false
-        type: boolean
       rancher_version:
         description: Rancher Manager channel/<version|head_version>[/head_version] to use for installation
         default: head/2.12
@@ -44,6 +40,10 @@ on:
         type: boolean
       skip_cluster_delete:
         description: Skip CAPI cluster and fleet repo deletion tests
+        default: false
+        type: boolean
+      qase_report:
+        description: Report to QASE
         default: false
         type: boolean
       cluster_name_suffix:
