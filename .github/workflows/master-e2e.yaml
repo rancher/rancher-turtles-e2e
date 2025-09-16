@@ -184,7 +184,7 @@ jobs:
           credentials_json: ${{ secrets.gcp_credentials }}
       - name: Setup gcloud
         if: ${{ needs.determine-runner.outputs.initial-runner != 'vsphere' }}
-        uses: google-github-actions/setup-gcloud@v2
+        uses: google-github-actions/setup-gcloud@v3
       - name: Create runner
         if: ${{ needs.determine-runner.outputs.initial-runner != 'vsphere' }}
         run: |
@@ -513,7 +513,7 @@ jobs:
         with:
           credentials_json: ${{ secrets.gcp_credentials }}
       - name: Setup gcloud
-        uses: google-github-actions/setup-gcloud@v2
+        uses: google-github-actions/setup-gcloud@v3
       - name: Delete GCP secrets
         run: |
           gcloud --quiet secrets delete PAT_TOKEN_${{ needs.create-runner.outputs.uuid }} || true
