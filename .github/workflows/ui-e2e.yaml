@@ -10,10 +10,7 @@ run-name: >-
        github.event.schedule == '0 4 * * *' && format('[{0}] Nightly e2e job for `@vsphere`', github.run_number) ||
        github.event.schedule == '0 5 * * 6' && format('[{0}] Weekly e2e job for `@full`', github.run_number) ||
        github.event.schedule == '0 3 * * 6' && format('[{0}] Weekly e2e job for `@upgrade`', github.run_number) ||
-       'Unknown scheduled job') ||
-      github.event_name == 'pull_request' &&
-      format('[{0}] Validate Dependabot PR#{1}', github.run_number, github.event.pull_request.number)
-    }}
+       'Unknown scheduled job') }}
 
 on:
   workflow_dispatch:
@@ -64,14 +61,9 @@ on:
     - cron: '0 4 * * *' # @vsphere
     - cron: '0 5 * * 6' # @full on Saturdays only
     - cron: '0 3 * * 6' # @upgrade @short on Saturdays only
-  pull_request:
-    # Only run for opened Dependabot PRs, filtered by additional startsWith(github.head_ref, 'dependabot/')
-    types:
-      - opened
 
 jobs:
   ui:
-    if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/')) }}
     uses: ./.github/workflows/master-e2e.yaml
     secrets:
       gcp_credentials: ${{ secrets.GCP_CREDENTIALS }}
@@ -102,4 +94,4 @@ jobs:
       skip_cluster_delete: ${{ inputs.skip_cluster_delete || (github.event_name == 'schedule' && false) }}
       runner_template: ${{ inputs.runner_template || 'capi-e2e-ci-runner-spot-n2-highmem-16-template-v3' }}
       cluster_name_suffix: ${{ inputs.cluster_name_suffix || github.run_number }}
-      grep_test_by_tag: ${{ inputs.grep_test_by_tag || (github.event.schedule == '0 3 * * *' && '@install @short') || (github.event.schedule == '0 4 * * *' && '@install @vsphere') || (github.event.schedule == '0 5 * * 6' && '@install @full') || (github.event.schedule == '0 3 * * 6' && '@install @upgrade @short') || (github.event_name == 'pull_request' && startsWith(github.head_ref, 'dependabot/') && '@install') }}
+      grep_test_by_tag: ${{ inputs.grep_test_by_tag || (github.event.schedule == '0 3 * * *' && '@install @short') || (github.event.schedule == '0 4 * * *' && '@install @vsphere') || (github.event.schedule == '0 5 * * 6' && '@install @full') || (github.event.schedule == '0 3 * * 6' && '@install @upgrade @short') }}

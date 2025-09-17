@@ -10,7 +10,7 @@ on:
 
 jobs:
   add_label:
-    # Do not run for Dependabot PRs
+    # Skip for Dependabot PRs
     if: ${{ !startsWith(github.head_ref, 'dependabot/') }}
     env:
       SQUAD_QA_LABEL: "squad/qa"
