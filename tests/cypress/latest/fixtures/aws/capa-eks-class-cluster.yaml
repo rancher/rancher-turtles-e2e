@@ -1,0 +1,29 @@
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: Cluster
+metadata:
+  labels:
+    cluster-api.cattle.io/rancher-auto-import: "true"
+  name: replace_cluster_name
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+        - 192.168.0.0/16
+  topology:
+    class: aws-eks-example
+    classNamespace: capi-classes
+    version: v1.31.0
+    variables:
+      - name: region
+        value: ap-south-2
+      - name: sshKeyName
+        value: turtles-qa-rke2
+      - name: awsClusterIdentityName
+        value: cluster-identity
+      - name: instanceType
+        value: t3.xlarge
+    workers:
+      machineDeployments:
+        - class: default-worker
+          name: md-0
+          replicas: 2
