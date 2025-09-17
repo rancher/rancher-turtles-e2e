@@ -20,7 +20,7 @@ jobs:
       pull-requests: write
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Label assigned issues and add them to project board
       if: github.event_name == 'issues'
