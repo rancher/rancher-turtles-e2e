@@ -18,7 +18,7 @@ import 'cypress-file-upload';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import jsyaml from 'js-yaml';
 import _ from 'lodash';
-import { isRancherManagerVersion } from '~/support/utils';
+import {isRancherManagerVersion} from '~/support/utils';
 
 // Generic commands
 // Go to specific Sub Menu from Access Menu
@@ -627,7 +627,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
     };
     checkApiStatus();
   } else {
-    cy.getBySel("windowmanager").then((windowmanager) => {
+    cy.get("div.wm.drag-end").then((windowmanager) => {
       // Check if the installation panel has appeared;
       if (windowmanager.find('div[role=tabpanel]').length) {
         // Wait for both CRD and main helm chart to be installed
