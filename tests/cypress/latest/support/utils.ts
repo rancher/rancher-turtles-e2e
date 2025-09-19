@@ -1,3 +1,4 @@
+import semver from 'semver';
 // Check the Cypress tags
 // Implemented but not used yet
 
@@ -12,8 +13,16 @@ export const isK8sVersion = (version: string) => {
 }
 
 // Check Rancher Manager version
+// Example Usage:
+// for rancher_version=head/2.13
+// isRancherManagerVersion('>=2.12') returns true
+// isRancherManagerVersion('2.13') returns true
+// isRancherManagerVersion('<=2.11') returns false
 export const isRancherManagerVersion = (version: string) => {
-  return (new RegExp(version)).test(Cypress.env("rancher_version"));
+  // rancher_version can be: latest/2.12.1, head/2.12, prime/2.11.1
+  // we need to make it semver compliant first
+  const rancherVersion = semver.valid(semver.coerce(Cypress.env('rancher_version')));
+  return semver.satisfies(rancherVersion, version)
 }
 
 // Check CAPI UI version

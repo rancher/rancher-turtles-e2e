@@ -38,7 +38,7 @@ function matchAndWaitForProviderReadyStatus(
 
 Cypress.config();
 describe('Enable CAPI Providers', () => {
-  const branch = isRancherManagerVersion('2.12') ? 'main' : 'release-0.23';
+  const branch = isRancherManagerVersion('>=2.12') ? 'main' : 'release-0.23';
   const turtlesRepoUrl = 'https://github.com/rancher/turtles.git';
 
   // Providers names

@@ -1,7 +1,7 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import {qase} from 'cypress-qase-reporter/mocha';
-import {skipClusterDeletion, isRancherManagerVersion} from '~/support/utils';
+import {isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
 import {capiClusterDeletion, capvResourcesCleanup, importedRancherClusterDeletion} from "~/support/cleanup_support";
 
 Cypress.config();
@@ -143,7 +143,7 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
       cy.getBySel('sortable-cell-0-1').should('exist');
 
       // Leases table in 2.12 showing extra namespace column
-      const holderSelector = isRancherManagerVersion('2.12') ? 'sortable-cell-0-3' : 'sortable-cell-0-2';
+      const holderSelector = isRancherManagerVersion('>=2.12') ? 'sortable-cell-0-3' : 'sortable-cell-0-2';
       return cy.getBySel(holderSelector).invoke('text');
     }
 
