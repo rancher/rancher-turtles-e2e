@@ -14,6 +14,7 @@ limitations under the License.
 
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
+import {isRancherManagerVersion} from "~/support/utils";
 
 Cypress.config();
 describe('Install CAPI extension - @install', { tags: '@install' }, () => {
@@ -33,8 +34,14 @@ describe('Install CAPI extension - @install', { tags: '@install' }, () => {
         .click();
       cy.contains('CAPI UI');
 
-      cy.getBySel('extension-card-install-btn-capi').click();
-
+      if (isRancherManagerVersion('>=2.13')) {
+        cy.get('div[aria-label*="CAPI UI"]').within(() => {
+          cy.getBySel('item-card-header-action-menu').click();
+          cy.contains('Install').click();
+        })
+      } else {
+        cy.getBySel('extension-card-install-btn-capi').click();
+      }
       const capiUIVersion = Cypress.env('capi_ui_version')
       // if the env var is empty or not defined at all; use the latest version
       if (capiUIVersion != "" && capiUIVersion != undefined) {
@@ -44,7 +51,7 @@ describe('Install CAPI extension - @install', { tags: '@install' }, () => {
 
       cy.clickButton('Install');
       cy.contains('Installing');
-      cy.contains('Extensions changed - reload required', { timeout: 40000 });
+      cy.contains('Extensions changed - reload required', {timeout: 60000});
       cy.clickButton('Reload');
       cy.get('.plugins')
         .children()
