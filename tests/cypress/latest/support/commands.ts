@@ -557,7 +557,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
     cy.typeInFilter(chartName);
   }
   let chartSelector = isRancherManagerVersion('>=2.12') ? 'app-chart-cards-container' : 'chart-selection-grid';
-  const turtlesChartSelector = isRancherManagerVersion('2.12') ? '"item-card-cluster/turtles-chart/rancher-turtles"' : '"select-icon-grid-Rancher Turtles - the Cluster API Extension"';
+  const turtlesChartSelector = isRancherManagerVersion('>=2.12') ? '"item-card-cluster/turtles-chart/rancher-turtles"' : '"select-icon-grid-Rancher Turtles - the Cluster API Extension"';
   
   if (chartName == 'Rancher Turtles') {
     chartSelector = turtlesChartSelector
