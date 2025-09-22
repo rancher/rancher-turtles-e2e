@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/rancher/rancher-turtles-e2e",
   "dependencies": {
-    "@cypress/grep": "^4.1.1",
+    "@cypress/grep": "^5.0.0",
     "@rancher-ecp-qa/cypress-library": "2.0.1",
     "cy-verify-downloads": "^0.3.0",
     "cypress-file-upload": "^5.0.8",
