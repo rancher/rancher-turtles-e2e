@@ -528,6 +528,11 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
 // Example1: cy.checkChart('Alerting', 'default', [{ menuEntry: '(None)', checkbox: 'Enable Microsoft Teams' }]);
 // Example2: cy.checkChart('Rancher Turtles', 'rancher-turtles-system', [{ menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Seamless integration with Fleet and CAPI'},{ menuEntry: 'Rancher webhook cleanup settings', inputBoxTitle: 'Webhook Cleanup Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.28.0'}]);
 Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, questions, refreshRepo = false) => {
+  const isUpdateOperation = operation == 'Update'
+  // the 'Update' operation has been renamed to 'Edit' in 2.13.
+  if (isRancherManagerVersion('>=2.13') && isUpdateOperation) {
+    operation = 'Edit'
+  }
   cy.get('.nav').contains('Apps').click();
 
   // Select All Repositories and click Action/Refresh
@@ -575,7 +580,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
     cy.url().should("contain", version)
   }
 
-  if (chartName == 'Rancher Turtles' && operation == 'Update') {
+  if (chartName == 'Rancher Turtles' && isUpdateOperation) {
     cy.get('body').invoke('text').then((bodyText) => {
       if (bodyText.includes('Current')) {
         cy.contains('Current').click();
@@ -591,7 +596,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
   if (questions) {
     // Some apps like Alerting show questions page directly so no further action needed here
     // Some other apps like Turtles have a 'Customize install settings' checkbox or its variant which needs to be clicked
-    if (chartName == 'Rancher Turtles' && operation == "Update") {
+    if (chartName == 'Rancher Turtles' && isUpdateOperation) {
       cy.contains('Customize install settings').should('be.visible').click();
     }
 
@@ -606,7 +611,11 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
     });
   }
 
-  cy.clickButton(operation);
+  if (isRancherManagerVersion('>=2.13') && isUpdateOperation) {
+    cy.clickButton('Save changes');
+  } else {
+    cy.clickButton(operation);
+  }
 
   // If 'namespaces <namespace> not found' error or `Error` button is visible,
   // wait for `Error` button to disappear and click on the `Install` button again
