@@ -530,7 +530,7 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
 Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, questions, refreshRepo = false) => {
   cy.get('.nav').contains('Apps').click();
 
-  // Select All Repositries and click Action/Refresh
+  // Select All Repositories and click Action/Refresh
   cy.get('.nav').contains('Repositories').click();
   cy.waitForAllRowsInState('Active');
   cy.wait(500);
