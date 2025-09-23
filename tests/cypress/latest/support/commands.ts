@@ -398,7 +398,7 @@ Cypress.Commands.add('addInfraProvider', (providerType, namespace, cloudCredenti
 
   if (providerType != 'Docker' && providerType != 'Azure' && cloudCredentials) {
     cy.getBySel('cluster-prov-select-credential').trigger('click');
-    cy.contains(cloudCredentials).click();
+    cy.get('ul').contains(cloudCredentials).click();
   }
   cy.getBySel('capi-provider-create-save').should('be.visible');
   cy.clickButton('Create');
