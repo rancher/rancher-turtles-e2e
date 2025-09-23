@@ -25,14 +25,14 @@ describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
   })
 
   // TODO: Create Provider via UI, ref: capi-ui-extension/issues/128
-  it('Create AWS CAPIProvider & AWSClusterStaticIdentity', () => {
+  it('Create AWS CAPIProvider & AWSClusterStaticIdentity', {failFast: {enabled: true}}, () => {
     cy.removeCAPIResource('Providers', providerName);
     cy.createCAPIProvider(providerName);
     cy.createAWSClusterStaticIdentity(accessKey, secretKey);
   })
 
   qase(129,
-    it('Add CAPA Kubeadm ClusterClass Fleet Repo and check Applications', () => {
+    it('Add CAPA Kubeadm ClusterClass Fleet Repo and check Applications', {failFast: {enabled: true}}, () => {
       cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(classNamePrefix);

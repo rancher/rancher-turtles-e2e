@@ -63,5 +63,7 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   // To know if tests are running in a CI environment
   config.env.ci = process.env.CI;
 
+  require("cypress-fail-fast/plugin")(on, config);
+
   return config;
 };
