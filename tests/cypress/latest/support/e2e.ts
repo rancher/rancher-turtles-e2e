@@ -14,13 +14,11 @@ limitations under the License.
 
 import './commands';
 import yaml from 'js-yaml';
-
 import './capz_support';
 import './cleanup_support';
 import {Cluster, Question} from './structs';
 // @ts-expect-error ignore the error
 import registerCypressGrep from '@cypress/grep'
-import "cypress-fail-fast";
 
 declare global {
   namespace Cypress {
