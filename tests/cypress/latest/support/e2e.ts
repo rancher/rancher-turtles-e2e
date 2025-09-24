@@ -18,7 +18,7 @@ import './capz_support';
 import './cleanup_support';
 import {Cluster, Question} from './structs';
 // @ts-expect-error ignore the error
-import registerCypressGrep from '@cypress/grep'
+import { register as registerCypressGrep } from '@cypress/grep'
 
 declare global {
   namespace Cypress {

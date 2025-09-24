@@ -1,6 +1,7 @@
 import { defineConfig } from 'cypress'
 import { afterSpecHook } from 'cypress-qase-reporter/hooks';
 import { writeFileSync } from 'fs';
+import { plugin as cypressGrepPlugin } from '@cypress/grep/plugin';
 
 const qaseAPIToken = process.env.QASE_API_TOKEN
 
@@ -55,7 +56,6 @@ export default defineConfig({
         return launchOptions;
       });
       require('./plugins/index.ts')(on, config);
-      require('@cypress/grep/src/plugin')(config);
       require('cypress-qase-reporter/plugin')(on, config);
       require('cypress-qase-reporter/metadata')(on);
       on('after:spec', async (spec, results) => {
@@ -80,6 +80,7 @@ export default defineConfig({
         //   process.stdout.write(`${key}=${value}\n`);
         // }
       });
+      cypressGrepPlugin(config);
       return config;
     },
     supportFile: './support/e2e.ts',
