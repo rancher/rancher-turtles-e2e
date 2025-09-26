@@ -125,6 +125,9 @@ on:
       cluster_name_suffix:
         description: Suffix to be used in cluster name (default - github.run_number)
         type: string
+      target_build_type:
+        description: Build type for turtles_dev_chart (prime|community)
+        type: string
 
 jobs:
   determine-runner:
@@ -258,6 +261,7 @@ jobs:
       TURTLES_CHART_VERSION: ${{ inputs.turtles_chart_version }}
       SKIP_CLUSTER_DELETE: ${{ inputs.skip_cluster_delete }}
       CLUSTER_NAME_SUFFIX: ${{ inputs.cluster_name_suffix }}
+      BUILD_TYPE: ${{ inputs.target_build_type }}
       # Secrets
       AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
@@ -302,6 +306,23 @@ jobs:
       - name: Install helm
         run: curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
       # Build rancher-turtles latest chart
+      - name: Inject kube-vip controlplane IP for vsphere into capv-helm-values.yaml
+        if: ${{ needs.create-runner.outputs.uuid == 'vsphere' }}
+        run: |
+          # A round-robin distribution of 3 available control plane IPs for kube-vip
+          INDEX=$(((${{ github.run_number }} % 3) + 1))
+          CP_ENDPOINT_IP=$(echo ${{ secrets.vsphere_endpoints_list }} | cut -d' ' -f${INDEX})
+          sed -i "s/replace_cluster_control_plane_endpoint_ip/${CP_ENDPOINT_IP}/" tests/cypress/latest/fixtures/vsphere/capv-helm-values.yaml
+      - name: Set Rancher Manager Install version
+        run: |
+          if [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
+            # Required for upgrade tests
+            echo "RANCHER_VERSION=head/2.11" >> ${GITHUB_ENV}
+            echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> $GITHUB_ENV
+            echo "SPECS=" >> ${GITHUB_ENV}
+          else
+            echo "RANCHER_VERSION=${{ inputs.rancher_version }}" >> ${GITHUB_ENV}
+          fi
       - name: Check out rancher-turtles repo
         if: ${{ inputs.turtles_dev_chart == true }}
         uses: actions/checkout@v5
@@ -321,8 +342,8 @@ jobs:
       - name: Make chart
         if: ${{ inputs.turtles_dev_chart == true }}
         run: |
-          TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} make e2e-image-build
-          RELEASE_TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} CONTROLLER_IMAGE_VERSION=v${{ env.TAG }} make build-chart
+          TARGET_BUILD=${{ env.BUILD_TYPE }} TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} make e2e-image-build
+          RELEASE_TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} CONTROLLER_IMAGE_VERSION=v${{ env.TAG }} make build-chart verify-gen
           docker run -d -p 5000:5000 --name registry registry:2
           docker push ${{ env.CONTROLLER_IMG }}:v${{ env.TAG }}
 
@@ -340,23 +361,6 @@ jobs:
       - name: Copy chart file for chartmuseum
         if: ${{ inputs.turtles_dev_chart == true }}
         run: cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
-      - name: Inject kube-vip controlplane IP for vsphere into capv-helm-values.yaml
-        if: ${{ needs.create-runner.outputs.uuid == 'vsphere' }}
-        run: |
-          # A round-robin distribution of 3 available control plane IPs for kube-vip
-          INDEX=$(((${{ github.run_number }} % 3) + 1))
-          CP_ENDPOINT_IP=$(echo ${{ secrets.vsphere_endpoints_list }} | cut -d' ' -f${INDEX})
-          sed -i "s/replace_cluster_control_plane_endpoint_ip/${CP_ENDPOINT_IP}/" tests/cypress/latest/fixtures/vsphere/capv-helm-values.yaml
-      - name: Set Rancher Manager Install version
-        run: |
-          if [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
-            # Required for upgrade tests
-            echo "RANCHER_VERSION=head/2.11" >> ${GITHUB_ENV}
-            echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> $GITHUB_ENV
-            echo "SPECS=" >> ${GITHUB_ENV}
-          else
-            echo "RANCHER_VERSION=${{ inputs.rancher_version }}" >> ${GITHUB_ENV}
-          fi
       - name: Install Rancher Manager
         env:
           RANCHER_VERSION: ${{ env.RANCHER_VERSION }}
@@ -490,6 +494,7 @@ jobs:
           TURTLES_VERSION=$(helm list -n rancher-turtles-system -o json 2> /dev/null | jq -r '.[] | .chart')
           echo "CAPI UI Extension Version: $UI_VERSION" >> ${GITHUB_STEP_SUMMARY}
           echo "Rancher Turtles Installed/Upgraded Chart Version: $TURTLES_VERSION" >> ${GITHUB_STEP_SUMMARY}
+          echo "Rancher Turtles Dev Build Type: ${{ inputs.target_build_type }}" >> ${GITHUB_STEP_SUMMARY}
           if [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
             echo "### Rancher Manager Upgrade Information" >> ${GITHUB_STEP_SUMMARY}
             echo "Rancher Manager Upgraded Image: ${{ steps.upgraded_component.outputs.rm_upgraded_image_version }}" >> ${GITHUB_STEP_SUMMARY}

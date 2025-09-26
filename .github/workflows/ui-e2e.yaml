@@ -22,14 +22,15 @@ on:
       turtles_chart_version:
         description: Rancher Turtles chart version to test (eg. 0.21.0)
         type: string
-      capi_ui_version:
-        description: Version of the capi-ui-extension to test (eg. 0.8.2)
-        type: string
       grep_test_by_tag:
         description: Test tags. For multiple selection separate with spaces (Available options - @install [@upgrade @short @full | @vsphere]). Keep always @install
         required: true
         type: string
         default: '@install @short'
+      target_build_type:
+        description: Build type for turtles_dev_chart (prime|community)
+        default: 'prime'
+        type: string
       turtles_dev_chart:
         description: Install rancher turtles dev chart
         default: true
@@ -86,10 +87,10 @@ jobs:
       test_description: "UI - e2e tests with Standard K3s"
       cluster_name: rancher-k3s-cluster
       destroy_runner: ${{ github.event_name == 'schedule' && true || inputs.destroy_runner }}
-      capi_ui_version: ${{ inputs.capi_ui_version }}
       rancher_version: ${{ inputs.rancher_version || 'head/2.12' }}
       qase_report: ${{ inputs.qase_report == true || (github.event_name == 'schedule' && true) }}
       turtles_dev_chart: ${{ inputs.turtles_dev_chart == true || (github.event_name == 'schedule' && true) }}
+      target_build_type: ${{ inputs.target_build_type || 'prime' }}
       turtles_chart_version: ${{ inputs.turtles_chart_version }}
       skip_cluster_delete: ${{ inputs.skip_cluster_delete || (github.event_name == 'schedule' && false) }}
       runner_template: ${{ inputs.runner_template || 'capi-e2e-ci-runner-spot-n2-highmem-16-template-v3' }}
