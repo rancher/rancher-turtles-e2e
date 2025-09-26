@@ -305,14 +305,6 @@ jobs:
           password: ${{ secrets.docker_auth_password }}
       - name: Install helm
         run: curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-      # Build rancher-turtles latest chart
-      - name: Inject kube-vip controlplane IP for vsphere into capv-helm-values.yaml
-        if: ${{ needs.create-runner.outputs.uuid == 'vsphere' }}
-        run: |
-          # A round-robin distribution of 3 available control plane IPs for kube-vip
-          INDEX=$(((${{ github.run_number }} % 3) + 1))
-          CP_ENDPOINT_IP=$(echo ${{ secrets.vsphere_endpoints_list }} | cut -d' ' -f${INDEX})
-          sed -i "s/replace_cluster_control_plane_endpoint_ip/${CP_ENDPOINT_IP}/" tests/cypress/latest/fixtures/vsphere/capv-helm-values.yaml
       - name: Set Rancher Manager Install version
         run: |
           if [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
@@ -346,11 +338,9 @@ jobs:
           RELEASE_TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} CONTROLLER_IMAGE_VERSION=v${{ env.TAG }} make build-chart verify-gen
           docker run -d -p 5000:5000 --name registry registry:2
           docker push ${{ env.CONTROLLER_IMG }}:v${{ env.TAG }}
-
       - name: Copy chart file
         if: ${{ inputs.turtles_dev_chart == true }}
         run: cp ${{ github.workspace }}/out/package/rancher-turtles-${{ env.TAG }}.tgz ${{ runner.temp }}
-
       - name: Checkout
         uses: actions/checkout@v5
       - name: Install Go
@@ -361,6 +351,13 @@ jobs:
       - name: Copy chart file for chartmuseum
         if: ${{ inputs.turtles_dev_chart == true }}
         run: cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
+      - name: Inject kube-vip controlplane IP for vsphere into capv-helm-values.yaml
+        if: ${{ needs.create-runner.outputs.uuid == 'vsphere' }}
+        run: |
+          # A round-robin distribution of 3 available control plane IPs for kube-vip
+          INDEX=$(((${{ github.run_number }} % 3) + 1))
+          CP_ENDPOINT_IP=$(echo ${{ secrets.vsphere_endpoints_list }} | cut -d' ' -f${INDEX})
+          sed -i "s/replace_cluster_control_plane_endpoint_ip/${CP_ENDPOINT_IP}/" tests/cypress/latest/fixtures/vsphere/capv-helm-values.yaml
       - name: Install Rancher Manager
         env:
           RANCHER_VERSION: ${{ env.RANCHER_VERSION }}
