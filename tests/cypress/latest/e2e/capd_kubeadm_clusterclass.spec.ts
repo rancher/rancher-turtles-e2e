@@ -27,10 +27,20 @@ describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
   const clusterClassRepoName = 'docker-kb-clusterclass'
   const dockerRegistryConfigBase64 = btoa(Cypress.env('docker_registry_config'))
   const capiClustersNS = 'capi-clusters'
+  let skipRestOfTheTests: boolean;
 
-  beforeEach(() => {
+  beforeEach(function () {
+    if (skipRestOfTheTests) {
+      this.skip();
+    }
     cy.login();
     cy.burgerMenuOperate('open');
+  });
+
+  afterEach(function () {
+    if (this.currentTest?.state == 'failed' && this.currentTest?.fullTitle?.().includes('@crucial')) {
+      skipRestOfTheTests = true;
+    }
   });
 
   // To validate namespace auto-import
@@ -39,8 +49,8 @@ describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
   })
 
   qase(92,
-    it('Add CAPD Kubeadm ClusterClass using fleet', () => {
-      cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
+    it('Add CAPD Kubeadm ClusterClass using fleet', {tags: '@crucial'}, () => {
+      cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'unknown', classesPath, 'capi-classes')
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(classNamePrefix);
     })
