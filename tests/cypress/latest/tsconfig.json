@@ -28,8 +28,7 @@
       "cypress",
       "cy-verify-downloads",
       "@rancher-ecp-qa/cypress-library",
-      "cypress-file-upload",
-      "@cypress/grep"
+      "cypress-file-upload"
     ]
   },
   "exclude": [
