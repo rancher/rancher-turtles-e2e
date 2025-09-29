@@ -14,9 +14,13 @@ limitations under the License.
 
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
+import {isRancherManagerVersion} from '~/support/utils';
 
 Cypress.config();
 describe('Install Turtles Chart - @install', { tags: '@install' }, () => {
+  let turtlesHelmRepo = Cypress.env('chartmuseum_repo')
+  let turtlesVersion = Cypress.env('turtles_chart_version')
+  let devChart = turtlesHelmRepo != ''
 
   beforeEach(() => {
     cy.login();
@@ -37,22 +41,22 @@ describe('Install Turtles Chart - @install', { tags: '@install' }, () => {
     cy.contains("Include Prerelease Versions").should('not.have.class', 'bg-disabled');
   })
 
-  it('Add turtles repo', { retries: 2 }, () => {
-    let turtlesHelmRepo = Cypress.env('chartmuseum_repo')
-    // if the env var is empty or not defined at all; use the normal repo
-    if (turtlesHelmRepo == '') {
-      turtlesHelmRepo = 'https://rancher.github.io/turtles/'
-    } else {
-      turtlesHelmRepo += ':8080'
-    }
-    cy.addRepository('turtles-chart', turtlesHelmRepo, 'http', 'none');
-  })
+  // Skip adding repo to install turtles from r/charts
+  if (isRancherManagerVersion('<=2.12') || devChart) {
+    it('Add turtles repo', { retries: 1 }, () => {
+      // if the env var is empty or not defined at all; use the normal repo
+      if (turtlesHelmRepo == '') {
+        turtlesHelmRepo = 'https://rancher.github.io/turtles/'
+      } else {
+        turtlesHelmRepo += ':8080'
+      }
+      cy.addRepository('turtles-chart', turtlesHelmRepo, 'http', 'none');
+    })
+  }
 
   qase([2, 11],
     it('Install Turtles chart', {retries: 1}, () => {
       cy.contains('local').click();
-
-      let turtlesVersion = Cypress.env('turtles_chart_version')
 
       // if turtles dev chart is to be used, ignore the turtles chart version
       const turtlesHelmRepo = Cypress.env('chartmuseum_repo')

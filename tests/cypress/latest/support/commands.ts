@@ -529,6 +529,8 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
 // Example2: cy.checkChart('Rancher Turtles', 'rancher-turtles-system', [{ menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Seamless integration with Fleet and CAPI'},{ menuEntry: 'Rancher webhook cleanup settings', inputBoxTitle: 'Webhook Cleanup Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.28.0'}]);
 Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, questions, refreshRepo = false) => {
   const isUpdateOperation = operation == 'Update'
+  const turtlesChart = chartName == 'Rancher Turtles'
+
   // the 'Update' operation has been renamed to 'Edit' in 2.13.
   if (isRancherManagerVersion('>=2.13') && isUpdateOperation) {
     operation = 'Edit'
@@ -562,9 +564,17 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
     cy.typeInFilter(chartName);
   }
   let chartSelector = isRancherManagerVersion('>=2.12') ? 'app-chart-cards-container' : 'chart-selection-grid';
-  const turtlesChartSelector = isRancherManagerVersion('>=2.12') ? '"item-card-cluster/turtles-chart/rancher-turtles"' : '"select-icon-grid-Rancher Turtles - the Cluster API Extension"';
-  
-  if (chartName == 'Rancher Turtles') {
+  if (turtlesChart) {
+    let devChart = Cypress.env('chartmuseum_repo') != ''
+    let turtlesChartSelector: string;
+    
+    if (isRancherManagerVersion('2.13')) {
+      turtlesChartSelector = devChart ? '"item-card-cluster/turtles-chart/rancher-turtles"' : '"item-card-cluster/rancher-charts/rancher-turtles"'; // turtles-chart repo == null
+    } else if (isRancherManagerVersion('2.12')) {
+      turtlesChartSelector = '"item-card-cluster/turtles-chart/rancher-turtles"'; // turtles-chart repo != null
+    } else {
+      turtlesChartSelector = '"select-icon-grid-Rancher Turtles - the Cluster API Extension"';
+    }
     chartSelector = turtlesChartSelector
   }
   cy.getBySel(chartSelector).within(() => {
@@ -580,7 +590,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
     cy.url().should("contain", version)
   }
 
-  if (chartName == 'Rancher Turtles' && isUpdateOperation) {
+  if (turtlesChart && isUpdateOperation) {
     cy.get('body').invoke('text').then((bodyText) => {
       if (bodyText.includes('Current')) {
         cy.contains('Current').click();
@@ -596,7 +606,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
   if (questions) {
     // Some apps like Alerting show questions page directly so no further action needed here
     // Some other apps like Turtles have a 'Customize install settings' checkbox or its variant which needs to be clicked
-    if (chartName == 'Rancher Turtles' && isUpdateOperation) {
+    if (turtlesChart && isUpdateOperation) {
       cy.contains('Customize install settings').should('be.visible').click();
     }
 
@@ -631,7 +641,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
   // or in case of Turtles, Rancher pod restarts, so this is enough time to start restarting Rancher
   cy.wait(10000);
 
-  if (chartName == 'Rancher Turtles') {
+  if (turtlesChart) {
     // Poll /dashboard/about until it returns HTTP 200 and then reload the page
     const checkApiStatus = (retries = 20) => {
       cy.request({
