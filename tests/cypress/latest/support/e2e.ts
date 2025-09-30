@@ -18,7 +18,7 @@ import './capz_support';
 import './cleanup_support';
 import {Cluster, Question} from './structs';
 // @ts-expect-error ignore the error
-import { register as registerCypressGrep } from '@cypress/grep'
+import {register as registerCypressGrep} from '@cypress/grep'
 
 declare global {
   namespace Cypress {
@@ -108,25 +108,52 @@ registerCypressGrep()
 
 // Abort on first failure in @install tests
 const resultFile = './fixtures/runtime_test_result.yaml'
-beforeEach(() => {
+beforeEach(function () {
   if (Cypress.env("ci")) {
     cy.log('Running in GitHub Actions - checking previous test result');
     cy.readFile(resultFile).then((data) => {
       const content = yaml.load(data)
       const result = content['test_result']
+      const test_type = content['test_type']
       cy.log('Previous Test Result: ' + result);
       if (result == 'failed') {
-        cy.log('Stopping test run - previous test(s) have failed')
-        Cypress.stop()
+        if (test_type == '@install') {
+          cy.log('Stopping test run - previous test(s) have failed')
+          Cypress.stop()
+        } else if (test_type == '@setup') {
+          cy.log('A @setup test has failed - skipping rest of the tests')
+          const run_delete_tests = content['run_delete_tests']
+          const test_title = content['test_title']
+          // Skip tests if a setup test failed; in case cluster is created, do not skip if it is a @delete test
+          if (!(run_delete_tests == 'true' && test_title.includes('@teardown'))) {
+            cy.log('Cluster was created; running delete tests for a proper cleanup')
+            this.skip();
+          }
+        }
       }
     });
   } else cy.log('Not running in GitHub Actions - skipping test result check');
 });
 
 afterEach(function () {
-  if (Cypress.env("ci") && this.currentTest?.state == 'failed' && this.currentTest?.fullTitle?.().includes('@install')) {
-    const result = { test_result: this.currentTest?.state };
-    const data = yaml.dump(result);
-    cy.writeFile(resultFile, data);
+  if (Cypress.env("ci")) {
+    if (this.currentTest?.state == 'failed') {
+      const test_tile = this.currentTest?.fullTitle?.() || '';
+      let result: Record<string, string> = {
+        test_result: this.currentTest?.state,
+        test_title: test_tile,
+      };
+
+      if (test_tile.includes('@install')) {
+        result['test_type'] = '@install';
+      } else if (test_tile.includes('@setup')) {
+        result['test_type'] = '@setup'
+        if (test_tile.includes('@import')) {
+          result['run_delete_tests'] = 'true'
+        }
+      }
+      const data = yaml.dump(result);
+      cy.writeFile(resultFile, data);
+    }
   }
 })

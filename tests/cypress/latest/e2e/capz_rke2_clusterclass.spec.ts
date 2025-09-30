@@ -16,26 +16,13 @@ describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
   const clientSecret = btoa(Cypress.env("azure_client_secret"))
   const subscriptionID = Cypress.env("azure_subscription_id")
   const tenantID = Cypress.env("azure_tenant_id")
-  let runDeleteTests: boolean, skipRestOfTheTests: boolean;
 
   beforeEach(function () {
-    // Skip tests; in case cluster is created, do not skip if it is a @delete test
-    if (skipRestOfTheTests && !(runDeleteTests && this.currentTest?.parent?.fullTitle?.().includes('@teardown'))) {
-      this.skip();
-    }
     cy.login();
     cy.burgerMenuOperate('open');
   });
 
   context('@setup', () => {
-    afterEach(function () {
-      if (this.currentTest?.state == 'failed') {
-        skipRestOfTheTests = true;
-        if (this.currentTest?.fullTitle?.().includes('@import')) {
-          runDeleteTests = true;
-        }
-      }
-    })
     it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
