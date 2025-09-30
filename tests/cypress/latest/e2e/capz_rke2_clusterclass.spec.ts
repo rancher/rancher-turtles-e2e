@@ -41,36 +41,38 @@ describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
       })
     );
 
-    qase(78,
-      it('Import CAPZ RKE2 class-cluster using YAML - @import', () => {
-        cy.readFile('./fixtures/azure/capz-rke2-class-cluster.yaml').then((data) => {
-          data = data.replace(/replace_cluster_name/g, clusterName)
-          data = data.replace(/replace_subscription_id/g, subscriptionID)
-          cy.importYAML(data, 'capi-clusters')
-        });
-        // Check CAPI cluster using its name
-        cy.checkCAPICluster(clusterName);
-      })
-    );
+    context('@cluster-import', () => {
+      qase(78,
+        it('Import CAPZ RKE2 class-cluster using YAML', () => {
+          cy.readFile('./fixtures/azure/capz-rke2-class-cluster.yaml').then((data) => {
+            data = data.replace(/replace_cluster_name/g, clusterName)
+            data = data.replace(/replace_subscription_id/g, subscriptionID)
+            cy.importYAML(data, 'capi-clusters')
+          });
+          // Check CAPI cluster using its name
+          cy.checkCAPICluster(clusterName);
+        })
+      );
 
-    qase(79, it('Auto import child CAPZ RKE2 cluster - @import', () => {
-        // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-        cy.checkCAPIClusterProvisioned(clusterName, timeout);
+      qase(79, it('Auto import child CAPZ RKE2 cluster', () => {
+          // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+          cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
-        // Check child cluster is created and auto-imported
-        // This is checked by ensuring the cluster is available in navigation menu
-        cy.goToHome();
-        cy.contains(clusterName).should('exist');
+          // Check child cluster is created and auto-imported
+          // This is checked by ensuring the cluster is available in navigation menu
+          cy.goToHome();
+          cy.contains(clusterName).should('exist');
 
-        // Check cluster is Active
-        cy.searchCluster(clusterName);
-        cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
+          // Check cluster is Active
+          cy.searchCluster(clusterName);
+          cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
 
-        // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-        // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
-        cy.checkCAPIClusterActive(clusterName, timeout);
-      })
-    );
+          // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+          // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
+          cy.checkCAPIClusterActive(clusterName, timeout);
+        })
+      );
+    })
   })
 
   context('@post-setup', () => {
@@ -107,7 +109,7 @@ describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
 
   context('@teardown', () => {
     if (skipClusterDeletion) {
-      it('Remove imported CAPZ cluster from Rancher Manager and ensure the provisioned CAPI cluster still exists', {retries: 1}, () => {
+      it('Remove imported CAPZ cluster from Rancher Manager', {retries: 1}, () => {
         // Delete the imported cluster
         // Ensure that the provisioned CAPI cluster still exists
         // this check can fail, ref: https://github.com/rancher/turtles/issues/1587

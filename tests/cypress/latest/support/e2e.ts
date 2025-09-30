@@ -106,8 +106,22 @@ require('cypress-plugin-tab');
 require('@rancher-ecp-qa/cypress-library');
 registerCypressGrep()
 
-// Abort on first failure in @install tests
+// Abort on first failure in @install tests or skip rest of the tests in file in case of @setup tests
 const resultFile = './fixtures/runtime_test_result.yaml'
+
+// reset the resultFile before every test suite run
+before(function () {
+  if (Cypress.env("ci")) {
+    cy.readFile(resultFile).then((data) => {
+      const content = yaml.load(data);
+      if (content['test_type'] != '@install') {
+        const result = {'test_result': 'passed'}
+        cy.writeFile(resultFile, yaml.dump(result));
+      }
+    })
+  }
+})
+
 beforeEach(function () {
   if (Cypress.env("ci")) {
     cy.log('Running in GitHub Actions - checking previous test result');
@@ -123,9 +137,8 @@ beforeEach(function () {
         } else if (test_type == '@setup') {
           cy.log('A @setup test has failed - skipping rest of the tests')
           const run_delete_tests = content['run_delete_tests']
-          const test_title = content['test_title']
           // Skip tests if a setup test failed; in case cluster is created, do not skip if it is a @delete test
-          if (!(run_delete_tests == 'true' && test_title.includes('@teardown'))) {
+          if (!(run_delete_tests == 'true' && this.currentTest?.fullTitle?.().includes('@teardown'))) {
             cy.log('Cluster was created; running delete tests for a proper cleanup')
             this.skip();
           }
@@ -138,17 +151,17 @@ beforeEach(function () {
 afterEach(function () {
   if (Cypress.env("ci")) {
     if (this.currentTest?.state == 'failed') {
-      const test_tile = this.currentTest?.fullTitle?.() || '';
+      const test_title = this.currentTest?.fullTitle?.() || '';
       let result: Record<string, string> = {
         test_result: this.currentTest?.state,
-        test_title: test_tile,
+        test_title: test_title,
       };
 
-      if (test_tile.includes('@install')) {
+      if (test_title.includes('@install')) {
         result['test_type'] = '@install';
-      } else if (test_tile.includes('@setup')) {
+      } else if (test_title.includes('@setup')) {
         result['test_type'] = '@setup'
-        if (test_tile.includes('@import')) {
+        if (test_title.includes('@cluster-import')) {
           result['run_delete_tests'] = 'true'
         }
       }
