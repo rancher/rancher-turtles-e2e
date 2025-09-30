@@ -285,7 +285,7 @@ Cypress.Commands.add('checkCAPICluster', (clusterName) => {
   cy.checkCAPIMenu();
   cy.getBySel('button-group-child-1').click();
   cy.typeInFilter(clusterName);
-  cy.getBySel('sortable-cell-0-1', { timeout: 90000 }).should('exist');
+  cy.getBySel('sortable-cell-0-1', {timeout: 90000}).should('exist');
 });
 
 // Command to check CAPI cluster presence under CAPI Menu
@@ -294,7 +294,7 @@ Cypress.Commands.add('checkCAPIClusterClass', (className) => {
   cy.contains('Cluster Classes').click();
   cy.getBySel('button-group-child-1').click();
   cy.typeInFilter(className);
-  cy.waitForAllRowsInState('Active');
+  cy.waitForAllRowsInState('Active', 20000);
 });
 
 // Command to check CAPI cluster Active status
@@ -889,7 +889,11 @@ Cypress.Commands.add('checkFleetGitRepoActive', (repoName, workspace) => {
   cy.url().should("include", "fleet/fleet.cattle.io.gitrepo/" + workspace + "/" + repoName)
   // Ensure there are no errors after waiting for a few seconds
   cy.wait(5000);
-  cy.get('.badge-state').should("not.contain", "Err Applied");
+  if (isRancherManagerVersion('>=2.12')) {
+    cy.get('.badge-state').should("not.contain", "Error");
+  } else {
+    cy.get('.badge-state').should("not.contain", "Err Applied");
+  }
 })
 
 // Fleet namespace toggle
