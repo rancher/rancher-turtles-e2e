@@ -93,7 +93,7 @@ describe('Enable CAPI Providers', () => {
     cy.burgerMenuOperate('open');
   });
 
-  context('Local providers - [INSTALL]', {tags: '@install'}, () => {
+  context('Local providers - @install', {tags: '@install'}, () => {
     it('Create CAPI Namespaces', () => {
       cy.createNamespace(capiNamespaces);
     })

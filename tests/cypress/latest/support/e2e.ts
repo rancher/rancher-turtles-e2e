@@ -106,15 +106,15 @@ require('cypress-plugin-tab');
 require('@rancher-ecp-qa/cypress-library');
 registerCypressGrep()
 
-// Abort on first failure in [INSTALL] tests or skip rest of the tests in spec in case of [SETUP] test failure
+// Abort on first failure in @install tests or skip rest of the tests in spec in case of [SETUP] test failure
 const resultFile = './fixtures/runtime_test_result.yaml'
 
-// reset the resultFile before every suite run (i.e. `*.spec.ts`); unless the failure is from [INSTALL] tests
+// reset the resultFile before every suite run (i.e. `*.spec.ts`); unless the failure is from @install tests
 before(function () {
   if (Cypress.env("ci")) {
     cy.readFile(resultFile).then((data) => {
       const content = yaml.load(data);
-      if (content['test_type'] != '[INSTALL]') {
+      if (content['test_type'] != '@install') {
         const result = {'test_result': 'passed'}
         cy.writeFile(resultFile, yaml.dump(result));
       }
@@ -131,7 +131,7 @@ beforeEach(function () {
       const test_type = content['test_type']
       cy.log('Previous Test Result: ' + result);
       if (result == 'failed') {
-        if (test_type == '[INSTALL]') {
+        if (test_type == '@install') {
           cy.log('Stopping test run - previous test(s) have failed')
           Cypress.stop()
         } else if (test_type == '[SETUP]') {
@@ -159,8 +159,8 @@ afterEach(function () {
         test_title: test_title,
       };
 
-      if (test_title.includes('[INSTALL]')) {
-        result['test_type'] = '[INSTALL]';
+      if (test_title.includes('@install')) {
+        result['test_type'] = '@install';
       } else if (test_title.includes('[SETUP]')) {
         result['test_type'] = '[SETUP]'
         if (test_title.includes('[CLUSTER-IMPORT]')) {
