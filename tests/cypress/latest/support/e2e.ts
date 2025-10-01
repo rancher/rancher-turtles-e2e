@@ -106,10 +106,10 @@ require('cypress-plugin-tab');
 require('@rancher-ecp-qa/cypress-library');
 registerCypressGrep()
 
-// Abort on first failure in @install tests or skip rest of the tests in file in case of @setup tests
+// Abort on first failure in @install tests or skip rest of the tests in spec in case of @setup test failure
 const resultFile = './fixtures/runtime_test_result.yaml'
 
-// reset the resultFile before every test suite run
+// reset the resultFile before every suite run (i.e. `*.spec.ts`); unless the failure is from @install tests
 before(function () {
   if (Cypress.env("ci")) {
     cy.readFile(resultFile).then((data) => {
@@ -150,10 +150,12 @@ beforeEach(function () {
 
 afterEach(function () {
   if (Cypress.env("ci")) {
-    if (this.currentTest?.state == 'failed') {
-      const test_title = this.currentTest?.fullTitle?.() || '';
+    const test_title = this.currentTest?.fullTitle?.() || '';
+    const test_result = this.currentTest?.state || '';
+
+    if (test_result == 'failed') {
       let result: Record<string, string> = {
-        test_result: this.currentTest?.state,
+        test_result: test_result,
         test_title: test_title,
       };
 
@@ -165,6 +167,7 @@ afterEach(function () {
           result['run_delete_tests'] = 'true'
         }
       }
+
       const data = yaml.dump(result);
       cy.writeFile(resultFile, data);
     }
