@@ -134,8 +134,8 @@ beforeEach(function () {
         if (test_type == '@install') {
           cy.log('Stopping test run - previous test(s) have failed')
           Cypress.stop()
-        } else if (test_type == '[SETUP]') {
-          cy.log('A [SETUP] test has failed - skipping rest of the tests')
+        } else if (test_type == '[SETUP]' || test_type == '[CLUSTER-IMPORT]') {
+          cy.log('A [SETUP]/[CLUSTER-IMPORT] test has failed - skipping rest of the tests')
           const run_delete_tests = content['run_delete_tests']
           // Skip tests if a setup test failed; in case cluster is created, do not skip if it is a @delete test
           if (!(run_delete_tests == 'true' && this.currentTest?.fullTitle?.().includes('[TEARDOWN]'))) {
@@ -163,9 +163,9 @@ afterEach(function () {
         result['test_type'] = '@install';
       } else if (test_title.includes('[SETUP]')) {
         result['test_type'] = '[SETUP]'
-        if (test_title.includes('[CLUSTER-IMPORT]')) {
-          result['run_delete_tests'] = 'true'
-        }
+      } else if (test_title.includes('[CLUSTER-IMPORT]')) {
+        result['test_type'] = '[CLUSTER-IMPORT]'
+        result['run_delete_tests'] = 'true'
       }
 
       const data = yaml.dump(result);

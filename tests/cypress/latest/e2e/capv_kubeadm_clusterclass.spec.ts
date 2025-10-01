@@ -77,40 +77,40 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
       // Navigate to `local` cluster, More Resources > Fleet > HelmApps and ensure the charts are present.
       cy.checkFleetHelmApps(['vsphere-ccm']);
     });
+  })
 
-    context('[CLUSTER-IMPORT]', () => {
-      it('Add CAPV class-clusters fleet repo', () => {
-        cypressLib.checkNavIcon('cluster-management')
-          .should('exist');
+  context('[CLUSTER-IMPORT]', () => {
+    it('Add CAPV class-clusters fleet repo', () => {
+      cypressLib.checkNavIcon('cluster-management')
+        .should('exist');
 
-        // Add CAPV fleet repository
-        cy.addFleetGitRepo(clusterRepoName, repoUrl, branch, path);
+      // Add CAPV fleet repository
+      cy.addFleetGitRepo(clusterRepoName, repoUrl, branch, path);
 
-        // Check CAPI cluster using its name
-        cy.checkCAPICluster(clusterName);
-      })
+      // Check CAPI cluster using its name
+      cy.checkCAPICluster(clusterName);
+    })
 
-      it('Auto import child CAPV cluster', () => {
-        // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-        cy.checkCAPIClusterProvisioned(clusterName, timeout);
+    it('Auto import child CAPV cluster', () => {
+      // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+      cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
-        // Check child cluster is created and auto-imported
-        // This is checked by ensuring the cluster is available in navigation menu
-        cy.goToHome();
-        cy.contains(clusterName).should('exist');
+      // Check child cluster is created and auto-imported
+      // This is checked by ensuring the cluster is available in navigation menu
+      cy.goToHome();
+      cy.contains(clusterName).should('exist');
 
-        // Check cluster is Active
-        cy.searchCluster(clusterName);
-        cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
+      // Check cluster is Active
+      cy.searchCluster(clusterName);
+      cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
 
-        // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-        // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
-        cy.checkCAPIClusterActive(clusterName, timeout);
-      })
+      // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+      // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
+      cy.checkCAPIClusterActive(clusterName, timeout);
     })
   })
 
-  context('[POST-SETUP]', () => {
+  context('[CLUSTER-OPERATIONS]', () => {
     it('Install App on imported cluster', () => {
       // Click on imported CAPV cluster
       cy.contains(clusterName).click();

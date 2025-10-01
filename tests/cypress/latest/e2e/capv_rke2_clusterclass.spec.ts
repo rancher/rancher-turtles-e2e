@@ -98,44 +98,44 @@ describe('Import CAPV RKE2 Class-Cluster', { tags: '@vsphere' }, () => {
       // Navigate to `local` cluster, More Resources > Fleet > HelmApps and ensure the charts are present.
       cy.checkFleetHelmApps(['vsphere-ccm']);
     });
+  })
 
-    context('[CLUSTER-IMPORT]', () => {
-      it('Add CAPV class-clusters fleet repo', () => {
-        cypressLib.checkNavIcon('cluster-management')
-          .should('exist');
+  context('[CLUSTER-IMPORT]', () => {
+    it('Add CAPV class-clusters fleet repo', () => {
+      cypressLib.checkNavIcon('cluster-management')
+        .should('exist');
 
-        // Add CAPV fleet repository
-        cy.addFleetGitRepo(clusterRepoName, repoUrl, branch, path);
+      // Add CAPV fleet repository
+      cy.addFleetGitRepo(clusterRepoName, repoUrl, branch, path);
 
-        // Check CAPI cluster using its name
-        cy.checkCAPICluster(clusterName);
-      })
+      // Check CAPI cluster using its name
+      cy.checkCAPICluster(clusterName);
+    })
 
-      it('Auto import child CAPV cluster', () => {
-        // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-        cy.checkCAPIClusterProvisioned(clusterName, timeout);
+    it('Auto import child CAPV cluster', () => {
+      // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+      cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
-        // Check child cluster is created and auto-imported
-        // This is checked by ensuring the cluster is available in navigation menu
-        cy.goToHome();
-        cy.contains(clusterName).should('exist');
+      // Check child cluster is created and auto-imported
+      // This is checked by ensuring the cluster is available in navigation menu
+      cy.goToHome();
+      cy.contains(clusterName).should('exist');
 
-        // Check cluster is Active
-        cy.searchCluster(clusterName);
-        cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
+      // Check cluster is Active
+      cy.searchCluster(clusterName);
+      cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
 
-        // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-        // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
-        cy.checkCAPIClusterActive(clusterName, timeout);
+      // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+      // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
+      cy.checkCAPIClusterActive(clusterName, timeout);
 
-        // Block until all 6 nodes are Active - this is important for kube-vip leader election test
-        cy.verifyResourceCount(clusterName, ['Nodes'], clusterName, '', 6); // '' means no namespace
-        cy.waitForAllRowsInState('Active', 300000);
-      })
+      // Block until all 6 nodes are Active - this is important for kube-vip leader election test
+      cy.verifyResourceCount(clusterName, ['Nodes'], clusterName, '', 6); // '' means no namespace
+      cy.waitForAllRowsInState('Active', 300000);
     })
   })
 
-  context('[POST-SETUP]', () => {
+  context('[CLUSTER-OPERATIONS]', () => {
     qase(131, it('Validate kube-vip leader election ability across CPs', () => {
         function getActiveKubeVipLeaderNode() {
           cy.burgerMenuOperate('open');

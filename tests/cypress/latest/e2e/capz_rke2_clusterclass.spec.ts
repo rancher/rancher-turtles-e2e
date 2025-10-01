@@ -40,42 +40,42 @@ describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
         cy.checkFleetHelmApps(['azure-ccm', 'calico-cni']);
       })
     );
-
-    context('[CLUSTER-IMPORT]', () => {
-      qase(78,
-        it('Import CAPZ RKE2 class-cluster using YAML', () => {
-          cy.readFile('./fixtures/azure/capz-rke2-class-cluster.yaml').then((data) => {
-            data = data.replace(/replace_cluster_name/g, clusterName)
-            data = data.replace(/replace_subscription_id/g, subscriptionID)
-            cy.importYAML(data, 'capi-clusters')
-          });
-          // Check CAPI cluster using its name
-          cy.checkCAPICluster(clusterName);
-        })
-      );
-
-      qase(79, it('Auto import child CAPZ RKE2 cluster', () => {
-          // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-          cy.checkCAPIClusterProvisioned(clusterName, timeout);
-
-          // Check child cluster is created and auto-imported
-          // This is checked by ensuring the cluster is available in navigation menu
-          cy.goToHome();
-          cy.contains(clusterName).should('exist');
-
-          // Check cluster is Active
-          cy.searchCluster(clusterName);
-          cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
-
-          // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-          // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
-          cy.checkCAPIClusterActive(clusterName, timeout);
-        })
-      );
-    })
   })
 
-  context('[POST-SETUP]', () => {
+  context('[CLUSTER-IMPORT]', () => {
+    qase(78,
+      it('Import CAPZ RKE2 class-cluster using YAML', () => {
+        cy.readFile('./fixtures/azure/capz-rke2-class-cluster.yaml').then((data) => {
+          data = data.replace(/replace_cluster_name/g, clusterName)
+          data = data.replace(/replace_subscription_id/g, subscriptionID)
+          cy.importYAML(data, 'capi-clusters')
+        });
+        // Check CAPI cluster using its name
+        cy.checkCAPICluster(clusterName);
+      })
+    );
+
+    qase(79, it('Auto import child CAPZ RKE2 cluster', () => {
+        // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+        cy.checkCAPIClusterProvisioned(clusterName, timeout);
+
+        // Check child cluster is created and auto-imported
+        // This is checked by ensuring the cluster is available in navigation menu
+        cy.goToHome();
+        cy.contains(clusterName).should('exist');
+
+        // Check cluster is Active
+        cy.searchCluster(clusterName);
+        cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
+
+        // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+        // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
+        cy.checkCAPIClusterActive(clusterName, timeout);
+      })
+    );
+  })
+
+  context('[CLUSTER-OPERATIONS]', () => {
 
     qase(80, it('Install App on imported cluster', () => {
         // Click on imported CAPZ cluster

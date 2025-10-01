@@ -47,52 +47,52 @@ describe('Create CAPD', {tags: '@short'}, () => {
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(className);
       })
+    })
 
-      context('[CLUSTER-IMPORT]', () => {
-        qase(44,
-          it('Create child CAPD cluster from Clusterclass', () => {
+    context('[CLUSTER-IMPORT]', () => {
+      qase(44,
+        it('Create child CAPD cluster from Clusterclass', () => {
 
-            const cluster: Cluster = {
-              className: className,
-              metadata: {
-                namespace: namespace, clusterName: clusterName, k8sVersion: k8sVersion, autoImportCluster: true,
-              },
-              clusterNetwork: {
-                serviceCIDR: [serviceCIDR], podCIDR: ['192.168.0.0/16'], serviceDomain: 'cluster.local'
-              },
-              controlPlane: {
-                replicas: '3'
-              },
-              workers: [
-                {class: 'default-worker', name: 'md-0', replicas: '3'},
-              ],
-              variables: [
-                {
-                  name: "podSecurityStandard",
-                  value: `audit: restricted
+          const cluster: Cluster = {
+            className: className,
+            metadata: {
+              namespace: namespace, clusterName: clusterName, k8sVersion: k8sVersion, autoImportCluster: true,
+            },
+            clusterNetwork: {
+              serviceCIDR: [serviceCIDR], podCIDR: ['192.168.0.0/16'], serviceDomain: 'cluster.local'
+            },
+            controlPlane: {
+              replicas: '3'
+            },
+            workers: [
+              {class: 'default-worker', name: 'md-0', replicas: '3'},
+            ],
+            variables: [
+              {
+                name: "podSecurityStandard",
+                value: `audit: restricted
 enabled: false
 enforce: baseline
 warn: restricted`,
-                  type: "codeMirror"
-                }
-              ],
-              labels: {
-                "cni": "calico"
+                type: "codeMirror"
               }
+            ],
+            labels: {
+              "cni": "calico"
             }
-            cy.createCAPICluster(cluster)
+          }
+          cy.createCAPICluster(cluster)
 
-            // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
-            cy.checkCAPIClusterActive(clusterName, timeout);
-            // Check child cluster is auto-imported
-            cy.searchCluster(clusterName);
-            cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
-          })
-        );
-      })
+          // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
+          cy.checkCAPIClusterActive(clusterName, timeout);
+          // Check child cluster is auto-imported
+          cy.searchCluster(clusterName);
+          cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
+        })
+      );
     })
 
-    context('[POST-SETUP]', () => {
+    context('[CLUSTER-OPERATIONS]', () => {
       it('Install App on created cluster', () => {
         // Click on imported CAPD cluster
         cy.contains(clusterName).click();

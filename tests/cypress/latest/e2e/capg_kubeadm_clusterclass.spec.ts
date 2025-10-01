@@ -38,42 +38,42 @@ describe('Import CAPG Kubeadm Class-Cluster', { tags: '@full' }, () => {
         cy.getBySel('sortable-cell-0-1').should('exist');
       })
     );
-
-    context('[CLUSTER-IMPORT]', () => {
-      qase(143,
-        it('Import CAPG Kubeadm class-cluster using YAML', () => {
-          cy.readFile('./fixtures/gcp/capg-kubeadm-class-cluster.yaml').then((data) => {
-            data = data.replace(/replace_cluster_name/g, clusterName)
-            data = data.replace(/replace_gcp_project/g, gcpProject)
-            cy.importYAML(data, 'capi-clusters')
-          });
-          // Check CAPI cluster using its name
-          cy.checkCAPICluster(clusterName);
-        })
-      );
-
-      qase(144,
-        it('Auto import child CAPG cluster', () => {
-          // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-          cy.checkCAPIClusterProvisioned(clusterName, timeout);
-
-          // Check child cluster is created and auto-imported
-          // This is checked by ensuring the cluster is available in navigation menu
-          cy.goToHome();
-          cy.contains(clusterName).should('exist');
-
-          // Check cluster is Active
-          cy.searchCluster(clusterName);
-          cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
-          // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-          // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
-          cy.checkCAPIClusterActive(clusterName, timeout);
-        })
-      );
-    })
   })
 
-  context('[POST-SETUP]', () => {
+  context('[CLUSTER-IMPORT]', () => {
+    qase(143,
+      it('Import CAPG Kubeadm class-cluster using YAML', () => {
+        cy.readFile('./fixtures/gcp/capg-kubeadm-class-cluster.yaml').then((data) => {
+          data = data.replace(/replace_cluster_name/g, clusterName)
+          data = data.replace(/replace_gcp_project/g, gcpProject)
+          cy.importYAML(data, 'capi-clusters')
+        });
+        // Check CAPI cluster using its name
+        cy.checkCAPICluster(clusterName);
+      })
+    );
+
+    qase(144,
+      it('Auto import child CAPG cluster', () => {
+        // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+        cy.checkCAPIClusterProvisioned(clusterName, timeout);
+
+        // Check child cluster is created and auto-imported
+        // This is checked by ensuring the cluster is available in navigation menu
+        cy.goToHome();
+        cy.contains(clusterName).should('exist');
+
+        // Check cluster is Active
+        cy.searchCluster(clusterName);
+        cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
+        // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+        // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
+        cy.checkCAPIClusterActive(clusterName, timeout);
+      })
+    );
+  })
+
+  context('[CLUSTER-OPERATIONS]', () => {
     qase(145,
       it('Install App on imported cluster', () => {
         // Click on imported CAPG cluster

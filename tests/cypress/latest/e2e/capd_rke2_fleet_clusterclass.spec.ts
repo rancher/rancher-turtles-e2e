@@ -55,42 +55,42 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(classNamePrefix);
     })
+  })
 
-    context('[CLUSTER-IMPORT]', () => {
-      it('Add CAPD cluster fleet repo and get cluster name', () => {
-        cypressLib.checkNavIcon('cluster-management').should('exist');
-        cy.addFleetGitRepo(clustersRepoName, repoUrl, branch, path);
+  context('[CLUSTER-IMPORT]', () => {
+    it('Add CAPD cluster fleet repo and get cluster name', () => {
+      cypressLib.checkNavIcon('cluster-management').should('exist');
+      cy.addFleetGitRepo(clustersRepoName, repoUrl, branch, path);
 
-        // Check CAPI cluster using its name prefix i.e. className
-        cy.checkCAPICluster(classNamePrefix);
-        // Get the cluster name by its prefix and use it across the test
-        cy.getBySel('sortable-cell-0-1').then(($cell) => {
-          clusterName = $cell.text();
-          cy.log('CAPI Cluster Name:', clusterName);
-        });
-      })
+      // Check CAPI cluster using its name prefix i.e. className
+      cy.checkCAPICluster(classNamePrefix);
+      // Get the cluster name by its prefix and use it across the test
+      cy.getBySel('sortable-cell-0-1').then(($cell) => {
+        clusterName = $cell.text();
+        cy.log('CAPI Cluster Name:', clusterName);
+      });
+    })
 
-      it('Auto import child CAPD cluster', () => {
-        // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-        cy.checkCAPIClusterProvisioned(clusterName, timeout);
+    it('Auto import child CAPD cluster', () => {
+      // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+      cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
-        // Check child cluster is created and auto-imported
-        // This is checked by ensuring the cluster is available in navigation menu
-        cy.goToHome();
-        cy.contains(clusterName).should('exist');
+      // Check child cluster is created and auto-imported
+      // This is checked by ensuring the cluster is available in navigation menu
+      cy.goToHome();
+      cy.contains(clusterName).should('exist');
 
-        // Check cluster is Active
-        cy.searchCluster(clusterName);
-        cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
+      // Check cluster is Active
+      cy.searchCluster(clusterName);
+      cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
 
-        // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-        // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
-        cy.checkCAPIClusterActive(clusterName, timeout);
-      })
+      // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+      // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
+      cy.checkCAPIClusterActive(clusterName, timeout);
     })
   })
 
-  context('[POST-SETUP]', () => {
+  context('[CLUSTER-OPERATIONS]', () => {
     it('Install App on imported cluster', () => {
       // Click on imported CAPD cluster
       cy.contains(clusterName).click();

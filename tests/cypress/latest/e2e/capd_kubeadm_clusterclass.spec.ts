@@ -55,44 +55,43 @@ describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
         cy.importYAML(data, capiClustersNS)
       })
     });
-
-
-    context('[CLUSTER-IMPORT]', () => {
-      qase(6,
-        it('Import CAPD Kubeadm class-clusters using YAML', () => {
-          cy.readFile('./fixtures/docker/capd-kubeadm-class-cluster.yaml').then((data) => {
-            data = data.replace(/replace_cluster_name/g, clusterName)
-            cy.importYAML(data, capiClustersNS)
-          });
-
-          // Check CAPI cluster using its name
-          cy.checkCAPICluster(clusterName);
-        })
-      );
-
-      qase(94,
-        it('Auto import child CAPD cluster', () => {
-          // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-          cy.checkCAPIClusterProvisioned(clusterName, timeout);
-
-          // Check child cluster is created and auto-imported
-          // This is checked by ensuring the cluster is available in navigation menu
-          cy.goToHome();
-          cy.contains(clusterName).should('exist');
-
-          // Check cluster is Active
-          cy.searchCluster(clusterName);
-          cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
-
-          // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-          // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
-          cy.checkCAPIClusterActive(clusterName, timeout);
-        })
-      );
-    })
   })
 
-  context('[POST-SETUP]', () => {
+  context('[CLUSTER-IMPORT]', () => {
+    qase(6,
+      it('Import CAPD Kubeadm class-clusters using YAML', () => {
+        cy.readFile('./fixtures/docker/capd-kubeadm-class-cluster.yaml').then((data) => {
+          data = data.replace(/replace_cluster_name/g, clusterName)
+          cy.importYAML(data, capiClustersNS)
+        });
+
+        // Check CAPI cluster using its name
+        cy.checkCAPICluster(clusterName);
+      })
+    );
+
+    qase(94,
+      it('Auto import child CAPD cluster', () => {
+        // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+        cy.checkCAPIClusterProvisioned(clusterName, timeout);
+
+        // Check child cluster is created and auto-imported
+        // This is checked by ensuring the cluster is available in navigation menu
+        cy.goToHome();
+        cy.contains(clusterName).should('exist');
+
+        // Check cluster is Active
+        cy.searchCluster(clusterName);
+        cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
+
+        // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+        // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
+        cy.checkCAPIClusterActive(clusterName, timeout);
+      })
+    );
+  })
+
+  context('[CLUSTER-OPERATIONS]', () => {
     // fleet-addon provider checks (for rancher dev/2.10.3 and up)
     qase(42,
       // skip due to turtles/issues/1329

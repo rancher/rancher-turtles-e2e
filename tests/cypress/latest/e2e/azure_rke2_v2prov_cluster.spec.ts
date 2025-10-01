@@ -50,50 +50,51 @@ describe('Create Azure RKE2 Cluster', { tags: '@short' }, () => {
         cy.importYAML(data)
       });
     })
-
-    context('[CLUSTER-IMPORT]', () => {
-      // Create Azure RKE2 Cluster using YAML
-      qase(132, it('Create Azure RKE2 Cluster', () => {
-          cy.goToHome();
-          cy.clickButton('Manage');
-          cy.getBySel('cluster-list').should('be.visible');
-          cy.clickButton('Create');
-
-          cy.getBySel('cluster-manager-create-grid-Azure')
-            .should('be.visible')
-            .click();
-
-          cy.getBySel('name-ns-description-name').should('be.visible');
-          cy.getBySel('rke2-custom-create-yaml').click();
-          cy.clickButton('Save and Continue');
-          cy.getBySel('yaml-editor-code-mirror').should('be.visible');
-
-          cy.readFile('./fixtures/azure/azure-rke2-cluster.yaml').then((data) => {
-            cy.get('.CodeMirror')
-              .then((editor) => {
-                data = data.replace(/replace_user_id/g, userID)
-                data = data.replace(/replace_cluster_name/g, clusterName)
-                data = data.replace(/replace_cloudcred_id/g, ccID)
-                data = data.replace(/replace_rke2_version/g, k8sVersion)
-                // @ts-expect-error expected error with CodeMirror
-                editor[0].CodeMirror.setValue(data);
-              })
-          });
-          cy.clickButton('Create');
-          cy.getBySel('cluster-list').should('be.visible');
-
-          // Check cluster is Active
-          cy.searchCluster(clusterName);
-          cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
-
-          // Check provisioning status
-          cy.getBySel('sortable-cell-0-1').click();
-          cy.getBySel('log').click();
-          cy.contains('[INFO ] provisioning done');
-        })
-      );
-    })
   })
+
+  context('[CLUSTER-IMPORT]', () => {
+    // Create Azure RKE2 Cluster using YAML
+    qase(132, it('Create Azure RKE2 Cluster', () => {
+        cy.goToHome();
+        cy.clickButton('Manage');
+        cy.getBySel('cluster-list').should('be.visible');
+        cy.clickButton('Create');
+
+        cy.getBySel('cluster-manager-create-grid-Azure')
+          .should('be.visible')
+          .click();
+
+        cy.getBySel('name-ns-description-name').should('be.visible');
+        cy.getBySel('rke2-custom-create-yaml').click();
+        cy.clickButton('Save and Continue');
+        cy.getBySel('yaml-editor-code-mirror').should('be.visible');
+
+        cy.readFile('./fixtures/azure/azure-rke2-cluster.yaml').then((data) => {
+          cy.get('.CodeMirror')
+            .then((editor) => {
+              data = data.replace(/replace_user_id/g, userID)
+              data = data.replace(/replace_cluster_name/g, clusterName)
+              data = data.replace(/replace_cloudcred_id/g, ccID)
+              data = data.replace(/replace_rke2_version/g, k8sVersion)
+              // @ts-expect-error expected error with CodeMirror
+              editor[0].CodeMirror.setValue(data);
+            })
+        });
+        cy.clickButton('Create');
+        cy.getBySel('cluster-list').should('be.visible');
+
+        // Check cluster is Active
+        cy.searchCluster(clusterName);
+        cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
+
+        // Check provisioning status
+        cy.getBySel('sortable-cell-0-1').click();
+        cy.getBySel('log').click();
+        cy.contains('[INFO ] provisioning done');
+      })
+    );
+  })
+
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
       it('Delete Azure RKE2 cluster from Rancher Manager', () => {
