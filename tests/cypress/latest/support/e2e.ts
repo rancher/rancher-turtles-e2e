@@ -128,18 +128,20 @@ beforeEach(function () {
     cy.readFile(resultFile).then((data) => {
       const content = yaml.load(data)
       const result = content['test_result']
-      const test_type = content['test_type']
-      cy.log('Previous Test Result: ' + result);
+      const stop_cypress = content['stop_cypress']
+      const skip_all_tests = content['skip_all_tests']
+      const run_delete_tests = content['run_delete_tests']
+      cy.log('Previous Test Result: ' + content);
       if (result == 'failed') {
-        if (test_type == '@install') {
+        if (stop_cypress == 'true') {
           cy.log('Stopping test run - previous test(s) have failed')
           Cypress.stop()
-        } else if (test_type == '[SETUP]' || test_type == '[CLUSTER-IMPORT]') {
-          cy.log('A [SETUP]/[CLUSTER-IMPORT] test has failed - skipping rest of the tests')
-          const run_delete_tests = content['run_delete_tests']
+        } else if (skip_all_tests == 'true') {
           // Skip tests if a setup test failed; in case cluster is created, do not skip if it is a @delete test
-          if (!(run_delete_tests == 'true' && this.currentTest?.fullTitle?.().includes('[TEARDOWN]'))) {
-            cy.log('Cluster was created; running delete tests for a proper cleanup')
+          if (run_delete_tests == 'true' && this.currentTest?.fullTitle?.().includes('[TEARDOWN]')) {
+            cy.log('Cluster was created; running delete tests for a proper cleanup.')
+          } else {
+            cy.log('A [SETUP]/[CLUSTER-IMPORT] test has failed - skipping rest of the tests.')
             this.skip();
           }
         }
@@ -157,14 +159,17 @@ afterEach(function () {
       let result: Record<string, string> = {
         test_result: test_result,
         test_title: test_title,
+        stop_cypress: 'false',
+        skip_all_tests: 'false',
+        run_delete_tests: 'false',
       };
 
       if (test_title.includes('@install')) {
-        result['test_type'] = '@install';
+        result['stop_cypress'] = 'true';
       } else if (test_title.includes('[SETUP]')) {
-        result['test_type'] = '[SETUP]'
+        result['skip_all_tests'] = 'true'
       } else if (test_title.includes('[CLUSTER-IMPORT]')) {
-        result['test_type'] = '[CLUSTER-IMPORT]'
+        result['skip_all_tests'] = 'true'
         result['run_delete_tests'] = 'true'
       }
 
