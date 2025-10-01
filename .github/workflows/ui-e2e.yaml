@@ -20,7 +20,7 @@ on:
         default: head/2.12
         type: string
       turtles_chart_version:
-        description: Rancher Turtles chart version to test (eg. 0.21.0)
+        description: Rancher Turtles chart version to test (eg. 0.24.1 | 108.0.0+up0.25.0)
         type: string
       grep_test_by_tag:
         description: Test tags. For multiple selection separate with spaces (Available options - @install [@upgrade @short @full | @vsphere]). Keep always @install
@@ -30,6 +30,9 @@ on:
       target_build_type:
         description: Build type for turtles_dev_chart (prime|community)
         default: 'prime'
+        type: string
+      cluster_name_suffix:
+        description: Suffix to be used in cluster name (default - github.run_number)
         type: string
       turtles_dev_chart:
         description: Install rancher turtles dev chart
@@ -47,9 +50,6 @@ on:
         description: Report to QASE
         default: false
         type: boolean
-      cluster_name_suffix:
-        description: Suffix to be used in cluster name (default - github.run_number)
-        type: string
       runner_template:
         description: Runner template to use
         default: capi-e2e-ci-runner-spot-n2-highmem-16-template-v3
