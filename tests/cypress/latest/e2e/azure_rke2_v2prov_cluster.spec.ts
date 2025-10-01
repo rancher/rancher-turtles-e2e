@@ -16,7 +16,7 @@ describe('Create Azure RKE2 Cluster', { tags: '@short' }, () => {
     cy.burgerMenuOperate('open')
   });
 
-  context('@setup', () => {
+  context('[SETUP]', () => {
     it('Create Azure Cloud credentials', () => {
       // Create Azure Cloud credentials
       cy.addCloudCredsAzure('azure', Cypress.env('azure_client_id'), Cypress.env('azure_client_secret'), Cypress.env('azure_subscription_id'));
@@ -51,7 +51,7 @@ describe('Create Azure RKE2 Cluster', { tags: '@short' }, () => {
       });
     })
 
-    context('@cluster-import', () => {
+    context('[CLUSTER-IMPORT]', () => {
       // Create Azure RKE2 Cluster using YAML
       qase(132, it('Create Azure RKE2 Cluster', () => {
           cy.goToHome();
@@ -94,7 +94,7 @@ describe('Create Azure RKE2 Cluster', { tags: '@short' }, () => {
       );
     })
   })
-  context('@teardown', () => {
+  context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
       it('Delete Azure RKE2 cluster from Rancher Manager', () => {
         cy.deleteCluster(clusterName, timeout);

@@ -21,7 +21,7 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
     cy.burgerMenuOperate('open')
   });
 
-  context('@setup', () => {
+  context('[SETUP]', () => {
     it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
@@ -39,7 +39,7 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
       cy.checkFleetHelmApps(['azure-ccm', 'calico-cni']);
     });
 
-    context('@cluster-import', () => {
+    context('[CLUSTER-IMPORT]', () => {
       it('Import CAPZ Kubeadm class-cluster using YAML', () => {
         cy.readFile('./fixtures/azure/capz-kubeadm-class-cluster.yaml').then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
@@ -70,7 +70,7 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
     })
   })
 
-  context('@post-setup', () => {
+  context('[POST-SETUP]', () => {
     it('Install App on imported cluster', () => {
       // Click on imported CAPZ cluster
       cy.contains(clusterName).click();
@@ -99,7 +99,7 @@ describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
     })
   })
 
-  context('@teardown', () => {
+  context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
       it('Remove imported CAPZ cluster from Rancher Manager', {retries: 1}, () => {
         // Delete the imported cluster

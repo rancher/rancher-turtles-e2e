@@ -22,7 +22,7 @@ describe('Import CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
     cy.burgerMenuOperate('open')
   });
 
-  context('@setup', () => {
+  context('[SETUP]', () => {
     it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
@@ -38,7 +38,7 @@ describe('Import CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
       })
     );
 
-    context('@cluster-import', () => {
+    context('[CLUSTER-IMPORT]', () => {
       qase(55,
         it('Import CAPZ AKS class-cluster using YAML', () => {
           cy.readFile('./fixtures/azure/capz-aks-class-cluster.yaml').then((data) => {
@@ -68,7 +68,7 @@ describe('Import CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
     })
   })
 
-  context('@post-setup', () => {
+  context('[POST-SETUP]', () => {
     qase(57, it('Install App on imported cluster', () => {
         // Click on imported CAPZ cluster
         cy.contains(clusterName).click();
@@ -79,7 +79,7 @@ describe('Import CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
     );
   })
 
-  context('@teardown', () => {
+  context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
       it('Remove imported CAPZ cluster from Rancher Manager', () => {
         // Delete the imported cluster

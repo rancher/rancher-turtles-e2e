@@ -890,9 +890,9 @@ Cypress.Commands.add('checkFleetGitRepoActive', (repoName, workspace) => {
   // Ensure there are no errors after waiting for a few seconds
   cy.wait(5000);
   if (isRancherManagerVersion('>=2.12')) {
-    cy.get('.badge-state').should("not.contain", "Error");
+    cy.get('.badge-state', {timeout: 3000}).should("not.contain", "Error");
   } else {
-    cy.get('.badge-state').should("not.contain", "Err Applied");
+    cy.get('.badge-state', {timeout: 3000}).should("not.contain", "Err Applied");
   }
 })
 

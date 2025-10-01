@@ -18,7 +18,7 @@ describe('Import CAPG Kubeadm Class-Cluster', { tags: '@full' }, () => {
     cy.login();
     cy.burgerMenuOperate('open');
   });
-  context('@setup', () => {
+  context('[SETUP]', () => {
     it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
@@ -39,7 +39,7 @@ describe('Import CAPG Kubeadm Class-Cluster', { tags: '@full' }, () => {
       })
     );
 
-    context('@cluster-import', () => {
+    context('[CLUSTER-IMPORT]', () => {
       qase(143,
         it('Import CAPG Kubeadm class-cluster using YAML', () => {
           cy.readFile('./fixtures/gcp/capg-kubeadm-class-cluster.yaml').then((data) => {
@@ -73,7 +73,7 @@ describe('Import CAPG Kubeadm Class-Cluster', { tags: '@full' }, () => {
     })
   })
 
-  context('@post-setup', () => {
+  context('[POST-SETUP]', () => {
     qase(145,
       it('Install App on imported cluster', () => {
         // Click on imported CAPG cluster
@@ -104,7 +104,7 @@ describe('Import CAPG Kubeadm Class-Cluster', { tags: '@full' }, () => {
     })
   })
 
-  context('@teardown', () => {
+  context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
       it('Remove imported CAPG cluster from Rancher Manager', {retries: 1}, () => {
         // Delete the imported cluster

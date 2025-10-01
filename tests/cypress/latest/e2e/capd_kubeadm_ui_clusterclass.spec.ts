@@ -40,7 +40,7 @@ describe('Create CAPD', {tags: '@short'}, () => {
       serviceCIDR = '10.128.0.0/12'
     }
 
-    context('@setup', () => {
+    context('[SETUP]', () => {
       it('Add CAPD ClusterClass fleet repo', () => {
         // TODO: Change the targetNamespace to capi-classes to test cross-namespace cluster provisioning (capi-ui-extension/issues/111)
         cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath + path, namespace)
@@ -48,7 +48,7 @@ describe('Create CAPD', {tags: '@short'}, () => {
         cy.checkCAPIClusterClass(className);
       })
 
-      context('@cluster-import', () => {
+      context('[CLUSTER-IMPORT]', () => {
         qase(44,
           it('Create child CAPD cluster from Clusterclass', () => {
 
@@ -92,7 +92,7 @@ warn: restricted`,
       })
     })
 
-    context('@post-setup', () => {
+    context('[POST-SETUP]', () => {
       it('Install App on created cluster', () => {
         // Click on imported CAPD cluster
         cy.contains(clusterName).click();
@@ -102,7 +102,7 @@ warn: restricted`,
       })
     })
 
-    context('@teardown', () => {
+    context('[TEARDOWN]', () => {
       if (skipClusterDeletion) {
         it('Remove imported CAPD cluster from Rancher Manager', {retries: 1}, () => {
           // Delete the imported cluster

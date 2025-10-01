@@ -25,7 +25,7 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
     cy.login();
     cy.burgerMenuOperate('open');
   });
-  context('@setup', () => {
+  context('[SETUP]', () => {
     it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
@@ -78,7 +78,7 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
       cy.checkFleetHelmApps(['vsphere-ccm']);
     });
 
-    context('@cluster-import', () => {
+    context('[CLUSTER-IMPORT]', () => {
       it('Add CAPV class-clusters fleet repo', () => {
         cypressLib.checkNavIcon('cluster-management')
           .should('exist');
@@ -110,7 +110,7 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
     })
   })
 
-  context('@post-setup', () => {
+  context('[POST-SETUP]', () => {
     it('Install App on imported cluster', () => {
       // Click on imported CAPV cluster
       cy.contains(clusterName).click();
@@ -121,7 +121,7 @@ describe('Import CAPV Kubeadm Class-Cluster', { tags: '@vsphere' }, () => {
     })
   })
 
-  context('@teardown', () => {
+  context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
       it('Remove imported CAPV cluster from Rancher Manager', {retries: 1}, () => {
         // Delete the imported cluster

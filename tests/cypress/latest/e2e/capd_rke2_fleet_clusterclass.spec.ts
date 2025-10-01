@@ -36,7 +36,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
     cy.login();
     cy.burgerMenuOperate('open');
   });
-  context('@setup', () => {
+  context('[SETUP]', () => {
     it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
@@ -56,7 +56,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
       cy.checkCAPIClusterClass(classNamePrefix);
     })
 
-    context('@cluster-import', () => {
+    context('[CLUSTER-IMPORT]', () => {
       it('Add CAPD cluster fleet repo and get cluster name', () => {
         cypressLib.checkNavIcon('cluster-management').should('exist');
         cy.addFleetGitRepo(clustersRepoName, repoUrl, branch, path);
@@ -90,7 +90,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
     })
   })
 
-  context('@post-setup', () => {
+  context('[POST-SETUP]', () => {
     it('Install App on imported cluster', () => {
       // Click on imported CAPD cluster
       cy.contains(clusterName).click();
@@ -101,7 +101,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
     })
   })
 
-  context('@teardown', () => {
+  context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
       it('Remove imported CAPD cluster from Rancher Manager', {retries: 1}, () => {
         // Delete the imported cluster

@@ -106,15 +106,15 @@ require('cypress-plugin-tab');
 require('@rancher-ecp-qa/cypress-library');
 registerCypressGrep()
 
-// Abort on first failure in @install tests or skip rest of the tests in spec in case of @setup test failure
+// Abort on first failure in [INSTALL] tests or skip rest of the tests in spec in case of [SETUP] test failure
 const resultFile = './fixtures/runtime_test_result.yaml'
 
-// reset the resultFile before every suite run (i.e. `*.spec.ts`); unless the failure is from @install tests
+// reset the resultFile before every suite run (i.e. `*.spec.ts`); unless the failure is from [INSTALL] tests
 before(function () {
   if (Cypress.env("ci")) {
     cy.readFile(resultFile).then((data) => {
       const content = yaml.load(data);
-      if (content['test_type'] != '@install') {
+      if (content['test_type'] != '[INSTALL]') {
         const result = {'test_result': 'passed'}
         cy.writeFile(resultFile, yaml.dump(result));
       }
@@ -131,14 +131,14 @@ beforeEach(function () {
       const test_type = content['test_type']
       cy.log('Previous Test Result: ' + result);
       if (result == 'failed') {
-        if (test_type == '@install') {
+        if (test_type == '[INSTALL]') {
           cy.log('Stopping test run - previous test(s) have failed')
           Cypress.stop()
-        } else if (test_type == '@setup') {
-          cy.log('A @setup test has failed - skipping rest of the tests')
+        } else if (test_type == '[SETUP]') {
+          cy.log('A [SETUP] test has failed - skipping rest of the tests')
           const run_delete_tests = content['run_delete_tests']
           // Skip tests if a setup test failed; in case cluster is created, do not skip if it is a @delete test
-          if (!(run_delete_tests == 'true' && this.currentTest?.fullTitle?.().includes('@teardown'))) {
+          if (!(run_delete_tests == 'true' && this.currentTest?.fullTitle?.().includes('[TEARDOWN]'))) {
             cy.log('Cluster was created; running delete tests for a proper cleanup')
             this.skip();
           }
@@ -159,11 +159,11 @@ afterEach(function () {
         test_title: test_title,
       };
 
-      if (test_title.includes('@install')) {
-        result['test_type'] = '@install';
-      } else if (test_title.includes('@setup')) {
-        result['test_type'] = '@setup'
-        if (test_title.includes('@cluster-import')) {
+      if (test_title.includes('[INSTALL]')) {
+        result['test_type'] = '[INSTALL]';
+      } else if (test_title.includes('[SETUP]')) {
+        result['test_type'] = '[SETUP]'
+        if (test_title.includes('[CLUSTER-IMPORT]')) {
           result['run_delete_tests'] = 'true'
         }
       }

@@ -17,7 +17,7 @@ import {qase} from 'cypress-qase-reporter/mocha';
 import {isRancherManagerVersion} from "~/support/utils";
 
 Cypress.config();
-describe('Install CAPI extension - @install', { tags: '@install' }, () => {
+describe('Install CAPI extension - [INSTALL]', {tags: '@install'}, () => {
 
   beforeEach(() => {
     cy.login();

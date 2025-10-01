@@ -20,7 +20,7 @@ describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
     cy.burgerMenuOperate('open');
   });
 
-  context('@setup', () => {
+  context('[SETUP]', () => {
     it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
@@ -44,7 +44,7 @@ describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
     );
 
 
-    context('@cluster-import', () => {
+    context('[CLUSTER-IMPORT]', () => {
       qase(124,
         it('Import CAPA Kubeadm class-cluster using YAML', () => {
           cy.readFile('./fixtures/aws/capa-kubeadm-class-cluster.yaml').then((data) => {
@@ -79,7 +79,7 @@ describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
     })
   })
 
-  context('@post-setup', () => {
+  context('[POST-SETUP]', () => {
     qase(126,
       it('Install App on imported cluster', () => {
         // Click on imported CAPA cluster
@@ -109,7 +109,7 @@ describe('Import CAPA Kubeadm Class-Cluster', { tags: '@full' }, () => {
     })
   })
 
-  context('@teardown', () => {
+  context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
       it('Remove imported CAPA cluster from Rancher Manager', {retries: 1}, () => {
         // Delete the imported cluster

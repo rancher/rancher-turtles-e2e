@@ -22,7 +22,7 @@ describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
     cy.burgerMenuOperate('open');
   });
 
-  context('@setup', () => {
+  context('[SETUP]', () => {
     it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
@@ -41,7 +41,7 @@ describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
       })
     );
 
-    context('@cluster-import', () => {
+    context('[CLUSTER-IMPORT]', () => {
       qase(78,
         it('Import CAPZ RKE2 class-cluster using YAML', () => {
           cy.readFile('./fixtures/azure/capz-rke2-class-cluster.yaml').then((data) => {
@@ -75,7 +75,7 @@ describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
     })
   })
 
-  context('@post-setup', () => {
+  context('[POST-SETUP]', () => {
 
     qase(80, it('Install App on imported cluster', () => {
         // Click on imported CAPZ cluster
@@ -107,7 +107,7 @@ describe('Import CAPZ RKE2 Class-Cluster', { tags: '@full' }, () => {
 
   })
 
-  context('@teardown', () => {
+  context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
       it('Remove imported CAPZ cluster from Rancher Manager', {retries: 1}, () => {
         // Delete the imported cluster
