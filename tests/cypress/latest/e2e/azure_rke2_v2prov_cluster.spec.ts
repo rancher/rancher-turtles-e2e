@@ -8,7 +8,7 @@ describe('Create Azure RKE2 Cluster', { tags: '@short' }, () => {
   let userID: string, ccID: string;
   const timeout = 1200000
   const userName = 'admin'
-  const k8sVersion = 'v1.31.7+rke2r1'
+  const k8sVersion = 'v1.32.9+rke2r1'
   const clusterName = 'turtles-qa-azure-v2-' + randomstring.generate({ length: 4, capitalization: "lowercase" })
 
   beforeEach(() => {

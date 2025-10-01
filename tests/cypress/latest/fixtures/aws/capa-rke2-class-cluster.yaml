@@ -32,7 +32,7 @@ spec:
       value: none
     - name: awsClusterIdentityName
       value: cluster-identity
-    version: v1.31.7+rke2r1
+    version: v1.32.9+rke2r1
     workers:
       machineDeployments:
       - class: default-worker

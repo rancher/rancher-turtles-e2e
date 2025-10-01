@@ -22,7 +22,7 @@ spec:
       value: replace_cluster_name
     - name: azureClusterIdentityName
       value: cluster-identity
-    version: v1.31.4
+    version: v1.32.0
     workers:
       machinePools:
       - class: default-system

@@ -26,7 +26,7 @@ spec:
       value: replace_cluster_name
     - name: azureClusterIdentityName
       value: cluster-identity
-    version: v1.31.2
+    version: v1.32.3
     workers:
       machineDeployments:
       - class: kubeadm-default-worker

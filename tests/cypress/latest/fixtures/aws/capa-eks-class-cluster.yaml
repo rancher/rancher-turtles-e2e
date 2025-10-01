@@ -12,7 +12,7 @@ spec:
   topology:
     class: aws-eks-example
     classNamespace: capi-classes
-    version: v1.31.0
+    version: v1.32.0
     variables:
       - name: region
         value: ap-south-2
