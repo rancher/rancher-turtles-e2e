@@ -17,7 +17,7 @@ import {qase} from 'cypress-qase-reporter/mocha';
 import {isRancherManagerVersion} from '~/support/utils';
 
 Cypress.config();
-describe('Install Turtles Chart - @install', { tags: '@install' }, () => {
+describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
   let turtlesHelmRepo = Cypress.env('chartmuseum_repo')
   let turtlesVersion = Cypress.env('turtles_chart_version')
   let devChart = turtlesHelmRepo != ''

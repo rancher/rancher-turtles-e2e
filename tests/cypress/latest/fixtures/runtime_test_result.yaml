@@ -1,1 +1,4 @@
-test_result: passed
+test_result: failed
+test_title: >-
+  Import CAPD RKE2 Class-Cluster [TEARDOWN] Remove imported CAPD cluster from
+  Rancher Manager
