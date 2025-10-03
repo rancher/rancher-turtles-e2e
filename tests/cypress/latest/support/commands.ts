@@ -101,7 +101,7 @@ Cypress.Commands.add('deleteNamespace', (namespaces: string[]) => {
 // Command to set namespace selection
 Cypress.Commands.add('setNamespace', (namespace, namespaceID) => {
   const nsID: string = namespaceID || (namespace.startsWith('Project:')) ? '' : `ns_${namespace}`
-  cy.getBySel('namespaces-dropdown', { timeout: 18000 }).trigger('click');
+  cy.getBySel('namespaces-dropdown', {timeout: 18000}).trigger('click');
   cy.get('.ns-clear').click();
   cy.get('.ns-options').within(() => {
     if (nsID != '') {
@@ -300,11 +300,11 @@ Cypress.Commands.add('checkCAPIClusterClass', (className) => {
 // Command to check CAPI cluster Active status
 Cypress.Commands.add('checkCAPIClusterActive', (clusterName, timeout = 90000) => {
   cy.checkCAPIMenu();
-  cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
+  cy.contains(new RegExp('Provisioned.*' + clusterName), {timeout: timeout});
   cy.contains('Machine Deployments').click();
-  cy.contains(new RegExp('Running.*' + clusterName), { timeout: timeout });
+  cy.contains(new RegExp('Running.*' + clusterName), {timeout: timeout});
   cy.contains('Machine Sets').click();
-  cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+  cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
 });
 
 // Command to check CAPI cluster Provisioned status
@@ -317,7 +317,7 @@ Cypress.Commands.add('checkCAPIClusterProvisioned', (clusterName, timeout) => {
   } else {
     timeout = 90000
   }
-  cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
+  cy.contains(new RegExp('Provisioned.*' + clusterName), {timeout: timeout});
 });
 
 // Command to check CAPI cluster deletion status
@@ -325,7 +325,7 @@ Cypress.Commands.add('checkCAPIClusterDeleted', (clusterName, timeout) => {
   cy.checkCAPIMenu();
   cy.getBySel('button-group-child-1').click();
   cy.typeInFilter(clusterName);
-  cy.getBySel('sortable-cell-0-1', { timeout: timeout }).should('not.exist');
+  cy.getBySel('sortable-cell-0-1', {timeout: timeout}).should('not.exist');
 });
 
 // Command to check CAPI Menu is visible
@@ -364,7 +364,7 @@ Cypress.Commands.add('addCustomProvider', (name, namespace, providerName, provid
 
   // Select provider type
   cy.contains('Provider type').click();
-  cy.contains(providerType, { matchCase: false }).click();
+  cy.contains(providerType, {matchCase: false}).click();
 
   cy.getBySel('name-ns-description-namespace').type(namespace + '{enter}');
   cy.typeValue('Name', name);
@@ -391,7 +391,7 @@ Cypress.Commands.add('addInfraProvider', (providerType, namespace, cloudCredenti
 
   // Match only with the first word of the provider type to avoid issues with providers like 'Google Cloud Platform' in 2.12
   const firstWordOfProviderType = providerType.includes(' ') ? providerType.split(' ')[0] : providerType;
-  cy.contains('Provider: Create ' + firstWordOfProviderType, { matchCase: false }).should('be.visible');
+  cy.contains('Provider: Create ' + firstWordOfProviderType, {matchCase: false}).should('be.visible');
 
   // TODO: Add variables support after capi-ui-extension/issues/49
   cy.getBySel('name-ns-description-namespace').type(namespace + '{enter}');
@@ -421,7 +421,7 @@ Cypress.Commands.add('removeCAPIResource', (resourcetype, resourceName, timeout)
   cy.wait(2000); // needed for 2.12
   cy.typeInFilter(resourceName);
   if (timeout != undefined) {
-    cy.getBySel('sortable-cell-0-1', { timeout: timeout }).should('not.exist');
+    cy.getBySel('sortable-cell-0-1', {timeout: timeout}).should('not.exist');
   } else {
     cy.getBySel('sortable-cell-0-1').should('not.exist');
   }
@@ -448,7 +448,7 @@ Cypress.Commands.add('addCloudCredsGCP', (name, gcpCredentials) => {
   cy.clickButton('Create');
   cy.getBySel('subtype-banner-item-gcp').click();
   cy.typeValue('Credential Name', name);
-  cy.getBySel('text-area-auto-grow').type(gcpCredentials, { log: false });
+  cy.getBySel('text-area-auto-grow').type(gcpCredentials, {log: false});
   cy.clickButton('Create');
   cy.contains('API Key').should('be.visible');
   cy.contains(name).should('be.visible');
@@ -492,7 +492,7 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
   // Make sure we are in the 'Repositories' screen (test failed here before)
   // Test fails sporadically here, screen stays in pending state forever
   // Ensuring "Loading..." overlay screen is not present.
-  cy.contains('Loading...', { timeout: 35000 }).should('not.exist');
+  cy.contains('Loading...', {timeout: 35000}).should('not.exist');
   cy.contains('header', 'Repositories')
     .should('be.visible');
   cy.contains('Create')
@@ -519,7 +519,7 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
   cy.wait(1000);
   cy.get('.icon.group-icon.icon-refresh').click();
   cy.wait(1000);
-  cy.contains(new RegExp('Active.*' + repositoryName), { timeout: 150000 });
+  cy.contains(new RegExp('Active.*' + repositoryName), {timeout: 150000});
 });
 
 // Command to Install, Update or Upgrade App from Charts menu
@@ -578,7 +578,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
     chartSelector = turtlesChartSelector
   }
   cy.getBySel(chartSelector).within(() => {
-    cy.contains(chartName, { timeout: 10000 }).then($el => {
+    cy.contains(chartName, {timeout: 10000}).then($el => {
       cy.wait(500);
       cy.wrap($el).should('be.visible').click();
     });
@@ -688,7 +688,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
     cy.namespaceReset();
   } else {
     cy.setNamespace(namespace);
-    cy.contains(new RegExp('Installed App:.*Deployed'), { timeout: 120000 }).should('be.visible');
+    cy.contains(new RegExp('Installed App:.*Deployed'), {timeout: 120000}).should('be.visible');
     cy.waitForAllRowsInState('Active');
     cy.namespaceReset();
   }
@@ -705,7 +705,7 @@ Cypress.Commands.add('patchYamlResource', (clusterName, namespace, resourceKind,
   // Open Resource Search modal
   cy.get('.icon-search.icon-lg').click();
   cy.get('input.search').type(resourceKind);
-  cy.contains('a', resourceKind, { matchCase: false }).click();
+  cy.contains('a', resourceKind, {matchCase: false}).click();
   cy.typeInFilter(resourceName);
   // Click three dots menu on filtered resource (must be unique)
   cy.getBySel('sortable-table-0-action-button').click();
@@ -770,7 +770,7 @@ Cypress.Commands.add('deleteCluster', (clusterName, timeout = 120000) => {
   cy.getBySel('sortable-table_check_select_all').click();
   cy.getBySel('sortable-table-promptRemove').click({ctrlKey: true}); // this will prevent to display confirmation dialog
   cy.wait(2000); // needed for 2.12
-  cy.contains(clusterName, { timeout: timeout }).should('not.exist');
+  cy.contains(clusterName, {timeout: timeout}).should('not.exist');
 });
 
 // Command to type in Filter input
@@ -910,8 +910,8 @@ Cypress.Commands.add('verifyTableRow', (rowNumber, expectedText1, expectedText2)
   // Could not find a better way to wait, but can be improved
   cy.wait(1000)
   // Ensure table is loaded and visible
-  cy.contains('tr.main-row[data-testid="sortable-table-0-row"]').should('not.be.empty', { timeout: 25000 });
-  cy.get(`table > tbody > tr.main-row[data-testid="sortable-table-${rowNumber}-row"]`, { timeout: 60000 }).should(($row) => {
+  cy.contains('tr.main-row[data-testid="sortable-table-0-row"]').should('not.be.empty', {timeout: 25000});
+  cy.get(`table > tbody > tr.main-row[data-testid="sortable-table-${rowNumber}-row"]`, {timeout: 60000}).should(($row) => {
     // Replace whitespaces by a space and trim the string for both expected texts
     const text = $row.text().replace(/\s+/g, ' ').trim();
 
@@ -938,7 +938,7 @@ Cypress.Commands.add('verifyTableRow', (rowNumber, expectedText1, expectedText2)
 
 // Wait until all the rows in the table on current page are in the same State
 Cypress.Commands.add('waitForAllRowsInState', (desiredState, timeout = 120000) => {
-  cy.get('table > tbody > tr.main-row', { timeout }).should(($rows) => {
+  cy.get('table > tbody > tr.main-row', {timeout}).should(($rows) => {
     // Make sure there is at least one row
     expect($rows.length).to.be.greaterThan(0);
     const allInDesiredState = $rows.toArray().every((row) => {
@@ -981,7 +981,7 @@ Cypress.Commands.add('deleteKubernetesResource', (clusterName = 'local', resourc
   cy.getBySel('sortable-table-promptRemove').click({ctrlKey: true}); // this will prevent to display confirmation dialog
   cy.wait(2000); // needed for 2.12
   cy.typeInFilter(resourceName);
-  cy.getBySel('sortable-cell-0-1', { timeout: 60000 }).should('not.exist');
+  cy.getBySel('sortable-cell-0-1', {timeout: 60000}).should('not.exist');
   cy.namespaceReset();
 })
 
@@ -1078,7 +1078,7 @@ Cypress.Commands.add('verifyResourceCount', (clusterName, resourcePath, resource
     cy.setNamespace(namespace);
   }
   cy.typeInFilter(resourceName);
-  cy.get('table > tbody > tr.main-row', { timeout }).should(($rows) => {
+  cy.get('table > tbody > tr.main-row', {timeout}).should(($rows) => {
     expect($rows.length).to.be.equal(expectedCount);
   });
 });

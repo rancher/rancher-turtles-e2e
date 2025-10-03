@@ -3,7 +3,7 @@ import {getClusterName, skipClusterDeletion} from '~/support/utils';
 import {capiClusterDeletion, capzResourcesCleanup, importedRancherClusterDeletion} from "~/support/cleanup_support";
 
 Cypress.config();
-describe('Import CAPZ Kubeadm Class-Cluster', { tags: '@full' }, () => {
+describe('Import CAPZ Kubeadm Class-Cluster', {tags: '@full'}, () => {
   const timeout = 1200000
   const classNamePrefix = 'azure-kubeadm'
   const clusterName = getClusterName(classNamePrefix)

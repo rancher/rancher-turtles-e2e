@@ -18,7 +18,7 @@ import {getClusterName, skipClusterDeletion} from '~/support/utils';
 import {capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 
 Cypress.config();
-describe('Import CAPD Kubeadm Class-Cluster', { tags: '@short' }, () => {
+describe('Import CAPD Kubeadm Class-Cluster', {tags: '@short'}, () => {
   const timeout = 600000
   const classNamePrefix = 'docker-kubeadm'
   const clusterName = getClusterName(classNamePrefix)

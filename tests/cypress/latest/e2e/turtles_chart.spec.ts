@@ -43,7 +43,7 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
 
   // Skip adding repo to install turtles from r/charts
   if (isRancherManagerVersion('<=2.12') || devChart) {
-    it('Add turtles repo', { retries: 1 }, () => {
+    it('Add turtles repo', {retries: 1}, () => {
       // if the env var is empty or not defined at all; use the normal repo
       if (turtlesHelmRepo == '') {
         turtlesHelmRepo = 'https://rancher.github.io/turtles/'

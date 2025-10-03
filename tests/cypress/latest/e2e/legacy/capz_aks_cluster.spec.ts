@@ -1,10 +1,10 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import {qase} from 'cypress-qase-reporter/mocha';
-import { skipClusterDeletion } from '~/support/utils';
+import {skipClusterDeletion} from '~/support/utils';
 
 Cypress.config();
-describe('Import CAPZ AKS Cluster', { tags: '@full' }, () => {
+describe('Import CAPZ AKS Cluster', {tags: '@full'}, () => {
   let clusterName: string
   const timeout = 1200000
   const repoName = 'clusters-azure-aks'
@@ -63,7 +63,7 @@ describe('Import CAPZ AKS Cluster', { tags: '@full' }, () => {
 
     // Check cluster is Active
     cy.searchCluster(clusterName);
-    cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+    cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
   })
   );
   qase(23, it('Install App on imported cluster', () => {
@@ -76,7 +76,7 @@ describe('Import CAPZ AKS Cluster', { tags: '@full' }, () => {
   );
 
   if (skipClusterDeletion) {
-    qase(25, it('Remove imported CAPZ cluster from Rancher Manager', { retries: 1 }, () => {
+    qase(25, it('Remove imported CAPZ cluster from Rancher Manager', {retries: 1}, () => {
 
       // Check cluster is not deleted after removal
       cy.deleteCluster(clusterName);

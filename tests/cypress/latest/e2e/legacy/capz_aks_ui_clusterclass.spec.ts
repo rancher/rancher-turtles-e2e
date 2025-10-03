@@ -4,7 +4,7 @@ import {getClusterName, skipClusterDeletion} from '~/support/utils';
 import {Cluster} from '~/support/structs';
 
 Cypress.config();
-describe('Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
+describe('Create CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
   const timeout = 1200000
   const classNamePrefix = 'azure-aks'
   const clusterName = getClusterName(classNamePrefix)
@@ -74,10 +74,10 @@ describe('Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
       }
       cy.createCAPICluster(cluster);
     cy.checkCAPIMenu();
-    cy.contains(new RegExp('Provisioned.*' + clusterName), { timeout: timeout });
+    cy.contains(new RegExp('Provisioned.*' + clusterName), {timeout: timeout});
       // Check child cluster is auto-imported
     cy.searchCluster(clusterName);
-    cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+    cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
   })
   );
 
@@ -90,7 +90,7 @@ describe('Create CAPZ AKS Class-Cluster', { tags: '@full' }, () => {
   })
 
   if (skipClusterDeletion) {
-    qase(89, it('Remove created CAPZ cluster from Rancher Manager and Delete the CAPZ cluster', { retries: 1 }, () => {
+    qase(89, it('Remove created CAPZ cluster from Rancher Manager and Delete the CAPZ cluster', {retries: 1}, () => {
       // Check cluster is not deleted after removal
       cy.deleteCluster(clusterName);
       cy.goToHome();
