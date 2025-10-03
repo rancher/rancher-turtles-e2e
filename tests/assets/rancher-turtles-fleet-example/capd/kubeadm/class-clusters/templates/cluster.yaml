@@ -34,7 +34,7 @@ spec:
         enabled: false
         enforce: baseline
         warn: restricted
-    version: v1.31.4
+    version: v1.32.3
     workers:
       machineDeployments:
       - class: default-worker

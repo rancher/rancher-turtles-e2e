@@ -29,8 +29,8 @@ spec:
     - name: awsClusterIdentityName
       value: cluster-identity
     - name: amiID
-      value: ami-0ac1df8d2f90a496c # Private copy of ami-0988c3c36e3080c43 from eu-west-2
-    version: v1.31.0
+      value: ami-0a130deaaeef71de6 # Private copy of ami-096c298c2ab1493d7 from eu-west-2
+    version: v1.32.0
     workers:
       machineDeployments:
       - class: default-worker

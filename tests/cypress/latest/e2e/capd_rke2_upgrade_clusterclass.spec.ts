@@ -29,7 +29,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', { tags: '@upgrade' }, () 
   const capiClassesNS = 'capi-classes'
   const capdProviderNS = 'capd-system'
   const capdProviderName = 'docker'
-  const capdProviderVersion = 'v1.10.5'
+  const capdProviderVersion = 'v1.10.6'
 
   beforeEach(() => {
     cy.login();

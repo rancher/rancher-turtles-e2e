@@ -5,7 +5,7 @@ metadata:
   namespace: capi-clusters
 data:  
   values.yaml: |-
-    kubeadm_k8s_version: v1.31.4
-    rke2_k8s_version: v1.31.7+rke2r1
+    kubeadm_k8s_version: v1.32.3
+    rke2_k8s_version: v1.32.9+rke2r1
     cp_machine_count: 3
     worker_machine_count: 2

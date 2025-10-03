@@ -109,13 +109,13 @@ describe('Enable CAPI Providers', () => {
         it('Create Kubeadm Providers - ' + providerType, () => {
           // Create CAPI Kubeadm providers
           if (providerType == 'control plane') {
-            // https://github.com/kubernetes-sigs/cluster-api/releases/v1.10.5/control-plane-components.yaml
+            // https://github.com/kubernetes-sigs/cluster-api/releases/v1.10.6/control-plane-components.yaml
             const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + 'control-plane' + '-components.yaml'
             const providerName = kubeadmProvider + '-' + 'control-plane'
             cy.addCustomProvider(providerName, 'capi-kubeadm-control-plane-system', kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
             matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', kubeadmProvider, kubeadmProviderVersion, 120000);
           } else {
-            // https://github.com/kubernetes-sigs/cluster-api/releases/v1.10.5/bootstrap-components.yaml
+            // https://github.com/kubernetes-sigs/cluster-api/releases/v1.10.6/bootstrap-components.yaml
             const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + providerType + '-components.yaml'
             const providerName = kubeadmProvider + '-' + providerType
             cy.addCustomProvider(providerName, 'capi-kubeadm-bootstrap-system', kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);

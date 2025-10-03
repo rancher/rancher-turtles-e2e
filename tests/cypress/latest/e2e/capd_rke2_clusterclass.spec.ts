@@ -27,7 +27,7 @@ describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
     {
       menuEntry: 'Rancher Turtles Features Settings',
       inputBoxTitle: 'Kubectl Image',
-      inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.31.0'
+      inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.32.0'
     }
   ];
 
