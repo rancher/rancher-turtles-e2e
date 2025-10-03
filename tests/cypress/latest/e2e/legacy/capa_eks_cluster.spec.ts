@@ -1,10 +1,10 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import {qase} from 'cypress-qase-reporter/mocha';
-import { skipClusterDeletion } from '~/support/utils';
+import {skipClusterDeletion} from '~/support/utils';
 
 Cypress.config();
-describe('Import CAPA EKS Cluster', { tags: '@full' }, () => {
+describe('Import CAPA EKS Cluster', {tags: '@full'}, () => {
   let clusterName: string
   const timeout = 1200000
   const repoName = 'clusters-aws-eks'
@@ -52,7 +52,7 @@ describe('Import CAPA EKS Cluster', { tags: '@full' }, () => {
 
       // Check cluster is Active
       cy.searchCluster(clusterName);
-      cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+      cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
     })
   );
 
@@ -69,7 +69,7 @@ describe('Import CAPA EKS Cluster', { tags: '@full' }, () => {
 
   if (skipClusterDeletion) {
     qase(15,
-      it('Remove imported CAPA cluster from Rancher Manager', { retries: 1 }, () => {
+      it('Remove imported CAPA cluster from Rancher Manager', {retries: 1}, () => {
 
         // Check cluster is not deleted after removal
         cy.deleteCluster(clusterName);

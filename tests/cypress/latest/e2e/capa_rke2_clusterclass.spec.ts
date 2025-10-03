@@ -4,7 +4,7 @@ import {getClusterName, skipClusterDeletion} from '~/support/utils';
 import {capaResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 
 Cypress.config();
-describe('Import CAPA RKE2 Class-Cluster', { tags: '@full' }, () => {
+describe('Import CAPA RKE2 Class-Cluster', {tags: '@full'}, () => {
   const timeout = 1200000
   const classNamePrefix = 'aws-rke2'
   const clusterName = getClusterName(classNamePrefix)

@@ -19,7 +19,7 @@ import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletio
 
 
 Cypress.config();
-describe('Import CAPD RKE2 Class-Cluster', { tags: '@short' }, () => {
+describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
   const timeout = 600000
   const classNamePrefix = 'docker-rke2'
   const clusterName = getClusterName(classNamePrefix)

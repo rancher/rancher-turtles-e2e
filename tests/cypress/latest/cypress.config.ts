@@ -1,7 +1,7 @@
-import { defineConfig } from 'cypress'
-import { afterSpecHook } from 'cypress-qase-reporter/hooks';
-import { writeFileSync } from 'fs';
-import { plugin as cypressGrepPlugin } from '@cypress/grep/plugin';
+import {defineConfig} from 'cypress'
+import {afterSpecHook} from 'cypress-qase-reporter/hooks';
+import {writeFileSync} from 'fs';
+import {plugin as cypressGrepPlugin} from '@cypress/grep/plugin';
 
 const qaseAPIToken = process.env.QASE_API_TOKEN
 
@@ -71,7 +71,7 @@ export default defineConfig({
         const qaseRunId = process.env.QASE_TESTOPS_RUN_ID;
         if (qaseRunId) {
           // process.stdout.write(`QASE_TESTOPS_RUN_ID=${qaseRunId}\n`);
-          writeFileSync('./QASE_TESTOPS_RUN_ID.txt', qaseRunId, { encoding: 'utf8' });
+          writeFileSync('./QASE_TESTOPS_RUN_ID.txt', qaseRunId, {encoding: 'utf8'});
         } else {
           // process.stdout.write('QASE_TESTOPS_RUN_ID is not set.\n');
         }

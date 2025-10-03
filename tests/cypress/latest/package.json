@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint --ext .js,.ts ."
+    "lint": "eslint --ext .js,.ts .",
+    "lint-fix": "eslint --fix --ext .js,.ts ."
   },
   "repository": {
     "type": "git",

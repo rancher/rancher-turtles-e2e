@@ -23,7 +23,7 @@ function matchAndWaitForProviderReadyStatus(
   timeout: number = 60000,
 ) {
   const readyState = 'Ready'; // Default state
-  cy.get('tr.main-row', { timeout: timeout })
+  cy.get('tr.main-row', {timeout: timeout})
     .contains('a', providerString)
     .closest('tr')
     .within(() => {
@@ -152,7 +152,7 @@ describe('Enable CAPI Providers', () => {
       const resourceKind = 'configMap';
       const resourceName = 'fleet-addon-config';
       const namespace = 'rancher-turtles-system';
-      const patch = { data: { manifests: { isNestedIn: true, spec: { cluster: { selector: { matchLabels: { cni: 'by-fleet-addon-kindnet' } } } } } } };
+      const patch = {data: {manifests: {isNestedIn: true, spec: {cluster: {selector: {matchLabels: {cni: 'by-fleet-addon-kindnet'}}}}}}};
 
       cy.patchYamlResource(clusterName, namespace, resourceKind, resourceName, patch);
     });
@@ -165,7 +165,7 @@ describe('Enable CAPI Providers', () => {
     });
   });
 
-  context('vSphere provider', { tags: '@vsphere' }, () => {
+  context('vSphere provider', {tags: '@vsphere'}, () => {
     it('Create vSphere CAPIProvider Namespace', () => {
       cy.createNamespace([vsphereProviderNamespace]);
     })
@@ -190,7 +190,7 @@ describe('Enable CAPI Providers', () => {
     );
   })
 
-  context('Cloud Providers', { tags: '@full' }, () => {
+  context('Cloud Providers', {tags: '@full'}, () => {
     const providerType = 'infrastructure'
 
     it('Create Cloud CAPIProviders Namespaces', () => {

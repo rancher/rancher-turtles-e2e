@@ -16,7 +16,7 @@ import {getClusterName, isRancherManagerVersion} from '~/support/utils';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 
 Cypress.config();
-describe('Import CAPD RKE2 Class-Cluster for Upgrade', { tags: '@upgrade' }, () => {
+describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () => {
   const timeout = 600000
   const classNamePrefix = 'docker-rke2'
   const clusterName = getClusterName(classNamePrefix)
@@ -98,7 +98,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', { tags: '@upgrade' }, () 
 
         // Check cluster is Active
         cy.searchCluster(clusterName);
-        cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+        cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
 
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
         // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
@@ -129,7 +129,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', { tags: '@upgrade' }, () 
 
         // Check CAPI cluster is Active
         cy.searchCluster(clusterName);
-        cy.contains(new RegExp('Active.*' + clusterName), { timeout: timeout });
+        cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
         cy.checkCAPIClusterActive(clusterName, timeout);
       })
 
@@ -160,7 +160,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', { tags: '@upgrade' }, () 
         cy.checkCAPIMenu();
         cy.contains('Machine Deployments').click();
         cy.typeInFilter(clusterName);
-        cy.get('.content > .count', { timeout: timeout }).should('have.text', '3');
+        cy.get('.content > .count', {timeout: timeout}).should('have.text', '3');
         cy.checkCAPIClusterActive(clusterName);
       })
 

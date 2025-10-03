@@ -4,12 +4,12 @@ import {skipClusterDeletion} from '~/support/utils';
 import * as randomstring from "randomstring";
 
 Cypress.config();
-describe('Create Azure RKE2 Cluster', { tags: '@short' }, () => {
+describe('Create Azure RKE2 Cluster', {tags: '@short'}, () => {
   let userID: string, ccID: string;
   const timeout = 1200000
   const userName = 'admin'
   const k8sVersion = 'v1.32.9+rke2r1'
-  const clusterName = 'turtles-qa-azure-v2-' + randomstring.generate({ length: 4, capitalization: "lowercase" })
+  const clusterName = 'turtles-qa-azure-v2-' + randomstring.generate({length: 4, capitalization: "lowercase"})
 
   beforeEach(() => {
     cy.login();

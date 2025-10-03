@@ -19,6 +19,7 @@ export default[
 
     rules: {
         "eol-last": ["error", "always"],
+        "object-curly-spacing": ["error", "never"],
         "cypress/no-unnecessary-waiting": "off",
         "@typescript-eslint/no-explicit-any": "off",
         "cypress/unsafe-to-chain-command": "off",
