@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
     "target": "ES2018",
-    "module": "ESNext",
-    "moduleResolution": "Node",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "lib": [
-      "ESNext",
-      "ESNext.AsyncIterable",
-      "DOM"
+      "esnext",
+      "esnext.asynciterable",
+      "dom"
     ],
     "esModuleInterop": true,
     "allowJs": true,
@@ -24,7 +24,6 @@
     },
     "types": [
       "@types/node",
-      "@nuxt/types",
       "cypress",
       "cy-verify-downloads",
       "@rancher-ecp-qa/cypress-library",
