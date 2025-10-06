@@ -16,19 +16,19 @@ spec:
           enabled: true
         controlplaneKubeadm:
           enabled: true
-        infrastructureAWS:
-          enabled: true
-        infrastructureAzure:
-          enabled: true
         infrastructureDocker:
           enabled: true
+        infrastructureVSphere:
+          enabled: false
+        infrastructureAWS:
+          enabled: false
+        infrastructureAzure:
+          enabled: false
         infrastructureGCP:
-          enabled: true
+          enabled: false
           variables:
             EXP_CAPG_GKE: "true"
             GCP_B64ENCODED_CREDENTIALS: ''
-        infrastructureVSphere:
-          enabled: true
   insecureSkipTLSVerify: true
   targets:
     - clusterSelector:
