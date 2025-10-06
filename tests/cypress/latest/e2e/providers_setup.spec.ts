@@ -92,6 +92,134 @@ describe('Enable CAPI Providers', () => {
     cy.burgerMenuOperate('open');
   });
 
+  // Currently this is only valid if we use nightly builds
+  if (Cypress.env('chartmuseum_repo')) {
+    context('Local providers - @install', {tags: '@install'}, () => {
+      it('Create CAPI Namespaces', () => {
+        cy.createNamespace(capiNamespaces);
+      })
+
+      it('Create Providers', () => {
+        cy.importYAML('fixtures/providers-chart/providers-chart-helmop.yaml')
+      })
+
+      kubeadmProviderTypes.forEach(providerType => {
+        qase(27,
+          it('Verify Kubeadm Providers - ' + providerType, () => {
+            cy.checkCAPIMenu();
+            cy.contains('Providers').click();
+            // Create CAPI Kubeadm providers
+            if (providerType == 'control plane') {
+              const providerName = kubeadmProvider + '-' + 'control-plane'
+              matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', kubeadmProvider, kubeadmProviderVersion, 120000);
+            } else {
+              const providerName = kubeadmProvider + '-' + providerType
+              matchAndWaitForProviderReadyStatus(providerName, providerType, kubeadmProvider, kubeadmProviderVersion, 120000);
+            }
+          })
+        );
+      })
+
+      it('Verify CAPD provider', () => {
+        // Create Docker Infrastructure provider
+        const namespace = 'capd-system'
+        cy.checkCAPIMenu();
+        cy.contains('Providers').click();
+        matchAndWaitForProviderReadyStatus(dockerProvider, 'infrastructure', dockerProvider, kubeadmProviderVersion, 120000);
+        cy.verifyCAPIProviderImage(dockerProvider, namespace);
+      })
+
+      qase(90,
+        // HelmApps to be used across all specs
+        it('Add Applications fleet repo', () => {
+          // Add upstream apps repo
+          cy.addFleetGitRepo('helm-apps', turtlesRepoUrl, branch, 'examples/applications/', 'capi-clusters');
+        })
+      );
+
+      it('Check Fleet addon provider', () => {
+        // Fleet addon provider is provisioned automatically when enabled during installation
+        cy.checkCAPIMenu();
+        cy.contains('Providers').click();
+        matchAndWaitForProviderReadyStatus(fleetProvider, 'addon', fleetProvider, fleetProviderVersion, 30000);
+      });
+    });
+
+    context('vSphere provider', {tags: '@vsphere'}, () => {
+      it('Create vSphere CAPIProvider Namespace', () => {
+        cy.createNamespace([vsphereProviderNamespace]);
+      })
+      it('Create CAPV cloud credentials', () => {
+        // Create vsphere Infrastructure provider
+        // See capv_rke2_cluster.spec.ts for more details about `vsphere_secrets_json_base64` structure
+        const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
+        // Decode the base64 encoded secret and make json object
+        const vsphere_secrets_json = JSON.parse(Buffer.from(vsphere_secrets_json_base64, 'base64').toString('utf-8'))
+        // Access keys from the json object
+        const vsphereUsername = vsphere_secrets_json.vsphere_username;
+        const vspherePassword = vsphere_secrets_json.vsphere_password;
+        const vsphereServer = vsphere_secrets_json.vsphere_server;
+        const vspherePort = '443';
+        cy.addCloudCredsVMware(vsphereProvider, vsphereUsername, vspherePassword, vsphereServer, vspherePort);
+      })
+
+      it('Add Provider via HelmOps', () => {
+        cy.readFile('fixtures/providers-chart/providers-chart-helmop.yaml').then((content) => {
+          content = content.replace(/infrastructureVSphere:\n          enabled: false/g, 'infrastructureVSphere:\n          enabled: true');
+          cy.importYAML(content);
+        })
+      })
+
+      it('Verify CAPV provider', () => {
+        cy.checkCAPIMenu();
+        matchAndWaitForProviderReadyStatus(vsphereProvider, 'infrastructure', vsphereProvider, vsphereProviderVersion, 120000);
+        cy.verifyCAPIProviderImage(vsphereProvider, vsphereProviderNamespace);
+      })
+
+    })
+
+    context('Cloud Providers', {tags: '@full'}, () => {
+      const providerType = 'infrastructure'
+
+      it('Create CAPA and CAPG Cloud Credentials', () => {
+        cy.addCloudCredsAWS(amazonProvider, Cypress.env('aws_access_key'), Cypress.env('aws_secret_key'));
+        cy.addCloudCredsGCP(googleProvider, Cypress.env('gcp_credentials'));
+      })
+
+      it('Add HelmOps provider', () => {
+        cy.readFile('fixtures/providers-chart/providers-chart-helmop.yaml').then((content) => {
+          content = content.replace(/infrastructureGCP:\n          enabled: false/g, 'infrastructureGCP:\n          enabled: true');
+          content = content.replace(/infrastructureAzure:\n          enabled: false/g, 'infrastructureAzure:\n          enabled: true');
+          content = content.replace(/infrastructureAWS:\n          enabled: false/g, 'infrastructureAWS:\n          enabled: true');
+          cy.importYAML(content);
+        })
+      })
+
+      it('Verify CAPA provider', () => {
+        const namespace = 'capa-system'
+        cy.checkCAPIMenu();
+        cy.contains('Providers').click();
+        matchAndWaitForProviderReadyStatus(amazonProvider, providerType, amazonProvider, amazonProviderVersion, 120000);
+        cy.verifyCAPIProviderImage(amazonProvider, namespace);
+      })
+
+      it('Verify CAPG provider', () => {
+        const namespace = 'capg-system'
+        cy.checkCAPIMenu();
+        cy.contains('Providers').click();
+        matchAndWaitForProviderReadyStatus(googleProvider, providerType, googleProvider, googleProviderVersion, 120000);
+        cy.verifyCAPIProviderImage(googleProvider, namespace);
+      })
+
+      it('Verify CAPZ provider', () => {
+        const namespace = 'capz-system'
+        cy.checkCAPIMenu();
+        cy.contains('Providers').click();
+        matchAndWaitForProviderReadyStatus(azureProvider, providerType, azureProvider, azureProviderVersion, 180000);
+        cy.verifyCAPIProviderImage(azureProvider, namespace);
+      })
+    })
+  } else {
   context('Local providers - @install', {tags: '@install'}, () => {
     it('Create CAPI Namespaces', () => {
       cy.createNamespace(capiNamespaces);
@@ -151,7 +279,14 @@ describe('Enable CAPI Providers', () => {
       const resourceKind = 'configMap';
       const resourceName = 'fleet-addon-config';
       const namespace = 'rancher-turtles-system';
-      const patch = {data: {manifests: {isNestedIn: true, spec: {cluster: {selector: {matchLabels: {cni: 'by-fleet-addon-kindnet'}}}}}}};
+      const patch = {
+        data: {
+          manifests: {
+            isNestedIn: true,
+            spec: {cluster: {selector: {matchLabels: {cni: 'by-fleet-addon-kindnet'}}}}
+          }
+        }
+      };
 
       cy.patchYamlResource(clusterName, namespace, resourceKind, resourceName, patch);
     });
@@ -221,13 +356,13 @@ describe('Enable CAPI Providers', () => {
     );
 
     qase(20, it('Create CAPZ provider', () => {
-      const namespace = 'capz-system'
-      // Create Azure Infrastructure provider
-      cy.addInfraProvider('Azure', namespace, azureProvider);
-      matchAndWaitForProviderReadyStatus(azureProvider, providerType, azureProvider, azureProviderVersion, 180000);
-      cy.verifyCAPIProviderImage(azureProvider, namespace);
-    })
+        const namespace = 'capz-system'
+        // Create Azure Infrastructure provider
+        cy.addInfraProvider('Azure', namespace, azureProvider);
+        matchAndWaitForProviderReadyStatus(azureProvider, providerType, azureProvider, azureProviderVersion, 180000);
+        cy.verifyCAPIProviderImage(azureProvider, namespace);
+      })
     );
   })
-
+  }
 });
