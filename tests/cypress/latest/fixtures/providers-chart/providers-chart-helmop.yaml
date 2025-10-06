@@ -24,9 +24,11 @@ spec:
           enabled: true
         infrastructureGCP:
           enabled: true
+          variables:
+            EXP_CAPG_GKE: "true"
+            GCP_B64ENCODED_CREDENTIALS: ''
         infrastructureVSphere:
           enabled: true
-
   insecureSkipTLSVerify: true
   targets:
     - clusterSelector:
