@@ -14,18 +14,46 @@ spec:
       providers: |
         bootstrapKubeadm:
           enabled: true
+          features:
+            machinePool: true
+            clusterResourceSet: true
+            clusterTopology: true
         controlplaneKubeadm:
           enabled: true
+          features:
+            machinePool: true
+            clusterResourceSet: true
+            clusterTopology: true
         infrastructureDocker:
           enabled: true
+          features:
+            machinePool: true
+            clusterResourceSet: true
+            clusterTopology: true
         infrastructureVSphere:
           enabled: false
+          features:
+            machinePool: true
+            clusterResourceSet: true
+            clusterTopology: true
         infrastructureAWS:
           enabled: false
+          features:
+            machinePool: true
+            clusterResourceSet: true
+            clusterTopology: true
         infrastructureAzure:
           enabled: false
+          features:
+            machinePool: true
+            clusterResourceSet: true
+            clusterTopology: true
         infrastructureGCP:
           enabled: false
+          features:
+            machinePool: true
+            clusterResourceSet: true
+            clusterTopology: true
           variables:
             EXP_CAPG_GKE: "true"
             GCP_B64ENCODED_CREDENTIALS: ''
