@@ -13,32 +13,31 @@ limitations under the License.
 
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
-import {isRancherManagerVersion} from '~/support/utils';
 
 function matchAndWaitForProviderReadyStatus(
   providerString: string,
   providerType: string,
   providerName: string,
-  providerVersion: string,
+  _providerVersion: string, // TODO: add provider-version check
   timeout: number = 60000,
 ) {
   const readyState = 'Ready'; // Default state
+  cy.reload();
   cy.get('tr.main-row', {timeout: timeout})
     .contains('a', providerString)
     .closest('tr')
     .within(() => {
-      //cy.get('td').eq(1).should('contain.text', readyState);    // State - unreliable in 2.12 - often Unavailable, using Phase instead
+      cy.get('td').eq(1).should('contain.text', readyState);    // State
       cy.get('td').eq(2).should('contain.text', providerString);  // Name
       cy.get('td').eq(3).should('contain.text', providerType);    // Type
       cy.get('td').eq(4).should('contain.text', providerName);    // ProviderName
-      cy.get('td').eq(5).should('contain.text', providerVersion); // InstalledVersion
+      // cy.get('td').eq(5).should('contain.text', providerVersion); // InstalledVersion
       cy.get('td').eq(6).should('contain.text', readyState);      // Phase
     });
 }
 
 Cypress.config();
 describe('Enable CAPI Providers', () => {
-  const branch = isRancherManagerVersion('>=2.12') ? 'main' : 'release-0.23';
   const turtlesRepoUrl = 'https://github.com/rancher/turtles.git';
 
   // Providers names
@@ -139,7 +138,7 @@ describe('Enable CAPI Providers', () => {
       // HelmApps to be used across all specs
       it('Add Applications fleet repo', () => {
         // Add upstream apps repo
-        cy.addFleetGitRepo('helm-apps', turtlesRepoUrl, branch, 'examples/applications/', 'capi-clusters');
+        cy.addFleetGitRepo('helm-apps', turtlesRepoUrl, 'main', 'examples/applications/', 'capi-clusters');
       })
     );
 

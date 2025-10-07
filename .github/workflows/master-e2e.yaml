@@ -252,6 +252,7 @@ jobs:
       QASE_TESTOPS_RUN_DESCRIPTION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
       # Cypress
       TURTLES_REPO: rancher/turtles
+      TURTLES_BRANCH: main
       CONTROLLER_IMG: localhost:5000/$TURTLES_REPO
       BROWSER: chrome
       CYPRESS_DOCKER: 'cypress/included:15.2.0'
@@ -315,11 +316,21 @@ jobs:
           else
             echo "RANCHER_VERSION=${{ inputs.rancher_version }}" >> ${GITHUB_ENV}
           fi
-      - name: Check out rancher-turtles repo
+      - name: Set rancher/turtles repo branch
+        run: |
+          if [[ "${{ env.RANCHER_VERSION }}" =~ "2.13" ]]; then
+            echo "TURTLES_BRANCH=release/v0.25" >> ${GITHUB_ENV}
+          elif [[ "${{ env.RANCHER_VERSION }}" =~ "2.12" ]]; then
+            echo "TURTLES_BRANCH=release-0.24" >> ${GITHUB_ENV}
+          else
+            echo "TURTLES_BRANCH=${{ env.TURTLES_BRANCH }}" >> ${GITHUB_ENV}
+          fi
+      - name: Check out rancher/turtles repo
         if: ${{ inputs.turtles_dev_chart == true }}
         uses: actions/checkout@v5
         with:
           repository: ${{ env.TURTLES_REPO }}
+          ref: ${{ env.TURTLES_BRANCH }}
       - name: Install Go
         if: ${{ inputs.turtles_dev_chart == true }}
         uses: actions/setup-go@v6

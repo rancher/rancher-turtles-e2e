@@ -17,7 +17,7 @@ on:
     inputs:
       rancher_version:
         description: Rancher Manager channel/<version|head_version>[/head_version] to use for installation
-        default: head/2.12
+        default: head/2.13
         type: string
       turtles_chart_version:
         description: Rancher Turtles chart version to test (eg. 0.24.1 | 108.0.0+up0.25.0)
@@ -87,7 +87,7 @@ jobs:
       test_description: "UI - e2e tests with Standard K3s"
       cluster_name: rancher-k3s-cluster
       destroy_runner: ${{ github.event_name == 'schedule' && true || inputs.destroy_runner }}
-      rancher_version: ${{ inputs.rancher_version || 'head/2.12' }}
+      rancher_version: ${{ inputs.rancher_version || 'head/2.13' }}
       qase_report: ${{ inputs.qase_report == true || (github.event_name == 'schedule' && true) }}
       turtles_dev_chart: ${{ inputs.turtles_dev_chart == true || (github.event_name == 'schedule' && true) }}
       target_build_type: ${{ inputs.target_build_type || 'prime' }}
