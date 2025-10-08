@@ -9,7 +9,7 @@ spec:
   defaultNamespace: default
   helm:
     chart: >-
-      https://github.com/rancher/rancher-turtles-e2e/raw/refs/heads/turtles-provider-charts/tests/cypress/latest/fixtures/providers-chart/rancher-turtles-providers-0.0.1.tgz
+      https://github.com/rancher/rancher-turtles-e2e/raw/refs/heads/main/tests/cypress/latest/fixtures/providers-chart/rancher-turtles-providers-0.0.1.tgz
     templateValues:
       providers: |
         bootstrapKubeadm:
