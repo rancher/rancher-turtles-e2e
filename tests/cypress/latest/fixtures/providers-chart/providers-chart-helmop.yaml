@@ -1,0 +1,67 @@
+apiVersion: fleet.cattle.io/v1alpha1
+kind: HelmOp
+metadata:
+  name: turtles-providers-chart
+  namespace: fleet-local
+spec:
+  correctDrift:
+    enabled: false
+  defaultNamespace: default
+  helm:
+    chart: >-
+      https://github.com/rancher/rancher-turtles-e2e/raw/refs/heads/main/tests/cypress/latest/fixtures/providers-chart/rancher-turtles-providers-0.0.1.tgz
+    templateValues:
+      providers: |
+        bootstrapKubeadm:
+          enabled: true
+          features:
+            machinePool: true
+            clusterResourceSet: true
+            clusterTopology: true
+        controlplaneKubeadm:
+          enabled: true
+          features:
+            machinePool: true
+            clusterResourceSet: true
+            clusterTopology: true
+        infrastructureDocker:
+          enabled: true
+          features:
+            machinePool: true
+            clusterResourceSet: true
+            clusterTopology: true
+        infrastructureVSphere:
+          enabled: false
+          features:
+            machinePool: true
+            clusterResourceSet: true
+            clusterTopology: true
+        infrastructureAWS:
+          enabled: false
+          features:
+            machinePool: true
+            clusterResourceSet: true
+            clusterTopology: true
+        infrastructureAzure:
+          enabled: false
+          features:
+            machinePool: true
+            clusterResourceSet: true
+            clusterTopology: true
+        infrastructureGCP:
+          enabled: false
+          features:
+            machinePool: true
+            clusterResourceSet: true
+            clusterTopology: true
+          variables:
+            EXP_CAPG_GKE: "true"
+            GCP_B64ENCODED_CREDENTIALS: ''
+  insecureSkipTLSVerify: true
+  targets:
+    - clusterSelector:
+        matchExpressions:
+          - key: provider.cattle.io
+            operator: NotIn
+            values:
+              - harvester
