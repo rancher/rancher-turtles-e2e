@@ -15,6 +15,7 @@ import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
 
 const buildType = Cypress.env('chartmuseum_repo') ? 'dev' : 'prod';
+const isDevBuild = buildType == 'dev';
 
 function matchAndWaitForProviderReadyStatus(
   providerString: string,
@@ -33,7 +34,7 @@ function matchAndWaitForProviderReadyStatus(
       cy.get('td').eq(2).should('contain.text', providerString);  // Name
       cy.get('td').eq(3).should('contain.text', providerType);    // Type
       cy.get('td').eq(4).should('contain.text', providerName);    // ProviderName
-      if (buildType == "dev") {
+      if (isDevBuild) {
         cy.get('td').eq(5).should('contain.text', providerVersion); // InstalledVersion
       }
       cy.get('td').eq(6).should('contain.text', readyState);      // Phase
@@ -100,13 +101,13 @@ describe('Enable CAPI Providers', () => {
       cy.createNamespace(capiNamespaces);
     })
 
-    if (buildType == "prod") {
+    if (!isDevBuild) {
       it('Create Local CAPIProviders Namespaces', () => {
         cy.createNamespace(localProviderNamespaces);
       })
     }
 
-    if (buildType == 'dev') {
+    if (isDevBuild) {
       it('Create Providers using Charts', () => {
         cy.importYAML('fixtures/providers-chart/providers-chart-helmop.yaml')
       })
@@ -119,7 +120,7 @@ describe('Enable CAPI Providers', () => {
           // Create CAPI Kubeadm providers
           if (providerType == 'control plane') {
             const providerName = kubeadmProvider + '-' + 'control-plane'
-            if (buildType == "prod") {
+            if (!isDevBuild) {
               // https://github.com/kubernetes-sigs/cluster-api/releases/v1.10.6/control-plane-components.yaml
               const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + 'control-plane' + '-components.yaml'
               cy.addCustomProvider(providerName, 'capi-kubeadm-control-plane-system', kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
@@ -130,7 +131,7 @@ describe('Enable CAPI Providers', () => {
             matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', kubeadmProvider, kubeadmProviderVersion, 120000);
           } else {
             const providerName = kubeadmProvider + '-' + providerType
-            if (buildType == "prod") {
+            if (!isDevBuild) {
               // https://github.com/kubernetes-sigs/cluster-api/releases/v1.10.6/bootstrap-components.yaml
               const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + providerType + '-components.yaml'
               cy.addCustomProvider(providerName, 'capi-kubeadm-bootstrap-system', kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
@@ -148,7 +149,7 @@ describe('Enable CAPI Providers', () => {
       it('Create CAPD provider', () => {
         // Create Docker Infrastructure provider
         const namespace = 'capd-system'
-        if (buildType == "prod") {
+        if (!isDevBuild) {
           cy.addInfraProvider('Docker', namespace);
         } else {
           cy.checkCAPIMenu();
@@ -197,7 +198,7 @@ describe('Enable CAPI Providers', () => {
   });
 
   context('vSphere provider', {tags: '@vsphere'}, () => {
-    if (buildType == "prod") {
+    if (!isDevBuild) {
       it('Create vSphere CAPIProvider Namespace', () => {
         cy.createNamespace([vsphereProviderNamespace]);
       })
@@ -217,7 +218,7 @@ describe('Enable CAPI Providers', () => {
         const vspherePort = '443';
         cy.addCloudCredsVMware(vsphereProvider, vsphereUsername, vspherePassword, vsphereServer, vspherePort);
         cy.burgerMenuOperate('open');
-        if (buildType == "prod") {
+        if (!isDevBuild) {
           cy.addInfraProvider('vSphere', vsphereProviderNamespace, vsphereProvider);
         } else {
           cy.readFile('fixtures/providers-chart/providers-chart-helmop.yaml').then((content) => {
@@ -236,13 +237,13 @@ describe('Enable CAPI Providers', () => {
   context('Cloud Providers', {tags: '@full'}, () => {
     const providerType = 'infrastructure'
 
-    if (buildType == "prod") {
+    if (!isDevBuild) {
       it('Create Cloud CAPIProviders Namespaces', () => {
         cy.createNamespace(cloudProviderNamespaces);
       })
     }
 
-    if (buildType == "dev") {
+    if (isDevBuild) {
       it('Create Providers using Charts', () => {
         cy.readFile('fixtures/providers-chart/providers-chart-helmop.yaml').then((content) => {
           content = content.replace(/infrastructureGCP:\n(\s*)enabled: false/g, 'infrastructureGCP:\n$1enabled: true');
@@ -259,7 +260,7 @@ describe('Enable CAPI Providers', () => {
         // Create AWS Infrastructure provider
         cy.addCloudCredsAWS(amazonProvider, Cypress.env('aws_access_key'), Cypress.env('aws_secret_key'));
         cy.burgerMenuOperate('open');
-        if (buildType == "prod") {
+        if (!isDevBuild) {
           cy.addInfraProvider('Amazon', namespace, amazonProvider);
         } else {
           cy.checkCAPIMenu();
@@ -276,7 +277,7 @@ describe('Enable CAPI Providers', () => {
         // Create GCP Infrastructure provider
         cy.addCloudCredsGCP(googleProvider, Cypress.env('gcp_credentials'));
         cy.burgerMenuOperate('open');
-        if (buildType == "prod") {
+        if (!isDevBuild) {
           cy.addInfraProvider('Google Cloud Platform', namespace, googleProvider);
         } else {
           cy.checkCAPIMenu();
@@ -291,7 +292,7 @@ describe('Enable CAPI Providers', () => {
       it('Create CAPZ provider', () => {
         const namespace = 'capz-system'
         // Create Azure Infrastructure provider
-        if (buildType == "prod") {
+        if (!isDevBuild) {
           cy.addInfraProvider('Azure', namespace, azureProvider);
         } else {
           cy.checkCAPIMenu();
