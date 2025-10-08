@@ -166,7 +166,7 @@ describe('Enable CAPI Providers', () => {
         cy.addCloudCredsVMware(vsphereProvider, vsphereUsername, vspherePassword, vsphereServer, vspherePort);
       })
 
-      it('Add Provider via HelmOps', () => {
+      it('Create CAPV Provider', () => {
         cy.readFile('fixtures/providers-chart/providers-chart-helmop.yaml').then((content) => {
           content = content.replace(/infrastructureVSphere:\n(\s*)enabled: false/g, 'infrastructureVSphere:\n$1enabled: true');
           cy.importYAML(content);
@@ -189,7 +189,7 @@ describe('Enable CAPI Providers', () => {
         cy.addCloudCredsGCP(googleProvider, Cypress.env('gcp_credentials'));
       })
 
-      it('Add HelmOps provider', () => {
+      it('Create CAPA, CAPG, CAPZ Providers', () => {
         cy.readFile('fixtures/providers-chart/providers-chart-helmop.yaml').then((content) => {
           content = content.replace(/infrastructureGCP:\n(\s*)enabled: false/g, 'infrastructureGCP:\n$1enabled: true');
           content = content.replace(/infrastructureAzure:\n(\s*)enabled: false/g, 'infrastructureAzure:\n$1enabled: true');
