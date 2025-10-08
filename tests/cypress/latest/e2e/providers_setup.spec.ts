@@ -175,6 +175,7 @@ describe('Enable CAPI Providers', () => {
 
       it('Verify CAPV provider', () => {
         cy.checkCAPIMenu();
+        cy.contains('Providers').click();
         matchAndWaitForProviderReadyStatus(vsphereProvider, 'infrastructure', vsphereProvider, vsphereProviderVersion, 120000);
         cy.verifyCAPIProviderImage(vsphereProvider, vsphereProviderNamespace);
       })
