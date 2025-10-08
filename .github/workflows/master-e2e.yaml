@@ -404,6 +404,7 @@ jobs:
           kubectl apply -f https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/rancher/pre-turtles-install.yaml
           kubectl delete mutatingwebhookconfiguration mutating-webhook-configuration --ignore-not-found
           kubectl delete validatingwebhookconfiguration validating-webhook-configuration --ignore-not-found
+          sleep 2
           kubectl rollout status deployment rancher -n cattle-system --timeout=1m
       - name: Cypress tests
         id: cypress
