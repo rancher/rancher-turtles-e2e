@@ -168,7 +168,7 @@ describe('Enable CAPI Providers', () => {
 
       it('Add Provider via HelmOps', () => {
         cy.readFile('fixtures/providers-chart/providers-chart-helmop.yaml').then((content) => {
-          content = content.replace(/infrastructureVSphere:\n          enabled: false/g, 'infrastructureVSphere:\n          enabled: true');
+          content = content.replace(/infrastructureVSphere:\n(\s*)enabled: false/g, 'infrastructureVSphere:\n$1enabled: true');
           cy.importYAML(content);
         })
       })
@@ -191,9 +191,9 @@ describe('Enable CAPI Providers', () => {
 
       it('Add HelmOps provider', () => {
         cy.readFile('fixtures/providers-chart/providers-chart-helmop.yaml').then((content) => {
-          content = content.replace(/infrastructureGCP:\n          enabled: false/g, 'infrastructureGCP:\n          enabled: true');
-          content = content.replace(/infrastructureAzure:\n          enabled: false/g, 'infrastructureAzure:\n          enabled: true');
-          content = content.replace(/infrastructureAWS:\n          enabled: false/g, 'infrastructureAWS:\n          enabled: true');
+          content = content.replace(/infrastructureGCP:\n(\s*)enabled: false/g, 'infrastructureGCP:\n$1enabled: true');
+          content = content.replace(/infrastructureAzure:\n(\s*)enabled: false/g, 'infrastructureAzure:\n$1enabled: true');
+          content = content.replace(/infrastructureAWS:\n(\s*)enabled: false/g, 'infrastructureAWS:\n$1enabled: true');
           cy.importYAML(content);
         })
       })
