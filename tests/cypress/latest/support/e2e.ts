@@ -113,7 +113,7 @@ before(function () {
   if (Cypress.env("ci")) {
     cy.readFile(resultFile).then((data) => {
       const content = yaml.load(data);
-      if (content['test_type'] != '@install') {
+      if (content['stop_cypress'] != 'true') {
         const result = {'test_result': 'passed'}
         cy.writeFile(resultFile, yaml.dump(result));
       }
