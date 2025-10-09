@@ -36,6 +36,7 @@ var (
 	rancherHeadVersion  string
 	rancherLogCollector string
 	rancherVersion      string
+	turtlesDevChart     string
 )
 
 /**
@@ -45,7 +46,12 @@ var (
  */
 func RunHelmCmdWithRetry(s ...string) {
 	Eventually(func() error {
-		return kubectl.RunHelmBinaryWithCustomErr(s...)
+		output, err := kubectl.RunHelmBinaryWithOutput(s...)
+		GinkgoWriter.Write([]byte(output))
+		if err != nil {
+			return err
+		}
+		return nil
 	}, tools.SetTimeout(2*time.Minute), 20*time.Second).Should(Not(HaveOccurred()))
 }
 
@@ -67,6 +73,7 @@ var _ = BeforeSuite(func() {
 	rancherHostname = os.Getenv("PUBLIC_DNS")
 	rancherLogCollector = os.Getenv("RANCHER_LOG_COLLECTOR")
 	rancherVersion = os.Getenv("RANCHER_VERSION")
+	turtlesDevChart = os.Getenv("TURTLES_DEV_CHART")
 
 	// Extract Rancher Manager channel/version to install
 	if rancherVersion != "" {
