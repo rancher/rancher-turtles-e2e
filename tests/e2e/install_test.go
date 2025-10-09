@@ -15,6 +15,7 @@ limitations under the License.
 package e2e_test
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -67,7 +68,7 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 
 				// Set command and arguments
 				installCmd := exec.Command("sh", fileName)
-				installCmd.Env = append(os.Environ(), "INSTALL_K3S_EXEC=--disable metrics-server")
+				installCmd.Env = append(os.Environ(), "INSTALL_K3S_EXEC=--disable metrics-server", "INSTALL_K3S_EXEC=--write-kubeconfig-mode 644")
 
 				// Retry in case of (sporadic) failure...
 				count := 1
@@ -140,7 +141,19 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 		}
 
 		By("Installing/Upgrading Rancher Manager", func() {
-			err := rancher.DeployRancherManager(rancherHostname, rancherChannel, rancherVersion, rancherHeadVersion, "none", "none")
+			var extraFlags []string
+			if turtlesDevChart == "true" {
+				extraEnvIndex := 1
+				// Following condition needs to be reviewed because nowadays heads build don't use any extraEnv
+				// if rancherHeadVersion != "" || strings.Contains(rancherChannel, "prime-optimus") {
+				//	extraEnvIndex = 2
+				//}
+				extraFlags = []string{
+					"--set", fmt.Sprintf("extraEnv[%d].name=CATTLE_FEATURES", extraEnvIndex),
+					"--set-string", fmt.Sprintf("extraEnv[%d].value='turtles=false,embedded-cluster-api=true'", extraEnvIndex),
+				}
+			}
+			err := rancher.DeployRancherManager(rancherHostname, rancherChannel, rancherVersion, rancherHeadVersion, "none", "none", extraFlags)
 			Expect(err).To(Not(HaveOccurred()))
 
 			// Wait for all pods to be started
