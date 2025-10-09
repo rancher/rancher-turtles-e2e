@@ -150,7 +150,7 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 				//}
 				extraFlags = []string{
 					"--set", fmt.Sprintf("extraEnv[%d].name=CATTLE_FEATURES", extraEnvIndex),
-					"--set-string", fmt.Sprintf("extraEnv[%d].value=turtles=false,embedded-cluster-api=true", extraEnvIndex),
+					"--set-string", fmt.Sprintf("extraEnv[%d].value='turtles=false,embedded-cluster-api=true'", extraEnvIndex),
 				}
 			}
 			err := rancher.DeployRancherManager(rancherHostname, rancherChannel, rancherVersion, rancherHeadVersion, "none", "none", extraFlags)
