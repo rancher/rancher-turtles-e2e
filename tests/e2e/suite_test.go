@@ -35,17 +35,17 @@ const (
 )
 
 var (
-	arch                string
-	CertManagerVersion  string
-	clusterName         string
-	clusterNS           string
-	rancherHostname     string
-	k8sVersion          string
+	arch               string
+	CertManagerVersion string
+	clusterName        string
+	clusterNS          string
+	rancherHostname    string
+	// k8sVersion          string
 	rancherChannel      string
 	rancherHeadVersion  string
 	rancherLogCollector string
 	rancherVersion      string
-	testType            string
+	turtlesDevChart     string
 )
 
 /**
@@ -75,10 +75,10 @@ var _ = BeforeSuite(func() {
 	clusterName = os.Getenv("CLUSTER_NAME")
 	clusterNS = os.Getenv("CLUSTER_NS")
 	rancherHostname = os.Getenv("PUBLIC_DNS")
-	k8sVersion = os.Getenv("K8S_VERSION_TO_PROVISION")
+	// k8sVersion = os.Getenv("K8S_VERSION_TO_PROVISION")
 	rancherLogCollector = os.Getenv("RANCHER_LOG_COLLECTOR")
 	rancherVersion = os.Getenv("RANCHER_VERSION")
-	testType = os.Getenv("TEST_TYPE")
+	turtlesDevChart = os.Getenv("TURTLES_DEV_CHART")
 
 	// Extract Rancher Manager channel/version to install
 	if rancherVersion != "" {
