@@ -346,9 +346,14 @@ jobs:
           RELEASE_TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} CONTROLLER_IMAGE_VERSION=v${{ env.TAG }} make build-chart verify-gen
           docker run -d -p 5000:5000 --name registry registry:2
           docker push ${{ env.CONTROLLER_IMG }}:v${{ env.TAG }}
-      - name: Copy chart file
+      - name: Make Providers chart
         if: ${{ inputs.turtles_dev_chart == true }}
-        run: cp ${{ github.workspace }}/out/package/rancher-turtles-${{ env.TAG }}.tgz ${{ runner.temp }}
+        run: RELEASE_TAG=v${{ env.TAG }} make build-providers-chart
+      - name: Copy chart files
+        if: ${{ inputs.turtles_dev_chart == true }}
+        run: |
+          cp ${{ github.workspace }}/out/package/rancher-turtles-${{ env.TAG }}.tgz ${{ runner.temp }}
+          cp ${{ github.workspace }}/out/package/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ runner.temp }}
       - name: Checkout
         uses: actions/checkout@v5
       - name: Install Go
@@ -358,7 +363,10 @@ jobs:
           go-version-file: tests/go.mod
       - name: Copy chart file for chartmuseum
         if: ${{ inputs.turtles_dev_chart == true }}
-        run: cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
+        run: |
+          cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
+          mkdir ${{ github.workspace }}/tests/assets/providers
+          cp ${{ runner.temp }}/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets/providers
       - name: Inject kube-vip controlplane IP for vsphere into capv-helm-values.yaml
         if: ${{ needs.create-runner.outputs.uuid == 'vsphere' }}
         run: |

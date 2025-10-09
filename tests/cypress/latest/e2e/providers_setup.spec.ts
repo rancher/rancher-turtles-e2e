@@ -110,12 +110,16 @@ describe('Enable CAPI Providers', () => {
 
     if (isDevBuild || isRancherManagerVersion('2.13')) {
       it('Create Providers using Charts', () => {
-        cy.importYAML('fixtures/providers-chart/providers-chart-helmop.yaml')
+        // Click on imported CAPD cluster
+        cy.contains('local').click();
+
+        // Install Rancher Turtles Certified Providers chart, this will install all providers based on the tags (@short, @full, @vsphere).
+        cy.checkChart('Install', 'Rancher Turtles Certified Providers', 'rancher-turtles-system');
       })
     }
 
     qase(4,
-      it('Create CAPD provider', {retries: 2}, () => {
+      it('Create/Verify CAPD provider', {retries: 2}, () => {
         // Create Docker Infrastructure provider
         const namespace = 'capd-system'
         if (!isDevBuild) {
@@ -132,7 +136,7 @@ describe('Enable CAPI Providers', () => {
     // TODO: Use wizard to create providers, capi-ui-extension/issues/177
     kubeadmProviderTypes.forEach(providerType => {
       qase(27,
-        it('Create Kubeadm Providers - ' + providerType, () => {
+        it('Create/Verify Kubeadm Providers - ' + providerType, () => {
           // Create CAPI Kubeadm providers
           if (providerType == 'control plane') {
             const providerName = kubeadmProvider + '-' + 'control-plane'
@@ -206,7 +210,7 @@ describe('Enable CAPI Providers', () => {
     }
 
     qase(40,
-      it('Create CAPV provider', () => {
+      it('Create/Verify CAPV provider', () => {
         // Create vsphere Infrastructure provider
         // See capv_rke2_cluster.spec.ts for more details about `vsphere_secrets_json_base64` structure
         const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
@@ -222,10 +226,6 @@ describe('Enable CAPI Providers', () => {
         if (!isDevBuild) {
           cy.addInfraProvider('vSphere', vsphereProviderNamespace, vsphereProvider);
         } else {
-          cy.readFile('fixtures/providers-chart/providers-chart-helmop.yaml').then((content) => {
-            content = content.replace(/infrastructureVSphere:\n(\s*)enabled: false/g, 'infrastructureVSphere:\n$1enabled: true');
-            cy.importYAML(content);
-          })
           cy.checkCAPIMenu();
           cy.contains('Providers').click();
         }
@@ -244,19 +244,8 @@ describe('Enable CAPI Providers', () => {
       })
     }
 
-    if (isDevBuild) {
-      it('Create Providers using Charts', () => {
-        cy.readFile('fixtures/providers-chart/providers-chart-helmop.yaml').then((content) => {
-          content = content.replace(/infrastructureGCP:\n(\s*)enabled: false/g, 'infrastructureGCP:\n$1enabled: true');
-          content = content.replace(/infrastructureAzure:\n(\s*)enabled: false/g, 'infrastructureAzure:\n$1enabled: true');
-          content = content.replace(/infrastructureAWS:\n(\s*)enabled: false/g, 'infrastructureAWS:\n$1enabled: true');
-          cy.importYAML(content);
-        })
-      })
-    }
-
     qase(13,
-      it('Create CAPA provider', () => {
+      it('Create/Verify CAPA provider', () => {
         const namespace = 'capa-system'
         // Create AWS Infrastructure provider
         cy.addCloudCredsAWS(amazonProvider, Cypress.env('aws_access_key'), Cypress.env('aws_secret_key'));
@@ -273,7 +262,7 @@ describe('Enable CAPI Providers', () => {
     );
 
     qase(28,
-      it('Create CAPG provider', () => {
+      it('Create/Verify CAPG provider', () => {
         const namespace = 'capg-system'
         // Create GCP Infrastructure provider
         cy.addCloudCredsGCP(googleProvider, Cypress.env('gcp_credentials'));
@@ -290,7 +279,7 @@ describe('Enable CAPI Providers', () => {
     );
 
     qase(20,
-      it('Create CAPZ provider', () => {
+      it('Create/Verify CAPZ provider', () => {
         const namespace = 'capz-system'
         // Create Azure Infrastructure provider
         if (!isDevBuild) {
