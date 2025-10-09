@@ -621,6 +621,36 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
     });
   }
 
+  if (chartName == 'Rancher Turtles Certified Providers') {
+    cy.get('.CodeMirror')
+      .then((editor) => {
+        // @ts-expect-error known error with CodeMirror
+        let text = editor[0].CodeMirror.getValue();
+        if (Cypress.env('grepTags')) {
+          const tags = Cypress.env('grepTags')
+          if (tags.includes('@short') || tags.includes('@install')) {
+            text = text.replace(/bootstrapKubeadm:\n(\s*)(.*)\n(\s*)enabled: false/g, 'bootstrapKubeadm:\n$1$2\n$1enabled: true');
+            text = text.replace(/controlplaneKubeadm:\n(\s*)(.*)\n(\s*)enabled: false/g, 'controlplaneKubeadm:\n$1$2\n$1enabled: true');
+            text = text.replace(/infrastructureDocker:\n(\s*)(.*)\n(\s*)enabled: false/g, 'infrastructureDocker:\n$1$2\n$1enabled: true');
+          }
+          if (tags.includes('@full')) {
+            text = text.replace(/infrastructureGCP:\n(\s*)(.*)\n(\s*)enabled: false/g, 'infrastructureGCP:\n$1$2\n$1enabled: true');
+            text = text.replace(/variables:\n(\s*)EXP_CAPG_(.*)\n/g, 'variables:\n$1EXP_CAPG_$2\n$1GCP_B64ENCODED_CREDENTIALS: \'\'\n');
+
+            text = text.replace(/infrastructureAzure:\n(\s*)(.*)\n(\s*)enabled: false/g, 'infrastructureAzure:\n$1$2\n$1enabled: true');
+            text = text.replace(/infrastructureAWS:\n(\s*)(.*)\n(\s*)enabled: false/g, 'infrastructureAWS:\n$1$2\n$1enabled: true');
+          }
+          if (tags.includes('@vsphere')) {
+            text = text.replace(/infrastructureVSphere:\n(\s*)(.*)\n(\s*)enabled: false/g, 'infrastructureVSphere:\n$1$2\n$1enabled: true');
+          }
+        }
+        // @ts-expect-error known error with CodeMirror
+        editor[0].CodeMirror.setValue(text);
+      })
+
+
+  }
+
   if (isRancherManagerVersion('>=2.13') && isUpdateOperation) {
     cy.clickButton('Save changes');
   } else {
@@ -667,7 +697,11 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
       // Check if the installation panel has appeared;
       if (windowmanager.find('div[role=tabpanel]').length) {
         // Wait for both CRD and main helm chart to be installed
-        cy.contains(new RegExp('SUCCESS: helm .*crd.*tgz.*SUCCESS: helm .*tgz'), {timeout: 140000}).should('be.visible');
+        if (chartName == 'Rancher Turtles Certified Providers') {
+          cy.contains(new RegExp('SUCCESS: helm .*tgz'), {timeout: 140000}).should('be.visible');
+        } else {
+          cy.contains(new RegExp('SUCCESS: helm .*crd.*tgz.*SUCCESS: helm .*tgz'), {timeout: 140000}).should('be.visible');
+        }
         cy.get('.closer').click();
       } else {
         // If the installation panel failed to appear for some reason, manually check for app installation
