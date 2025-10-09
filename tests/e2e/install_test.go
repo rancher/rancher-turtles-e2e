@@ -144,13 +144,13 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 			var extraFlags []string
 			if turtlesDevChart == "true" {
 				extraEnvIndex := 1
-				// Following condition needs to be reviewed because nowadays heads build don't need any extraEnvq
+				// Following condition needs to be reviewed because nowadays heads build don't use any extraEnv
 				// if rancherHeadVersion != "" || strings.Contains(rancherChannel, "prime-optimus") {
 				//	extraEnvIndex = 2
 				//}
 				extraFlags = []string{
 					"--set", fmt.Sprintf("extraEnv[%d].name=CATTLE_FEATURES", extraEnvIndex),
-					"--set-string", fmt.Sprintf("extraEnv[%d].value=turtles=false", extraEnvIndex),
+					"--set-string", fmt.Sprintf("extraEnv[%d].value=turtles=false,embedded-cluster-api=true", extraEnvIndex),
 				}
 			}
 			err := rancher.DeployRancherManager(rancherHostname, rancherChannel, rancherVersion, rancherHeadVersion, "none", "none", extraFlags)
