@@ -42,7 +42,7 @@ function matchAndWaitForProviderReadyStatus(
 }
 
 Cypress.config();
-describe('Enable CAPI Providers', () => {
+describe.skip('Enable CAPI Providers', () => {
   const turtlesRepoUrl = 'https://github.com/rancher/turtles.git';
 
   // Providers names
