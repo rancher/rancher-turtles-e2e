@@ -65,7 +65,7 @@ describe('Enable CAPI Providers', () => {
       azure: 'v1.21.0'
     },
     dev: {
-      kubeadm: 'v1.10.6',
+      kubeadm: 'v1.10.7',
       fleet: 'v0.11.0',
       vsphere: 'v1.13.1',
       amazon: 'v2.9.1',

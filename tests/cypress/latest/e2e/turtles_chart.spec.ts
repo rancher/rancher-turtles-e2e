@@ -68,7 +68,7 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
         // Required to validate turtles/issues/1395
         turtlesVersion = '0.21.0'
       }
-      cy.checkChart('Install', 'Rancher Turtles', 'rancher-turtles-system', turtlesVersion);
+      cy.checkChart('Upgrade', 'Rancher Turtles', 'rancher-turtles-system', turtlesVersion);
     })
   );
 });
