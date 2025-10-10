@@ -64,6 +64,7 @@ declare global {
 
       typeInFilter(text: string, selector?: string): Chainable<Element>;
       goToHome(): Chainable<Element>;
+      goToNamespaces(): Chainable<Element>;
       patchYamlResource(clusterName: string, namespace: string, resourceKind: string, resourceName: string, patch: object): Chainable<Element>;
       importYAML(yamlOrPath: string, namespace?: string, clusterName?: string): Chainable<Element>;
       verifyResourceCount(clusterName: string, resourcePath: string[], resourceName: string, namespace: string, expectedCount: number, timeout?: number): Chainable<Element>;
@@ -73,9 +74,11 @@ declare global {
       createCAPIProvider(providerName: string): Chainable<Element>;
       checkCAPIProvider(providerName: string): Chainable<Element>;
       verifyCAPIProviderImage(providerName: string, providerNamespace: string): Chainable<Element>;
+      checkTurtlesFeature(status: boolean): Chainable<Element>;
       // Functions declared in capz_support.js
       createCAPZValuesSecret(clientID: string, tenantID: string, subscriptionID: string): Chainable<Element>;
       createAzureClusterIdentity(clientID: string, tenantID: string, clientSecret: string): Chainable<Element>;
+      checkResourceDeleted(resourceName: string): Chainable<Element>;
       deleteKubernetesResource(clusterName: string, resourcePath: string[], resourceName: string, namespace?: string): Chainable<Element>;
     }
   }

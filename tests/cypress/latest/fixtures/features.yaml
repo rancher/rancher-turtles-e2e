@@ -1,0 +1,6 @@
+apiVersion: management.cattle.io/v3
+kind: Feature
+metadata:
+  name: turtles
+spec:
+  value: replace_turtles_value

@@ -18,7 +18,7 @@ import 'cypress-file-upload';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import jsyaml from 'js-yaml';
 import _ from 'lodash';
-import {isRancherManagerVersion} from '~/support/utils';
+import {isRancherManagerVersion, checkApiStatus} from '~/support/utils';
 
 // Generic commands
 // Go to specific Sub Menu from Access Menu
@@ -31,12 +31,7 @@ Cypress.Commands.add('accesMenuSelection', (menuPaths: string[]) => {
 
 // Command to set CAPI Auto-import on capi-clusters namespace
 Cypress.Commands.add('namespaceAutoImport', (mode) => {
-  cy.contains('local')
-    .click();
-  cypressLib.accesMenu('Projects/Namespaces');
-  cy.contains('Create Project')
-    .should('be.visible');
-
+  cy.goToNamespaces();
   // Select capi-clusters namespace
   cy.setNamespace('capi-clusters');
   cy.setAutoImport(mode);
@@ -72,11 +67,7 @@ Cypress.Commands.add('clusterAutoImport', (clusterName, mode) => {
 Cypress.Commands.add('createNamespace', (namespaces: string[]) => {
   namespaces.forEach((namespace) => {
     cy.log('Creating Namespace:', namespace);
-    cy.burgerMenuOperate('open');
-    cy.contains('local')
-      .click();
-    cypressLib.accesMenu('Projects/Namespaces');
-    cy.contains('Create Project').should('be.visible');
+    cy.goToNamespaces();
 
     // Workaround for 2.12, find a row with 'Not in a Project' and press button 'Create Namespace'
     // Ref. https://github.com/rancher/dashboard/issues/15193
@@ -89,6 +80,16 @@ Cypress.Commands.add('createNamespace', (namespaces: string[]) => {
     cy.log('Namespace created:', namespace);
     cy.namespaceReset();
   })
+});
+
+// Command to navigate to Home page
+Cypress.Commands.add('goToNamespaces', () => {
+  cy.goToHome();
+  cy.burgerMenuOperate('open');
+  cy.contains('local')
+    .click();
+  cypressLib.accesMenu('Projects/Namespaces');
+  cy.contains('Create Project').should('be.visible');
 });
 
 // Command to create namespace
@@ -641,26 +642,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
   // or in case of Turtles, Rancher pod restarts, so this is enough time to start restarting Rancher
   cy.wait(10000);
 
-  if (turtlesChart) {
-    // Poll /dashboard/about until it returns HTTP 200 and then reload the page
-    const checkApiStatus = (retries = 20) => {
-      cy.request({
-        url: '/about',
-        failOnStatusCode: false,
-        timeout: 30000,
-      }).then((response) => {
-        if (response.status !== 200 && retries > 0) {
-          cy.wait(5000);
-          checkApiStatus(retries - 1);
-        } else {
-          expect(response.status).to.eq(200);
-          // Once /dashboard/about is back, reload the page
-          cy.wait(5000);
-          cy.reload();
-          cy.wait(2000);
-        }
-      });
-    };
+  if (turtlesChart) {    
     checkApiStatus();
   } else {
     cy.get("div.wm.drag-end").then((windowmanager) => {
@@ -964,6 +946,13 @@ Cypress.Commands.add('burgerMenuOperate', (operation: 'open' | 'close') => {
   cy.get('.side-menu.' + selector).should('exist');
 });
 
+// Checks resource not exist on page using filter
+Cypress.Commands.add('checkResourceDeleted', (resourceName: string) => {
+  cy.typeInFilter(resourceName);
+  cy.getBySel('sortable-cell-0-1', {timeout: 60000}).should('not.exist');
+  cy.namespaceReset();
+})
+
 
 Cypress.Commands.add('deleteKubernetesResource', (clusterName = 'local', resourcePath: string[], resourceName: string, namespace?: string) => {
   cy.exploreCluster(clusterName);
@@ -980,9 +969,7 @@ Cypress.Commands.add('deleteKubernetesResource', (clusterName = 'local', resourc
   cy.getBySel('sortable-table_check_select_all').click();
   cy.getBySel('sortable-table-promptRemove').click({ctrlKey: true}); // this will prevent to display confirmation dialog
   cy.wait(2000); // needed for 2.12
-  cy.typeInFilter(resourceName);
-  cy.getBySel('sortable-cell-0-1', {timeout: 60000}).should('not.exist');
-  cy.namespaceReset();
+  cy.checkResourceDeleted(resourceName);
 })
 
 Cypress.Commands.add('exploreCluster', (clusterName: string) => {
@@ -1097,4 +1084,20 @@ Cypress.Commands.add('verifyCAPIProviderImage', (providerName, providerNamespace
   cy.setNamespace(providerNamespace);
   cy.contains(providerImageRegistry).should('be.visible');
   cy.namespaceReset();
+});
+
+// Check Turtles Feature flag expected status
+Cypress.Commands.add('checkTurtlesFeature', (status) => {
+  // Navigate to Feature flags
+  cy.goToHome();
+  cy.burgerMenuOperate('open');
+  cy.accesMenuSelection(['Global Settings', 'Feature Flags']);
+  cy.typeInFilter('api');
+
+  if (status == false) {
+    cy.contains(new RegExp('Disabled.*' + 'turtles'));
+    cy.goToNamespaces();
+    cy.setNamespace('All Namespaces', 'all_user');
+    cy.checkResourceDeleted('rancher-turtles-system');
+  }
 });

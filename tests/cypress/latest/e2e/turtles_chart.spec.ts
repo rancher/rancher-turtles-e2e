@@ -14,7 +14,7 @@ limitations under the License.
 
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
-import {isRancherManagerVersion} from '~/support/utils';
+import {isRancherManagerVersion, checkApiStatus} from '~/support/utils';
 
 Cypress.config();
 describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
@@ -54,6 +54,21 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
     })
   }
 
+  // Disable turtles system-chart to use dev chart 
+  if (isRancherManagerVersion('>=2.13') && devChart) {
+    it.skip('Toggle turtles feature', () => {
+      cy.readFile('./fixtures/features.yaml').then((data) => {
+        data = data.replace(/replace_turtles_value/, 'false')
+        cy.importYAML(data);
+
+        // Check status
+        cy.wait(5000);
+        checkApiStatus();
+        cy.checkTurtlesFeature(false);
+      });
+    });
+  }
+
   qase([2, 11],
     it('Install Turtles chart', {retries: 1}, () => {
       cy.contains('local').click();
@@ -68,7 +83,7 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
         // Required to validate turtles/issues/1395
         turtlesVersion = '0.21.0'
       }
-      cy.checkChart('Install', 'Rancher Turtles', 'rancher-turtles-system', turtlesVersion);
+      cy.checkChart('Upgrade', 'Rancher Turtles', 'rancher-turtles-system', turtlesVersion);
     })
   );
 });
