@@ -14,7 +14,7 @@ limitations under the License.
 
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
-import {isRancherManagerVersion} from '~/support/utils';
+import {isRancherManagerVersion, checkApiStatus} from '~/support/utils';
 
 Cypress.config();
 describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
@@ -52,6 +52,21 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
       }
       cy.addRepository('turtles-chart', turtlesHelmRepo, 'http', 'none');
     })
+  }
+
+  // Disable turtles system-chart to use dev chart 
+  if (isRancherManagerVersion('>=2.13') && devChart) {
+    it('Toggle turtles feature', () => {
+      cy.readFile('./fixtures/features.yaml').then((data) => {
+        data = data.replace(/replace_turtles_value/, 'false')
+        cy.importYAML(data);
+
+        // Check status
+        cy.wait(5000);
+        checkApiStatus();
+        cy.checkTurtlesFeature(false);
+      });
+    });
   }
 
   qase([2, 11],

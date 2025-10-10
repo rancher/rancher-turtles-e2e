@@ -398,14 +398,6 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: current
-      - name: Prepare for Providers Chart installation
-        if: ${{ inputs.turtles_dev_chart == true }}
-        run: |
-          kubectl apply -f https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/rancher/pre-turtles-install.yaml
-          kubectl delete mutatingwebhookconfiguration mutating-webhook-configuration --ignore-not-found
-          kubectl delete validatingwebhookconfiguration validating-webhook-configuration --ignore-not-found
-          sleep 10
-          kubectl rollout status deployment rancher -n cattle-system --timeout=1m
       - name: Cypress tests
         id: cypress
         env:

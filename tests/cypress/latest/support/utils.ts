@@ -36,3 +36,23 @@ export const getClusterName = (className: string): string => {
   const separator = '-'
   return 'turtles-qa'.concat(separator, className, separator, Cypress.env('cluster_name_suffix'))
 }
+
+// Poll /dashboard/about until it returns HTTP 200 and then reload the page
+export const checkApiStatus = (retries = 25) => {
+  cy.request({
+    url: '/about',
+    failOnStatusCode: false,
+    timeout: 30000,
+  }).then((response) => {
+    if (response.status !== 200 && retries > 0) {
+      cy.wait(5000);
+      checkApiStatus(retries - 1);
+    } else {
+      expect(response.status).to.eq(200);
+      // Once /dashboard/about is back, reload the page
+      cy.wait(5000);
+      cy.reload();
+      cy.wait(2000);
+    }
+  });
+}
