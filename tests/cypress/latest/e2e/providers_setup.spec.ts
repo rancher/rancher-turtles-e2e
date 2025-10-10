@@ -113,6 +113,21 @@ describe('Enable CAPI Providers', () => {
       })
     }
 
+    qase(4,
+      it('Create CAPD provider', {retries: 1}, () => {
+        // Create Docker Infrastructure provider
+        const namespace = 'capd-system'
+        if (!isDevBuild) {
+          cy.addInfraProvider('Docker', namespace);
+        } else {
+          cy.checkCAPIMenu();
+          cy.contains('Providers').click();
+        }
+        matchAndWaitForProviderReadyStatus(dockerProvider, 'infrastructure', dockerProvider, kubeadmProviderVersion, 120000);
+        cy.verifyCAPIProviderImage(dockerProvider, namespace);
+      })
+    );
+
     // TODO: Use wizard to create providers, capi-ui-extension/issues/177
     kubeadmProviderTypes.forEach(providerType => {
       qase(27,
@@ -144,21 +159,6 @@ describe('Enable CAPI Providers', () => {
         })
       );
     })
-
-    qase(4,
-      it('Create CAPD provider', () => {
-        // Create Docker Infrastructure provider
-        const namespace = 'capd-system'
-        if (!isDevBuild) {
-          cy.addInfraProvider('Docker', namespace);
-        } else {
-          cy.checkCAPIMenu();
-          cy.contains('Providers').click();
-        }
-        matchAndWaitForProviderReadyStatus(dockerProvider, 'infrastructure', dockerProvider, kubeadmProviderVersion, 120000);
-        cy.verifyCAPIProviderImage(dockerProvider, namespace);
-      })
-    );
 
     qase(90,
       // HelmApps to be used across all specs
