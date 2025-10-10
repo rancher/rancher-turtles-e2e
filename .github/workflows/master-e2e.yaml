@@ -367,9 +367,9 @@ jobs:
       - name: Copy chart file for chartmuseum
         if: ${{ inputs.turtles_dev_chart == true }}
         run: |
-          mkdir ${{ github.workspace }}/tests/assets/chartmuseum
-          cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets/chartmuseum
-          cp ${{ runner.temp }}/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets/chartmuseum
+          cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
+          mkdir ${{ github.workspace }}/tests/assets/providers
+          cp ${{ runner.temp }}/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets/providers
       - name: Inject kube-vip controlplane IP for vsphere into capv-helm-values.yaml
         if: ${{ needs.create-runner.outputs.uuid == 'vsphere' }}
         run: |
