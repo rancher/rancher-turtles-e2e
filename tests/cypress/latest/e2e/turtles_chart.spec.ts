@@ -53,22 +53,23 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
       cy.addRepository('turtles-chart', turtlesHelmRepo, 'http', 'none');
     })
   }
+  if (devChart) {
+    qase([2, 11],
+      it('Install Turtles chart', {retries: 1}, () => {
+        cy.contains('local').click();
 
-  qase([2, 11],
-    it('Install Turtles chart', {retries: 1}, () => {
-      cy.contains('local').click();
+        // if turtles dev chart is to be used, ignore the turtles chart version
+        const turtlesHelmRepo = Cypress.env('chartmuseum_repo')
+        if (turtlesHelmRepo != "" && turtlesHelmRepo != undefined) {
+          turtlesVersion = ""
+        }
 
-      // if turtles dev chart is to be used, ignore the turtles chart version
-      const turtlesHelmRepo = Cypress.env('chartmuseum_repo')
-      if (turtlesHelmRepo != "" && turtlesHelmRepo != undefined) {
-        turtlesVersion = ""
-      }
-
-      if (Cypress.env('grepTags') && (Cypress.env('grepTags')).includes('@upgrade')) {
-        // Required to validate turtles/issues/1395
-        turtlesVersion = '0.21.0'
-      }
-      cy.checkChart('Install', 'Rancher Turtles', 'rancher-turtles-system', turtlesVersion);
-    })
-  );
+        if (Cypress.env('grepTags') && (Cypress.env('grepTags')).includes('@upgrade')) {
+          // Required to validate turtles/issues/1395
+          turtlesVersion = '0.21.0'
+        }
+        cy.checkChart('Install', 'Rancher Turtles', 'rancher-turtles-system', turtlesVersion);
+      })
+    );
+  }
 });
