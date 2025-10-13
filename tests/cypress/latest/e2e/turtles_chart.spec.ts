@@ -42,7 +42,7 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
   })
 
   // Skip adding repo to install turtles from r/charts
-  if (isRancherManagerVersion('<=2.12') || devChart) {
+  if (isRancherManagerVersion('<=2.12')) {
     it('Add turtles repo', {retries: 1}, () => {
       // if the env var is empty or not defined at all; use the normal repo
       if (turtlesHelmRepo == '') {
@@ -54,6 +54,8 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
     })
   }
 
+  // Skip for 2.13, TODO: remove check  after turtles/issues/1811 is fixed
+  if (isRancherManagerVersion('<=2.12')) {
   qase([2, 11],
     it('Install Turtles chart', {retries: 1}, () => {
       cy.contains('local').click();
@@ -71,4 +73,5 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
       cy.checkChart('Install', 'Rancher Turtles', 'rancher-turtles-system', turtlesVersion);
     })
   );
+  }
 });
