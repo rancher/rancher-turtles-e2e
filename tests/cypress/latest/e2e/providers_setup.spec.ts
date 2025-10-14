@@ -47,6 +47,7 @@ describe('Enable CAPI Providers', () => {
   const turtlesRepoUrl = 'https://github.com/rancher/turtles.git';
 
   // Providers names
+  const rke2Provider = 'rke2'
   const kubeadmProvider = 'kubeadm'
   const dockerProvider = 'docker'
   const amazonProvider = 'aws'
@@ -58,6 +59,7 @@ describe('Enable CAPI Providers', () => {
   // Expected provider versions
   const providerVersions = {
     prod: {
+      rke2: 'v0.20.1',
       kubeadm: 'v1.10.5',
       fleet: 'v0.11.0',
       vsphere: 'v1.13.1',
@@ -66,6 +68,7 @@ describe('Enable CAPI Providers', () => {
       azure: 'v1.21.0'
     },
     dev: {
+      rke2: 'v0.20.1',
       kubeadm: 'v1.10.7',
       fleet: 'v0.11.0',
       vsphere: 'v1.13.1',
@@ -78,6 +81,7 @@ describe('Enable CAPI Providers', () => {
   // Set the provider versions based on the environment
 
   // Assign the provider versions based on the build type
+  const rke2ProviderVersion = providerVersions[buildType].rke2;
   const kubeadmProviderVersion = providerVersions[buildType].kubeadm
   const fleetProviderVersion = providerVersions[buildType].fleet
   const vsphereProviderVersion = providerVersions[buildType].vsphere
@@ -86,7 +90,7 @@ describe('Enable CAPI Providers', () => {
   const azureProviderVersion = providerVersions[buildType].azure
 
   const kubeadmBaseURL = 'https://github.com/kubernetes-sigs/cluster-api/releases/'
-  const kubeadmProviderTypes = ['bootstrap', 'control plane']
+  const kubeProviderTypes = ['bootstrap', 'control plane']
   const capiNamespaces = ['capi-clusters', 'capi-classes']
   const localProviderNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system', 'capd-system']
   const cloudProviderNamespaces = ['capa-system', 'capg-system', 'capz-system']
@@ -134,7 +138,7 @@ describe('Enable CAPI Providers', () => {
     );
 
     // TODO: Use wizard to create providers, capi-ui-extension/issues/177
-    kubeadmProviderTypes.forEach(providerType => {
+    kubeProviderTypes.forEach(providerType => {
       qase(27,
         it('Create/Verify Kubeadm Providers - ' + providerType, () => {
           // Create CAPI Kubeadm providers
@@ -163,6 +167,21 @@ describe('Enable CAPI Providers', () => {
           }
         })
       );
+
+      it('Create/Verify RKE2 Providers - ' + providerType, () => {
+        // Create CAPI Kubeadm providers
+        if (providerType == 'control plane') {
+          const providerName = rke2Provider + '-' + 'control-plane'
+          cy.checkCAPIMenu();
+          cy.contains('Providers').click();
+          matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', rke2Provider, rke2ProviderVersion, 120000);
+        } else {
+          const providerName = rke2Provider + '-' + providerType
+          cy.checkCAPIMenu();
+          cy.contains('Providers').click();
+          matchAndWaitForProviderReadyStatus(providerName, providerType, rke2Provider, rke2ProviderVersion, 120000);
+        }
+      });
     })
 
     qase(90,
