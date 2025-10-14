@@ -114,7 +114,7 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 					"upgrade", "--install", "cert-manager", "jetstack/cert-manager",
 					"--namespace", "cert-manager",
 					"--create-namespace",
-					"--set", "installCRDs=true",
+					"--set", "crds.enabled=true",
 					"--wait", "--wait-for-jobs",
 				}
 
@@ -158,15 +158,22 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 				return rancher.CheckPod(k, checkList)
 			}, tools.SetTimeout(4*time.Minute), 30*time.Second).Should(BeNil())
 
-			// Apply the workaround for for disabling embedded cluter API on dev
+			// Apply the workaround for disabling embedded cluster API on dev
 			if turtlesDevChart == "true" {
-				//	#!/bin/sh
-				//
-				// kubectl apply -f https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/rancher/pre-turtles-install.yaml
-				// kubectl delete mutatingwebhookconfiguration mutating-webhook-configuration --ignore-not-found
-				// kubectl delete validatingwebhookconfiguration validating-webhook-configuration --ignore-not-found
-				// sleep 10
-				// kubectl rollout status deployment rancher -n cattle-system --timeout=1m
+				// Run the bash commands from Go
+				_, err := kubectl.Run("apply", "-f", "https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/rancher/pre-turtles-install.yaml")
+				Expect(err).To(BeNil())
+
+				_, err = kubectl.Run("delete", "mutatingwebhookconfiguration", "mutating-webhook-configuration", "--ignore-not-found")
+				Expect(err).To(BeNil())
+
+				_, err = kubectl.Run("delete", "validatingwebhookconfiguration", "validating-webhook-configuration", "--ignore-not-found")
+				Expect(err).To(BeNil())
+
+				time.Sleep(10 * time.Second)
+
+				_, err = kubectl.Run("rollout", "status", "deployment/rancher", "-n", "cattle-system", "--timeout=1m")
+				Expect(err).To(BeNil())
 			}
 
 			// A bit dirty be better to wait a little here for all to be correctly started
