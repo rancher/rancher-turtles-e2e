@@ -319,11 +319,9 @@ jobs:
       - name: Set rancher/turtles repo branch
         run: |
           if [[ "${{ env.RANCHER_VERSION }}" =~ "2.13" ]]; then
-            echo "TURTLES_BRANCH=release/v0.25" >> ${GITHUB_ENV}
-          elif [[ "${{ env.RANCHER_VERSION }}" =~ "2.12" ]]; then
-            echo "TURTLES_BRANCH=release-0.24" >> ${GITHUB_ENV}
-          else
             echo "TURTLES_BRANCH=${{ env.TURTLES_BRANCH }}" >> ${GITHUB_ENV}
+          else
+            echo "TURTLES_BRANCH=release-0.24" >> ${GITHUB_ENV}
           fi
       - name: Check out rancher/turtles repo
         if: ${{ inputs.turtles_dev_chart == true }}
