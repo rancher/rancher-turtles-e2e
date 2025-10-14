@@ -626,11 +626,12 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
       .then((editor) => {
         // @ts-expect-error known error with CodeMirror
         let text = editor[0].CodeMirror.getValue();
+        text = text.replace(/bootstrapKubeadm:\n(\s*)(.*)\n(\s*)enabled: false/g, 'bootstrapKubeadm:\n$1$2\n$1enabled: true');
+        text = text.replace(/controlplaneKubeadm:\n(\s*)(.*)\n(\s*)enabled: false/g, 'controlplaneKubeadm:\n$1$2\n$1enabled: true');
+
         if (Cypress.env('grepTags')) {
           const tags = Cypress.env('grepTags')
-          if (tags.includes('@short') || tags.includes('@install')) {
-            text = text.replace(/bootstrapKubeadm:\n(\s*)(.*)\n(\s*)enabled: false/g, 'bootstrapKubeadm:\n$1$2\n$1enabled: true');
-            text = text.replace(/controlplaneKubeadm:\n(\s*)(.*)\n(\s*)enabled: false/g, 'controlplaneKubeadm:\n$1$2\n$1enabled: true');
+          if (tags.includes('@short')) {
             text = text.replace(/infrastructureDocker:\n(\s*)(.*)\n(\s*)enabled: false/g, 'infrastructureDocker:\n$1$2\n$1enabled: true');
           }
           if (tags.includes('@full')) {
