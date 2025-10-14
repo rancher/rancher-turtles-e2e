@@ -397,7 +397,7 @@ jobs:
         with:
           node-version: current
       - name: Prepare for Providers Chart installation
-        if: ${{ inputs.turtles_dev_chart == true }}
+        if: ${{ inputs.turtles_dev_chart == true && (contains(env.RANCHER_VERSION, '2.13') || contains(env.RANCHER_VERSION, '2.12')) }}
         run: |
           kubectl apply -f https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/rancher/pre-turtles-install.yaml
           kubectl delete mutatingwebhookconfiguration mutating-webhook-configuration --ignore-not-found
