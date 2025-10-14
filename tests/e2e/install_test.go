@@ -15,8 +15,10 @@ limitations under the License.
 package e2e_test
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -112,7 +114,7 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 					"upgrade", "--install", "cert-manager", "jetstack/cert-manager",
 					"--namespace", "cert-manager",
 					"--create-namespace",
-					"--set", "installCRDs=true",
+					"--set", "crds.enabled=true",
 					"--wait", "--wait-for-jobs",
 				}
 
@@ -130,7 +132,20 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 		}
 
 		By("Installing/Upgrading Rancher Manager", func() {
-			err := rancher.DeployRancherManager(rancherHostname, rancherChannel, rancherVersion, rancherHeadVersion, "none", "none")
+			var extraFlags []string
+			if turtlesDevChart == "true" {
+				extraEnvIndex := 1
+				// Following condition needs to be reviewed because nowadays heads build don't use any extraEnv
+				// if rancherHeadVersion != "" || strings.Contains(rancherChannel, "prime-optimus") {
+				//	extraEnvIndex = 2
+				//}
+				extraFlags = []string{
+					"--set", fmt.Sprintf("extraEnv[%d].name=CATTLE_FEATURES", extraEnvIndex),
+					"--set-string", fmt.Sprintf("extraEnv[%d].value=turtles=false\\,embedded-cluster-api=true", extraEnvIndex),
+				}
+				GinkgoWriter.Write([]byte(strings.Join(extraFlags, " ") + "\n"))
+			}
+			err := rancher.DeployRancherManager(rancherHostname, rancherChannel, rancherVersion, rancherHeadVersion, "none", "none", extraFlags)
 			Expect(err).To(Not(HaveOccurred()))
 
 			// Wait for all pods to be started
@@ -142,6 +157,24 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 			Eventually(func() error {
 				return rancher.CheckPod(k, checkList)
 			}, tools.SetTimeout(4*time.Minute), 30*time.Second).Should(BeNil())
+
+			// Apply the workaround for disabling embedded cluster API on dev
+			if turtlesDevChart == "true" {
+				// Run the bash commands from Go
+				_, err := kubectl.Run("apply", "-f", "https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/rancher/pre-turtles-install.yaml")
+				Expect(err).To(BeNil())
+
+				_, err = kubectl.Run("delete", "mutatingwebhookconfiguration", "mutating-webhook-configuration", "--ignore-not-found")
+				Expect(err).To(BeNil())
+
+				_, err = kubectl.Run("delete", "validatingwebhookconfiguration", "validating-webhook-configuration", "--ignore-not-found")
+				Expect(err).To(BeNil())
+
+				time.Sleep(10 * time.Second)
+
+				_, err = kubectl.Run("rollout", "status", "deployment/rancher", "-n", "cattle-system", "--timeout=1m")
+				Expect(err).To(BeNil())
+			}
 
 			// A bit dirty be better to wait a little here for all to be correctly started
 			time.Sleep(2 * time.Minute)
