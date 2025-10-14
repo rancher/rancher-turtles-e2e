@@ -13,9 +13,10 @@ limitations under the License.
 
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
+import {isRancherManagerVersion} from "~/support/utils";
 
 const buildType = Cypress.env('chartmuseum_repo') ? 'dev' : 'prod';
-const isDevBuild = buildType == 'dev';
+const isDevBuild = buildType == 'dev' && isRancherManagerVersion('>=2.12');
 
 function matchAndWaitForProviderReadyStatus(
   providerString: string,
