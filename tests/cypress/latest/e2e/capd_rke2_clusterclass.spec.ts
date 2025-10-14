@@ -13,7 +13,7 @@ limitations under the License.
 
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
-import {getClusterName, skipClusterDeletion} from '~/support/utils';
+import {getClusterName, skipClusterDeletion, isRancherManagerVersion} from '~/support/utils';
 import {Question} from '~/support/structs';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 
@@ -130,6 +130,7 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
       })
     );
 
+    if (isRancherManagerVersion('<=2.12')) {
     qase(41,
       it('Update chart and check cluster status', () => {
         cy.contains('local').click();
@@ -140,6 +141,7 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
         cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
       })
     );
+    }
   })
 
   context('[TEARDOWN]', () => {

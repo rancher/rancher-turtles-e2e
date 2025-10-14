@@ -13,7 +13,7 @@ limitations under the License.
 
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
-import {isRancherManagerVersion} from "~/support/utils";
+import {isRancherManagerVersion} from '~/support/utils';
 
 const buildType = Cypress.env('chartmuseum_repo') ? 'dev' : 'prod';
 const isDevBuild = buildType == 'dev' && isRancherManagerVersion('>=2.12');
@@ -108,11 +108,26 @@ describe('Enable CAPI Providers', () => {
       })
     }
 
-    if (isDevBuild) {
+    if (isDevBuild || isRancherManagerVersion('2.13')) {
       it('Create Providers using Charts', () => {
         cy.importYAML('fixtures/providers-chart/providers-chart-helmop.yaml')
       })
     }
+
+    qase(4,
+      it('Create CAPD provider', {retries: 2}, () => {
+        // Create Docker Infrastructure provider
+        const namespace = 'capd-system'
+        if (!isDevBuild) {
+          cy.addInfraProvider('Docker', namespace);
+        } else {
+          cy.checkCAPIMenu();
+          cy.contains('Providers').click();
+        }
+        matchAndWaitForProviderReadyStatus(dockerProvider, 'infrastructure', dockerProvider, kubeadmProviderVersion, 120000);
+        cy.verifyCAPIProviderImage(dockerProvider, namespace);
+      })
+    );
 
     // TODO: Use wizard to create providers, capi-ui-extension/issues/177
     kubeadmProviderTypes.forEach(providerType => {
@@ -145,21 +160,6 @@ describe('Enable CAPI Providers', () => {
         })
       );
     })
-
-    qase(4,
-      it('Create CAPD provider', () => {
-        // Create Docker Infrastructure provider
-        const namespace = 'capd-system'
-        if (!isDevBuild) {
-          cy.addInfraProvider('Docker', namespace);
-        } else {
-          cy.checkCAPIMenu();
-          cy.contains('Providers').click();
-        }
-        matchAndWaitForProviderReadyStatus(dockerProvider, 'infrastructure', dockerProvider, kubeadmProviderVersion, 120000);
-        cy.verifyCAPIProviderImage(dockerProvider, namespace);
-      })
-    );
 
     qase(90,
       // HelmApps to be used across all specs
