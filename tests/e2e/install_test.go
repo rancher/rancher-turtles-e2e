@@ -17,7 +17,6 @@ package e2e_test
 import (
 	"os"
 	"os/exec"
-	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -28,8 +27,6 @@ import (
 )
 
 var (
-	// Define local Kubeconfig file
-	localKubeconfig = os.Getenv("HOME") + "/.kube/config"
 	// Create kubectl context
 	// Default timeout is too small, so New() cannot be used
 	k = &kubectl.Kubectl{
@@ -67,7 +64,7 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 
 				// Set command and arguments
 				installCmd := exec.Command("sh", fileName)
-				installCmd.Env = append(os.Environ(), "INSTALL_K3S_EXEC=--disable metrics-server")
+				installCmd.Env = append(os.Environ(), "INSTALL_K3S_EXEC=--disable metrics-server --write-kubeconfig-mode 0644")
 
 				// Retry in case of (sporadic) failure...
 				count := 1
@@ -102,14 +99,7 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 			})
 
 			By("Configuring Kubeconfig file", func() {
-				// Copy K3s file in ~/.kube/config
-				// NOTE: don't check for error, as it will happen anyway (only K3s is installed at a time)
-				file, _ := exec.Command("bash", "-c", "ls /etc/rancher/k3s/k3s.yaml").Output()
-				Expect(file).To(Not(BeEmpty()))
-				err := tools.CopyFile(strings.Trim(string(file), "\n"), localKubeconfig)
-				Expect(err).To(Not(HaveOccurred()))
-
-				err = os.Setenv("KUBECONFIG", localKubeconfig)
+				err := os.Setenv("KUBECONFIG", "/etc/rancher/k3s/k3s.yaml")
 				Expect(err).To(Not(HaveOccurred()))
 			})
 
@@ -156,52 +146,5 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 			// A bit dirty be better to wait a little here for all to be correctly started
 			time.Sleep(2 * time.Minute)
 		})
-
-		if Label("install").MatchesLabelFilter(GinkgoLabelFilter()) {
-			By("Configuring kubectl to use Rancher admin user", func() {
-				// Getting internal username for admin
-				internalUsername, err := kubectl.Run("get", "user",
-					"-o", "jsonpath={.items[?(@.username==\"admin\")].metadata.name}",
-				)
-				Expect(err).To(Not(HaveOccurred()))
-				Expect(internalUsername).To(Not(BeEmpty()))
-
-				// Add token in Rancher Manager
-				err = tools.Sed("%ADMIN_USER%", internalUsername, ciTokenYaml)
-				Expect(err).To(Not(HaveOccurred()))
-				err = kubectl.Apply("default", ciTokenYaml)
-				Expect(err).To(Not(HaveOccurred()))
-
-				// Getting Rancher Manager local cluster CA
-				// NOTE: loop until the cmd return something, it could take some time
-				var rancherCA string
-				Eventually(func() error {
-					rancherCA, err = kubectl.Run("get", "secret",
-						"--namespace", "cattle-system",
-						"tls-rancher-ingress",
-						"-o", "jsonpath={.data.tls\\.crt}",
-					)
-					return err
-				}, tools.SetTimeout(2*time.Minute), 5*time.Second).Should(Not(HaveOccurred()))
-
-				// Copy skel file for ~/.kube/config
-				err = tools.CopyFile(localKubeconfigYaml, localKubeconfig)
-				Expect(err).To(Not(HaveOccurred()))
-
-				// Create kubeconfig for local cluster
-				err = tools.Sed("%RANCHER_URL%", rancherHostname, localKubeconfig)
-				Expect(err).To(Not(HaveOccurred()))
-				err = tools.Sed("%RANCHER_CA%", rancherCA, localKubeconfig)
-				Expect(err).To(Not(HaveOccurred()))
-
-				// Set correct file permissions
-				_ = exec.Command("chmod", "0600", localKubeconfig).Run()
-
-				// Remove the "old" kubeconfig file to force the use of the new one
-				// NOTE: in fact move it, just to keep it in case of issue
-				// Also don't check the returned error, as it will always not equal 0
-				_ = exec.Command("bash", "-c", "sudo mv -f /etc/rancher/k3s/k3s.yaml ~/").Run()
-			})
-		}
 	})
 })

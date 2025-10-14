@@ -238,7 +238,6 @@ jobs:
       # K3S flags to use for installation
       INSTALL_K3S_SKIP_ENABLE: true
       INSTALL_K3S_VERSION: ${{ inputs.upstream_cluster_version }}
-      K3S_KUBECONFIG_MODE: 0644
       # For Rancher Manager
       RANCHER_USER: admin
       RANCHER_URL: https://${{ needs.create-runner.outputs.public_dns }}/dashboard

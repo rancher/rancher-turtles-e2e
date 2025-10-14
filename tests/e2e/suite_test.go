@@ -26,26 +26,16 @@ import (
 	"github.com/rancher-sandbox/ele-testhelpers/tools"
 )
 
-const (
-	ciTokenYaml         = "../assets/local-kubeconfig-token-skel.yaml"
-	localKubeconfigYaml = "../assets/local-kubeconfig-skel.yaml"
-	userName            = "root"
-	userPassword        = "r0s@pwd1"
-	vmNameRoot          = "node"
-)
-
 var (
 	arch                string
 	CertManagerVersion  string
 	clusterName         string
 	clusterNS           string
 	rancherHostname     string
-	k8sVersion          string
 	rancherChannel      string
 	rancherHeadVersion  string
 	rancherLogCollector string
 	rancherVersion      string
-	testType            string
 )
 
 /**
@@ -75,10 +65,8 @@ var _ = BeforeSuite(func() {
 	clusterName = os.Getenv("CLUSTER_NAME")
 	clusterNS = os.Getenv("CLUSTER_NS")
 	rancherHostname = os.Getenv("PUBLIC_DNS")
-	k8sVersion = os.Getenv("K8S_VERSION_TO_PROVISION")
 	rancherLogCollector = os.Getenv("RANCHER_LOG_COLLECTOR")
 	rancherVersion = os.Getenv("RANCHER_VERSION")
-	testType = os.Getenv("TEST_TYPE")
 
 	// Extract Rancher Manager channel/version to install
 	if rancherVersion != "" {
