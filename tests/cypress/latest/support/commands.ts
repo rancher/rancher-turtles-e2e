@@ -1089,7 +1089,11 @@ Cypress.Commands.add('verifyCAPIProviderImage', (providerName, providerNamespace
   if (providerName == 'docker') {
     providerImageRegistry = 'gcr.io/k8s-staging-cluster-api'
   } else {
-    providerImageRegistry = 'registry.suse.com/rancher'
+    if (isRancherManagerVersion('2.13')) {
+      providerImageRegistry = 'registry.k8s.io/cluster-api'
+    } else {
+      providerImageRegistry = 'registry.suse.com/rancher'
+    }
   }
 
   cy.exploreCluster('local');
