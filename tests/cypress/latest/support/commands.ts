@@ -642,7 +642,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
             text = text.replace(/infrastructureAWS:\n(\s*)(.*)\n(\s*)enabled: false/g, 'infrastructureAWS:\n$1$2\n$1enabled: true');
           }
           if (tags.includes('@vsphere')) {
-            text = text.replace(/infrastructureVSphere:\n(\s*)(.*)\n(\s*)enabled: false/g, 'infrastructureVSphere:\n$1$2\n$1enabled: true');
+            text = text.replace(/infrastructureVSphere:\n(\s*)(.*)\n(\s*)enabled: false/g, 'infrastructureVSphere:\n$1$2\n$1enabled: true\n$1version: v1.13.1');
           }
         }
         // @ts-expect-error known error with CodeMirror
