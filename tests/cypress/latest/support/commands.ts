@@ -642,7 +642,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
             text = text.replace(/infrastructureAWS:\n(\s*)(.*)\n(\s*)enabled: false/g, 'infrastructureAWS:\n$1$2\n$1enabled: true');
           }
           if (tags.includes('@vsphere')) {
-            text = text.replace(/infrastructureVSphere:\n(\s*)(.*)\n(\s*)enabled: false/g, 'infrastructureVSphere:\n$1$2\n$1enabled: true');
+            text = text.replace(/infrastructureVSphere:\n(\s*)(.*)\n(\s*)enabled: false/g, 'infrastructureVSphere:\n$1$2\n$1enabled: true\n$1version: v1.13.1');
           }
         }
         // @ts-expect-error known error with CodeMirror
@@ -1124,7 +1124,11 @@ Cypress.Commands.add('verifyCAPIProviderImage', (providerName, providerNamespace
   if (providerName == 'docker') {
     providerImageRegistry = 'gcr.io/k8s-staging-cluster-api'
   } else {
-    providerImageRegistry = 'registry.suse.com/rancher'
+    if (isRancherManagerVersion('2.13')) {
+      providerImageRegistry = 'registry.k8s.io/cluster-api'
+    } else {
+      providerImageRegistry = 'registry.suse.com/rancher'
+    }
   }
 
   cy.exploreCluster('local');
