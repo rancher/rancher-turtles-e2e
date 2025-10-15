@@ -122,21 +122,6 @@ describe('Enable CAPI Providers', () => {
       })
     }
 
-    qase(4,
-      it('Create/Verify CAPD provider', {retries: 2}, () => {
-        // Create Docker Infrastructure provider
-        const namespace = 'capd-system'
-        if (!isDevBuild) {
-          cy.addInfraProvider('Docker', namespace);
-        } else {
-          cy.checkCAPIMenu();
-          cy.contains('Providers').click();
-        }
-        matchAndWaitForProviderReadyStatus(dockerProvider, 'infrastructure', dockerProvider, kubeadmProviderVersion, 120000);
-        cy.verifyCAPIProviderImage(dockerProvider, namespace);
-      })
-    );
-
     // TODO: Use wizard to create providers, capi-ui-extension/issues/177
     kubeProviderTypes.forEach(providerType => {
       qase(27,
@@ -220,6 +205,23 @@ describe('Enable CAPI Providers', () => {
       matchAndWaitForProviderReadyStatus(fleetProvider, 'addon', fleetProvider, fleetProviderVersion, 30000);
     });
   });
+
+  context('Docker provider', {tags: '@short'}, () => {
+    qase(4,
+      it('Create/Verify CAPD provider', {retries: 2}, () => {
+        // Create Docker Infrastructure provider
+        const namespace = 'capd-system'
+        if (!isDevBuild) {
+          cy.addInfraProvider('Docker', namespace);
+        } else {
+          cy.checkCAPIMenu();
+          cy.contains('Providers').click();
+        }
+        matchAndWaitForProviderReadyStatus(dockerProvider, 'infrastructure', dockerProvider, kubeadmProviderVersion, 120000);
+        cy.verifyCAPIProviderImage(dockerProvider, namespace);
+      })
+    );
+  })
 
   context('vSphere provider', {tags: '@vsphere'}, () => {
     if (!isDevBuild) {
