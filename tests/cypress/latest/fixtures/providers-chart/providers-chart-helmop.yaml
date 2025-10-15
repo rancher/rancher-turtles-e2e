@@ -32,6 +32,7 @@ spec:
             clusterTopology: true
         infrastructureVSphere:
           enabled: false
+          version: v1.13.1
           features:
             machinePool: true
             clusterResourceSet: true
