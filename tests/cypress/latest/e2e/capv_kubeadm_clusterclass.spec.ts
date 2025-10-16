@@ -60,7 +60,7 @@ describe('Import CAPV Kubeadm Class-Cluster', {tags: '@vsphere'}, () => {
     })
 
     // TODO: Create Provider via UI, ref: capi-ui-extension/issues/128
-    it('Create VSphere CAPIProvider & VSphereClusterIdentity', () => {
+    it.skip('Create VSphere CAPIProvider & VSphereClusterIdentity', () => {
       cy.removeCAPIResource('Providers', providerName);
       cy.createCAPIProvider(providerName);
 

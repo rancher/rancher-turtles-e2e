@@ -566,7 +566,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
   let chartSelector = isRancherManagerVersion('>=2.12') ? 'app-chart-cards-container' : 'chart-selection-grid';
   if (turtlesChart) {
     let turtlesChartSelector: string;
-    
+
     if (isRancherManagerVersion('2.13')) {
       const devChart = Cypress.env('chartmuseum_repo') != ''
       turtlesChartSelector = devChart ? '"item-card-cluster/turtles-chart/rancher-turtles"' : '"item-card-cluster/rancher-charts/rancher-turtles"'; // turtles-chart repo == null
@@ -1089,7 +1089,11 @@ Cypress.Commands.add('verifyCAPIProviderImage', (providerName, providerNamespace
   if (providerName == 'docker') {
     providerImageRegistry = 'gcr.io/k8s-staging-cluster-api'
   } else {
-    providerImageRegistry = 'registry.suse.com/rancher'
+    if (isRancherManagerVersion('2.13')) {
+      providerImageRegistry = 'registry.k8s.io/cluster-api'
+    } else {
+      providerImageRegistry = 'registry.suse.com/rancher'
+    }
   }
 
   cy.exploreCluster('local');
