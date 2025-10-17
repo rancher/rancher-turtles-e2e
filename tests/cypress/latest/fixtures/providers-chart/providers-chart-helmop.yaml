@@ -33,6 +33,7 @@ spec:
         infrastructureVSphere:
           enabled: false
           version: v1.13.1
+          enableAutomaticUpdate: false
           features:
             machinePool: true
             clusterResourceSet: true

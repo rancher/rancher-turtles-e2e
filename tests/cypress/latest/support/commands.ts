@@ -566,7 +566,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
   let chartSelector = isRancherManagerVersion('>=2.12') ? 'app-chart-cards-container' : 'chart-selection-grid';
   if (turtlesChart) {
     let turtlesChartSelector: string;
-    
+
     if (isRancherManagerVersion('2.13')) {
       const devChart = Cypress.env('chartmuseum_repo') != ''
       turtlesChartSelector = devChart ? '"item-card-cluster/turtles-chart/rancher-turtles"' : '"item-card-cluster/rancher-charts/rancher-turtles"'; // turtles-chart repo == null
