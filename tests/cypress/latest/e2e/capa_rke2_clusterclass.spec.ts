@@ -1,6 +1,6 @@
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
-import {getClusterName, skipClusterDeletion} from '~/support/utils';
+import {getClusterName, isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
 import {capaResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 
 Cypress.config();
@@ -27,8 +27,10 @@ describe('Import CAPA RKE2 Class-Cluster', {tags: '@full'}, () => {
 
     // TODO: Create Provider via UI, ref: capi-ui-extension/issues/128
     it('Create AWS CAPIProvider & AWSClusterStaticIdentity', () => {
-      cy.removeCAPIResource('Providers', providerName);
-      cy.createCAPIProvider(providerName);
+      if (isRancherManagerVersion('<2.12')) {
+        cy.removeCAPIResource('Providers', providerName);
+        cy.createCAPIProvider(providerName);
+      }
       cy.createAWSClusterStaticIdentity(accessKey, secretKey);
     })
 

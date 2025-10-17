@@ -71,8 +71,10 @@ describe('Import CAPV RKE2 Class-Cluster', {tags: '@vsphere'}, () => {
 
     // TODO: Create Provider via UI, ref: capi-ui-extension/issues/128
     it('Create VSphere CAPIProvider & VSphereClusterIdentity', () => {
-      // cy.removeCAPIResource('Providers', providerName);
-      // cy.createCAPIProvider(providerName);
+      if (isRancherManagerVersion('<2.12')) {
+        cy.removeCAPIResource('Providers', providerName);
+        cy.createCAPIProvider(providerName);
+      }
 
       const vsphere_username = JSON.stringify(vsphere_secrets_json.vsphere_username).replace(/\"/g, "")
       const vsphere_password = JSON.stringify(vsphere_secrets_json.vsphere_password).replace(/\"/g, "")

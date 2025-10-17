@@ -1,6 +1,6 @@
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
-import {getClusterName, skipClusterDeletion} from '~/support/utils';
+import {getClusterName, isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
 import {Cluster} from '~/support/structs';
 
 Cypress.config();
@@ -28,10 +28,12 @@ describe('Create CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
   });
 
   // TODO: Create Provider via UI, ref: capi-ui-extension/issues/128
-  it('Create Azure CAPIProvider', () => {
-    cy.removeCAPIResource('Providers', providerName);
-    cy.createCAPIProvider(providerName);
-  })
+  if (isRancherManagerVersion('<2.12')) {
+    it('Create Azure CAPIProvider', () => {
+      cy.removeCAPIResource('Providers', providerName);
+      cy.createCAPIProvider(providerName);
+    })
+  }
 
   it('Setup the namespace for importing', () => {
     cy.namespaceAutoImport('Disable');
