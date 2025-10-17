@@ -47,6 +47,7 @@ describe('Enable CAPI Providers', () => {
   const turtlesRepoUrl = 'https://github.com/rancher/turtles.git';
 
   // Providers names
+  const rke2Provider = 'rke2'
   const kubeadmProvider = 'kubeadm'
   const dockerProvider = 'docker'
   const amazonProvider = 'aws'
@@ -58,18 +59,20 @@ describe('Enable CAPI Providers', () => {
   // Expected provider versions
   const providerVersions = {
     prod: {
+      rke2: 'v0.20.1',
       kubeadm: 'v1.10.5',
       fleet: 'v0.11.0',
       vsphere: 'v1.13.1',
-      amazon: 'v2.9.1',
+      amazon: 'v2.9.2',
       google: 'v1.10.0',
       azure: 'v1.21.0'
     },
     dev: {
+      rke2: 'v0.20.1',
       kubeadm: 'v1.10.7',
       fleet: 'v0.11.0',
       vsphere: 'v1.13.1',
-      amazon: 'v2.9.1',
+      amazon: 'v2.9.2',
       google: 'v1.10.0',
       azure: 'v1.21.0'
     }
@@ -78,6 +81,7 @@ describe('Enable CAPI Providers', () => {
   // Set the provider versions based on the environment
 
   // Assign the provider versions based on the build type
+  const rke2ProviderVersion = providerVersions[buildType].rke2;
   const kubeadmProviderVersion = providerVersions[buildType].kubeadm
   const fleetProviderVersion = providerVersions[buildType].fleet
   const vsphereProviderVersion = providerVersions[buildType].vsphere
@@ -86,7 +90,7 @@ describe('Enable CAPI Providers', () => {
   const azureProviderVersion = providerVersions[buildType].azure
 
   const kubeadmBaseURL = 'https://github.com/kubernetes-sigs/cluster-api/releases/'
-  const kubeadmProviderTypes = ['bootstrap', 'control plane']
+  const kubeProviderTypes = ['bootstrap', 'control plane']
   const capiNamespaces = ['capi-clusters', 'capi-classes']
   const localProviderNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system', 'capd-system']
   const cloudProviderNamespaces = ['capa-system', 'capg-system', 'capz-system']
@@ -110,29 +114,18 @@ describe('Enable CAPI Providers', () => {
 
     if (isDevBuild || isRancherManagerVersion('2.13')) {
       it('Create Providers using Charts', () => {
-        cy.importYAML('fixtures/providers-chart/providers-chart-helmop.yaml')
+        // Click on imported CAPD cluster
+        cy.contains('local').click();
+
+        // Install Rancher Turtles Certified Providers chart, this will install all providers based on the tags (@short, @full, @vsphere).
+        cy.checkChart('Install', 'Rancher Turtles Certified Providers', 'cattle-turtles-system');
       })
     }
 
-    qase(4,
-      it('Create CAPD provider', {retries: 2}, () => {
-        // Create Docker Infrastructure provider
-        const namespace = 'capd-system'
-        if (!isDevBuild) {
-          cy.addInfraProvider('Docker', namespace);
-        } else {
-          cy.checkCAPIMenu();
-          cy.contains('Providers').click();
-        }
-        matchAndWaitForProviderReadyStatus(dockerProvider, 'infrastructure', dockerProvider, kubeadmProviderVersion, 120000);
-        cy.verifyCAPIProviderImage(dockerProvider, namespace);
-      })
-    );
-
     // TODO: Use wizard to create providers, capi-ui-extension/issues/177
-    kubeadmProviderTypes.forEach(providerType => {
+    kubeProviderTypes.forEach(providerType => {
       qase(27,
-        it('Create Kubeadm Providers - ' + providerType, () => {
+        it('Create/Verify Kubeadm Providers - ' + providerType, () => {
           // Create CAPI Kubeadm providers
           if (providerType == 'control plane') {
             const providerName = kubeadmProvider + '-' + 'control-plane'
@@ -159,6 +152,21 @@ describe('Enable CAPI Providers', () => {
           }
         })
       );
+
+      it('Create/Verify RKE2 Providers - ' + providerType, () => {
+        // Create CAPI Kubeadm providers
+        if (providerType == 'control plane') {
+          const providerName = rke2Provider + '-' + 'control-plane'
+          cy.checkCAPIMenu();
+          cy.contains('Providers').click();
+          matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', rke2Provider, rke2ProviderVersion, 120000);
+        } else {
+          const providerName = rke2Provider + '-' + providerType
+          cy.checkCAPIMenu();
+          cy.contains('Providers').click();
+          matchAndWaitForProviderReadyStatus(providerName, providerType, rke2Provider, rke2ProviderVersion, 120000);
+        }
+      });
     })
 
     qase(90,
@@ -177,7 +185,7 @@ describe('Enable CAPI Providers', () => {
       const clusterName = 'local';
       const resourceKind = 'configMap';
       const resourceName = 'fleet-addon-config';
-      const namespace = 'rancher-turtles-system';
+      const namespace = 'cattle-turtles-system';
       const patch = {
         data: {
           manifests: {
@@ -198,6 +206,23 @@ describe('Enable CAPI Providers', () => {
     });
   });
 
+  context('Docker provider', {tags: '@short'}, () => {
+    qase(4,
+      it('Create/Verify CAPD provider', {retries: 2}, () => {
+        // Create Docker Infrastructure provider
+        const namespace = 'capd-system'
+        if (!isDevBuild) {
+          cy.addInfraProvider('Docker', namespace);
+        } else {
+          cy.checkCAPIMenu();
+          cy.contains('Providers').click();
+        }
+        matchAndWaitForProviderReadyStatus(dockerProvider, 'infrastructure', dockerProvider, kubeadmProviderVersion, 120000);
+        cy.verifyCAPIProviderImage(dockerProvider, namespace);
+      })
+    );
+  })
+
   context('vSphere provider', {tags: '@vsphere'}, () => {
     if (!isDevBuild) {
       it('Create vSphere CAPIProvider Namespace', () => {
@@ -206,7 +231,7 @@ describe('Enable CAPI Providers', () => {
     }
 
     qase(40,
-      it('Create CAPV provider', () => {
+      it('Create/Verify CAPV provider', () => {
         // Create vsphere Infrastructure provider
         // See capv_rke2_cluster.spec.ts for more details about `vsphere_secrets_json_base64` structure
         const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
@@ -222,10 +247,6 @@ describe('Enable CAPI Providers', () => {
         if (!isDevBuild) {
           cy.addInfraProvider('vSphere', vsphereProviderNamespace, vsphereProvider);
         } else {
-          cy.readFile('fixtures/providers-chart/providers-chart-helmop.yaml').then((content) => {
-            content = content.replace(/infrastructureVSphere:\n(\s*)enabled: false/g, 'infrastructureVSphere:\n$1enabled: true');
-            cy.importYAML(content);
-          })
           cy.checkCAPIMenu();
           cy.contains('Providers').click();
         }
@@ -244,19 +265,8 @@ describe('Enable CAPI Providers', () => {
       })
     }
 
-    if (isDevBuild) {
-      it('Create Providers using Charts', () => {
-        cy.readFile('fixtures/providers-chart/providers-chart-helmop.yaml').then((content) => {
-          content = content.replace(/infrastructureGCP:\n(\s*)enabled: false/g, 'infrastructureGCP:\n$1enabled: true');
-          content = content.replace(/infrastructureAzure:\n(\s*)enabled: false/g, 'infrastructureAzure:\n$1enabled: true');
-          content = content.replace(/infrastructureAWS:\n(\s*)enabled: false/g, 'infrastructureAWS:\n$1enabled: true');
-          cy.importYAML(content);
-        })
-      })
-    }
-
     qase(13,
-      it('Create CAPA provider', () => {
+      it('Create/Verify CAPA provider', () => {
         const namespace = 'capa-system'
         // Create AWS Infrastructure provider
         cy.addCloudCredsAWS(amazonProvider, Cypress.env('aws_access_key'), Cypress.env('aws_secret_key'));
@@ -273,7 +283,7 @@ describe('Enable CAPI Providers', () => {
     );
 
     qase(28,
-      it('Create CAPG provider', () => {
+      it('Create/Verify CAPG provider', () => {
         const namespace = 'capg-system'
         // Create GCP Infrastructure provider
         cy.addCloudCredsGCP(googleProvider, Cypress.env('gcp_credentials'));
@@ -290,7 +300,7 @@ describe('Enable CAPI Providers', () => {
     );
 
     qase(20,
-      it('Create CAPZ provider', () => {
+      it('Create/Verify CAPZ provider', () => {
         const namespace = 'capz-system'
         // Create Azure Infrastructure provider
         if (!isDevBuild) {

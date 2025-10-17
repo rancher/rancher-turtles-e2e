@@ -36,6 +36,7 @@ declare global {
       waitForAllRowsInState(desiredState: string, timeout?: number): Chainable<Element>;
       accesMenuSelection(menuPaths: string[]): Chainable<Element>;
       burgerMenuOperate(operation: 'open' | 'close'): Chainable<Element>;
+
       checkChart(operation: string, chartName: string, namespace: string, version?: string, questions?: Question[], refreshRepo?: boolean): Chainable<Element>;
 
       deleteCluster(clusterName: string, timeout?: number): Chainable<Element>;

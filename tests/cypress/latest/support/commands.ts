@@ -526,7 +526,7 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
 // Operation types: Install, Update, Upgrade
 // You can optionally provide an array of questions and answer them before the installation starts
 // Example1: cy.checkChart('Alerting', 'default', [{ menuEntry: '(None)', checkbox: 'Enable Microsoft Teams' }]);
-// Example2: cy.checkChart('Rancher Turtles', 'rancher-turtles-system', [{ menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Seamless integration with Fleet and CAPI'},{ menuEntry: 'Rancher webhook cleanup settings', inputBoxTitle: 'Webhook Cleanup Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.28.0'}]);
+// Example2: cy.checkChart('Rancher Turtles', 'cattle-turtles-system', [{ menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Seamless integration with Fleet and CAPI'},{ menuEntry: 'Rancher webhook cleanup settings', inputBoxTitle: 'Webhook Cleanup Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.28.0'}]);
 Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, questions, refreshRepo = false) => {
   const isUpdateOperation = operation == 'Update'
   const turtlesChart = chartName == 'Rancher Turtles'
@@ -621,6 +621,37 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
     });
   }
 
+  if (chartName == 'Rancher Turtles Certified Providers') {
+    cy.get('.CodeMirror')
+      .then((editor) => {
+        // @ts-expect-error known error with CodeMirror
+        let text = editor[0].CodeMirror.getValue();
+        text = text.replace(/bootstrapKubeadm:\n(\s*)(.*)\n(\s*)enabled: false/g, 'bootstrapKubeadm:\n$1$2\n$1enabled: true');
+        text = text.replace(/controlplaneKubeadm:\n(\s*)(.*)\n(\s*)enabled: false/g, 'controlplaneKubeadm:\n$1$2\n$1enabled: true');
+
+        if (Cypress.env('grepTags')) {
+          const tags = Cypress.env('grepTags')
+          if (tags.includes('@short')) {
+            text = text.replace(/infrastructureDocker:\n(\s*)(.*)\n(\s*)enabled: false/g, 'infrastructureDocker:\n$1$2\n$1enabled: true');
+          }
+          if (tags.includes('@full')) {
+            text = text.replace(/infrastructureGCP:\n(\s*)(.*)\n(\s*)enabled: false/g, 'infrastructureGCP:\n$1$2\n$1enabled: true');
+            text = text.replace(/variables:\n(\s*)EXP_CAPG_(.*)\n/g, 'variables:\n$1EXP_CAPG_$2\n$1GCP_B64ENCODED_CREDENTIALS: \'\'\n');
+
+            text = text.replace(/infrastructureAzure:\n(\s*)(.*)\n(\s*)enabled: false/g, 'infrastructureAzure:\n$1$2\n$1enabled: true');
+            text = text.replace(/infrastructureAWS:\n(\s*)(.*)\n(\s*)enabled: false/g, 'infrastructureAWS:\n$1$2\n$1enabled: true');
+          }
+          if (tags.includes('@vsphere')) {
+            text = text.replace(/infrastructureVSphere:\n(\s*)(.*)\n(\s*)enabled: false/g, 'infrastructureVSphere:\n$1$2\n$1enabled: true\n$1version: v1.13.1');
+          }
+        }
+        // @ts-expect-error known error with CodeMirror
+        editor[0].CodeMirror.setValue(text);
+      })
+
+
+  }
+
   if (isRancherManagerVersion('>=2.13') && isUpdateOperation) {
     cy.clickButton('Save changes');
   } else {
@@ -667,7 +698,11 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
       // Check if the installation panel has appeared;
       if (windowmanager.find('div[role=tabpanel]').length) {
         // Wait for both CRD and main helm chart to be installed
-        cy.contains(new RegExp('SUCCESS: helm .*crd.*tgz.*SUCCESS: helm .*tgz'), {timeout: 140000}).should('be.visible');
+        if (chartName == 'Rancher Turtles Certified Providers') {
+          cy.contains(new RegExp('SUCCESS: helm .*tgz'), {timeout: 140000}).should('be.visible');
+        } else {
+          cy.contains(new RegExp('SUCCESS: helm .*crd.*tgz.*SUCCESS: helm .*tgz'), {timeout: 140000}).should('be.visible');
+        }
         cy.get('.closer').click();
       } else {
         // If the installation panel failed to appear for some reason, manually check for app installation
@@ -1089,7 +1124,11 @@ Cypress.Commands.add('verifyCAPIProviderImage', (providerName, providerNamespace
   if (providerName == 'docker') {
     providerImageRegistry = 'gcr.io/k8s-staging-cluster-api'
   } else {
-    providerImageRegistry = 'registry.suse.com/rancher'
+    if (isRancherManagerVersion('2.13')) {
+      providerImageRegistry = 'registry.k8s.io/cluster-api'
+    } else {
+      providerImageRegistry = 'registry.suse.com/rancher'
+    }
   }
 
   cy.exploreCluster('local');
