@@ -118,7 +118,7 @@ describe('Enable CAPI Providers', () => {
         cy.contains('local').click();
 
         // Install Rancher Turtles Certified Providers chart, this will install all providers based on the tags (@short, @full, @vsphere).
-        cy.checkChart('Install', 'Rancher Turtles Certified Providers', 'rancher-turtles-system');
+        cy.checkChart('Install', 'Rancher Turtles Certified Providers', 'cattle-turtles-system');
       })
     }
 
@@ -185,7 +185,7 @@ describe('Enable CAPI Providers', () => {
       const clusterName = 'local';
       const resourceKind = 'configMap';
       const resourceName = 'fleet-addon-config';
-      const namespace = 'rancher-turtles-system';
+      const namespace = 'cattle-turtles-system';
       const patch = {
         data: {
           manifests: {
