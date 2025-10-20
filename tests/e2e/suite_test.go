@@ -20,6 +20,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Masterminds/semver/v3"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/rancher-sandbox/ele-testhelpers/kubectl"
@@ -53,6 +54,30 @@ func RunHelmCmdWithRetry(s ...string) {
 		}
 		return nil
 	}, tools.SetTimeout(2*time.Minute), 20*time.Second).Should(Not(HaveOccurred()))
+}
+
+/**
+ * isRancherManagerVersion checks if RANCHER_VERSION satisfies a semver constraint.
+ * Assumes rancherEnv is always like "head/2.13", "alpha/2.13.1-rc1", "latest/2.13.0"
+ * @param constraint Semver constraint string (e.g., ">=2.13", "<2.14", "2.13" etc.)
+ * @returns true if RANCHER_VERSION satisfies the constraint, false otherwise
+ */
+func isRancherManagerVersion(constraint string) bool {
+	rancherEnv := os.Getenv("RANCHER_VERSION")
+
+	// Split "prefix/version" -> take the part after "/"
+	parts := strings.SplitN(rancherEnv, "/", 2)
+	versionStr := parts[1]
+
+	// Coerce "2.13" -> "2.13.0"
+	if strings.Count(versionStr, ".") == 1 {
+		versionStr += ".0"
+	}
+
+	v, _ := semver.NewVersion(versionStr)
+	c, _ := semver.NewConstraint(constraint)
+
+	return c.Check(v)
 }
 
 func FailWithReport(message string, callerSkip ...int) {

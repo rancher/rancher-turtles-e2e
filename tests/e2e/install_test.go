@@ -132,19 +132,21 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 		}
 
 		By("Installing/Upgrading Rancher Manager", func() {
-			var extraFlags []string
-			if turtlesDevChart == "true" {
-				extraEnvIndex := 1
+			var extraFlags []string = nil
+			if turtlesDevChart == "true" && (isRancherManagerVersion(">=2.13")) {
 				// Following condition needs to be reviewed because nowadays heads build don't use any extraEnv
 				// if rancherHeadVersion != "" || strings.Contains(rancherChannel, "prime-optimus") {
 				//	extraEnvIndex = 2
 				//}
-				extraFlags = []string{
+				extraEnvIndex := 1
+				extraFlags := []string{
 					"--set", fmt.Sprintf("extraEnv[%d].name=CATTLE_FEATURES", extraEnvIndex),
 					"--set-string", fmt.Sprintf("extraEnv[%d].value=turtles=false\\,embedded-cluster-api=true", extraEnvIndex),
 				}
+				// Log the extra flags
 				GinkgoWriter.Write([]byte(strings.Join(extraFlags, " ") + "\n"))
 			}
+
 			err := rancher.DeployRancherManager(rancherHostname, rancherChannel, rancherVersion, rancherHeadVersion, "none", "none", extraFlags)
 			Expect(err).To(Not(HaveOccurred()))
 
