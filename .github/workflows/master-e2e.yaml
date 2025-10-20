@@ -392,7 +392,7 @@ jobs:
         if: ${{ inputs.turtles_dev_chart == true }}
         run: cd tests && make e2e-install-chartmuseum
       - name: Setup node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: current
       - name: Cypress tests
