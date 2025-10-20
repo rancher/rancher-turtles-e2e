@@ -28,7 +28,7 @@ describe('Create CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
   });
 
   // TODO: Create Provider via UI, ref: capi-ui-extension/issues/128
-  if (isRancherManagerVersion('<2.12')) {
+  if (isRancherManagerVersion('<2.13')) {
     it('Create Azure CAPIProvider', () => {
       cy.removeCAPIResource('Providers', providerName);
       cy.createCAPIProvider(providerName);

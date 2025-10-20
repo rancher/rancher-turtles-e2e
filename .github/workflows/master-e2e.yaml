@@ -368,10 +368,10 @@ jobs:
           go-version-file: tests/go.mod
       - name: Copy chart files for chartmuseum
         run: |
-          if [ ${{ inputs.turtles_dev_chart }} == true ]; then
+          if [[ ${{ inputs.turtles_dev_chart }} == true ]]; then
             cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
           fi
-          if [ "${{ env.RANCHER_VERSION }}" =~ "2.13" ]; then
+          if [[ "${{ env.RANCHER_VERSION }}" =~ "2.13" ]]; then
             mkdir ${{ github.workspace }}/tests/assets/providers
             cp ${{ runner.temp }}/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets/providers
           fi
