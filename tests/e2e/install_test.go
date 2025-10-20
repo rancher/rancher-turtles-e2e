@@ -162,7 +162,7 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 			}, tools.SetTimeout(4*time.Minute), 30*time.Second).Should(BeNil())
 
 			// Apply the workaround for disabling embedded cluster API on dev
-			if turtlesDevChart == "true" {
+			if turtlesDevChart == "true" && isRancherManagerVersion(">=2.13") {
 				// Run the bash commands from Go
 				_, err := kubectl.Run("apply", "-f", "https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/rancher/pre-turtles-install.yaml")
 				Expect(err).To(BeNil())
