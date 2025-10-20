@@ -133,13 +133,14 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 
 		By("Installing/Upgrading Rancher Manager", func() {
 			var extraFlags []string = nil
+			// Since 2.13 released turtles is preinstalled by default so we need to disable it for dev
 			if turtlesDevChart == "true" && (isRancherManagerVersion(">=2.13")) {
 				// Following condition needs to be reviewed because nowadays heads build don't use any extraEnv
 				// if rancherHeadVersion != "" || strings.Contains(rancherChannel, "prime-optimus") {
 				//	extraEnvIndex = 2
 				//}
 				extraEnvIndex := 1
-				extraFlags := []string{
+				extraFlags = []string{
 					"--set", fmt.Sprintf("extraEnv[%d].name=CATTLE_FEATURES", extraEnvIndex),
 					"--set-string", fmt.Sprintf("extraEnv[%d].value=turtles=false\\,embedded-cluster-api=true", extraEnvIndex),
 				}
