@@ -13,7 +13,7 @@ limitations under the License.
 
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
-import {isRancherManagerVersion} from '~/support/utils';
+import {isRancherManagerVersion, turtlesNamespace} from '~/support/utils';
 
 const buildType = Cypress.env('chartmuseum_repo') ? 'dev' : 'prod';
 
@@ -115,7 +115,7 @@ describe('Enable CAPI Providers', () => {
         cy.contains('local').click();
 
         // Install Rancher Turtles Certified Providers chart, this will install all providers based on the tags (@short, @full, @vsphere).
-        cy.checkChart('Install', 'Rancher Turtles Certified Providers', 'cattle-turtles-system');
+        cy.checkChart('Install', 'Rancher Turtles Certified Providers', turtlesNamespace);
       })
     }
 
@@ -182,7 +182,7 @@ describe('Enable CAPI Providers', () => {
       const clusterName = 'local';
       const resourceKind = 'configMap';
       const resourceName = 'fleet-addon-config';
-      const namespace = 'cattle-turtles-system';
+      const namespace = turtlesNamespace;
       const patch = {
         data: {
           manifests: {
@@ -280,7 +280,7 @@ describe('Enable CAPI Providers', () => {
           cy.checkCAPIMenu();
           cy.contains('Providers').click();
 
-          // Create GCP Cloud Credential until https://github.com/rancher/dashboard/issues/15674 is fixed
+          // Create GCP Cloud Credential until https://github.com/rancher/dashboard/issues/15391 is fixed
           cy.get('tr.main-row').contains('a', googleProvider).closest('tr').within(() => {
             cy.get('td').eq(7).click();      // Action button
           })

@@ -14,7 +14,7 @@ limitations under the License.
 
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
-import {isRancherManagerVersion} from '~/support/utils';
+import {isRancherManagerVersion, turtlesNamespace} from '~/support/utils';
 
 Cypress.config();
 describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
@@ -68,7 +68,7 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
           // Required to validate turtles/issues/1395
           turtlesVersion = '0.21.0'
         }
-        cy.checkChart('Install', 'Rancher Turtles', 'cattle-turtles-system', turtlesVersion);
+        cy.checkChart('Install', 'Rancher Turtles', turtlesNamespace, turtlesVersion);
       })
     );
   }
