@@ -34,7 +34,7 @@ function matchAndWaitForProviderReadyStatus(
       cy.get('td').eq(2).should('contain.text', providerString);  // Name
       cy.get('td').eq(3).should('contain.text', providerType);    // Type
       cy.get('td').eq(4).should('contain.text', providerName);    // ProviderName
-      if (isRancherManagerVersion('2.13')) {
+      if (isRancherManagerVersion('>=2.13')) {
         cy.get('td').eq(5).should('contain.text', providerVersion); // InstalledVersion
       }
       cy.get('td').eq(6).should('contain.text', readyState);      // Phase
@@ -110,7 +110,7 @@ describe('Enable CAPI Providers', () => {
       })
     }
 
-    if (isRancherManagerVersion('2.13')) {
+    if (isRancherManagerVersion('>=2.13')) {
       it('Create Providers using Charts', () => {
         cy.contains('local').click();
 
@@ -126,7 +126,7 @@ describe('Enable CAPI Providers', () => {
           // Create CAPI Kubeadm providers
           if (providerType == 'control plane') {
             const providerName = kubeadmProvider + '-' + 'control-plane'
-            if (isRancherManagerVersion('2.13')) {
+            if (isRancherManagerVersion('>=2.13')) {
               cy.checkCAPIMenu();
               cy.contains('Providers').click();
             } else {
@@ -137,7 +137,7 @@ describe('Enable CAPI Providers', () => {
             matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', kubeadmProvider, kubeadmProviderVersion, 120000);
           } else {
             const providerName = kubeadmProvider + '-' + providerType
-            if (isRancherManagerVersion('2.13')) {
+            if (isRancherManagerVersion('>=2.13')) {
               cy.checkCAPIMenu();
               cy.contains('Providers').click();
             } else {
@@ -208,7 +208,7 @@ describe('Enable CAPI Providers', () => {
       it('Create/Verify CAPD provider', {retries: 2}, () => {
         // Create Docker Infrastructure provider
         const namespace = 'capd-system'
-        if (isRancherManagerVersion('2.13')) {
+        if (isRancherManagerVersion('>=2.13')) {
           cy.checkCAPIMenu();
           cy.contains('Providers').click();
         } else {
@@ -236,7 +236,7 @@ describe('Enable CAPI Providers', () => {
         const vspherePort = '443';
         cy.addCloudCredsVMware(vsphereProvider, vsphereUsername, vspherePassword, vsphereServer, vspherePort);
         cy.burgerMenuOperate('open');
-        if (isRancherManagerVersion('2.13')) {
+        if (isRancherManagerVersion('>=2.13')) {
           cy.checkCAPIMenu();
           cy.contains('Providers').click();
         } else {
@@ -257,7 +257,7 @@ describe('Enable CAPI Providers', () => {
         // Create AWS Infrastructure provider
         cy.addCloudCredsAWS(amazonProvider, Cypress.env('aws_access_key'), Cypress.env('aws_secret_key'));
         cy.burgerMenuOperate('open');
-        if (isRancherManagerVersion('2.13')) {
+        if (isRancherManagerVersion('>=2.13')) {
           cy.checkCAPIMenu();
           cy.contains('Providers').click();
         } else {
@@ -274,7 +274,7 @@ describe('Enable CAPI Providers', () => {
         // Create GCP Infrastructure provider
         cy.addCloudCredsGCP(googleProvider, Cypress.env('gcp_credentials'));
         cy.burgerMenuOperate('open');
-        if (isRancherManagerVersion('2.13')) {
+        if (isRancherManagerVersion('>=2.13')) {
           cy.checkCAPIMenu();
           cy.contains('Providers').click();
         } else {
@@ -289,7 +289,7 @@ describe('Enable CAPI Providers', () => {
       it('Create/Verify CAPZ provider', () => {
         const namespace = 'capz-system'
         // Create Azure Infrastructure provider
-        if (isRancherManagerVersion('2.13')) {
+        if (isRancherManagerVersion('>=2.13')) {
           cy.checkCAPIMenu();
           cy.contains('Providers').click();
         } else {
