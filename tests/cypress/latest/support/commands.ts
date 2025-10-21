@@ -626,23 +626,23 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
       .then((editor) => {
         // @ts-expect-error known error with CodeMirror
         let text = editor[0].CodeMirror.getValue();
-        text = text.replace(/bootstrapKubeadm:\n(\s*)(.*)\n(\s*)enabled: false/g, 'bootstrapKubeadm:\n$1$2\n$1enabled: true');
-        text = text.replace(/controlplaneKubeadm:\n(\s*)(.*)\n(\s*)enabled: false/g, 'controlplaneKubeadm:\n$1$2\n$1enabled: true');
+        text = text.replace(/bootstrapKubeadm:\n(\s*)(.*)\n(\s*)enabled: (.*)/g, 'bootstrapKubeadm:\n$1$2\n$1enabled: true');
+        text = text.replace(/controlplaneKubeadm:\n(\s*)(.*)\n(\s*)enabled: (.*)/g, 'controlplaneKubeadm:\n$1$2\n$1enabled: true');
 
         if (Cypress.env('grepTags')) {
           const tags = Cypress.env('grepTags')
           if (tags.includes('@short')) {
-            text = text.replace(/infrastructureDocker:\n(\s*)(.*)\n(\s*)enabled: false/g, 'infrastructureDocker:\n$1$2\n$1enabled: true');
+            text = text.replace(/infrastructureDocker:\n(\s*)(.*)\n(\s*)enabled: (.*)/g, 'infrastructureDocker:\n$1$2\n$1enabled: true');
           }
           if (tags.includes('@full')) {
-            text = text.replace(/infrastructureGCP:\n(\s*)(.*)\n(\s*)enabled: false/g, 'infrastructureGCP:\n$1$2\n$1enabled: true');
+            text = text.replace(/infrastructureGCP:\n(\s*)(.*)\n(\s*)enabled: (.*)/g, 'infrastructureGCP:\n$1$2\n$1enabled: true');
             text = text.replace(/variables:\n(\s*)EXP_CAPG_(.*)\n/g, 'variables:\n$1EXP_CAPG_$2\n$1GCP_B64ENCODED_CREDENTIALS: \'\'\n');
 
-            text = text.replace(/infrastructureAzure:\n(\s*)(.*)\n(\s*)enabled: false/g, 'infrastructureAzure:\n$1$2\n$1enabled: true');
-            text = text.replace(/infrastructureAWS:\n(\s*)(.*)\n(\s*)enabled: false/g, 'infrastructureAWS:\n$1$2\n$1enabled: true');
+            text = text.replace(/infrastructureAzure:\n(\s*)(.*)\n(\s*)enabled: (.*)/g, 'infrastructureAzure:\n$1$2\n$1enabled: true');
+            text = text.replace(/infrastructureAWS:\n(\s*)(.*)\n(\s*)enabled: (.*)/g, 'infrastructureAWS:\n$1$2\n$1enabled: true');
           }
           if (tags.includes('@vsphere')) {
-            text = text.replace(/infrastructureVSphere:\n(\s*)(.*)\n(\s*)enabled: false/g, 'infrastructureVSphere:\n$1$2\n$1enabled: true\n$1version: v1.13.1');
+            text = text.replace(/infrastructureVSphere:\n(\s*)enableAutomaticUpdate: true\n(\s*)enabled: (.*)/g, 'infrastructureVSphere:\n$1enableAutomaticUpdate: false\n$1enabled: true\n$1version: v1.13.1');
           }
         }
         // @ts-expect-error known error with CodeMirror
