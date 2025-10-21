@@ -272,11 +272,25 @@ describe('Enable CAPI Providers', () => {
       it('Create/Verify CAPG provider', () => {
         const namespace = 'capg-system'
         // Create GCP Infrastructure provider
-        cy.addCloudCredsGCP(googleProvider, Cypress.env('gcp_credentials'));
+        if (isRancherManagerVersion('<2.13')) {
+          cy.addCloudCredsGCP(googleProvider, Cypress.env('gcp_credentials'));
+        }
         cy.burgerMenuOperate('open');
         if (isRancherManagerVersion('>=2.13')) {
           cy.checkCAPIMenu();
           cy.contains('Providers').click();
+
+          // Create GCP Cloud Credential until https://github.com/rancher/dashboard/issues/15674 is fixed
+          cy.get('tr.main-row').contains('a', googleProvider).closest('tr').within(() => {
+            cy.get('td').eq(7).click();      // Action button
+          })
+          cy.contains('Edit Config').click();
+          cy.contains(`Provider: Google - ${googleProvider}`).should('exist');
+          cy.typeValue('Credential Name', googleProvider);
+          cy.getBySel('text-area-auto-grow').type(Cypress.env('gcp_credentials'), {log: false});
+          cy.clickButton('Continue');
+          cy.getBySel('cluster-prov-select-credential').contains(googleProvider).should('be.visible');
+          cy.clickButton('Save');
         } else {
           cy.addInfraProvider('Google Cloud Platform', namespace, googleProvider);
         }
