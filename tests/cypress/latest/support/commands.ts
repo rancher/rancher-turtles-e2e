@@ -17,6 +17,7 @@ limitations under the License.
 import 'cypress-file-upload';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import jsyaml from 'js-yaml';
+import yaml from 'js-yaml';
 import _ from 'lodash';
 import {isRancherManagerVersion} from '~/support/utils';
 
@@ -625,28 +626,41 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
     cy.get('.CodeMirror')
       .then((editor) => {
         // @ts-expect-error known error with CodeMirror
-        let text = editor[0].CodeMirror.getValue();
-        text = text.replace(/bootstrapKubeadm:\n(\s*)(.*)\n(\s*)enabled: (.*)/g, 'bootstrapKubeadm:\n$1$2\n$1enabled: true');
-        text = text.replace(/controlplaneKubeadm:\n(\s*)(.*)\n(\s*)enabled: (.*)/g, 'controlplaneKubeadm:\n$1$2\n$1enabled: true');
+        let text = yaml.load(editor[0].CodeMirror.getValue());
+        console.log(text);
+        // @ts-ignore
+        text.providers.bootstrapKubeadm.enabled = true;
+        // @ts-ignore
+        text.providers.controlplaneKubeadm.enabled = true;
 
         if (Cypress.env('grepTags')) {
           const tags = Cypress.env('grepTags')
           if (tags.includes('@short')) {
-            text = text.replace(/infrastructureDocker:\n(\s*)(.*)\n(\s*)enabled: (.*)/g, 'infrastructureDocker:\n$1$2\n$1enabled: true');
+            // @ts-ignore
+            text.providers.infrastructureDocker.enabled = true;
           }
           if (tags.includes('@full')) {
-            text = text.replace(/infrastructureGCP:\n(\s*)(.*)\n(\s*)enabled: (.*)/g, 'infrastructureGCP:\n$1$2\n$1enabled: true');
-            text = text.replace(/variables:\n(\s*)EXP_CAPG_(.*)\n/g, 'variables:\n$1EXP_CAPG_$2\n$1GCP_B64ENCODED_CREDENTIALS: \'\'\n');
+            // @ts-ignore
+            text.providers.infrastructureGCP.enabled = true;
+            // @ts-ignore
+            text.providers.infrastructureGCP.variables.GCP_B64ENCODED_CREDENTIALS = '';
 
-            text = text.replace(/infrastructureAzure:\n(\s*)(.*)\n(\s*)enabled: (.*)/g, 'infrastructureAzure:\n$1$2\n$1enabled: true');
-            text = text.replace(/infrastructureAWS:\n(\s*)(.*)\n(\s*)enabled: (.*)/g, 'infrastructureAWS:\n$1$2\n$1enabled: true');
+            // @ts-ignore
+            text.providers.infrastructureAzure.enabled = true;
+            // @ts-ignore
+            text.providers.infrastructureAWS.enabled = true;
           }
           if (tags.includes('@vsphere')) {
-            text = text.replace(/infrastructureVSphere:\n(\s*)enableAutomaticUpdate: true\n(\s*)enabled: (.*)/g, 'infrastructureVSphere:\n$1enableAutomaticUpdate: false\n$1enabled: true\n$1version: v1.13.1');
+            // @ts-ignore
+            text.providers.infrastructureVSphere.enabled = true;
+            // @ts-ignore
+            text.providers.infrastructureVSphere.enableAutomaticUpdate = false;
+            // @ts-ignore
+            text.providers.infrastructureVSphere.version = 'v1.13.1';
           }
         }
         // @ts-expect-error known error with CodeMirror
-        editor[0].CodeMirror.setValue(text);
+        editor[0].CodeMirror.setValue(yaml.dump(text));
       })
 
 

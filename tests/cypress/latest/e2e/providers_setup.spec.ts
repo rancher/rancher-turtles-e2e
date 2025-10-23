@@ -205,7 +205,7 @@ describe('Enable CAPI Providers', () => {
 
   context('Docker provider', {tags: '@short'}, () => {
     qase(4,
-      it('Create/Verify CAPD provider', {retries: 2}, () => {
+      it('Create/Verify CAPD provider', () => {
         // Create Docker Infrastructure provider
         const namespace = 'capd-system'
         if (isRancherManagerVersion('>=2.13')) {
