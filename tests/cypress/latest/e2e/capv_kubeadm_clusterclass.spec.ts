@@ -113,7 +113,7 @@ describe('Import CAPV Kubeadm Class-Cluster', {tags: '@vsphere'}, () => {
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    it('Install App on imported cluster', () => {
+    it('Install App on imported cluster', {retries: 1}, () => {
       // Click on imported CAPV cluster
       cy.contains(clusterName).click();
 

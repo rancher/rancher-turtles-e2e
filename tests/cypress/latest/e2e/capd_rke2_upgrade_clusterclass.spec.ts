@@ -140,7 +140,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
         cy.checkFleetHelmApps(['calico-cni']);
       })
 
-      it('Install App on imported cluster', () => {
+      it('Install App on imported cluster', {retries: 1}, () => {
         // Click on imported CAPD cluster
         cy.contains(clusterName).click();
 

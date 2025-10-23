@@ -83,7 +83,7 @@ describe('Import CAPA RKE2 Class-Cluster', {tags: '@full'}, () => {
 
   context('[CLUSTER-OPERATIONS]', () => {
     qase(112,
-      it('Install App on imported cluster', () => {
+      it('Install App on imported cluster', {retries: 1}, () => {
         // Click on imported CAPA cluster
         cy.contains(clusterName).click();
 

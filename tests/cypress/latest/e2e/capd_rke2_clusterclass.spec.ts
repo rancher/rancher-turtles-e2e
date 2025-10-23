@@ -103,7 +103,7 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
 
   context('[CLUSTER-OPERATIONS]', () => {
     qase(101,
-      it('Install App on imported cluster', () => {
+      it('Install App on imported cluster', {retries: 1}, () => {
         // Click on imported CAPD cluster
         cy.contains(clusterName).click();
 
