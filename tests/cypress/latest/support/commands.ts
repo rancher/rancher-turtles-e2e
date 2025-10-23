@@ -627,9 +627,8 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
       .then((editor) => {
         // @ts-expect-error known error with CodeMirror
         let text = yaml.load(editor[0].CodeMirror.getValue());
-        if (modifyYAMLOperation) {
-          modifyYAMLOperation(text);
-        }
+        // @ts-ignore
+        modifyYAMLOperation(text);
         // @ts-expect-error known error with CodeMirror
         editor[0].CodeMirror.setValue(yaml.dump(text));
       })

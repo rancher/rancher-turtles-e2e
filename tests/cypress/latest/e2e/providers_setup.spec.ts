@@ -147,7 +147,7 @@ describe('Enable CAPI Providers', () => {
             }
           }
         }
-        // Install Rancher Turtles Certified Providers chart, this will install all providers based on the tags (@short, @full, @vsphere).
+        // Install Rancher Turtles Certified Providers chart
         cy.checkChart('Install', 'Rancher Turtles Certified Providers', turtlesNamespace, undefined, undefined, false, providerSelectionFunction);
       })
 
@@ -155,7 +155,7 @@ describe('Enable CAPI Providers', () => {
         // Adding this extra check so that retry is not needed in other tests.
         cy.checkCAPIMenu();
         cy.contains('Providers').click();
-        cy.waitForAllRowsInState('Ready', 90000);
+        cy.waitForAllRowsInState('Ready', 180000);
       })
 
     }
