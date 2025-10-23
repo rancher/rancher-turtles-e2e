@@ -528,7 +528,7 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
 // You can optionally provide an array of questions and answer them before the installation starts
 // Example1: cy.checkChart('Alerting', 'default', [{ menuEntry: '(None)', checkbox: 'Enable Microsoft Teams' }]);
 // Example2: cy.checkChart('Rancher Turtles', 'cattle-turtles-system', [{ menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Seamless integration with Fleet and CAPI'},{ menuEntry: 'Rancher webhook cleanup settings', inputBoxTitle: 'Webhook Cleanup Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.28.0'}]);
-Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, questions, refreshRepo = false) => {
+Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, questions, refreshRepo = false, modifyYAMLOperation) => {
   const isUpdateOperation = operation == 'Update'
   const turtlesChart = chartName == 'Rancher Turtles'
 
@@ -627,37 +627,8 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
       .then((editor) => {
         // @ts-expect-error known error with CodeMirror
         let text = yaml.load(editor[0].CodeMirror.getValue());
-        console.log(text);
-        // @ts-ignore
-        text.providers.bootstrapKubeadm.enabled = true;
-        // @ts-ignore
-        text.providers.controlplaneKubeadm.enabled = true;
-
-        if (Cypress.env('grepTags')) {
-          const tags = Cypress.env('grepTags')
-          if (tags.includes('@short')) {
-            // @ts-ignore
-            text.providers.infrastructureDocker.enabled = true;
-          }
-          if (tags.includes('@full')) {
-            // @ts-ignore
-            text.providers.infrastructureGCP.enabled = true;
-            // @ts-ignore
-            text.providers.infrastructureGCP.variables.GCP_B64ENCODED_CREDENTIALS = '';
-
-            // @ts-ignore
-            text.providers.infrastructureAzure.enabled = true;
-            // @ts-ignore
-            text.providers.infrastructureAWS.enabled = true;
-          }
-          if (tags.includes('@vsphere')) {
-            // @ts-ignore
-            text.providers.infrastructureVSphere.enabled = true;
-            // @ts-ignore
-            text.providers.infrastructureVSphere.enableAutomaticUpdate = false;
-            // @ts-ignore
-            text.providers.infrastructureVSphere.version = 'v1.13.1';
-          }
+        if (modifyYAMLOperation) {
+          modifyYAMLOperation(text);
         }
         // @ts-expect-error known error with CodeMirror
         editor[0].CodeMirror.setValue(yaml.dump(text));

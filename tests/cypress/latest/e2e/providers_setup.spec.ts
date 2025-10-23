@@ -114,9 +114,50 @@ describe('Enable CAPI Providers', () => {
       it('Create Providers using Charts', () => {
         cy.contains('local').click();
 
+        const providerSelectionFunction = (text: any) => {
+          // @ts-ignore
+          text.providers.bootstrapKubeadm.enabled = true;
+          // @ts-ignore
+          text.providers.controlplaneKubeadm.enabled = true;
+
+          const tags = Cypress.env('grepTags')
+          if (tags) {
+            if (tags.includes('@short')) {
+              // @ts-ignore
+              text.providers.infrastructureDocker.enabled = true;
+            }
+            if (tags.includes('@full')) {
+              // @ts-ignore
+              text.providers.infrastructureGCP.enabled = true;
+              // @ts-ignore
+              text.providers.infrastructureGCP.variables.GCP_B64ENCODED_CREDENTIALS = '';
+
+              // @ts-ignore
+              text.providers.infrastructureAzure.enabled = true;
+              // @ts-ignore
+              text.providers.infrastructureAWS.enabled = true;
+            }
+            if (tags.includes('@vsphere')) {
+              // @ts-ignore
+              text.providers.infrastructureVSphere.enabled = true;
+              // @ts-ignore
+              text.providers.infrastructureVSphere.enableAutomaticUpdate = false;
+              // @ts-ignore
+              text.providers.infrastructureVSphere.version = 'v1.13.1';
+            }
+          }
+        }
         // Install Rancher Turtles Certified Providers chart, this will install all providers based on the tags (@short, @full, @vsphere).
-        cy.checkChart('Install', 'Rancher Turtles Certified Providers', turtlesNamespace);
+        cy.checkChart('Install', 'Rancher Turtles Certified Providers', turtlesNamespace, undefined, undefined, false, providerSelectionFunction);
       })
+
+      it('Wait for all the providers to be Ready', {retries: 2}, () => {
+        // Adding this extra check so that retry is not needed in other tests.
+        cy.checkCAPIMenu();
+        cy.contains('Providers').click();
+        cy.waitForAllRowsInState('Ready', 90000);
+      })
+
     }
 
     // TODO: Use wizard to create providers, capi-ui-extension/issues/177
