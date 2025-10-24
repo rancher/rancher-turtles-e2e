@@ -622,7 +622,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
     });
   }
 
-  if (chartName == 'Rancher Turtles Certified Providers') {
+  if (modifyYAMLOperation) {
     cy.get('.CodeMirror')
       .then((editor) => {
         // @ts-expect-error known error with CodeMirror
@@ -632,8 +632,6 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
         // @ts-expect-error known error with CodeMirror
         editor[0].CodeMirror.setValue(yaml.dump(text));
       })
-
-
   }
 
   if (isRancherManagerVersion('>=2.13') && isUpdateOperation) {
