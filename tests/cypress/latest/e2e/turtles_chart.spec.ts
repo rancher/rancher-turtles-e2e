@@ -14,7 +14,7 @@ limitations under the License.
 
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
-import {isRancherManagerVersion} from '~/support/utils';
+import {isRancherManagerVersion, turtlesNamespace} from '~/support/utils';
 
 Cypress.config();
 describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
@@ -41,37 +41,35 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
     cy.contains("Include Prerelease Versions").should('not.have.class', 'bg-disabled');
   })
 
-  // Skip adding repo to install turtles from r/charts
-  if (isRancherManagerVersion('<=2.12')) {
-    it('Add turtles repo', {retries: 1}, () => {
-      // if the env var is empty or not defined at all; use the normal repo
-      if (turtlesHelmRepo == '') {
-        turtlesHelmRepo = 'https://rancher.github.io/turtles/'
-      } else {
-        turtlesHelmRepo += ':8080'
-      }
-      cy.addRepository('turtles-chart', turtlesHelmRepo, 'http', 'none');
-    })
-  }
+  // Turtles Repo is required to install providers chart and turtles nightly build.
+  it('Add turtles repo', {retries: 1}, () => {
+    // if the env var is empty or not defined at all; use the normal repo
+    if (turtlesHelmRepo == '') {
+      turtlesHelmRepo = 'https://rancher.github.io/turtles/'
+    } else {
+      turtlesHelmRepo += ':8080'
+    }
+    cy.addRepository('turtles-chart', turtlesHelmRepo, 'http', 'none');
+  })
 
   // Skip for 2.13, TODO: remove check  after turtles/issues/1811 is fixed
   if (isRancherManagerVersion('<=2.12')) {
-  qase([2, 11],
-    it('Install Turtles chart', {retries: 1}, () => {
-      cy.contains('local').click();
+    qase([2, 11],
+      it('Install Turtles chart', {retries: 1}, () => {
+        cy.contains('local').click();
 
-      // if turtles dev chart is to be used, ignore the turtles chart version
-      const turtlesHelmRepo = Cypress.env('chartmuseum_repo')
-      if (turtlesHelmRepo != "" && turtlesHelmRepo != undefined) {
-        turtlesVersion = ""
-      }
+        // if turtles dev chart is to be used, ignore the turtles chart version
+        const turtlesHelmRepo = Cypress.env('chartmuseum_repo')
+        if (turtlesHelmRepo && turtlesHelmRepo != "") {
+          turtlesVersion = ""
+        }
 
-      if (Cypress.env('grepTags') && (Cypress.env('grepTags')).includes('@upgrade')) {
-        // Required to validate turtles/issues/1395
-        turtlesVersion = '0.21.0'
-      }
-      cy.checkChart('Install', 'Rancher Turtles', 'rancher-turtles-system', turtlesVersion);
-    })
-  );
+        if (Cypress.env('grepTags') && (Cypress.env('grepTags')).includes('@upgrade')) {
+          // Required to validate turtles/issues/1395
+          turtlesVersion = '0.21.0'
+        }
+        cy.checkChart('Install', 'Rancher Turtles', turtlesNamespace, turtlesVersion);
+      })
+    );
   }
 });

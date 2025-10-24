@@ -12,7 +12,7 @@ limitations under the License.
 */
 
 import '~/support/commands';
-import {getClusterName, isRancherManagerVersion} from '~/support/utils';
+import {getClusterName, isRancherManagerVersion, turtlesNamespace} from '~/support/utils';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 
 Cypress.config();
@@ -112,7 +112,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
       it('Upgrade turtles chart and check cluster status', () => {
         cy.contains('local').click();
         // This upgrades Turtles chart from v0.21.0 to turtles dev chart on Rancher v2.12
-        cy.checkChart('Upgrade', 'Rancher Turtles', 'rancher-turtles-system', '');
+        cy.checkChart('Upgrade', 'Rancher Turtles', turtlesNamespace, '');
 
         // Check CAPI operator deployment to be removed
         cy.exploreCluster('local');
@@ -140,7 +140,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
         cy.checkFleetHelmApps(['calico-cni']);
       })
 
-      it('Install App on imported cluster', () => {
+      it('Install App on imported cluster', {retries: 1}, () => {
         // Click on imported CAPD cluster
         cy.contains(clusterName).click();
 

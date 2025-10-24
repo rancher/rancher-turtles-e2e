@@ -17,6 +17,7 @@ limitations under the License.
 import 'cypress-file-upload';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import jsyaml from 'js-yaml';
+import yaml from 'js-yaml';
 import _ from 'lodash';
 import {isRancherManagerVersion} from '~/support/utils';
 
@@ -526,8 +527,8 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
 // Operation types: Install, Update, Upgrade
 // You can optionally provide an array of questions and answer them before the installation starts
 // Example1: cy.checkChart('Alerting', 'default', [{ menuEntry: '(None)', checkbox: 'Enable Microsoft Teams' }]);
-// Example2: cy.checkChart('Rancher Turtles', 'rancher-turtles-system', [{ menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Seamless integration with Fleet and CAPI'},{ menuEntry: 'Rancher webhook cleanup settings', inputBoxTitle: 'Webhook Cleanup Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.28.0'}]);
-Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, questions, refreshRepo = false) => {
+// Example2: cy.checkChart('Rancher Turtles', 'cattle-turtles-system', [{ menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Seamless integration with Fleet and CAPI'},{ menuEntry: 'Rancher webhook cleanup settings', inputBoxTitle: 'Webhook Cleanup Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.28.0'}]);
+Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, questions, refreshRepo = false, modifyYAMLOperation) => {
   const isUpdateOperation = operation == 'Update'
   const turtlesChart = chartName == 'Rancher Turtles'
 
@@ -567,7 +568,7 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
   if (turtlesChart) {
     let turtlesChartSelector: string;
 
-    if (isRancherManagerVersion('2.13')) {
+    if (isRancherManagerVersion('>=2.13')) {
       const devChart = Cypress.env('chartmuseum_repo') != ''
       turtlesChartSelector = devChart ? '"item-card-cluster/turtles-chart/rancher-turtles"' : '"item-card-cluster/rancher-charts/rancher-turtles"'; // turtles-chart repo == null
     } else if (isRancherManagerVersion('2.12')) {
@@ -621,6 +622,18 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
     });
   }
 
+  if (modifyYAMLOperation) {
+    cy.get('.CodeMirror')
+      .then((editor) => {
+        // @ts-expect-error known error with CodeMirror
+        let text = yaml.load(editor[0].CodeMirror.getValue());
+        // @ts-ignore
+        modifyYAMLOperation(text);
+        // @ts-expect-error known error with CodeMirror
+        editor[0].CodeMirror.setValue(yaml.dump(text));
+      })
+  }
+
   if (isRancherManagerVersion('>=2.13') && isUpdateOperation) {
     cy.clickButton('Save changes');
   } else {
@@ -667,7 +680,11 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
       // Check if the installation panel has appeared;
       if (windowmanager.find('div[role=tabpanel]').length) {
         // Wait for both CRD and main helm chart to be installed
-        cy.contains(new RegExp('SUCCESS: helm .*crd.*tgz.*SUCCESS: helm .*tgz'), {timeout: 140000}).should('be.visible');
+        if (chartName == 'Rancher Turtles Certified Providers') {
+          cy.contains(new RegExp('SUCCESS: helm .*tgz'), {timeout: 140000}).should('be.visible');
+        } else {
+          cy.contains(new RegExp('SUCCESS: helm .*crd.*tgz.*SUCCESS: helm .*tgz'), {timeout: 140000}).should('be.visible');
+        }
         cy.get('.closer').click();
       } else {
         // If the installation panel failed to appear for some reason, manually check for app installation
@@ -1089,7 +1106,7 @@ Cypress.Commands.add('verifyCAPIProviderImage', (providerName, providerNamespace
   if (providerName == 'docker') {
     providerImageRegistry = 'gcr.io/k8s-staging-cluster-api'
   } else {
-    if (isRancherManagerVersion('2.13')) {
+    if (isRancherManagerVersion('>=2.13')) {
       providerImageRegistry = 'registry.k8s.io/cluster-api'
     } else {
       providerImageRegistry = 'registry.suse.com/rancher'

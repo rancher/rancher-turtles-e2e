@@ -36,3 +36,5 @@ export const getClusterName = (className: string): string => {
   const separator = '-'
   return 'turtles-qa'.concat(separator, className, separator, Cypress.env('cluster_name_suffix'))
 }
+
+export const turtlesNamespace = isRancherManagerVersion('>=2.13') ? 'cattle-turtles-system' : 'rancher-turtles-system'

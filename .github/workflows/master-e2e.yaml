@@ -323,13 +323,13 @@ jobs:
             echo "TURTLES_BRANCH=release-0.24" >> ${GITHUB_ENV}
           fi
       - name: Check out rancher/turtles repo
-        if: ${{ inputs.turtles_dev_chart == true }}
+        if: ${{ inputs.turtles_dev_chart == true || contains(env.RANCHER_VERSION, '2.13') }}
         uses: actions/checkout@v5
         with:
           repository: ${{ env.TURTLES_REPO }}
           ref: ${{ env.TURTLES_BRANCH }}
       - name: Install Go
-        if: ${{ inputs.turtles_dev_chart == true }}
+        if: ${{ inputs.turtles_dev_chart == true || contains(env.RANCHER_VERSION, '2.13') }}
         uses: actions/setup-go@v6
         with:
           cache: false
@@ -339,16 +339,26 @@ jobs:
       - name: Set date variable
         run: |
           echo "TAG=$(date "+%Y.%m.%d")" >> ${GITHUB_ENV}
-      - name: Make chart
-        if: ${{ inputs.turtles_dev_chart == true }}
+      - name: Make Turtle and Providers chart
         run: |
-          TARGET_BUILD=${{ env.BUILD_TYPE }} TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} make e2e-image-build
-          RELEASE_TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} CONTROLLER_IMAGE_VERSION=v${{ env.TAG }} make build-chart verify-gen
-          docker run -d -p 5000:5000 --name registry registry:2
-          docker push ${{ env.CONTROLLER_IMG }}:v${{ env.TAG }}
-      - name: Copy chart file
-        if: ${{ inputs.turtles_dev_chart == true }}
-        run: cp ${{ github.workspace }}/out/package/rancher-turtles-${{ env.TAG }}.tgz ${{ runner.temp }}
+          if [[ ${{ inputs.turtles_dev_chart }} == true  ]]; then
+            TARGET_BUILD=${{ env.BUILD_TYPE }} TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} make e2e-image-build
+            RELEASE_TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} CONTROLLER_IMAGE_VERSION=v${{ env.TAG }} make build-chart verify-gen
+            docker run -d -p 5000:5000 --name registry registry:2
+            docker push ${{ env.CONTROLLER_IMG }}:v${{ env.TAG }}
+          fi
+          if [[ "${{ env.RANCHER_VERSION }}" =~ "2.13" ]]; then
+            RELEASE_TAG=v${{ env.TAG }} make build-providers-chart
+          fi
+
+      - name: Copy chart files
+        run: |
+          if [[ ${{ inputs.turtles_dev_chart }} == true ]]; then
+            cp ${{ github.workspace }}/out/package/rancher-turtles-${{ env.TAG }}.tgz ${{ runner.temp }}
+          fi
+          if [[ "${{ env.RANCHER_VERSION }}" =~ "2.13" ]]; then
+            cp ${{ github.workspace }}/out/package/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ runner.temp }}
+          fi
       - name: Checkout
         uses: actions/checkout@v5
       - name: Install Go
@@ -356,9 +366,15 @@ jobs:
         with:
           cache: false
           go-version-file: tests/go.mod
-      - name: Copy chart file for chartmuseum
-        if: ${{ inputs.turtles_dev_chart == true }}
-        run: cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
+      - name: Copy chart files for chartmuseum
+        run: |
+          if [[ ${{ inputs.turtles_dev_chart }} == true ]]; then
+            cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
+          fi
+          if [[ "${{ env.RANCHER_VERSION }}" =~ "2.13" ]]; then
+            mkdir ${{ github.workspace }}/tests/assets/providers
+            cp ${{ runner.temp }}/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets/providers
+          fi
       - name: Inject kube-vip controlplane IP for vsphere into capv-helm-values.yaml
         if: ${{ needs.create-runner.outputs.uuid == 'vsphere' }}
         run: |
@@ -389,7 +405,6 @@ jobs:
           echo "rm_image_version=${RM_IMAGE_VERSION}" >> ${GITHUB_OUTPUT}
           echo "rm_version=${{ env.RANCHER_VERSION }}" >> ${GITHUB_OUTPUT}
       - name: Install Chartmuseum
-        if: ${{ inputs.turtles_dev_chart == true }}
         run: cd tests && make e2e-install-chartmuseum
       - name: Setup node
         uses: actions/setup-node@v6
@@ -408,9 +423,7 @@ jobs:
             e2e/capd_rke2_upgrade_clusterclass.spec.ts
             ${{ env.SPECS }}
         run: |
-          if [ ${{ inputs.turtles_dev_chart }} == true ]; then
-            export CHARTMUSEUM_REPO=http://${{ needs.create-runner.outputs.public_dns }}
-          fi
+          export CHARTMUSEUM_REPO=http://${{ needs.create-runner.outputs.public_dns }}
           cd tests && make start-cypress-tests
       - name: Upload Cypress screenshots
         if: failure()

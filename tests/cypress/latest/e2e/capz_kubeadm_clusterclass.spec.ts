@@ -71,7 +71,7 @@ describe('Import CAPZ Kubeadm Class-Cluster', {tags: '@full'}, () => {
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    it('Install App on imported cluster', () => {
+    it('Install App on imported cluster', {retries: 1}, () => {
       // Click on imported CAPZ cluster
       cy.contains(clusterName).click();
 

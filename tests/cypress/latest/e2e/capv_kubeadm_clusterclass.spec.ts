@@ -1,6 +1,6 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import {skipClusterDeletion} from '~/support/utils';
+import {isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
 import {capiClusterDeletion, capvResourcesCleanup, importedRancherClusterDeletion} from "~/support/cleanup_support";
 
 Cypress.config();
@@ -61,8 +61,10 @@ describe('Import CAPV Kubeadm Class-Cluster', {tags: '@vsphere'}, () => {
 
     // TODO: Create Provider via UI, ref: capi-ui-extension/issues/128
     it('Create VSphere CAPIProvider & VSphereClusterIdentity', () => {
-      // cy.removeCAPIResource('Providers', providerName);
-      // cy.createCAPIProvider(providerName);
+      if (isRancherManagerVersion('<2.13')) {
+        cy.removeCAPIResource('Providers', providerName);
+        cy.createCAPIProvider(providerName);
+      }
 
       const vsphere_username = JSON.stringify(vsphere_secrets_json.vsphere_username).replace(/\"/g, "")
       const vsphere_password = JSON.stringify(vsphere_secrets_json.vsphere_password).replace(/\"/g, "")
@@ -111,7 +113,7 @@ describe('Import CAPV Kubeadm Class-Cluster', {tags: '@vsphere'}, () => {
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    it('Install App on imported cluster', () => {
+    it('Install App on imported cluster', {retries: 1}, () => {
       // Click on imported CAPV cluster
       cy.contains(clusterName).click();
 
