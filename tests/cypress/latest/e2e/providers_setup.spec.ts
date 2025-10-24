@@ -64,7 +64,7 @@ describe('Enable CAPI Providers', () => {
       vsphere: 'v1.13.1',
       amazon: 'v2.9.2',
       google: 'v1.10.0',
-      azure: 'v1.21.0'
+      azure: 'v1.21.1'
     },
     dev: {
       rke2: 'v0.20.1',
@@ -73,7 +73,7 @@ describe('Enable CAPI Providers', () => {
       vsphere: 'v1.13.1',
       amazon: 'v2.9.2',
       google: 'v1.10.0',
-      azure: 'v1.21.0'
+      azure: 'v1.21.1'
     }
   }
 
