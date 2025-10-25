@@ -785,7 +785,9 @@ Cypress.Commands.add('deleteCluster', (clusterName, timeout = 120000) => {
   cy.searchCluster(clusterName);
   cy.viewport(1920, 1080);
   cy.getBySel('sortable-table_check_select_all').click();
-  cy.getBySel('sortable-table-promptRemove').click({ctrlKey: true}); // this will prevent to display confirmation dialog
+  cy.getBySel('sortable-table-promptRemove').click(); // this will prevent to display confirmation dialog
+  cy.getBySel('prompt-remove-input').type(clusterName);
+  cy.getBySel('prompt-remove-confirm-button').click();
   cy.wait(2000); // needed for 2.12
   cy.contains(clusterName, {timeout: timeout}).should('not.exist');
 });
