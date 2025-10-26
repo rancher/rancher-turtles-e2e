@@ -81,7 +81,7 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
-      it('Remove imported CAPZ cluster from Rancher Manager', () => {
+      it('Remove imported CAPZ cluster from Rancher Manager', {retries: 1}, () => {
         // Delete the imported cluster
         // Ensure that the provisioned CAPI cluster still exists
         // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
