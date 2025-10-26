@@ -84,12 +84,9 @@ describe('Import CAPA RKE2 Class-Cluster', {tags: '@full'}, () => {
   context('[CLUSTER-OPERATIONS]', () => {
     qase(112,
       it('Install App on imported cluster', {retries: 1}, () => {
-        // Click on imported CAPA cluster
-        cy.contains(clusterName).click();
-
         // Install Chart
         // We install Logging chart instead of Monitoring, since this is relatively lightweight.
-        cy.checkChart('Install', 'Logging', 'cattle-logging-system');
+        cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
     );
 

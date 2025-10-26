@@ -104,12 +104,9 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
   context('[CLUSTER-OPERATIONS]', () => {
     qase(101,
       it('Install App on imported cluster', {retries: 1}, () => {
-        // Click on imported CAPD cluster
-        cy.contains(clusterName).click();
-
         // Install Chart
         // We install Logging chart instead of Monitoring, since this is relatively lightweight.
-        cy.checkChart('Install', 'Logging', 'cattle-logging-system');
+        cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
     );
 
@@ -133,8 +130,7 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
     if (isRancherManagerVersion('<=2.12')) {
     qase(41,
       it('Update chart and check cluster status', () => {
-        cy.contains('local').click();
-        cy.checkChart('Update', 'Rancher Turtles', turtlesNamespace, '', questions);
+        cy.checkChart('local', 'Update', 'Rancher Turtles', turtlesNamespace, '', questions);
 
         // Check cluster is Active
         cy.searchCluster(clusterName);

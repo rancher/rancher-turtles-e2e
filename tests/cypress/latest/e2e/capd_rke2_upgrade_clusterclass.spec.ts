@@ -110,9 +110,8 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
   context('Post-Upgrade Cluster checks and Resources cleanup', () => {
     if (isRancherManagerVersion('2.12')) {
       it('Upgrade turtles chart and check cluster status', () => {
-        cy.contains('local').click();
         // This upgrades Turtles chart from v0.21.0 to turtles dev chart on Rancher v2.12
-        cy.checkChart('Upgrade', 'Rancher Turtles', turtlesNamespace, '');
+        cy.checkChart('local', 'Upgrade', 'Rancher Turtles', turtlesNamespace, '');
 
         // Check CAPI operator deployment to be removed
         cy.exploreCluster('local');
@@ -141,12 +140,9 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
       })
 
       it('Install App on imported cluster', {retries: 1}, () => {
-        // Click on imported CAPD cluster
-        cy.contains(clusterName).click();
-
         // Install Chart
         // We install Logging chart instead of Monitoring, since this is relatively lightweight.
-        cy.checkChart('Install', 'Logging', 'cattle-logging-system');
+        cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
 
       it("Scale up imported CAPD cluster by patching class-cluster yaml", () => {

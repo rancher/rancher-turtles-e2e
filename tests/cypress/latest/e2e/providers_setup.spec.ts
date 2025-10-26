@@ -112,8 +112,6 @@ describe('Enable CAPI Providers', () => {
 
     if (isRancherManagerVersion('>=2.13')) {
       it('Create Providers using Charts', () => {
-        cy.contains('local').click();
-
         const providerSelectionFunction = (text: any) => {
           // @ts-ignore
           text.providers.bootstrapKubeadm.enabled = true;
@@ -148,7 +146,7 @@ describe('Enable CAPI Providers', () => {
           }
         }
         // Install Rancher Turtles Certified Providers chart
-        cy.checkChart('Install', 'Rancher Turtles Certified Providers', turtlesNamespace, undefined, undefined, false, providerSelectionFunction);
+        cy.checkChart('local', 'Install', 'Rancher Turtles Certified Providers', turtlesNamespace, undefined, undefined, false, providerSelectionFunction);
       })
 
       it('Wait for all the providers to be Ready', {retries: 2}, () => {

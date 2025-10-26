@@ -94,11 +94,9 @@ warn: restricted`,
 
     context('[CLUSTER-OPERATIONS]', () => {
       it('Install App on created cluster', () => {
-        // Click on imported CAPD cluster
-        cy.contains(clusterName).click();
         // Install Chart
         // We install Logging chart instead of Monitoring, since this is relatively lightweight.
-        cy.checkChart('Install', 'Logging', 'cattle-logging-system');
+        cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
     })
 
