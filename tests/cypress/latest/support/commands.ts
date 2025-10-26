@@ -795,7 +795,7 @@ Cypress.Commands.add('typeInFilter', (text, selector = '.input-sm') => {
   cy.get(selector)
     .click()
     .clear()
-    .type(text)
+    .type(`${text}{enter}`)
     .wait(2000);
 });
 
