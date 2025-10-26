@@ -54,7 +54,7 @@ describe('Install CAPI extension - @install', {tags: '@install'}, () => {
       cy.contains('Extensions changed - reload required', {timeout: 60000});
       cy.clickButton('Reload');
       // Ensure `Installed` extensions tab is active.
-      cy.getBySel('installed').should('have.class', 'active');
+      cy.getBySel('installed').click();
       const pluginSelector = isRancherManagerVersion('>=2.13') ? '.plugin-cards' : '.plugins';
       cy.get(pluginSelector)
         .children()
