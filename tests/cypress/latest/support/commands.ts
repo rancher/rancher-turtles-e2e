@@ -526,9 +526,10 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
 // Command to Install, Update or Upgrade App from Charts menu
 // Operation types: Install, Update, Upgrade
 // You can optionally provide an array of questions and answer them before the installation starts
-// Example1: cy.checkChart('Alerting', 'default', [{ menuEntry: '(None)', checkbox: 'Enable Microsoft Teams' }]);
-// Example2: cy.checkChart('Rancher Turtles', 'cattle-turtles-system', [{ menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Seamless integration with Fleet and CAPI'},{ menuEntry: 'Rancher webhook cleanup settings', inputBoxTitle: 'Webhook Cleanup Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.28.0'}]);
-Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, questions, refreshRepo = false, modifyYAMLOperation) => {
+// Example1: cy.checkChart('local', 'Alerting', 'default', [{ menuEntry: '(None)', checkbox: 'Enable Microsoft Teams' }]);
+// Example2: cy.checkChart('capg-kubeadm', Rancher Turtles', 'cattle-turtles-system', [{ menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Seamless integration with Fleet and CAPI'},{ menuEntry: 'Rancher webhook cleanup settings', inputBoxTitle: 'Webhook Cleanup Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.28.0'}]);
+Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace, version, questions, refreshRepo = false, modifyYAMLOperation) => {
+
   const isUpdateOperation = operation == 'Update'
   const turtlesChart = chartName == 'Rancher Turtles'
 
@@ -536,6 +537,11 @@ Cypress.Commands.add('checkChart', (operation, chartName, namespace, version, qu
   if (isRancherManagerVersion('>=2.13') && isUpdateOperation) {
     operation = 'Edit'
   }
+
+  // Click on the cluster
+  cy.get('.side-menu .clusters').within(() => {
+    cy.contains(clusterName).click();
+  })
   cy.get('.nav').contains('Apps').click();
 
   // Select All Repositories and click Action/Refresh
@@ -785,7 +791,9 @@ Cypress.Commands.add('deleteCluster', (clusterName, timeout = 120000) => {
   cy.searchCluster(clusterName);
   cy.viewport(1920, 1080);
   cy.getBySel('sortable-table_check_select_all').click();
-  cy.getBySel('sortable-table-promptRemove').click({ctrlKey: true}); // this will prevent to display confirmation dialog
+  cy.getBySel('sortable-table-promptRemove').click();
+  cy.getBySel('prompt-remove-input').type(clusterName);
+  cy.getBySel('prompt-remove-confirm-button').click();
   cy.wait(2000); // needed for 2.12
   cy.contains(clusterName, {timeout: timeout}).should('not.exist');
 });

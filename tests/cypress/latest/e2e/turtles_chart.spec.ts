@@ -56,8 +56,6 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
   if (isRancherManagerVersion('<=2.12')) {
     qase([2, 11],
       it('Install Turtles chart', {retries: 1}, () => {
-        cy.contains('local').click();
-
         // if turtles dev chart is to be used, ignore the turtles chart version
         const turtlesHelmRepo = Cypress.env('chartmuseum_repo')
         if (turtlesHelmRepo && turtlesHelmRepo != "") {
@@ -68,7 +66,7 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
           // Required to validate turtles/issues/1395
           turtlesVersion = '0.21.0'
         }
-        cy.checkChart('Install', 'Rancher Turtles', turtlesNamespace, turtlesVersion);
+        cy.checkChart('local', 'Install', 'Rancher Turtles', turtlesNamespace, turtlesVersion);
       })
     );
   }

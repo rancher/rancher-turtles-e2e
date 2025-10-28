@@ -70,18 +70,15 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
 
   context('[CLUSTER-OPERATIONS]', () => {
     qase(57, it('Install App on imported cluster', {retries: 1}, () => {
-        // Click on imported CAPZ cluster
-        cy.contains(clusterName).click();
-
         // Install Chart
-        cy.checkChart('Install', 'Logging', 'cattle-logging-system');
+      cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
     );
   })
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
-      it('Remove imported CAPZ cluster from Rancher Manager', () => {
+      it('Remove imported CAPZ cluster from Rancher Manager', {retries: 1}, () => {
         // Delete the imported cluster
         // Ensure that the provisioned CAPI cluster still exists
         // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
