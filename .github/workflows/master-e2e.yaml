@@ -498,6 +498,21 @@ jobs:
           name: cypress-videos-after-upgrade-${{ inputs.cluster_name }}
           path: tests/cypress/latest/videos
           retention-days: 7
+      - name: Collect logs
+        env:
+          KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+          RANCHER_LOG_COLLECTOR: ${{ github.workspace }}/.github/scripts/collect-rancher-logs.sh
+        if: ${{ always() }}
+        run: |
+          chmod +x ${{ env.RANCHER_LOG_COLLECTOR }}
+          bash ${{ env.RANCHER_LOG_COLLECTOR }}
+      - name: Upload cluster logs
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: support-logs
+          path: ${{ github.workspace }}/logs/*
+          if-no-files-found: ignore
       - name: Add summary
         if: ${{ always() }}
         run: |
