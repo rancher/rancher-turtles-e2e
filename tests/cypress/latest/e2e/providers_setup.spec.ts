@@ -15,7 +15,7 @@ import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
 import {isRancherManagerVersion, turtlesNamespace} from '~/support/utils';
 
-const buildType = Cypress.env('chartmuseum_repo') ? 'dev' : 'prod';
+const buildType = Cypress.env('turtles_dev_chart') ? 'dev' : 'prod';
 
 function matchAndWaitForProviderReadyStatus(
   providerString: string,
