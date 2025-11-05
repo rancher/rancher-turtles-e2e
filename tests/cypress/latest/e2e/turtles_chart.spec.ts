@@ -62,7 +62,7 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
     qase([2, 11],
       it('Install Turtles chart', {retries: 1}, () => {
         // if turtles dev chart is to be used, ignore the turtles chart version
-        if (!devChart) {
+        if (devChart) {
           turtlesVersion = ""
         }
 
