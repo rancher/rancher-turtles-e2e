@@ -92,7 +92,6 @@ describe('Enable CAPI Providers', () => {
   const kubeProviderTypes = ['bootstrap', 'control plane']
   const capiNamespaces = ['capi-clusters', 'capi-classes']
   const localProviderNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system']
-  const vsphereProviderNamespace = 'capv-system'
 
   beforeEach(() => {
     cy.login();
@@ -243,24 +242,36 @@ describe('Enable CAPI Providers', () => {
   });
 
   context('Docker provider', {tags: '@short'}, () => {
+    const dockerProviderNamespace = 'capd-system'
+    if (isRancherManagerVersion('<2.13')) {
+      it('Create CAPIProviders Namespaces', () => {
+        cy.createNamespace([dockerProviderNamespace]);
+      })
+    }
+
     qase(4,
       it('Create/Verify CAPD provider', () => {
         // Create Docker Infrastructure provider
-        const namespace = 'capd-system'
         if (isRancherManagerVersion('>=2.13')) {
           cy.checkCAPIMenu();
           cy.contains('Providers').click();
         } else {
-          cy.addInfraProvider('Docker', namespace);
+          cy.addInfraProvider('Docker', dockerProviderNamespace);
         }
         matchAndWaitForProviderReadyStatus(dockerProvider, 'infrastructure', dockerProvider, kubeadmProviderVersion, 120000);
-        cy.verifyCAPIProviderImage(dockerProvider, namespace);
+        cy.verifyCAPIProviderImage(dockerProvider, dockerProviderNamespace);
       })
     );
   })
 
   context('vSphere provider', {tags: '@vsphere'}, () => {
+    const vsphereProviderNamespace = 'capv-system'
 
+    if (isRancherManagerVersion('<2.13')) {
+      it('Create CAPIProviders Namespaces', () => {
+        cy.createNamespace([vsphereProviderNamespace]);
+      })
+    }
     qase(40,
       it('Create/Verify CAPV provider', () => {
         // Create vsphere Infrastructure provider
@@ -289,6 +300,12 @@ describe('Enable CAPI Providers', () => {
 
   context('Cloud Providers', {tags: '@full'}, () => {
     const providerType = 'infrastructure'
+    if (isRancherManagerVersion('<2.13')) {
+      it('Create Cloud CAPIProviders Namespaces', () => {
+        const cloudProviderNamespaces = ['capa-system', 'capg-system', 'capz-system']
+        cy.createNamespace(cloudProviderNamespaces);
+      })
+    }
 
     qase(13,
       it('Create/Verify CAPA provider', () => {
