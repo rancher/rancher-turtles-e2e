@@ -5,6 +5,8 @@ set -evx
 # Variables
 RANCHER_LOG_COLLECTER="https://raw.githubusercontent.com/rancherlabs/support-tools/master/collection/rancher/v2.x/logs-collector/rancher2_logs_collector.sh"
 CRUST_GATHER_INSTALLER="https://github.com/crust-gather/crust-gather/raw/main/install.sh"
+# Due to GH API rate limiting, we need to specify the crust version
+CRUST_VERSION="v0.11.0"
 
 # Create directory to store logs
 mkdir -p -m 755 logs
@@ -27,7 +29,7 @@ cd crust-gather-logs
 
 curl -L ${CRUST_GATHER_INSTALLER} -o crust-gather-installer.sh
 chmod +x crust-gather-installer.sh
-sudo ./crust-gather-installer.sh -y
+sudo VERSION=${CRUST_VERSION} ./crust-gather-installer.sh -y
 
 crust-gather collect
 
