@@ -36,3 +36,16 @@ updates:
         patterns:
           - "*cypress*"
     open-pull-requests-limit: 10
+  - package-ecosystem: "gomod"
+    directory: "/tests"
+    commit-message:
+      prefix: "[GO] "
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels: ["dependencies"]
+    groups:
+      gomod:
+        patterns:
+          - "*"
+    open-pull-requests-limit: 10
