@@ -42,7 +42,7 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
   })
 
   if (devChart || isRancherManagerVersion('>=2.13')) {
-    it('Add chartmuseum repo', () => {
+    it('Add turtles dev repo', () => {
       // this test is needed to install providers chart (for 2.13) and turtles dev build
       expect(chartMuseumRepo, "checking chartmuseum repo").to.not.be.empty;
       cy.addRepository('chartmuseum-repo', `${chartMuseumRepo}:8080`, 'http', 'none');
@@ -51,7 +51,7 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
 
   if (!devChart && isRancherManagerVersion('<2.13')) {
     // for all Rancher versions <2.13; we add the repo if not testing turtles dev build
-    it('Add turtles dev repo', {retries: 1}, () => {
+    it('Add turtles chart repo', {retries: 1}, () => {
       cy.addRepository('turtles-chart', 'https://rancher.github.io/turtles/', 'http', 'none');
     })
   }
