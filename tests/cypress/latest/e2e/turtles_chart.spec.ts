@@ -18,9 +18,9 @@ import {isRancherManagerVersion, turtlesNamespace} from '~/support/utils';
 
 Cypress.config();
 describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
-  let turtlesHelmRepo = Cypress.env('chartmuseum_repo')
+  let chartMuseumRepo = Cypress.env('chartmuseum_repo')
   let turtlesVersion = Cypress.env('turtles_chart_version')
-  let devChart = turtlesHelmRepo != ''
+  let devChart = Cypress.env('turtles_dev_chart')
 
   beforeEach(() => {
     cy.login();
@@ -41,24 +41,28 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
     cy.contains("Include Prerelease Versions").should('not.have.class', 'bg-disabled');
   })
 
-  // Turtles Repo is required to install providers chart and turtles nightly build.
-  it('Add turtles repo', {retries: 1}, () => {
-    // if the env var is empty or not defined at all; use the normal repo
-    if (turtlesHelmRepo == '') {
-      turtlesHelmRepo = 'https://rancher.github.io/turtles/'
-    } else {
-      turtlesHelmRepo += ':8080'
-    }
-    cy.addRepository('turtles-chart', turtlesHelmRepo, 'http', 'none');
-  })
+  if (devChart || isRancherManagerVersion('>=2.13')) {
+    it('Add turtles dev repo', () => {
+      // this test is needed to install providers chart (for 2.13) and turtles dev build
+      expect(chartMuseumRepo, "checking chartmuseum repo").to.not.be.empty;
+      cy.addRepository('chartmuseum-repo', `${chartMuseumRepo}:8080`, 'http', 'none');
+    })
+  }
+
+  if (!devChart && isRancherManagerVersion('<2.13')) {
+    // for all Rancher versions <2.13; we add the repo if not testing turtles dev build
+    it('Add turtles chart repo', {retries: 1}, () => {
+      cy.addRepository('turtles-chart', 'https://rancher.github.io/turtles/', 'http', 'none');
+    })
+  }
+
 
   // Skip for 2.13, TODO: remove check  after turtles/issues/1811 is fixed
   if (isRancherManagerVersion('<=2.12')) {
     qase([2, 11],
       it('Install Turtles chart', {retries: 1}, () => {
         // if turtles dev chart is to be used, ignore the turtles chart version
-        const turtlesHelmRepo = Cypress.env('chartmuseum_repo')
-        if (turtlesHelmRepo && turtlesHelmRepo != "") {
+        if (devChart) {
           turtlesVersion = ""
         }
 

@@ -262,6 +262,7 @@ jobs:
       SKIP_CLUSTER_DELETE: ${{ inputs.skip_cluster_delete }}
       CLUSTER_NAME_SUFFIX: ${{ inputs.cluster_name_suffix }}
       BUILD_TYPE: ${{ inputs.target_build_type }}
+      TURTLES_DEV_CHART: ${{ inputs.turtles_dev_chart }}
       # Secrets
       AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
