@@ -523,6 +523,25 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
   cy.contains(new RegExp('Active.*' + repositoryName), {timeout: 150000});
 });
 
+function checkApiStatus (retries = 20) {
+  cy.request({
+    url: '/about',
+    failOnStatusCode: false,
+    timeout: 30000,
+  }).then((response) => {
+    if (response.status !== 200 && retries > 0) {
+      cy.wait(5000);
+      checkApiStatus(retries - 1);
+    } else {
+      expect(response.status).to.eq(200);
+      // Once /dashboard/about is back, reload the page
+      cy.wait(5000);
+      cy.reload();
+      cy.wait(2000);
+    }
+  });
+};
+
 // Command to Install, Update or Upgrade App from Charts menu
 // Operation types: Install, Update, Upgrade
 // You can optionally provide an array of questions and answer them before the installation starts
@@ -664,24 +683,6 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
 
   if (turtlesChart) {
     // Poll /dashboard/about until it returns HTTP 200 and then reload the page
-    const checkApiStatus = (retries = 20) => {
-      cy.request({
-        url: '/about',
-        failOnStatusCode: false,
-        timeout: 30000,
-      }).then((response) => {
-        if (response.status !== 200 && retries > 0) {
-          cy.wait(5000);
-          checkApiStatus(retries - 1);
-        } else {
-          expect(response.status).to.eq(200);
-          // Once /dashboard/about is back, reload the page
-          cy.wait(5000);
-          cy.reload();
-          cy.wait(2000);
-        }
-      });
-    };
     checkApiStatus();
   } else {
     cy.get("div.wm.drag-end").then((windowmanager) => {
@@ -1128,4 +1129,25 @@ Cypress.Commands.add('verifyCAPIProviderImage', (providerName, providerNamespace
   cy.setNamespace(providerNamespace);
   cy.contains(providerImageRegistry).should('be.visible');
   cy.namespaceReset();
+});
+
+Cypress.Commands.add('setCAPIFeature', (featureName, featureValue) => {
+  cy.readFile('./fixtures/feature.yaml').then((data) => {
+    data = data.replace(/replace_feature_name/g, featureName)
+    data = data.replace(/replace_feature_value/g, featureValue)
+    cy.importYAML(data);
+  });
+
+  // Poll /dashboard/about until it returns HTTP 200 and then reload the page
+  cy.wait(5000);
+  checkApiStatus();
+
+  cy.burgerMenuOperate('open');
+  cy.accesMenuSelection(['Global Settings', 'Feature Flags']);
+  cy.typeInFilter(featureName);
+  if (featureValue == 'true') {
+    cy.contains(new RegExp('Active.*' + featureName));
+  } else {
+    cy.contains(new RegExp('Disabled.*' + featureName));
+  }
 });
