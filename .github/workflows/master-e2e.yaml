@@ -352,6 +352,34 @@ jobs:
             RELEASE_TAG=v${{ env.TAG }} make build-providers-chart
           fi
 
+      - name: Clone, build and publish artifical system charts for 2.13
+        if: ${{ inputs.turtles_dev_chart == true && contains(env.RANCHER_VERSION, '2.13') }}
+        run: |
+          # Install yq if not present
+          if ! command -v yq >/dev/null 2>&1; then
+            sudo curl -L https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/local/bin/yq
+            sudo chmod +x /usr/local/bin/yq
+          fi
+
+          # Configure a git user to be able do a commit by the script
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+          export RANCHER_CHARTS_REPO_DIR=${{ runner.temp }}/system-charts/charts
+          export RANCHER_CHART_DEV_VERSION=108.0.0+up9.99.9
+          export RANCHER_CHARTS_BASE_BRANCH=dev-v2.13
+          export CHART_RELEASE_DIR=${{ github.workspace }}/out/charts/rancher-turtles
+          export HELM=helm
+
+          # Script from rancher/turtles
+          chmod +x scripts/build-local-rancher-charts.sh
+          # To use https instead of git+ssh
+          sed -i 's#git@github.com:rancher/charts.git#https://github.com/rancher/charts.git#' scripts/build-local-rancher-charts.sh
+          ./scripts/build-local-rancher-charts.sh
+
+          # Note allow port tcp/4080 by a firewall rule on GCP
+          docker run --name git-http-backend -d -p 4080:80 -v ${{ runner.temp }}/system-charts:/git ynohat/git-http-backend
+
       - name: Copy chart files
         run: |
           if [[ ${{ inputs.turtles_dev_chart }} == true ]]; then
