@@ -1112,15 +1112,17 @@ Cypress.Commands.add('verifyResourceCount', (clusterName, resourcePath, resource
 
 // Command to verify CAPIProvider image registry
 Cypress.Commands.add('verifyCAPIProviderImage', (providerName, providerNamespace) => {
+  const buildType = Cypress.env('turtles_build_type');
   let providerImageRegistry: string;
-  if (providerName == 'docker') {
-    providerImageRegistry = 'gcr.io/k8s-staging-cluster-api'
+
+  if (providerName === 'docker') {
+    providerImageRegistry = 'gcr.io/k8s-staging-cluster-api';
+  } else if (isRancherManagerVersion('>=2.13')) {
+    providerImageRegistry = buildType === 'prime'
+      ? 'registry.suse.com/rancher'
+      : 'registry.k8s.io/cluster-api';
   } else {
-    if (isRancherManagerVersion('>=2.13')) {
-      providerImageRegistry = 'registry.k8s.io/cluster-api'
-    } else {
-      providerImageRegistry = 'registry.suse.com/rancher'
-    }
+    providerImageRegistry = 'registry.suse.com/rancher';
   }
 
   cy.exploreCluster('local');
