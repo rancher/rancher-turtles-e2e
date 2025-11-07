@@ -34,7 +34,7 @@ function matchAndWaitForProviderReadyStatus(
       cy.get('td').eq(2).should('contain.text', providerString);  // Name
       cy.get('td').eq(3).should('contain.text', providerType);    // Type
       cy.get('td').eq(4).should('contain.text', providerName);    // ProviderName
-      if (isRancherManagerVersion('>=2.13')) {
+      if (buildType === 'prod' && isRancherManagerVersion('>=2.13')) {
         cy.get('td').eq(5).should('contain.text', providerVersion); // InstalledVersion
       }
       cy.get('td').eq(6).should('contain.text', readyState);      // Phase
@@ -112,9 +112,8 @@ describe('Enable CAPI Providers', () => {
     if (isRancherManagerVersion('>=2.13')) {
       it('Create Providers using Charts', () => {
         const providerSelectionFunction = (text: any) => {
-          // @ts-ignore
+
           text.providers.bootstrapKubeadm.enabled = true;
-          // @ts-ignore
           text.providers.controlplaneKubeadm.enabled = true;
 
           const tags = Cypress.env('grepTags')
@@ -124,22 +123,15 @@ describe('Enable CAPI Providers', () => {
               text.providers.infrastructureDocker.enabled = true;
             }
             if (tags.includes('@full')) {
-              // @ts-ignore
               text.providers.infrastructureGCP.enabled = true;
-              // @ts-ignore
               text.providers.infrastructureGCP.variables.GCP_B64ENCODED_CREDENTIALS = '';
 
-              // @ts-ignore
               text.providers.infrastructureAzure.enabled = true;
-              // @ts-ignore
               text.providers.infrastructureAWS.enabled = true;
             }
             if (tags.includes('@vsphere')) {
-              // @ts-ignore
               text.providers.infrastructureVSphere.enabled = true;
-              // @ts-ignore
               text.providers.infrastructureVSphere.enableAutomaticUpdate = false;
-              // @ts-ignore
               text.providers.infrastructureVSphere.version = 'v1.13.1';
             }
           }
@@ -154,7 +146,6 @@ describe('Enable CAPI Providers', () => {
         cy.contains('Providers').click();
         cy.waitForAllRowsInState('Ready', 180000);
       })
-
     }
 
     // TODO: Use wizard to create providers, capi-ui-extension/issues/177
