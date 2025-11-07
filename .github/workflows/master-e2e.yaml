@@ -366,7 +366,7 @@ jobs:
           git config --global user.email "actions@github.com"
 
           export RANCHER_CHARTS_REPO_DIR=${{ runner.temp }}/system-charts/charts
-          export RANCHER_CHART_DEV_VERSION=108.0.0+up9.99.9
+          export RANCHER_CHART_DEV_VERSION=108.0.0+up99.99.99
           export RANCHER_CHARTS_BASE_BRANCH=dev-v2.13
           export CHART_RELEASE_DIR=${{ github.workspace }}/out/charts/rancher-turtles
           export HELM=helm
