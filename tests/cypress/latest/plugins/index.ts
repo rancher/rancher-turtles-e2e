@@ -34,10 +34,8 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   config.env.turtles_dev_chart = process.env.TURTLES_DEV_CHART == "true";
   config.env.turtles_chart_version = process.env.TURTLES_CHART_VERSION;
   config.env.cluster = process.env.CLUSTER_NAME;
-  config.env.capi_ui_version = process.env.CAPI_UI_VERSION;
   config.env.k8s_version = process.env.K8S_VERSION_TO_PROVISION;
   config.env.rancher_version = process.env.RANCHER_VERSION;
-  config.env.ui_account = process.env.UI_ACCOUNT;
   config.env.username = process.env.RANCHER_USER;
   config.env.grep = process.env.GREP;
   config.env.grepTags = process.env.GREPTAGS;
