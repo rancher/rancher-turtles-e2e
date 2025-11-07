@@ -1,16 +1,20 @@
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
-import {skipClusterDeletion} from '~/support/utils';
+import {isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
 import * as randomstring from "randomstring";
 
 Cypress.config();
 describe('Create Azure RKE2 Cluster', {tags: '@short'}, () => {
   let userID: string, ccID: string;
+  let features = ['turtles']
   const timeout = 1200000
   const userName = 'admin'
   const k8sVersion = 'v1.32.9+rke2r1'
   const clusterName = 'turtles-qa-azure-v2-' + randomstring.generate({length: 4, capitalization: "lowercase"})
-  const features = ['turtles', 'embedded-cluster-api']
+
+  if (isRancherManagerVersion('>=2.13')) {
+    features.push('embedded-cluster-api');
+  }
 
   beforeEach(() => {
     cy.login();
@@ -95,14 +99,15 @@ describe('Create Azure RKE2 Cluster', {tags: '@short'}, () => {
           cy.getBySel('log').click();
           cy.contains('[INFO ] provisioning done');
 
-          // Switch the features
-          cy.setCAPIFeature(feature, 'false');
-          if (feature == 'turtles') {
-            cy.setCAPIFeature('embedded-cluster-api', 'true');
-          } else {
-            cy.setCAPIFeature('turtles', 'true');
+          if (isRancherManagerVersion('>=2.13')) {
+            // Switch the features
+            cy.setCAPIFeature(feature, 'false');
+            if (feature == 'turtles') {
+              cy.setCAPIFeature('embedded-cluster-api', 'true');
+            } else {
+              cy.setCAPIFeature('turtles', 'true');
+            }
           }
-
           // Check cluster is Active
           cy.searchCluster(clusterName);
           cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
