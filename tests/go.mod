@@ -5,13 +5,13 @@ go 1.24.0
 toolchain go1.24.6
 
 require (
+	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/onsi/ginkgo/v2 v2.27.2
 	github.com/onsi/gomega v1.38.2
 	github.com/rancher-sandbox/ele-testhelpers v0.0.0-20251106083847-6b6b27499b4f
 )
 
 require (
-	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/bramvdbogaerde/go-scp v1.5.0 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect

@@ -15,8 +15,10 @@ limitations under the License.
 package e2e_test
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -26,30 +28,16 @@ import (
 	"github.com/rancher-sandbox/ele-testhelpers/tools"
 )
 
-var (
-	// Create kubectl context
-	// Default timeout is too small, so New() cannot be used
-	k = &kubectl.Kubectl{
-		Namespace:    "",
-		PollTimeout:  tools.SetTimeout(300 * time.Second),
-		PollInterval: 500 * time.Millisecond,
-	}
-)
+func waitForResourceCondition(ns, resource, condition string) {
+	// Wait for resource to be created
+	status, err := kubectl.Run("wait", "--namespace", ns, "--for=create", resource, "--timeout=300s")
+	GinkgoWriter.Printf("kubectl wait --for=create %s/%s: %s", ns, resource, status)
+	Expect(err).To(Not(HaveOccurred()), "kubectl wait --for=create %s failed: %s", resource, status)
 
-func rolloutDeployment(ns, d string) {
-	// NOTE: 1st or 2nd rollout command can sporadically fail, so better to use Eventually here
-	Eventually(func() string {
-		status, _ := kubectl.Run("rollout", "restart", "deployment/"+d,
-			"--namespace", ns)
-		return status
-	}, tools.SetTimeout(1*time.Minute), 20*time.Second).Should(ContainSubstring("restarted"))
-
-	// Wait for deployment to be restarted
-	Eventually(func() string {
-		status, _ := kubectl.Run("rollout", "status", "deployment/"+d,
-			"--namespace", ns)
-		return status
-	}, tools.SetTimeout(2*time.Minute), 30*time.Second).Should(ContainSubstring("successfully rolled out"))
+	// Wait for the requested condition
+	status, err = kubectl.Run("wait", "--namespace", ns, "--for=condition="+condition, resource, "--timeout=300s")
+	GinkgoWriter.Printf("kubectl wait --for=condition=%s %s/%s: %s", condition, ns, resource, status)
+	Expect(err).To(Not(HaveOccurred()), "kubectl wait --for=condition=%s %s failed: %s", condition, resource, status)
 }
 
 var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgrade"), func() {
@@ -85,17 +73,10 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 				time.Sleep(tools.SetTimeout(20 * time.Second))
 			})
 
-			By("Waiting for K3s to be started", func() {
-				// Wait for all pods to be started
-				checkList := [][]string{
-					{"kube-system", "app=local-path-provisioner"},
-					{"kube-system", "k8s-app=kube-dns"},
-					{"kube-system", "app.kubernetes.io/name=traefik"},
-					{"kube-system", "svccontroller.k3s.cattle.io/svcname=traefik"},
-				}
-				Eventually(func() error {
-					return rancher.CheckPod(k, checkList)
-				}, tools.SetTimeout(4*time.Minute), 30*time.Second).Should(BeNil())
+			By("Waiting for K3s resources", func() {
+				waitForResourceCondition("kube-system", "deployment/local-path-provisioner", "Available")
+				waitForResourceCondition("kube-system", "deployment/coredns", "Available")
+				waitForResourceCondition("kube-system", "deployment/traefik", "Available")
 			})
 
 			By("Configuring Kubeconfig file", func() {
@@ -112,39 +93,58 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 					"upgrade", "--install", "cert-manager", "jetstack/cert-manager",
 					"--namespace", "cert-manager",
 					"--create-namespace",
-					"--set", "installCRDs=true",
+					"--set", "crds.enabled=true",
 					"--wait", "--wait-for-jobs",
 				}
 
 				RunHelmCmdWithRetry(flags...)
 
-				checkList := [][]string{
-					{"cert-manager", "app.kubernetes.io/component=controller"},
-					{"cert-manager", "app.kubernetes.io/component=webhook"},
-					{"cert-manager", "app.kubernetes.io/component=cainjector"},
-				}
-				Eventually(func() error {
-					return rancher.CheckPod(k, checkList)
-				}, tools.SetTimeout(4*time.Minute), 30*time.Second).Should(BeNil())
+				waitForResourceCondition("cert-manager", "deployment/cert-manager", "Available")
 			})
 		}
 
 		By("Installing/Upgrading Rancher Manager", func() {
-			err := rancher.DeployRancherManager(rancherHostname, rancherChannel, rancherVersion, rancherHeadVersion, "none", "none")
+			// Used for providing artifical system chart during install/upgrade
+			var extraFlags []string = nil
+			// TODO: is this condition suitable for upgrade?
+			if turtlesDevChart && (isRancherManagerVersion(">=2.13")) {
+				extraEnvIndex := 1
+				// For prime-optimus[-alpha] channels extraEnvIndex needs to be shifted
+				// Ref. https://github.com/rancher-sandbox/ele-testhelpers/blob/main/rancher/install.go#L93
+				if strings.Contains(rancherChannel, "prime-optimus") {
+					extraEnvIndex = 2
+				}
+
+				entries := []struct {
+					name  string
+					value string
+				}{
+					{"CATTLE_CHART_DEFAULT_URL", "http://" + rancherHostname + ":4080" + "/git/charts"}, // Can we leave it hardcoded?
+					{"CATTLE_CHART_DEFAULT_BRANCH", "dev-v2.13"},
+					{"CATTLE_RANCHER_TURTLES_VERSION", "108.0.0+up99.99.99"}, // Ensure using custom built turtles
+				}
+
+				extraFlags = []string{}
+				for i, e := range entries {
+					idx := extraEnvIndex + i
+					extraFlags = append(extraFlags,
+						"--set", fmt.Sprintf("extraEnv[%d].name=%s", idx, e.name),
+						"--set-string", fmt.Sprintf("extraEnv[%d].value=%s", idx, e.value),
+					)
+				}
+				// Log the extra flags
+				GinkgoWriter.Write([]byte(strings.Join(extraFlags, " ") + "\n"))
+			}
+
+			err := rancher.DeployRancherManager(rancherHostname, rancherChannel, rancherVersion, rancherHeadVersion, "none", "none", extraFlags)
 			Expect(err).To(Not(HaveOccurred()))
 
-			// Wait for all pods to be started
-			checkList := [][]string{
-				{"cattle-system", "app=rancher"},
-				{"cattle-fleet-local-system", "app=fleet-agent"},
-				{"cattle-system", "app=rancher-webhook"},
-			}
-			Eventually(func() error {
-				return rancher.CheckPod(k, checkList)
-			}, tools.SetTimeout(4*time.Minute), 30*time.Second).Should(BeNil())
+			waitForResourceCondition("cattle-system", "deployments/rancher-webhook", "Available")
 
-			// A bit dirty be better to wait a little here for all to be correctly started
-			time.Sleep(2 * time.Minute)
+			if isRancherManagerVersion(">=2.13") {
+				waitForResourceCondition("cattle-turtles-system", "deployments/rancher-turtles-controller-manager", "Available")
+				waitForResourceCondition("cattle-capi-system", "deployments/capi-controller-manager", "Available")
+			}
 		})
 	})
 })
