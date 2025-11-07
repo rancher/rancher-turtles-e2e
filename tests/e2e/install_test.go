@@ -121,7 +121,7 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 				}{
 					{"CATTLE_CHART_DEFAULT_URL", "http://" + rancherHostname + ":4080" + "/git/charts"}, // Can we leave it hardcoded?
 					{"CATTLE_CHART_DEFAULT_BRANCH", "dev-v2.13"},
-					{"CATTLE_RANCHER_TURTLES_VERSION", "108.0.0+up9.99.9"}, // Ensure using custom built turtles
+					{"CATTLE_RANCHER_TURTLES_VERSION", "108.0.0+up99.99.99"}, // Ensure using custom built turtles
 				}
 
 				extraFlags = []string{}
