@@ -523,8 +523,7 @@ jobs:
           else
             TURTLES_NAMESPACE="rancher-turtles-system"
           fi
-          # this will also print rancher-turtles-providers version in case of 2.13
-          TURTLES_VERSION=$(helm list -n $TURTLES_NAMESPACE -o json 2> /dev/null | jq -r '.[] | .chart')
+          TURTLES_VERSION=$(helm list -n $TURTLES_NAMESPACE -o json 2> /dev/null | jq -r '.[] | .chart' | head -n 1)
           echo "Rancher Turtles Installed/Upgraded Chart Version: $TURTLES_VERSION" >> ${GITHUB_STEP_SUMMARY}
           echo "Rancher Turtles Dev Build Type: ${{ inputs.target_build_type }}" >> ${GITHUB_STEP_SUMMARY}
           if [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
