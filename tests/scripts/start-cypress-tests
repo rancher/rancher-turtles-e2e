@@ -20,7 +20,6 @@ docker network create \
 docker run --init -v $PWD:/workdir -w /workdir \
     --user 1000:$(id -g) \
     -e CYPRESS_TAGS=$CYPRESS_TAGS \
-    -e CAPI_UI_VERSION=$CAPI_UI_VERSION \
     -e CHARTMUSEUM_REPO=$CHARTMUSEUM_REPO \
     -e TURTLES_DEV_CHART=$TURTLES_DEV_CHART \
     -e TURTLES_CHART_VERSION=$TURTLES_CHART_VERSION \
@@ -40,7 +39,6 @@ docker run --init -v $PWD:/workdir -w /workdir \
     -e GCP_CREDENTIALS="$GCP_CREDENTIALS" \
     -e GCP_PROJECT=$GCP_PROJECT \
     -e RANCHER_USER=$RANCHER_USER \
-    -e UI_ACCOUNT=$UI_ACCOUNT \
     -e QASE_API_TOKEN=$QASE_API_TOKEN \
     -e QASE_MODE=$QASE_MODE \
     -e QASE_TESTOPS_RUN_TITLE="$QASE_TESTOPS_RUN_TITLE" \

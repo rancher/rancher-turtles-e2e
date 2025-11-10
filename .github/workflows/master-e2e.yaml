@@ -71,9 +71,6 @@ on:
         description: Destroy the auto-generated self-hosted runner
         default: true
         type: boolean
-      capi_ui_version:
-        description: Version of the capi-ui-extension which will be installed
-        type: string
       rancher_log_collector:
         description: URL of the Rancher log collector script
         default: https://raw.githubusercontent.com/rancherlabs/support-tools/master/collection/rancher/v2.x/logs-collector/rancher2_logs_collector.sh
@@ -94,10 +91,6 @@ on:
         type: string
       test_description:
         description: Short description of the test
-        type: string
-      ui_account:
-        description: Account used to test RBAC role in UI
-        required: false
         type: string
       upstream_cluster_version:
         description: Cluster upstream version where to install Rancher (K3s)
@@ -256,7 +249,6 @@ jobs:
       BROWSER: chrome
       CYPRESS_DOCKER: 'cypress/included:15.2.0'
       # Inputs
-      CAPI_UI_VERSION: ${{ inputs.capi_ui_version }}
       GREPTAGS: ${{ inputs.grep_test_by_tag }}
       TURTLES_CHART_VERSION: ${{ inputs.turtles_chart_version }}
       SKIP_CLUSTER_DELETE: ${{ inputs.skip_cluster_delete }}
@@ -543,6 +535,8 @@ jobs:
           path: ${{ github.workspace }}/logs/*
           if-no-files-found: ignore
       - name: Add summary
+        env:
+          KUBECONFIG: /etc/rancher/k3s/k3s.yaml
         if: ${{ always() }}
         run: |
           # Add summary
@@ -552,9 +546,12 @@ jobs:
           echo "Rancher Manager Image: ${{ steps.component.outputs.rm_image_version }}" >> ${GITHUB_STEP_SUMMARY}
           echo "Rancher Manager Version: ${{ steps.component.outputs.rm_version }}" >> ${GITHUB_STEP_SUMMARY}
           echo "CertManager Image: ${{ steps.component.outputs.cert_manager_image_version }}" >> ${GITHUB_STEP_SUMMARY}
-          UI_VERSION=$(helm list -n cattle-ui-plugin-system -o json 2> /dev/null |  jq -r '.[] | .chart')
-          TURTLES_VERSION=$(helm list -n rancher-turtles-system -o json 2> /dev/null | jq -r '.[] | .chart')
-          echo "CAPI UI Extension Version: $UI_VERSION" >> ${GITHUB_STEP_SUMMARY}
+          if [[ "${{ env.RANCHER_VERSION }}" =~ "2.13" ]]; then
+            TURTLES_NAMESPACE="cattle-turtles-system"
+          else
+            TURTLES_NAMESPACE="rancher-turtles-system"
+          fi
+          TURTLES_VERSION=$(helm list -n $TURTLES_NAMESPACE -o json 2> /dev/null | jq -r '.[] | .chart' | head -n 1)
           echo "Rancher Turtles Installed/Upgraded Chart Version: $TURTLES_VERSION" >> ${GITHUB_STEP_SUMMARY}
           echo "Rancher Turtles Dev Build Type: ${{ inputs.target_build_type }}" >> ${GITHUB_STEP_SUMMARY}
           if [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then

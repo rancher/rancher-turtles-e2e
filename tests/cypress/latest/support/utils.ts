@@ -25,11 +25,6 @@ export const isRancherManagerVersion = (version: string) => {
   return semver.satisfies(rancherVersion, version)
 }
 
-// Check CAPI UI version
-export const isUIVersion = (version: string) => {
-  return (new RegExp(version)).test(Cypress.env("capi_ui_version"));
-}
-
 export const skipClusterDeletion = Cypress.env("skip_cluster_delete") == "false"
 
 export const getClusterName = (className: string): string => {
