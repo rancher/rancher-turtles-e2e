@@ -33,7 +33,7 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   config.env.chartmuseum_repo = process.env.CHARTMUSEUM_REPO || '';
   config.env.turtles_dev_chart = process.env.TURTLES_DEV_CHART == "true";
   config.env.turtles_chart_version = process.env.TURTLES_CHART_VERSION;
-  config.env.turtles_build_type = process.env.BUILD_TYPE || undefined;
+  config.env.turtles_build_type = process.env.BUILD_TYPE || "prime";
   config.env.cluster = process.env.CLUSTER_NAME;
   config.env.k8s_version = process.env.K8S_VERSION_TO_PROVISION;
   config.env.rancher_version = process.env.RANCHER_VERSION;
