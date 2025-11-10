@@ -1,0 +1,6 @@
+apiVersion: management.cattle.io/v3
+kind: Feature
+metadata:
+  name: replace_feature_name
+spec:
+  value: replace_feature_value
