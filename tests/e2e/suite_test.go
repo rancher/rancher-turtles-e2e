@@ -67,9 +67,8 @@ func isRancherManagerVersion(constraint string) bool {
 	rancherEnv := os.Getenv("RANCHER_VERSION")
 
 	// Better safe than sorry
-	if rancherEnv == "" {
-		return false
-	}
+	Expect(rancherEnv).To(Not(BeEmpty()), "RANCHER_VERSION environment variable not set - test setup error")
+
 	// take everything after the last "/"
 	parts := strings.Split(rancherEnv, "/")
 
@@ -77,9 +76,7 @@ func isRancherManagerVersion(constraint string) bool {
 	rancherEnv = parts[len(parts)-1]
 
 	versionStr := strings.TrimSpace(rancherEnv)
-	if versionStr == "" {
-		return false
-	}
+	Expect(versionStr).To(MatchRegexp(`^\d+\.\d+`), "Last part of RANCHER_VERSION does not contain a valid version (expected at least MAJOR.MINOR)")
 
 	// Coerce "2.13" -> "2.13.0"
 	if strings.Count(versionStr, ".") == 1 {
