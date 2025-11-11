@@ -107,7 +107,7 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 			// Used for providing artifical system chart during install/upgrade
 			var extraFlags []string = nil
 			// TODO: is this condition suitable for upgrade?
-			if turtlesDevChart && (isRancherManagerVersion(">=2.13")) {
+			if (isRancherManagerVersion(">=2.13")) && turtlesDevChart {
 				extraEnvIndex := 1
 				// For prime-optimus[-alpha] channels extraEnvIndex needs to be shifted
 				// Ref. https://github.com/rancher-sandbox/ele-testhelpers/blob/main/rancher/install.go#L93
