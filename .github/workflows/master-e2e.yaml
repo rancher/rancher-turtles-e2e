@@ -124,9 +124,9 @@ on:
         type: string
 
 # To prevent concurrent runs on vsphere tests
-concurrency:
-  group: ${{ contains(inputs.grep_test_by_tag, '@vsphere') && 'vsphere-runner-lock' || null }}
-  cancel-in-progress: false # This is effective only when group is not null
+#concurrency:
+#  group: ${{ contains(inputs.grep_test_by_tag, '@vsphere') && 'vsphere-runner-lock' || null }}
+#  cancel-in-progress: false # This is effective only when group is not null
 
 jobs:
   determine-runner:
