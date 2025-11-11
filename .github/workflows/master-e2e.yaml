@@ -4,6 +4,7 @@ name: (template) Rancher Turtles E2E tests
 on:
   workflow_call:
     # Variables to set when calling this reusable workflow
+
     secrets:
       gcp_credentials:
         description: Credentials to use to connect
@@ -121,6 +122,11 @@ on:
       target_build_type:
         description: Build type for turtles_dev_chart (prime|community)
         type: string
+
+# To prevent concurrent runs on vsphere tests
+concurrency:
+  group: ${{ contains(inputs.grep_test_by_tag, '@vsphere') && 'vsphere-runner-lock' || null }}
+  cancel-in-progress: false # This is effective only when group is not null
 
 jobs:
   determine-runner:
