@@ -58,16 +58,28 @@ func RunHelmCmdWithRetry(s ...string) {
 
 /**
  * isRancherManagerVersion checks if RANCHER_VERSION satisfies a semver constraint.
- * Assumes rancherEnv is always like "head/2.13", "alpha/2.13.1-rc1", "latest/2.13.0"
+ * Assumes rancherEnv always contains version after the last "/".
+ * Examples: "head/2.13", "alpha/2.13.1-rc1", "latest/2.13.0" or "latest/devel/2.12"
  * @param constraint Semver constraint string (e.g., ">=2.13", "<2.14", "2.13" etc.)
  * @returns true if RANCHER_VERSION satisfies the constraint, false otherwise
  */
 func isRancherManagerVersion(constraint string) bool {
 	rancherEnv := os.Getenv("RANCHER_VERSION")
 
-	// Split "prefix/version" -> take the part after "/"
-	parts := strings.SplitN(rancherEnv, "/", 2)
-	versionStr := parts[1]
+	// Better safe than sorry
+	if rancherEnv == "" {
+		return false
+	}
+	// take everything after the last "/"
+	parts := strings.Split(rancherEnv, "/")
+
+	// it is always last member of the array
+	rancherEnv = parts[len(parts)-1]
+
+	versionStr := strings.TrimSpace(rancherEnv)
+	if versionStr == "" {
+		return false
+	}
 
 	// Coerce "2.13" -> "2.13.0"
 	if strings.Count(versionStr, ".") == 1 {
