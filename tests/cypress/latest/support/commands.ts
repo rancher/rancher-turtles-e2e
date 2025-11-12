@@ -1119,19 +1119,19 @@ Cypress.Commands.add('verifyCAPIProviderImage', (providerName, providerNamespace
 
   if (providerName === 'docker') {
     providerImageRegistry = 'gcr.io/k8s-staging-cluster-api';
-  }
-
-  if (isRancherManagerVersion('>=2.13')) {
-    if (devChart) {
-      providerImageRegistry = buildType === 'prime'
-      ? 'registry.suse.com/rancher'
-      : 'registry.k8s.io/cluster-api';
+  } else { 
+    if (isRancherManagerVersion('>=2.13')) {
+      if (devChart) {
+        providerImageRegistry = buildType === 'prime'
+        ? 'registry.suse.com/rancher'
+        : 'registry.k8s.io/cluster-api';
+      } else {
+        // dev=false - for Prime 2.13 release this is likely subject to change
+        providerImageRegistry = 'registry.k8s.io/cluster-api';
+      }
     } else {
-      // dev=false - for Prime 2.13 release this is likely subject to change
-      providerImageRegistry = 'registry.k8s.io/cluster-api';
+      providerImageRegistry = 'registry.suse.com/rancher';
     }
-  } else {
-    providerImageRegistry = 'registry.suse.com/rancher';
   }
 
   cy.exploreCluster('local');
