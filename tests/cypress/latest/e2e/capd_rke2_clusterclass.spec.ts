@@ -16,11 +16,12 @@ import {qase} from 'cypress-qase-reporter/mocha';
 import {getClusterName, isRancherManagerVersion, skipClusterDeletion, turtlesNamespace} from '~/support/utils';
 import {Question} from '~/support/structs';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
+import { vars } from '~/support/variables';
 
 
 Cypress.config();
 describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
-  const timeout = 600000
+  const timeout = vars.shortTimeout
   const classNamePrefix = 'docker-rke2'
   const clusterName = getClusterName(classNamePrefix)
   const questions: Question[] = [
@@ -82,7 +83,7 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
     qase(101,
       it('Auto import child CAPD cluster', () => {
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-        cy.checkCAPIClusterProvisioned(clusterName, timeout);
+        cy.checkCAPIClusterProvisioned(clusterName, variables.shortTimeout);
 
         // Check child cluster is created and auto-imported
         // This is checked by ensuring the cluster is available in navigation menu
