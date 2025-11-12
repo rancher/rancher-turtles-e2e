@@ -27,12 +27,12 @@ spec:
     - name: workerMachineType
       value: t3.2xlarge
     - name: amiID
-      value: ami-035c9a1657ffc50bb # Private copy of ami-012e88f0aa221423a from eu-west-2
+      value: replace_amiID
     - name: cni
       value: none
     - name: awsClusterIdentityName
       value: cluster-identity
-    version: v1.32.9+rke2r1
+    version: replace_rke2_version
     workers:
       machineDeployments:
       - class: default-worker

@@ -12,7 +12,7 @@ spec:
   topology:
     class: aws-eks-example
     classNamespace: capi-classes
-    version: v1.32.0
+    version: v1.32.0 #https://github.com/rancher/turtles/blob/main/test/e2e/config/operator.yaml#L61
     variables:
       - name: region
         value: ap-south-2

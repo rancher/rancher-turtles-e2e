@@ -25,10 +25,10 @@ spec:
       - name: rke2CNI
         value: none
       - name: dockerImage
-        value: kindest/node:v1.32.8
+        value: kindest/node:replace_kind_version
       - name: dockerAuthSecret
         value: capd-docker-token
-    version: v1.32.9+rke2r1
+    version: replace_rke2_version
     workers:
       machineDeployments:
         - class: default-worker

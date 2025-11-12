@@ -2,14 +2,15 @@ import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
 import {isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
 import * as randomstring from "randomstring";
+import {vars} from '~/support/variables';
 
 Cypress.config();
 describe('Create Azure RKE2 Cluster', {tags: '@short'}, () => {
   let userID: string, ccID: string;
   let features = ['turtles']
-  const timeout = 1200000
+  const timeout = vars.fullTimeout
   const userName = 'admin'
-  const k8sVersion = 'v1.32.9+rke2r1'
+  const k8sVersion = vars.rke2Version
   const clusterName = 'turtles-qa-azure-v2-' + randomstring.generate({length: 4, capitalization: "lowercase"})
 
   if (isRancherManagerVersion('>=2.13')) {

@@ -14,6 +14,7 @@ limitations under the License.
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
 import {isRancherManagerVersion, turtlesNamespace} from '~/support/utils';
+import {vars} from '~/support/variables';
 
 const buildType = Cypress.env('turtles_dev_chart') ? 'dev' : 'prod';
 
@@ -43,8 +44,6 @@ function matchAndWaitForProviderReadyStatus(
 
 Cypress.config();
 describe('Enable CAPI Providers', () => {
-  const turtlesRepoUrl = 'https://github.com/rancher/turtles.git';
-
   // Providers names
   const rke2Provider = 'rke2'
   const kubeadmProvider = 'kubeadm'
@@ -90,7 +89,7 @@ describe('Enable CAPI Providers', () => {
 
   const kubeadmBaseURL = 'https://github.com/kubernetes-sigs/cluster-api/releases/'
   const kubeProviderTypes = ['bootstrap', 'control plane']
-  const capiNamespaces = ['capi-clusters', 'capi-classes']
+  const capiNamespaces = [vars.capiClustersNS, vars.capiClassesNS]
   const localProviderNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system']
 
   beforeEach(() => {
@@ -208,7 +207,7 @@ describe('Enable CAPI Providers', () => {
       // HelmApps to be used across all specs
       it('Add Applications fleet repo', () => {
         // Add upstream apps repo
-        cy.addFleetGitRepo('helm-apps', turtlesRepoUrl, 'main', 'examples/applications/', 'capi-clusters');
+        cy.addFleetGitRepo('helm-apps', vars.turtlesRepoUrl, vars.branch, 'examples/applications/', vars.capiClustersNS);
       })
     );
 

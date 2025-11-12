@@ -2,18 +2,16 @@ import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import {isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
 import {capiClusterDeletion, capvResourcesCleanup, importedRancherClusterDeletion} from "~/support/cleanup_support";
+import {vars} from '~/support/variables';
 
 Cypress.config();
 describe('Import CAPV Kubeadm Class-Cluster', {tags: '@vsphere'}, () => {
-  const timeout = 1200000
+  const timeout = vars.fullTimeout
   const clusterRepoName = 'class-clusters-capv-kb'
   const classRepoName = 'vsphere-kb-clusterclass'
   const className = 'vsphere-kubeadm-example'
   const clusterName = 'turtles-qa-capv-kb-example'
-  const branch = 'main'
   const path = '/tests/assets/rancher-turtles-fleet-example/capv/kubeadm/class-clusters'
-  const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
-  const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/vsphere/kubeadm'
   const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
   const providerName = 'vsphere'
@@ -72,7 +70,7 @@ describe('Import CAPV Kubeadm Class-Cluster', {tags: '@vsphere'}, () => {
     })
 
     it('Add CAPV Kubeadm ClusterClass Fleet Repo and check Applications', () => {
-      cy.addFleetGitRepo(classRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
+      cy.addFleetGitRepo(classRepoName, vars.turtlesRepoUrl, vars.branch, classesPath, vars.capiClassesNS)
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(className);
 
@@ -87,7 +85,7 @@ describe('Import CAPV Kubeadm Class-Cluster', {tags: '@vsphere'}, () => {
         .should('exist');
 
       // Add CAPV fleet repository
-      cy.addFleetGitRepo(clusterRepoName, repoUrl, branch, path);
+      cy.addFleetGitRepo(clusterRepoName, vars.repoUrl, vars.branch, path);
 
       // Check CAPI cluster using its name
       cy.checkCAPICluster(clusterName);

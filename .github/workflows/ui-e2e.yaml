@@ -20,7 +20,7 @@ on:
         default: head/2.13
         type: string
       turtles_chart_version:
-        description: Rancher Turtles chart version to test (eg. 0.24.1 | 108.0.0+up0.25.0)
+        description: Rancher Turtles chart version to test (eg. 0.24.3 | 108.0.0+up0.25.0)
         type: string
       grep_test_by_tag:
         description: Test tags. For multiple selection separate with spaces (Available options - @install [@upgrade @short @full | @vsphere]). Keep always @install
@@ -96,4 +96,3 @@ jobs:
       runner_template: ${{ inputs.runner_template || 'capi-e2e-ci-runner-spot-n2-highmem-16-template-v3' }}
       cluster_name_suffix: ${{ inputs.cluster_name_suffix || github.run_number }}
       grep_test_by_tag: ${{ inputs.grep_test_by_tag || (github.event.schedule == '0 3 * * *' && '@install @short') || (github.event.schedule == '0 4 * * *' && '@install @vsphere') || (github.event.schedule == '0 5 * * 6' && '@install @full') || (github.event.schedule == '0 3 * * 6' && '@install @upgrade @short') }}
-      upstream_cluster_version: ${{ contains(inputs.rancher_version, '2.12') && 'v1.31.13+k3s1' || 'v1.32.3+k3s1'}}

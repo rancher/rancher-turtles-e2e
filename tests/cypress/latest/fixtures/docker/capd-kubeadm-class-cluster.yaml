@@ -34,7 +34,7 @@ spec:
           warn: restricted
       - name: imagePullSecret
         value: docker-config
-    version: v1.32.3
+    version: replace_kindVersion
     workers:
       machineDeployments:
         - class: default-worker
