@@ -19,7 +19,7 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import jsyaml from 'js-yaml';
 import yaml from 'js-yaml';
 import _ from 'lodash';
-import {isRancherManagerVersion} from '~/support/utils';
+import {isRancherManagerVersion, isPrimeChannel} from '~/support/utils';
 
 // Generic commands
 // Go to specific Sub Menu from Access Menu
@@ -1119,15 +1119,15 @@ Cypress.Commands.add('verifyCAPIProviderImage', (providerName, providerNamespace
 
   if (providerName === 'docker') {
     providerImageRegistry = 'gcr.io/k8s-staging-cluster-api';
-  } else { 
+  } else {
     if (isRancherManagerVersion('>=2.13')) {
       if (devChart) {
         providerImageRegistry = buildType === 'prime'
-        ? 'registry.suse.com/rancher'
-        : 'registry.k8s.io/cluster-api';
+          ? 'registry.suse.com/rancher'
+          : 'registry.k8s.io/cluster-api';
       } else {
-        // dev=false - for Prime 2.13 release this is likely subject to change
-        providerImageRegistry = 'registry.k8s.io/cluster-api';
+        // dev=false - choose registry based on isPrimeChannel flag
+        providerImageRegistry = isPrimeChannel() ? 'registry.suse.com/rancher' : 'registry.k8s.io/cluster-api';
       }
     } else {
       providerImageRegistry = 'registry.suse.com/rancher';

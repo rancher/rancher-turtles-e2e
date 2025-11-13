@@ -109,9 +109,9 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 			// TODO: is this condition suitable for upgrade?
 			if (isRancherManagerVersion(">=2.13")) && turtlesDevChart {
 				extraEnvIndex := 1
-				// For prime-optimus[-alpha] channels extraEnvIndex needs to be shifted
+				// For prime-alpha and prime-rc channels extraEnvIndex needs to be shifted
 				// Ref. https://github.com/rancher-sandbox/ele-testhelpers/blob/main/rancher/install.go#L93
-				if strings.Contains(rancherChannel, "prime-optimus") {
+				if strings.Contains(rancherChannel, "prime-") {
 					extraEnvIndex = 2
 				}
 
