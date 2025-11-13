@@ -518,7 +518,8 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
   cy.typeInFilter(repositoryName);
   cy.getBySel('sortable-table-0-action-button').click();
   cy.wait(1000);
-  cy.get('.icon.group-icon.icon-refresh').click();
+  // On prime 2.13.0-alpha4 the refresh icon selector didn't change but parent <div> must be clicked
+  cy.get('.icon.group-icon.icon-refresh').parent().click();
   cy.wait(1000);
   cy.contains(new RegExp('Active.*' + repositoryName), {timeout: 150000});
 });
@@ -893,7 +894,8 @@ Cypress.Commands.add('forceUpdateFleetGitRepo', (repoName, workspace) => {
   } else {
     cy.get('.actions .btn.actions').click();
   }
-  cy.get('.icon.group-icon.icon-refresh').click();
+  // On prime 2.13.0-alpha4 the refresh icon selector didn't change but parent <div> must be clicked
+  cy.get('.icon.group-icon.icon-refresh').parent().click();
   cy.clickButton('Update')
 })
 
