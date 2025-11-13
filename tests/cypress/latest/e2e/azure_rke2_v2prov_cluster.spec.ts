@@ -101,9 +101,9 @@ describe('Create Azure RKE2 Cluster', {tags: '@short'}, () => {
 
           if (isRancherManagerVersion('>=2.13')) {
             // Switch the features
-            cy.setCAPIFeature(feature, 'false');
             if (feature == 'turtles') {
               cy.setCAPIFeature('embedded-cluster-api', 'true');
+              cy.setCAPIFeature(feature, 'false');
             } else {
               cy.setCAPIFeature('turtles', 'true');
             }
