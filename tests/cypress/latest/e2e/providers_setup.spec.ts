@@ -58,7 +58,7 @@ describe('Enable CAPI Providers', () => {
   // Expected provider versions
   const providerVersions = {
     prod: {
-      rke2: 'v0.21.1',
+      rke2: 'v0.20.1',
       kubeadm: 'v1.10.6',
       fleet: 'v0.11.0',
       vsphere: 'v1.13.1',
