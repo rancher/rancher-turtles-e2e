@@ -19,7 +19,7 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import jsyaml from 'js-yaml';
 import yaml from 'js-yaml';
 import _ from 'lodash';
-import {isRancherManagerVersion} from '~/support/utils';
+import {isRancherManagerVersion, isPrimeChannel} from '~/support/utils';
 
 // Generic commands
 // Go to specific Sub Menu from Access Menu
@@ -518,7 +518,8 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
   cy.typeInFilter(repositoryName);
   cy.getBySel('sortable-table-0-action-button').click();
   cy.wait(1000);
-  cy.get('.icon.group-icon.icon-refresh').click();
+  // On prime 2.13.0-alpha4 the refresh icon selector didn't change but parent <div> must be clicked
+  cy.get('.icon.group-icon.icon-refresh').parent().click();
   cy.wait(1000);
   cy.contains(new RegExp('Active.*' + repositoryName), {timeout: 150000});
 });
@@ -893,7 +894,8 @@ Cypress.Commands.add('forceUpdateFleetGitRepo', (repoName, workspace) => {
   } else {
     cy.get('.actions .btn.actions').click();
   }
-  cy.get('.icon.group-icon.icon-refresh').click();
+  // On prime 2.13.0-alpha4 the refresh icon selector didn't change but parent <div> must be clicked
+  cy.get('.icon.group-icon.icon-refresh').parent().click();
   cy.clickButton('Update')
 })
 
@@ -1119,15 +1121,15 @@ Cypress.Commands.add('verifyCAPIProviderImage', (providerName, providerNamespace
 
   if (providerName === 'docker') {
     providerImageRegistry = 'gcr.io/k8s-staging-cluster-api';
-  } else { 
+  } else {
     if (isRancherManagerVersion('>=2.13')) {
       if (devChart) {
         providerImageRegistry = buildType === 'prime'
-        ? 'registry.suse.com/rancher'
-        : 'registry.k8s.io/cluster-api';
+          ? 'registry.suse.com/rancher'
+          : 'registry.k8s.io/cluster-api';
       } else {
-        // dev=false - for Prime 2.13 release this is likely subject to change
-        providerImageRegistry = 'registry.k8s.io/cluster-api';
+        // dev=false - choose registry based on isPrimeChannel flag
+        providerImageRegistry = isPrimeChannel() ? 'registry.suse.com/rancher' : 'registry.k8s.io/cluster-api';
       }
     } else {
       providerImageRegistry = 'registry.suse.com/rancher';

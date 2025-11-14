@@ -25,6 +25,11 @@ export const isRancherManagerVersion = (version: string) => {
   return semver.satisfies(rancherVersion, version)
 }
 
+// Check if Rancher comes from Prime channel
+export const isPrimeChannel = (): boolean => {
+  return Cypress.env("rancher_version").includes('prime');
+}
+
 export const skipClusterDeletion = Cypress.env("skip_cluster_delete") == "false"
 
 export const getClusterName = (className: string): string => {
