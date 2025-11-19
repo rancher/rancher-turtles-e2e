@@ -8,7 +8,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/onsi/ginkgo/v2 v2.27.2
 	github.com/onsi/gomega v1.38.2
-	github.com/rancher-sandbox/ele-testhelpers v0.0.0-20251113123558-e37721f14acb
+	github.com/rancher-sandbox/ele-testhelpers v0.0.0-20251119081933-d9f87840d634
 )
 
 require (
