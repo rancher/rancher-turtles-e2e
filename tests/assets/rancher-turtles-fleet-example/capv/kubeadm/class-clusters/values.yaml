@@ -15,6 +15,6 @@ vsphere:
 cluster:
   name: turtles-qa-capv-kb-example
   namespace: capi-clusters
-  version: v1.32.3
+  version: v1.33.5
   control_plane_machine_count: 3
   worker_machine_count: 3
