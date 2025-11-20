@@ -2,13 +2,13 @@ import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
 import {getClusterName, isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
 import {capaResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
+import {vars} from '~/support/variables';
 
 Cypress.config();
 describe('Import CAPA RKE2 Class-Cluster', {tags: '@full'}, () => {
   const timeout = 1200000
   const classNamePrefix = 'aws-rke2'
   const clusterName = getClusterName(classNamePrefix)
-  const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/aws/rke2'
   const clusterClassRepoName = 'aws-rke2-clusterclass'
   const providerName = 'aws'
@@ -36,7 +36,7 @@ describe('Import CAPA RKE2 Class-Cluster', {tags: '@full'}, () => {
 
     qase(116,
       it('Add CAPA RKE2 ClusterClass Fleet Repo and check Applications', () => {
-        cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
+        cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.branch, classesPath, vars.capiClassesNS)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(classNamePrefix);
 
@@ -52,7 +52,9 @@ describe('Import CAPA RKE2 Class-Cluster', {tags: '@full'}, () => {
       it('Import CAPA RKE2 class-cluster using YAML', () => {
         cy.readFile('./fixtures/aws/capa-rke2-class-cluster.yaml').then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
-          cy.importYAML(data, 'capi-clusters')
+          data = data.replace(/replace_rke2_version/g, vars.rke2Version)
+          data = data.replace(/replace_amiID/g, vars.amiID)
+          cy.importYAML(data, vars.capiClustersNS)
         });
         // Check CAPI cluster using its name
         cy.checkCAPICluster(clusterName);
@@ -96,7 +98,9 @@ describe('Import CAPA RKE2 Class-Cluster', {tags: '@full'}, () => {
 
         // workaround; these values need to be re-replaced before applying the scaling changes
         data = data.replace(/replace_cluster_name/g, clusterName)
-        cy.importYAML(data, 'capi-clusters')
+        data = data.replace(/replace_rke2_version/g, vars.rke2Version)
+        data = data.replace(/replace_amiID/g, vars.amiID)
+        cy.importYAML(data, vars.capiClustersNS)
       })
 
       // Check CAPI cluster status

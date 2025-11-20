@@ -33,5 +33,5 @@ spec:
       value:
         - asia-south2-a
     - name: imageId
-      value: projects/replace_gcp_project/global/images/cluster-api-ubuntu-2404-v1-32-5-1749802537
-    version: v1.32.5
+      value: projects/replace_gcp_project/global/images/replace_gcpImageId
+    version: replace_k8sVersion

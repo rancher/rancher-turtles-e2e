@@ -3,18 +3,16 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import {qase} from 'cypress-qase-reporter/mocha';
 import {isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
 import {capiClusterDeletion, capvResourcesCleanup, importedRancherClusterDeletion} from "~/support/cleanup_support";
+import {vars} from '~/support/variables';
 
 Cypress.config();
 describe('Import CAPV RKE2 Class-Cluster', {tags: '@vsphere'}, () => {
-  const timeout = 1200000
+  const timeout = vars.fullTimeout
   const clusterRepoName = 'class-clusters-capv-rke2'
   const classRepoName = 'vsphere-rke2-clusterclass'
   const className = 'vsphere-rke2-example'
   const clusterName = 'turtles-qa-capv-rke2-example'
-  const branch = 'main'
   const path = '/tests/assets/rancher-turtles-fleet-example/capv/rke2/class-clusters'
-  const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
-  const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/vsphere/rke2'
   const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
   const providerName = 'vsphere'
@@ -88,12 +86,12 @@ describe('Import CAPV RKE2 Class-Cluster', {tags: '@vsphere'}, () => {
         const dockerAuthUsernameBase64 = Buffer.from(vsphere_secrets_json.cluster_docker_auth_username).toString('base64')
         data = data.replace(/replace_cluster_docker_auth_username/, dockerAuthUsernameBase64)
         data = data.replace(/replace_cluster_docker_auth_password/, dockerAuthPasswordBase64)
-        cy.importYAML(data, 'capi-clusters')
+        cy.importYAML(data, vars.capiClustersNS)
       })
     });
 
     it('Add CAPV RKE2 ClusterClass Fleet Repo and check Applications', () => {
-      cy.addFleetGitRepo(classRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
+      cy.addFleetGitRepo(classRepoName, vars.turtlesRepoUrl, vars.branch, classesPath, vars.capiClassesNS)
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(className);
 
@@ -108,7 +106,7 @@ describe('Import CAPV RKE2 Class-Cluster', {tags: '@vsphere'}, () => {
         .should('exist');
 
       // Add CAPV fleet repository
-      cy.addFleetGitRepo(clusterRepoName, repoUrl, branch, path);
+      cy.addFleetGitRepo(clusterRepoName, vars.repoUrl, vars.branch, path);
 
       // Check CAPI cluster using its name
       cy.checkCAPICluster(clusterName);

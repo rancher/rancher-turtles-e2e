@@ -15,22 +15,20 @@ import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import {skipClusterDeletion} from '~/support/utils';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
+import {vars} from '~/support/variables';
 
 Cypress.config();
 describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
   let clusterName: string
-  const timeout = 600000
+  const timeout = vars.shortTimeout
   const classNamePrefix = 'docker-rke2'
-  const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
   const path = '/tests/assets/rancher-turtles-fleet-example/capd/rke2/class-clusters'
-  const branch = 'main'
-  const turtlesRepoUrl = 'https://github.com/rancher/turtles'
+  const branch = vars.branch
   const classesPath = 'examples/clusterclasses/docker/rke2'
   const clustersRepoName = 'docker-rke2-class-clusters'
   const clusterClassRepoName = "docker-rke2-clusterclass"
   const dockerAuthUsernameBase64 = btoa(Cypress.env("docker_auth_username"))
   const dockerAuthPasswordBase64 = btoa(Cypress.env("docker_auth_password"))
-  const capiClustersNS = 'capi-clusters'
 
   beforeEach(() => {
     cy.login();
@@ -46,12 +44,12 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
       cy.readFile('./fixtures/docker/capd-auth-token-secret.yaml').then((data) => {
         data = data.replace(/replace_cluster_docker_auth_username/, dockerAuthUsernameBase64)
         data = data.replace(/replace_cluster_docker_auth_password/, dockerAuthPasswordBase64)
-        cy.importYAML(data, capiClustersNS)
+        cy.importYAML(data, vars.capiClustersNS)
       })
     });
 
     it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
-      cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
+      cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.branch, classesPath, vars.capiClassesNS)
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(classNamePrefix);
     })
@@ -60,7 +58,7 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
   context('[CLUSTER-IMPORT]', () => {
     it('Add CAPD cluster fleet repo and get cluster name', () => {
       cypressLib.checkNavIcon('cluster-management').should('exist');
-      cy.addFleetGitRepo(clustersRepoName, repoUrl, branch, path);
+      cy.addFleetGitRepo(clustersRepoName, vars.repoUrl, branch, path);
 
       // Check CAPI cluster using its name prefix i.e. className
       cy.checkCAPICluster(classNamePrefix);

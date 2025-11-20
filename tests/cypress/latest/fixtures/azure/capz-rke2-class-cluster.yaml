@@ -26,7 +26,7 @@ spec:
       value: replace_cluster_name
     - name: azureClusterIdentityName
       value: cluster-identity
-    version: v1.32.9+rke2r1
+    version: replace_rke2_version
     workers:
       machineDeployments:
       - class: rke2-default-worker

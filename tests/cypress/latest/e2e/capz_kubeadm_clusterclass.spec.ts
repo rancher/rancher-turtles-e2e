@@ -1,13 +1,13 @@
 import '~/support/commands';
 import {getClusterName, skipClusterDeletion} from '~/support/utils';
 import {capiClusterDeletion, capzResourcesCleanup, importedRancherClusterDeletion} from "~/support/cleanup_support";
+import {vars} from '~/support/variables';
 
 Cypress.config();
 describe('Import CAPZ Kubeadm Class-Cluster', {tags: '@full'}, () => {
-  const timeout = 1200000
+  const timeout = vars.fullTimeout
   const classNamePrefix = 'azure-kubeadm'
   const clusterName = getClusterName(classNamePrefix)
-  const turtlesRepoUrl = 'https://github.com/rancher/turtles'
   const classesPath = 'examples/clusterclasses/azure/kubeadm'
   const clusterClassRepoName = "azure-kubeadm-clusterclass"
 
@@ -31,7 +31,7 @@ describe('Import CAPZ Kubeadm Class-Cluster', {tags: '@full'}, () => {
     })
 
     it('Add CAPZ Kubeadm ClusterClass Fleet Repo and check Azure CCM', () => {
-      cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-classes')
+      cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.branch, classesPath, vars.capiClassesNS)
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(classNamePrefix);
 
@@ -44,8 +44,9 @@ describe('Import CAPZ Kubeadm Class-Cluster', {tags: '@full'}, () => {
     it('Import CAPZ Kubeadm class-cluster using YAML', () => {
       cy.readFile('./fixtures/azure/capz-kubeadm-class-cluster.yaml').then((data) => {
         data = data.replace(/replace_cluster_name/g, clusterName)
+        data = data.replace(/replace_k8sVersion/g, vars.k8sVersion)
         data = data.replace(/replace_subscription_id/g, subscriptionID)
-        cy.importYAML(data, 'capi-clusters')
+        cy.importYAML(data, vars.capiClustersNS)
       });
       // Check CAPI cluster using its name
       cy.checkCAPICluster(clusterName);
@@ -83,8 +84,9 @@ describe('Import CAPZ Kubeadm Class-Cluster', {tags: '@full'}, () => {
 
         // workaround; these values need to be re-replaced before applying the scaling changes
         data = data.replace(/replace_cluster_name/g, clusterName)
+        data = data.replace(/replace_k8sVersion/g, vars.k8sVersion)
         data = data.replace(/replace_subscription_id/g, subscriptionID)
-        cy.importYAML(data, 'capi-clusters')
+        cy.importYAML(data, vars.capiClustersNS)
       })
 
       // Check CAPI cluster status
