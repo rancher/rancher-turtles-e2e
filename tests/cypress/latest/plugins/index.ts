@@ -31,7 +31,7 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   config.baseUrl = url.replace(/\/$/, '');
   config.env.cache_session = process.env.CACHE_SESSION || false;
   config.env.chartmuseum_repo = process.env.CHARTMUSEUM_REPO || '';
-  config.env.turtles_dev_chart = process.env.TURTLES_DEV_CHART == "true";
+  config.env.turtles_dev_chart = process.env.TURTLES_DEV_CHART || "false";
   config.env.turtles_chart_version = process.env.TURTLES_CHART_VERSION;
   config.env.turtles_build_type = process.env.BUILD_TYPE || "prime";
   config.env.cluster = process.env.CLUSTER_NAME;
