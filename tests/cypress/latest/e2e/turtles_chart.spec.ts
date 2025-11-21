@@ -20,7 +20,7 @@ Cypress.config();
 describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
   let chartMuseumRepo = Cypress.env('chartmuseum_repo')
   let turtlesVersion = Cypress.env('turtles_chart_version')
-  let devChart = Cypress.env('turtles_dev_chart')
+  let devChart = Cypress.env('turtles_dev_chart') == "true"
 
   beforeEach(() => {
     cy.login();

@@ -16,6 +16,8 @@ import {qase} from 'cypress-qase-reporter/mocha';
 import {isRancherManagerVersion, turtlesNamespace} from '~/support/utils';
 
 const buildType = Cypress.env('turtles_dev_chart') == "true" ? 'dev' : 'prod';
+console.log('turtles_dev_chart', Cypress.env('turtles_dev_chart'));
+console.log("Build Type", buildType);
 
 function matchAndWaitForProviderReadyStatus(
   providerString: string,

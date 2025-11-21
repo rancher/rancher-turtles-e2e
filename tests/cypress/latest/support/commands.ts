@@ -592,7 +592,7 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
   let chartSelector = isRancherManagerVersion('>=2.12') ? 'app-chart-cards-container' : 'chart-selection-grid';
   if (turtlesChart) {
     let turtlesChartSelector: string;
-    const devChart = Cypress.env('turtles_dev_chart')
+    const devChart = Cypress.env('turtles_dev_chart') == "true"
     // if dev==true; then for 2.13 and 2.12, the selector remains same;
     // if dev==false; then for 2.13 we use system integrated turtles, and for 2.12 we use turtles-chart repo to install turtles
     if (isRancherManagerVersion('>=2.13')) {
@@ -1114,7 +1114,7 @@ Cypress.Commands.add('verifyResourceCount', (clusterName, resourcePath, resource
 // Command to verify CAPIProvider image registry
 Cypress.Commands.add('verifyCAPIProviderImage', (providerName, providerNamespace) => {
   const buildType = Cypress.env('turtles_build_type');
-  const devChart = Cypress.env('turtles_dev_chart');
+  const devChart = Cypress.env('turtles_dev_chart') == "true";
   let providerImageRegistry: string;
 
   if (providerName === 'docker') {
