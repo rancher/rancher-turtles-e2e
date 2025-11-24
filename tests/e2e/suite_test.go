@@ -78,6 +78,11 @@ func isRancherManagerVersion(constraint string) bool {
 	versionStr := strings.TrimSpace(rancherEnv)
 	Expect(versionStr).To(MatchRegexp(`^\d+\.\d+`), "Last part of RANCHER_VERSION does not contain a valid version (expected at least MAJOR.MINOR)")
 
+	// Strip pre-release suffix "2.13.0-alpha8" or "2.13.0-rc1" -> "2.13.0"
+	if idx := strings.IndexAny(versionStr, "-"); idx != -1 {
+		versionStr = versionStr[:idx]
+	}
+
 	// Coerce "2.13" -> "2.13.0"
 	if strings.Count(versionStr, ".") == 1 {
 		versionStr += ".0"
