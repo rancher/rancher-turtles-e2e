@@ -152,7 +152,7 @@ jobs:
     steps:
       # actions/checkout MUST come before auth
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Generate UUID and Runner hostname
         id: generator
         run: |
@@ -317,7 +317,7 @@ jobs:
           fi
       - name: Check out rancher/turtles repo
         if: ${{ inputs.turtles_dev_chart == true || contains(env.RANCHER_VERSION, '2.13') }}
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: ${{ env.TURTLES_REPO }}
           ref: ${{ env.TURTLES_BRANCH }}
@@ -381,7 +381,7 @@ jobs:
             cp ${{ github.workspace }}/out/package/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ runner.temp }}
           fi
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Install Go
         uses: actions/setup-go@v6
         with:
@@ -574,7 +574,7 @@ jobs:
     steps:
       # actions/checkout MUST come before auth
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v3
         with:
