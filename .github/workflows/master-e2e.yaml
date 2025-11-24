@@ -357,7 +357,8 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
 
-          export RANCHER_CHARTS_REPO_DIR=${{ runner.temp }}/system-charts/charts
+          # Dir outside github workspace must be used for destroy=false persistance
+          export RANCHER_CHARTS_REPO_DIR=/tmp/system-charts/charts
           export RANCHER_CHART_DEV_VERSION=108.0.0+up99.99.99
           export RANCHER_CHARTS_BASE_BRANCH=dev-v2.13
           export CHART_RELEASE_DIR=${{ github.workspace }}/out/charts/rancher-turtles
@@ -370,7 +371,7 @@ jobs:
           ./scripts/build-local-rancher-charts.sh
 
           # Note allow port tcp/4080 by a firewall rule on GCP
-          docker run --name git-http-backend -d -p 4080:80 -v ${{ runner.temp }}/system-charts:/git ynohat/git-http-backend
+          docker run --name git-http-backend -d -p 4080:80 -v /tmp/system-charts:/git ynohat/git-http-backend
 
       - name: Copy chart files
         run: |
