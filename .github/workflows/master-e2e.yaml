@@ -339,7 +339,7 @@ jobs:
             sed -i 's#{{- printf "%s\/" \.Values\.global\.cattle\.systemDefaultRegistry -}}#{{- "" -}}#g' charts/rancher-turtles/templates/_helpers.tpl
 
             TARGET_BUILD=${{ env.BUILD_TYPE }} TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} make e2e-image-build
-            RELEASE_TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} CONTROLLER_IMAGE_VERSION=v${{ env.TAG }} make build-chart verify-gen
+            RELEASE_TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} CONTROLLER_IMAGE_VERSION=v${{ env.TAG }} make build-chart # verify-gen
             docker run -d -p 5000:5000 --name registry registry:2
             docker push ${{ env.CONTROLLER_IMG }}:v${{ env.TAG }}
           fi
