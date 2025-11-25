@@ -13,7 +13,7 @@ limitations under the License.
 
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
-import {isRancherManagerVersion, isTurtlesPrimeBuild, turtlesNamespace} from '~/support/utils';
+import {isPrimeChannel, isRancherManagerVersion, isTurtlesPrimeBuild, turtlesNamespace} from '~/support/utils';
 import {vars} from '~/support/variables';
 
 const buildType = Cypress.env('turtles_dev_chart') ? 'dev' : 'prod';
@@ -35,7 +35,10 @@ function matchAndWaitForProviderReadyStatus(
       cy.get('td').eq(2).should('contain.text', providerString);  // Name
       cy.get('td').eq(3).should('contain.text', providerType);    // Type
       cy.get('td').eq(4).should('contain.text', providerName);    // ProviderName
-      if (isRancherManagerVersion('>=2.13') && isTurtlesPrimeBuild()) {
+      // Only check provider version for Rancher >=2.13 and -
+      // 1. prime rancher
+      // 2. for turtles build with dev=true & target_build_type=prime
+      if (isRancherManagerVersion('>=2.13') && (isPrimeChannel() || (buildType=="dev" && isTurtlesPrimeBuild()))) {
         cy.get('td').eq(5).should('contain.text', providerVersion); // InstalledVersion
       } else {
         cy.task('log', 'This is not a prime Rancher; skipping provider version check');
