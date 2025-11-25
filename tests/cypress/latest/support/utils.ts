@@ -30,6 +30,10 @@ export const isPrimeChannel = (): boolean => {
   return Cypress.env("rancher_version").includes('prime');
 }
 
+export const isTurtlesPrimeBuild = (): boolean =>{
+  return Cypress.env("turtles_build_type") === "prime";
+}
+
 export const skipClusterDeletion = Cypress.env("skip_cluster_delete") == "false"
 
 export const getClusterName = (className: string): string => {
