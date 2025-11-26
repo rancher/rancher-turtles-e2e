@@ -557,7 +557,21 @@ jobs:
           fi
           TURTLES_VERSION=$(helm list -n $TURTLES_NAMESPACE -o json 2> /dev/null | jq -r '.[] | .chart' | head -n 1)
           echo "Rancher Turtles Installed/Upgraded Chart Version: $TURTLES_VERSION" >> ${GITHUB_STEP_SUMMARY}
-          echo "Rancher Turtles Dev Build Type: ${{ inputs.target_build_type }}" >> ${GITHUB_STEP_SUMMARY}
+          if [[ ${{ inputs.turtles_dev_chart }} == true ]]; then
+            echo "Rancher Turtles Dev Build Type: ${{ inputs.target_build_type }}" >> ${GITHUB_STEP_SUMMARY}
+          fi
+          # Only add provider section if providers exist
+          PROVIDER_DATA=$(kubectl get capiproviders.turtles-capi.cattle.io -A \
+            -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.metadata.namespace}{" "}{.spec.version}{"\n"}{end}' 2>/dev/null)
+          # Format provider data into a markdown table
+          if [[ -n "$PROVIDER_DATA" ]]; then
+            PROVIDER_VERSIONS=$(
+              printf "| NAME | NAMESPACE | VERSION |\n|:---|:---|:---|\n"
+              echo "$PROVIDER_DATA" | awk '{printf "| %-25s | %-35s | %-8s |\n", $1, $2, $3}'
+            )
+            echo "Installed CAPI Providers:" >> ${GITHUB_STEP_SUMMARY}
+            echo "${PROVIDER_VERSIONS}" >> ${GITHUB_STEP_SUMMARY}
+          fi
           if [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
             echo "### Rancher Manager Upgrade Information" >> ${GITHUB_STEP_SUMMARY}
             echo "Rancher Manager Upgraded Image: ${{ steps.upgraded_component.outputs.rm_upgraded_image_version }}" >> ${GITHUB_STEP_SUMMARY}
