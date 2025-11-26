@@ -272,6 +272,19 @@ jobs:
       # Common specs: @short @vsphere @full
       SPECS: |
         e2e/providers_setup.spec.ts
+        e2e/capd_rke2_clusterclass.spec.ts
+        e2e/capd_rke2_fleet_clusterclass.spec.ts
+        e2e/capd_kubeadm_clusterclass.spec.ts
+        e2e/azure_rke2_v2prov_cluster.spec.ts
+        e2e/capv_rke2_clusterclass.spec.ts
+        e2e/capv_kubeadm_clusterclass.spec.ts
+        e2e/capa_rke2_clusterclass.spec.ts
+        e2e/capa_kubeadm_clusterclass.spec.ts
+        e2e/capa_eks_clusterclass.spec.ts
+        e2e/capg_kubeadm_clusterclass.spec.ts
+        e2e/capz_aks_clusterclass.spec.ts
+        e2e/capz_rke2_clusterclass.spec.ts
+        e2e/capz_kubeadm_clusterclass.spec.ts
     steps:
       - name: Add /usr/local/bin into PATH
         run: |
