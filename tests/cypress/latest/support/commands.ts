@@ -343,12 +343,11 @@ Cypress.Commands.add('checkCAPIMenu', () => {
   cy.contains('.nav', 'Providers')
 });
 
-// Command to check presence of HelmApps under Fleet on local cluster
-Cypress.Commands.add('checkFleetHelmApps', (appList: string[]) => {
+// Command to check presence of HelmOps under Fleet on local cluster
+Cypress.Commands.add('checkFleetHelmOps', (appList: string[]) => {
   cy.burgerMenuOperate('open');
   cy.contains('local').click();
-  const helmPsMenuLocation = isRancherManagerVersion('>=2.12') ? ['More Resources', 'Fleet', 'Helm Ops'] : ['More Resources', 'Fleet', 'HelmApps'];
-  cy.accesMenuSelection(helmPsMenuLocation);
+  cy.accesMenuSelection(['More Resources', 'Fleet', 'Helm Ops']);
   appList.forEach((app) => {
     cy.typeInFilter(app);
     cy.getBySel('sortable-cell-0-1').should('exist');
@@ -594,12 +593,13 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
   if (turtlesChart) {
     let turtlesChartSelector: string;
     const devChart = Cypress.env('turtles_dev_chart')
+    const upgradeTest = Cypress.env('grepTags').includes('@upgrade')
     // if dev==true; then for 2.13 and 2.12, the selector remains same;
     // if dev==false; then for 2.13 we use system integrated turtles, and for 2.12 we use turtles-chart repo to install turtles
     if (isRancherManagerVersion('>=2.13')) {
       turtlesChartSelector = devChart ? '"item-card-cluster/chartmuseum-repo/rancher-turtles"' : '"item-card-cluster/rancher-charts/rancher-turtles"';
     } else if (isRancherManagerVersion('2.12')) {
-      turtlesChartSelector = devChart ? '"item-card-cluster/chartmuseum-repo/rancher-turtles"' : '"item-card-cluster/turtles-chart/rancher-turtles"';
+      turtlesChartSelector = devChart && upgradeTest ? '"item-card-cluster/turtles-chart/rancher-turtles"' : devChart ? '"item-card-cluster/chartmuseum-repo/rancher-turtles"' : '"item-card-cluster/turtles-chart/rancher-turtles"';
     } else {
       turtlesChartSelector = '"select-icon-grid-Rancher Turtles - the Cluster API Extension"';
     }
@@ -733,6 +733,7 @@ Cypress.Commands.add('patchYamlResource', (clusterName, namespace, resourceKind,
   cy.get('.icon-search.icon-lg').click();
   cy.get('input.search').type(resourceKind);
   cy.contains('a', resourceKind, {matchCase: false}).click();
+  cy.wait(2000);
   cy.typeInFilter(resourceName);
   // Click three dots menu on filtered resource (must be unique)
   cy.getBySel('sortable-table-0-action-button').click();
@@ -1002,7 +1003,7 @@ Cypress.Commands.add('deleteKubernetesResource', (clusterName = 'local', resourc
     cy.setNamespace(namespace);
   }
 
-  cy.accesMenuSelection(resourcePath);
+  cy.clickNavMenu(resourcePath);
 
   cy.typeInFilter(resourceName);
   cy.getBySel('sortable-cell-0-1').should('exist');

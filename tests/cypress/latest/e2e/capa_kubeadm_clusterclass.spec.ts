@@ -40,8 +40,8 @@ describe('Import CAPA Kubeadm Class-Cluster', {tags: '@full'}, () => {
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(classNamePrefix);
 
-        // Navigate to `local` cluster, More Resources > Fleet > HelmApps and ensure the charts are present.
-        cy.checkFleetHelmApps(['aws-ccm', 'aws-csi-driver', 'calico-cni-aws']);
+        // Navigate to `local` cluster, More Resources > Fleet > HelmOps and ensure the charts are present.
+        cy.checkFleetHelmOps(['aws-ccm', 'aws-csi-driver', 'calico-cni-aws']);
       })
     );
   })

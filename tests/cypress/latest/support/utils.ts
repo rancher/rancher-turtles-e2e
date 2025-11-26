@@ -17,9 +17,9 @@ export const isK8sVersion = (version: string) => {
 // for rancher_version=head/2.13
 // isRancherManagerVersion('>=2.12') returns true
 // isRancherManagerVersion('2.13') returns true
-// isRancherManagerVersion('<=2.11') returns false
+// isRancherManagerVersion('<=2.12') returns false
 export const isRancherManagerVersion = (version: string) => {
-  // rancher_version can be: latest/2.12.1, head/2.12, prime/2.11.1
+  // rancher_version can be: latest/2.12.1, head/2.12, prime/2.12.3
   // we need to make it semver compliant first
   const rancherVersion = semver.valid(semver.coerce(Cypress.env('rancher_version')));
   return semver.satisfies(rancherVersion, version)

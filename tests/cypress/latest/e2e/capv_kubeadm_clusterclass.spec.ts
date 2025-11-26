@@ -74,8 +74,8 @@ describe('Import CAPV Kubeadm Class-Cluster', {tags: '@vsphere'}, () => {
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(className);
 
-      // Navigate to `local` cluster, More Resources > Fleet > HelmApps and ensure the charts are present.
-      cy.checkFleetHelmApps(['vsphere-ccm']);
+      // Navigate to `local` cluster, More Resources > Fleet > HelmOps and ensure the charts are present.
+      cy.checkFleetHelmOps(['vsphere-ccm']);
     });
   })
 

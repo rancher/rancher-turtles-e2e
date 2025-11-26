@@ -29,8 +29,8 @@ describe('Import CAPG Kubeadm Class-Cluster', {tags: '@full'}, () => {
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(classNamePrefix);
 
-        // Navigate to `local` cluster, More Resources > Fleet > HelmApps and ensure the charts are present.
-        cy.checkFleetHelmApps(['calico-cni']);
+        // Navigate to `local` cluster, More Resources > Fleet > HelmOps and ensure the charts are present.
+        cy.checkFleetHelmOps(['calico-cni']);
 
         // Check GCP CCM bundle is available
         cy.accesMenuSelection(['More Resources', 'Fleet', 'Bundle']);

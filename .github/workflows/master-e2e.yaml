@@ -301,8 +301,8 @@ jobs:
       - name: Set Rancher Manager Install version
         run: |
           if [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
-            # Required for upgrade tests
-            echo "RANCHER_VERSION=head/2.11" >> ${GITHUB_ENV}
+            # Required for upgrade/migration tests
+            echo "RANCHER_VERSION=latest/2.12.3" >> ${GITHUB_ENV}
             echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> $GITHUB_ENV
             echo "SPECS=" >> ${GITHUB_ENV}
           else
@@ -310,7 +310,7 @@ jobs:
           fi
       - name: Set rancher/turtles repo branch
         run: |
-          if [[ "${{ env.RANCHER_VERSION }}" =~ "2.13" ]]; then
+          if [[ "${{ env.RANCHER_VERSION }}" =~ "2.13" || "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
             echo "TURTLES_BRANCH=${{ env.TURTLES_BRANCH }}" >> ${GITHUB_ENV}
           else
             echo "TURTLES_BRANCH=release-0.24" >> ${GITHUB_ENV}
@@ -332,9 +332,9 @@ jobs:
       - name: Set date variable
         run: |
           echo "TAG=$(date "+%Y.%m.%d")" >> ${GITHUB_ENV}
-      - name: Make Turtle and Providers chart
+      - name: Make Turtles and Providers chart
         run: |
-          if [[ ${{ inputs.turtles_dev_chart }} == true  ]]; then
+          if [[ ${{ inputs.turtles_dev_chart }} == true ]]; then
             # HACK for disabling rendering of `systemDefaultRegisty` value in turtles chart which is set in Prime builds
             sed -i 's#{{- printf "%s\/" \.Values\.global\.cattle\.systemDefaultRegistry -}}#{{- "" -}}#g' charts/rancher-turtles/templates/_helpers.tpl
 
@@ -343,12 +343,12 @@ jobs:
             docker run -d -p 5000:5000 --name registry registry:2
             docker push ${{ env.CONTROLLER_IMG }}:v${{ env.TAG }}
           fi
-          if [[ "${{ env.RANCHER_VERSION }}" =~ "2.13" ]]; then
+          if [[ "${{ env.RANCHER_VERSION }}" =~ "2.13" || "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
             RELEASE_TAG=v${{ env.TAG }} make build-providers-chart
           fi
 
-      - name: Clone, build and publish artifical system charts for 2.13
-        if: ${{ inputs.turtles_dev_chart == true && contains(env.RANCHER_VERSION, '2.13') }}
+      - name: Clone, build and publish artificial system charts for 2.13
+        if: ${{ inputs.turtles_dev_chart == true && contains(env.RANCHER_VERSION, '2.13') || contains(inputs.grep_test_by_tag, '@upgrade')}}
         run: |
           # Install yq if not present
           if ! command -v yq >/dev/null 2>&1; then
@@ -367,6 +367,10 @@ jobs:
           chmod +x scripts/build-local-rancher-charts.sh
           ./scripts/build-local-rancher-charts.sh
 
+          # Migration script from rancher/turtles
+          cp scripts/migrate-providers-ownership.sh /tmp
+          chmod +x /tmp/migrate-providers-ownership.sh
+
           # Note allow port tcp/4080 by a firewall rule on GCP
           docker run --name git-http-backend -d -p 4080:80 -v /tmp/system-charts:/git ynohat/git-http-backend
 
@@ -375,7 +379,7 @@ jobs:
           if [[ ${{ inputs.turtles_dev_chart }} == true ]]; then
             cp ${{ github.workspace }}/out/package/rancher-turtles-${{ env.TAG }}.tgz ${{ runner.temp }}
           fi
-          if [[ "${{ env.RANCHER_VERSION }}" =~ "2.13" ]]; then
+          if [[ "${{ env.RANCHER_VERSION }}" =~ "2.13" || "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
             cp ${{ github.workspace }}/out/package/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ runner.temp }}
           fi
       - name: Checkout
@@ -390,9 +394,12 @@ jobs:
           if [[ ${{ inputs.turtles_dev_chart }} == true ]]; then
             cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
           fi
-          if [[ "${{ env.RANCHER_VERSION }}" =~ "2.13" ]]; then
+          if [[ "${{ env.RANCHER_VERSION }}" =~ "2.13" || "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
             mkdir ${{ github.workspace }}/tests/assets/providers
             cp ${{ runner.temp }}/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets/providers
+          fi
+          if [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
+            cp /tmp/migrate-providers-ownership.sh ${{ github.workspace }}/tests/assets/
           fi
       - name: Inject kube-vip controlplane IP for vsphere into capv-helm-values.yaml
         if: contains(needs.create-runner.outputs.uuid, 'vsphere')
@@ -472,7 +479,8 @@ jobs:
         id: rancher_upgrade
         if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:
-          RANCHER_VERSION: head/2.12
+          RANCHER_VERSION: head/2.13
+          KUBECONFIG: /etc/rancher/k3s/k3s.yaml
           PUBLIC_DNS: ${{ needs.create-runner.outputs.public_dns }}
         run: cd tests && make e2e-upgrade-rancher
       - name: Extract component versions/informations after Rancher Upgrade
@@ -487,6 +495,10 @@ jobs:
           # Export values
           echo "rm_upgraded_image_version=${RM_UPGRADED_IMAGE_VERSION}" >> ${GITHUB_OUTPUT}
           echo "rm_upgraded_version=${{ env.RANCHER_VERSION }}" >> ${GITHUB_OUTPUT}
+      - name: Migration script
+        if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') }}
+        run: |
+          ${{ github.workspace }}/tests/assets/migrate-providers-ownership.sh --adopt docker:capd-system
       - name: Cypress tests - Upgraded Rancher
         if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:
