@@ -356,10 +356,6 @@ jobs:
             sudo chmod +x /usr/local/bin/yq
           fi
 
-          # Configure a git user to be able do a commit by the script
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-
           # Dir outside github workspace must be used for destroy=false persistance
           export RANCHER_CHARTS_REPO_DIR=/tmp/system-charts/charts
           export RANCHER_CHART_DEV_VERSION=108.0.0+up99.99.99
@@ -369,8 +365,6 @@ jobs:
 
           # Script from rancher/turtles
           chmod +x scripts/build-local-rancher-charts.sh
-          # To use https instead of git+ssh
-          sed -i 's#git@github.com:rancher/charts.git#https://github.com/rancher/charts.git#' scripts/build-local-rancher-charts.sh
           ./scripts/build-local-rancher-charts.sh
 
           # Note allow port tcp/4080 by a firewall rule on GCP
