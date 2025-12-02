@@ -52,7 +52,7 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 
 				// Set command and arguments
 				installCmd := exec.Command("sh", fileName)
-				installCmd.Env = append(os.Environ(), "INSTALL_K3S_EXEC=--disable metrics-server --write-kubeconfig-mode 0644")
+				installCmd.Env = append(os.Environ(), "INSTALL_K3S_EXEC=--disable metrics-server --write-kubeconfig-mode 0644", "INSTALL_K3S_SKIP_SELINUX_RPM=true")
 
 				// Retry in case of (sporadic) failure...
 				count := 1
