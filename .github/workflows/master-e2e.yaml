@@ -157,8 +157,8 @@ jobs:
         id: generator
         run: |
           if [[ ${{ needs.determine-runner.outputs.initial-runner }} == "vsphere" ]]; then
-            echo "uuid=vsphere" >> ${GITHUB_OUTPUT}
-            echo "runner=vsphere" >> ${GITHUB_OUTPUT}
+            echo "uuid=${{ runner.name }}" >> ${GITHUB_OUTPUT}
+            echo "runner=${{ runner.name }}" >> ${GITHUB_OUTPUT}
           else
             # NOTE: keep the runner name to less than 63 characters!
             UUID=$(uuidgen)
@@ -395,7 +395,7 @@ jobs:
             cp ${{ runner.temp }}/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets/providers
           fi
       - name: Inject kube-vip controlplane IP for vsphere into capv-helm-values.yaml
-        if: ${{ needs.create-runner.outputs.uuid == 'vsphere' }}
+        if: contains(needs.create-runner.outputs.uuid, 'vsphere')
         run: |
           # A round-robin distribution of 3 available control plane IPs for kube-vip
           INDEX=$(((${{ github.run_number }} % 3) + 1))
@@ -580,7 +580,7 @@ jobs:
           fi
 
   delete-runner:
-    if: ${{ always() && needs.create-runner.outputs.uuid != 'vsphere' }}
+    if: ${{ always() && contains(needs.create-runner.outputs.uuid, 'vsphere') == false }}
     needs: [create-runner, e2e]
     runs-on: ubuntu-latest
     steps:
@@ -624,9 +624,9 @@ jobs:
           fi
           echo "QASE run $RUN_ID marked as Completed" >> ${GITHUB_STEP_SUMMARY}
   cleanup-vsphere-runner:
-    if: ${{ always() && needs.create-runner.outputs.uuid == 'vsphere' && inputs.destroy_runner == true }}
+    if: ${{ always() && contains(needs.create-runner.outputs.uuid, 'vsphere') && inputs.destroy_runner == true }}
     needs: [create-runner, e2e]
-    runs-on: vsphere
+    runs-on: ${{ needs.create-runner.outputs.uuid }}
     steps:
       - name: Cleanup vsphere runner
         env:
