@@ -1,0 +1,21 @@
+vsphere_datastore_cluster = "NVMe-Cluster-Datastore"
+vsphere_datacenter = "PG Devlab"
+vsphere_network = "VM-Network"
+vsphere_resource_pool = "username"
+vsphere_folder = "username"
+template_name = "openSUSE-MicroOS-ContainerHost-251128"
+firmware = "efi"
+stack_name = "rancher-turtles-e2e-github-runner"
+nodes = 1
+node_memory = 16384
+node_cpus = 8
+node_disk_size = 100
+# The private key has to be stored on a machine from where you call tofu
+# Also its public ssh key part has to be stored in var.authorized_keys
+private_key_path = "/home/username/.ssh/id_rsa"
+authorized_keys = [
+    "ssh AAAA...",
+    "ssh BBBB..."
+]
+# Hash for "linux" password
+root_password_hash = "$6$ubxU6YmPQA6xUdhY$8B3dxeisleccpp.9nUmLZqK3z.karGVKP4zMFwry1/KpYGe86DCuS6pEcM/BwmUCfQmAPdv5WwZU19Fh50V87/"
