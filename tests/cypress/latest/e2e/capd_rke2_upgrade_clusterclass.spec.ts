@@ -128,13 +128,18 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
       })
 
       it('Check cluster & Resources status post-upgrade', () => {
-        // TODO: WranglerManagedCertificates check
         // Check Dockerprovider version is auto-upgraded
-        cy.exploreCluster('local');
-        cy.accesMenuSelection(['Workloads', 'Deployments']);
-        cy.setNamespace(capdProviderNS);
+        cy.checkCAPIProvider(capdProviderName);
         cy.contains(capdProviderVersion);
-        cy.namespaceReset();
+
+        // click the three-dots menu and click View YAML
+        cy.getBySel('sortable-table-0-action-button').click();
+        cy.contains('View YAML').click();
+        cy.get('.CodeMirror').then((editor) => {
+          // @ts-expect-error known error with CodeMirror
+          const text = editor[0].CodeMirror.getValue();
+          expect(text).to.include('WranglerManagedCertificates');
+        });
 
         // Check CAPI cluster is Active
         cy.searchCluster(clusterName);
