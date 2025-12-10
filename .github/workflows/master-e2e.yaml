@@ -335,8 +335,18 @@ jobs:
       - name: Make Turtles and Providers chart
         run: |
           if [[ ${{ inputs.turtles_dev_chart }} == true ]]; then
-            # HACK for disabling rendering of `systemDefaultRegisty` value in turtles chart which is set in Prime builds
-            sed -i 's#{{- printf "%s\/" \.Values\.global\.cattle\.systemDefaultRegistry -}}#{{- "" -}}#g' charts/rancher-turtles/templates/_helpers.tpl
+            if [[ "${{ env.RANCHER_VERSION }}" =~ "prime" ]]; then
+              # Inject custom image into turtles chart deployment.yaml without using the system_default_registry prefix
+              # This is needed on Prime because the local registry is not accessible via system_default_registry
+              # Sed command uses range from `if` to `end` to replace templating by actual image
+              sed -i "/{{- if (contains \"sha256:\" .Values.image.tag) }}/,/{{- end}}/c\\        image: localhost:5000/rancher/turtles:v${{ env.TAG }}" \
+                charts/rancher-turtles/templates/deployment.yaml
+              # Verify the patch worked
+              if ! grep -q "image: localhost:5000/rancher/turtles:v${{ env.TAG }}" charts/rancher-turtles/templates/deployment.yaml; then
+                echo "ERROR: Failed to patch deployment.yaml with custom turtles image"
+                exit 1
+              fi
+            fi
 
             TARGET_BUILD=${{ env.BUILD_TYPE }} TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} make e2e-image-build
             RELEASE_TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} CONTROLLER_IMAGE_VERSION=v${{ env.TAG }} make build-chart # verify-gen
