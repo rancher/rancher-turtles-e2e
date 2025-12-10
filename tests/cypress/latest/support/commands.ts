@@ -599,7 +599,7 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
     if (isRancherManagerVersion('>=2.13')) {
       turtlesChartSelector = devChart ? '"item-card-cluster/chartmuseum-repo/rancher-turtles"' : '"item-card-cluster/rancher-charts/rancher-turtles"';
     } else if (isRancherManagerVersion('2.12')) {
-      turtlesChartSelector = devChart && upgradeTest ? '"item-card-cluster/turtles-chart/rancher-turtles"' : devChart ? '"item-card-cluster/chartmuseum-repo/rancher-turtles"' : '"item-card-cluster/turtles-chart/rancher-turtles"';
+      turtlesChartSelector = devChart && !upgradeTest ? '"item-card-cluster/chartmuseum-repo/rancher-turtles"' : '"item-card-cluster/turtles-chart/rancher-turtles"';
     } else {
       turtlesChartSelector = '"select-icon-grid-Rancher Turtles - the Cluster API Extension"';
     }
