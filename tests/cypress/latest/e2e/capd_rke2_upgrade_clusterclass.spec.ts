@@ -35,21 +35,16 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
   });
 
   context('Pre-Upgrade Resources and Cluster creation', () => {
-    if (isRancherManagerVersion('2.11')) {
+    if (isRancherManagerVersion('2.12')) {
       it('Create & Setup the namespace for importing', () => {
-        cy.createNamespace([vars.capiClustersNS, capdProviderNS]);
+        cy.createNamespace([vars.capiClustersNS, vars.capiClassesNS, capdProviderNS]);
         cy.burgerMenuOperate('open');
         cy.namespaceAutoImport('Disable');
       })
 
-      it('Create Docker CAPIProvider & Calico CNI HelmApp', () => {
-        // Calico CNI Helmapp for v2.11 with keepResources: true
-        cy.readFile('./fixtures/calico-cni-helmapp.yaml').then((data) => {
-          cy.importYAML(data, vars.capiClustersNS)
-        })
-        // Navigate to `local` cluster, More Resources > Fleet > HelmApps and ensure the charts are present.
-        cy.reload();
-        cy.checkFleetHelmApps(['calico-cni']);
+      it('Create Docker CAPIProvider & Calico CNI HelmOp', () => {
+        // Calico CNI HelmOp
+        cy.addFleetGitRepo('calico-cni', vars.turtlesRepoUrl, vars.branch, 'examples/applications/cni/calico', vars.capiClustersNS)
 
         // Docker rke2 lb-config
         cy.burgerMenuOperate('open');
@@ -78,6 +73,8 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
       it('Import CAPD RKE2 class-clusters using YAML', () => {
         cy.readFile('./fixtures/docker/capd-rke2-class-cluster.yaml').then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
+          data = data.replace(/replace_rke2_version/g, vars.rke2Version)
+          data = data.replace(/replace_kind_version/g, vars.kindVersion)
           cy.importYAML(data, vars.capiClustersNS)
         });
 
@@ -102,24 +99,39 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
         // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
         cy.checkCAPIClusterActive(clusterName, timeout);
       })
+
+      it('Pre-upgrade steps for migration', () => {
+        // Uninstall Rancher Turtles chart
+        cy.deleteKubernetesResource('local', ['Apps', 'Installed Apps'], 'rancher-turtles', turtlesNamespace);
+        cy.contains(new RegExp('"rancher-turtles" uninstalled'), {timeout: timeout}).should('be.visible');
+        cy.get('.closer').click();
+        
+        // Patch CRDs with cattle-turtles-system namespace
+        ['capiproviders.turtles-capi.cattle.io', 'clusterctlconfigs.turtles-capi.cattle.io'].forEach((resourceName) => {
+          const resourceKind = 'CustomResourceDefinitions';
+          const namespace = turtlesNamespace;
+          const patch = {metadata: {annotations: {'meta.helm.sh/release-namespace': 'cattle-turtles-system'}}};
+          cy.burgerMenuOperate('open');
+          cy.patchYamlResource('local', namespace, resourceKind, resourceName, patch);
+        })
+      })
     }
   })
 
   context('Post-Upgrade Cluster checks and Resources cleanup', () => {
-    if (isRancherManagerVersion('2.12')) {
-      it('Upgrade turtles chart and check cluster status', () => {
-        // This upgrades Turtles chart from v0.21.0 to turtles dev chart on Rancher v2.12
-        cy.checkChart('local', 'Upgrade', 'Rancher Turtles', turtlesNamespace, '');
+    // Migration script was ran to adopt provider resources into new Helm release (master-e2e.yaml)
 
-        // Check CAPI operator deployment to be removed
+    if (isRancherManagerVersion('2.13')) {
+      it('Create Fleet Provider using provider charts', () => {
+        // Install Rancher Turtles Certified Providers chart with default values
+        cy.checkChart('local', 'Install', 'Rancher Turtles Certified Providers', turtlesNamespace, undefined, undefined, false, undefined);
+      })
+
+      it('Check cluster & Resources status post-upgrade', () => {
+        // TODO: WranglerManagedCertificates check
+        // Check Dockerprovider version is auto-upgraded
         cy.exploreCluster('local');
         cy.accesMenuSelection(['Workloads', 'Deployments']);
-        cy.typeInFilter('rancher-turtles-cluster-api-operator');
-        cy.getBySel('sortable-cell-0-1').should('not.exist');
-        cy.accesMenuSelection(['Workloads', 'Pods']);
-        cy.waitForAllRowsInState('Running', 300000);
-
-        // Check Dockerprovider version is auto-upgraded
         cy.setNamespace(capdProviderNS);
         cy.contains(capdProviderVersion);
         cy.namespaceReset();
@@ -128,13 +140,6 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
         cy.searchCluster(clusterName);
         cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
         cy.checkCAPIClusterActive(clusterName, timeout);
-      })
-
-      it('Add Calico CNI fleet repo', () => {
-        // Calico CNI HelmOp for v2.12
-        cy.addFleetGitRepo('calico-cni', vars.turtlesRepoUrl, vars.branch, 'examples/applications/cni/calico', vars.capiClustersNS);
-        // Navigate to `local` cluster, More Resources > Fleet > HelmOps and ensure the charts are present.
-        cy.checkFleetHelmApps(['calico-cni']);
       })
 
       it('Install App on imported cluster', {retries: 1}, () => {
@@ -146,6 +151,8 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
       it("Scale up imported CAPD cluster by patching class-cluster yaml", () => {
         cy.readFile('./fixtures/docker/capd-rke2-class-cluster.yaml').then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
+          data = data.replace(/replace_rke2_version/g, vars.rke2Version)
+          data = data.replace(/replace_kind_version/g, vars.kindVersion)
           data = data.replace(/replicas: 2/g, 'replicas: 3')
           cy.importYAML(data, vars.capiClustersNS)
         });
@@ -171,9 +178,6 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
 
-        // Remove docker provider
-        cy.removeCAPIResource('Providers', capdProviderName);
-
         // Remove the cni repo
         cy.removeFleetGitRepo('calico-cni');
         // Remove the lb-config
@@ -182,6 +186,11 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
 
         // Cleanup other resources
         capdResourcesCleanup();
+
+        // Uninstall Rancher Turtles providers chart
+        cy.deleteKubernetesResource('local', ['Apps', 'Installed Apps'], 'rancher-turtles-providers', turtlesNamespace);
+        cy.get('.closer').click();
+
         // Remove namespaces
         cy.deleteNamespace([vars.capiClassesNS, vars.capiClustersNS, capdProviderNS]);
       })

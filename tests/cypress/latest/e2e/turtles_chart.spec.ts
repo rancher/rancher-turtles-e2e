@@ -56,8 +56,7 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
     })
   }
 
-
-  // Skip for 2.13, TODO: remove check  after turtles/issues/1811 is fixed
+  // Skip for 2.13
   if (isRancherManagerVersion('<=2.12')) {
     qase([2, 11],
       it('Install Turtles chart', {retries: 1}, () => {
@@ -67,8 +66,9 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
         }
 
         if (Cypress.env('grepTags') && (Cypress.env('grepTags')).includes('@upgrade')) {
-          // Required to validate turtles/issues/1395
-          turtlesVersion = '0.21.0'
+          cy.addRepository('turtles-chart', 'https://rancher.github.io/turtles/', 'http', 'none');
+          cy.burgerMenuOperate('open');
+          turtlesVersion = '0.24.3'
         }
         cy.checkChart('local', 'Install', 'Rancher Turtles', turtlesNamespace, turtlesVersion);
       })
