@@ -5,7 +5,7 @@ import * as randomstring from "randomstring";
 import {vars} from '~/support/variables';
 
 Cypress.config();
-describe('Create Azure RKE2 Cluster', {tags: '@short'}, () => {
+describe('Create Azure RKE2 Cluster', {tags: ['@short', '@upgrade']}, () => {
   let userID: string, ccID: string;
   let features = ['turtles']
   const timeout = vars.fullTimeout
