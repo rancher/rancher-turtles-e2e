@@ -463,7 +463,7 @@ jobs:
           cd tests && make start-cypress-tests
       - name: Upload Cypress screenshots
         if: failure()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: cypress-screenshots-${{ inputs.cluster_name }}
           path: tests/cypress/latest/screenshots
@@ -472,7 +472,7 @@ jobs:
       - name: Upload Cypress videos
         # Test run video is always captured, so this action uses "always()" condition
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: cypress-videos-${{ inputs.cluster_name }}
           path: tests/cypress/latest/videos
@@ -525,7 +525,7 @@ jobs:
           cd tests && make start-cypress-tests
       - name: Upload Cypress screenshots (after-upgrade)
         if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') && failure() }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: cypress-screenshots-after-upgrade-${{ inputs.cluster_name }}
           path: tests/cypress/latest/screenshots
@@ -534,7 +534,7 @@ jobs:
       - name: Upload Cypress videos (after-upgrade)
         # Test run video is always captured, so this action uses "always()" condition
         if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') && always() }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: cypress-videos-after-upgrade-${{ inputs.cluster_name }}
           path: tests/cypress/latest/videos
@@ -549,7 +549,7 @@ jobs:
           bash ${{ env.RANCHER_LOG_COLLECTOR }}
       - name: Upload cluster logs
         if: ${{ always() }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: support-logs
           path: ${{ github.workspace }}/logs/*
