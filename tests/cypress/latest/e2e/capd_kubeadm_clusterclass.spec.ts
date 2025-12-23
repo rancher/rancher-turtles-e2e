@@ -73,7 +73,7 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: '@short'}, () => {
     qase(94,
       it('Auto import child CAPD cluster', () => {
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-        cy.checkCAPIClusterProvisioned(clusterName, timeout);
+        cy.checkCAPIClusterProvisioned(clusterName, vars.fullTimeout);
 
         // Check child cluster is created and auto-imported
         // This is checked by ensuring the cluster is available in navigation menu
