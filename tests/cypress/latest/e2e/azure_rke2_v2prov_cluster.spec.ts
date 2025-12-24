@@ -35,7 +35,7 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@upgrade']}, () => {
       // Get the user id
       cy.getBySel('sortable-cell-0-1').then(($cell) => {
         userID = String($cell.text());
-        cy.log('User ID:', userID);
+        cy.task('log', `User ID: ${userID}`);
       });
 
       cy.burgerMenuOperate('open');
@@ -45,7 +45,7 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@upgrade']}, () => {
       // Get the CC id
       cy.getBySel('sortable-cell-0-0').then(($cell) => {
         ccID = $cell.text();
-        cy.log('Cloud credential ID:', ccID);
+        cy.task('log', `Cloud credential ID: ${ccID}`);
       });
     })
   })

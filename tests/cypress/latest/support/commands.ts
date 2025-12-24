@@ -19,7 +19,7 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import jsyaml from 'js-yaml';
 import yaml from 'js-yaml';
 import _ from 'lodash';
-import {isRancherManagerVersion, isPrimeChannel} from '~/support/utils';
+import {isPrimeChannel, isRancherManagerVersion} from '~/support/utils';
 
 // Generic commands
 // Go to specific Sub Menu from Access Menu
@@ -72,7 +72,7 @@ Cypress.Commands.add('clusterAutoImport', (clusterName, mode) => {
 // Command to create namespace
 Cypress.Commands.add('createNamespace', (namespaces: string[]) => {
   namespaces.forEach((namespace) => {
-    cy.log('Creating Namespace:', namespace);
+    cy.task('log', 'Creating Namespace:', namespace);
     cy.burgerMenuOperate('open');
     cy.contains('local')
       .click();
@@ -87,7 +87,7 @@ Cypress.Commands.add('createNamespace', (namespaces: string[]) => {
     cy.typeValue('Name', namespace);
     cy.clickButton('Create');
     cy.contains(new RegExp('Active.*' + namespace));
-    cy.log('Namespace created:', namespace);
+    cy.task('log', 'Namespace created:', namespace);
     cy.namespaceReset();
   })
 });
@@ -794,11 +794,11 @@ Cypress.Commands.add('searchCluster', (clusterName) => {
 // Command to remove cluster from Rancher
 Cypress.Commands.add('deleteCluster', (clusterName, timeout = 120000) => {
   cy.searchCluster(clusterName);
+  // If no cluster is found, tr.no-results will be present; ensure that this does not happen
+  cy.get("table.sortable-table tbody tr").should('not.have.class', 'no-results');
   cy.viewport(1920, 1080);
   cy.getBySel('sortable-table_check_select_all').click();
-  cy.getBySel('sortable-table-promptRemove').click();
-  cy.getBySel('prompt-remove-input').type(clusterName);
-  cy.getBySel('prompt-remove-confirm-button').click();
+  cy.getBySel('sortable-table-promptRemove').click({ctrlKey: true});
   cy.wait(2000); // needed for 2.12
   cy.contains(clusterName, {timeout: timeout}).should('not.exist');
 });
