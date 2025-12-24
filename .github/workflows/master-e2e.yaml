@@ -64,10 +64,6 @@ on:
       cert-manager_version:
         description: Version of cert-manager to use
         type: string
-      cluster_name:
-        description: Name of the management cluster (Rancher local cluster)
-        required: true
-        type: string
       destroy_runner:
         description: Destroy the auto-generated self-hosted runner
         default: true
@@ -236,7 +232,6 @@ jobs:
       RANCHER_USER: admin
       RANCHER_URL: https://${{ needs.create-runner.outputs.public_dns }}/dashboard
       CERT_MANAGER_VERSION: ${{ inputs.cert-manager_version }}
-      CLUSTER_NAME: ${{ inputs.cluster_name }}
       # Qase
       QASE_API_TOKEN: ${{ secrets.qase_api_token }}
       QASE_PROJECT_CODE: RT
@@ -465,7 +460,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v6
         with:
-          name: cypress-screenshots-${{ inputs.cluster_name }}
+          name: cypress-screenshots-${{ github.run_number }}
           path: tests/cypress/latest/screenshots
           retention-days: 7
           if-no-files-found: ignore
@@ -474,7 +469,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: cypress-videos-${{ inputs.cluster_name }}
+          name: cypress-videos-${{ github.run_number }}
           path: tests/cypress/latest/videos
           retention-days: 7
       - name: Store QASE_TESTOPS_RUN_ID for later use
@@ -527,7 +522,7 @@ jobs:
         if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') && failure() }}
         uses: actions/upload-artifact@v6
         with:
-          name: cypress-screenshots-after-upgrade-${{ inputs.cluster_name }}
+          name: cypress-screenshots-after-upgrade-${{ github.run_number }}
           path: tests/cypress/latest/screenshots
           retention-days: 7
           if-no-files-found: ignore
@@ -536,7 +531,7 @@ jobs:
         if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') && always() }}
         uses: actions/upload-artifact@v6
         with:
-          name: cypress-videos-after-upgrade-${{ inputs.cluster_name }}
+          name: cypress-videos-after-upgrade-${{ github.run_number }}
           path: tests/cypress/latest/videos
           retention-days: 7
       - name: Collect logs
