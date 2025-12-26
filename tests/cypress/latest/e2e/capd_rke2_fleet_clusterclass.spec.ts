@@ -65,7 +65,7 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
       // Get the cluster name by its prefix and use it across the test
       cy.getBySel('sortable-cell-0-1').then(($cell) => {
         clusterName = $cell.text();
-        cy.log('CAPI Cluster Name:', clusterName);
+        cy.task('log',`CAPI Cluster Name: ${clusterName}`);
       });
     })
 
@@ -94,17 +94,17 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
       // We install Logging chart instead of Monitoring, since this is relatively lightweight.
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
+
+    it('Remove imported CAPD cluster from Rancher Manager', {retries: 1}, () => {
+      // Delete the imported cluster
+      // Ensure that the provisioned CAPI cluster still exists
+      // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
+      importedRancherClusterDeletion(clusterName);
+    })
   })
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
-      it('Remove imported CAPD cluster from Rancher Manager', {retries: 1}, () => {
-        // Delete the imported cluster
-        // Ensure that the provisioned CAPI cluster still exists
-        // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
-        importedRancherClusterDeletion(clusterName);
-      })
-
       it('Delete the CAPD cluster', {retries: 1}, () => {
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout, clustersRepoName, true);

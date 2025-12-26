@@ -116,17 +116,17 @@ describe('Import CAPV Kubeadm Class-Cluster', {tags: '@vsphere'}, () => {
       // We install Logging chart instead of Monitoring, since this is relatively lightweight.
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
+
+    it('Remove imported CAPV cluster from Rancher Manager', {retries: 1}, () => {
+      // Delete the imported cluster
+      // Ensure that the provisioned CAPI cluster still exists
+      // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
+      importedRancherClusterDeletion(clusterName);
+    })
   })
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
-      it('Remove imported CAPV cluster from Rancher Manager', {retries: 1}, () => {
-        // Delete the imported cluster
-        // Ensure that the provisioned CAPI cluster still exists
-        // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
-        importedRancherClusterDeletion(clusterName);
-      })
-
       it('Delete the CAPV cluster', {retries: 1}, () => {
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout, clusterRepoName);

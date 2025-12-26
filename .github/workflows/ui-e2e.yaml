@@ -85,7 +85,6 @@ jobs:
       docker_registry_config: ${{ secrets.DOCKER_REGISTRY_CONFIG }}
     with:
       test_description: "UI - e2e tests with Standard K3s"
-      cluster_name: rancher-k3s-cluster
       destroy_runner: ${{ github.event_name == 'schedule' && true || inputs.destroy_runner }}
       rancher_version: ${{ inputs.rancher_version || 'head/2.13' }}
       qase_report: ${{ inputs.qase_report == true || (github.event_name == 'schedule' && true) }}
