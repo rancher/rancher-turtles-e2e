@@ -125,14 +125,12 @@ before(function () {
 
 beforeEach(function () {
   if (Cypress.env("ci")) {
-    cy.task('log', 'Running in GitHub Actions - checking previous test result');
     cy.readFile(resultFile).then((data) => {
       const content = yaml.load(data)
       const result = content['test_result']
       const stop_cypress = content['stop_cypress']
       const skip_all_tests = content['skip_all_tests']
       const run_delete_tests = content['run_delete_tests']
-      cy.task('log', 'Previous Test Result: ' + content);
       if (result == 'failed') {
         if (stop_cypress == 'true') {
           cy.task('log', 'Stopping test run - previous test(s) have failed')
@@ -140,7 +138,7 @@ beforeEach(function () {
         } else if (skip_all_tests == 'true') {
           // Skip tests if a setup test failed; in case cluster is created, do not skip if it is a @delete test
           if (run_delete_tests == 'true' && this.currentTest?.fullTitle?.().includes('[TEARDOWN]')) {
-            cy.task('log', 'Cluster was created; running delete tests for a proper cleanup.')
+            cy.task('log', 'CAPI Cluster was created; running delete tests for a proper cleanup.')
           } else {
             cy.task('log', 'A [SETUP]/[CLUSTER-IMPORT] test has failed - skipping rest of the tests.')
             this.skip();
