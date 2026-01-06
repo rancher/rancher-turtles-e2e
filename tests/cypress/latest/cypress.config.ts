@@ -80,6 +80,13 @@ export default defineConfig({
         //   process.stdout.write(`${key}=${value}\n`);
         // }
       });
+      // Register the 'log' task
+      on('task', {
+        log(message) {
+          console.log(message);
+          return null; // Tasks must return a value or null
+        },
+      });
       cypressGrepPlugin(config);
       return config;
     },
