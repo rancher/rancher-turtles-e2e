@@ -311,13 +311,13 @@ jobs:
             echo "TURTLES_BRANCH=release-0.24" >> ${GITHUB_ENV}
           fi
       - name: Check out rancher/turtles repo
-        if: ${{ inputs.turtles_dev_chart == true || contains(env.RANCHER_VERSION, '2.13') }}
+        if: ${{ inputs.turtles_dev_chart == true }}
         uses: actions/checkout@v6
         with:
           repository: ${{ env.TURTLES_REPO }}
           ref: ${{ env.TURTLES_BRANCH }}
       - name: Install Go
-        if: ${{ inputs.turtles_dev_chart == true || contains(env.RANCHER_VERSION, '2.13') }}
+        if: ${{ inputs.turtles_dev_chart == true }}
         uses: actions/setup-go@v6
         with:
           cache: false
@@ -328,29 +328,26 @@ jobs:
         run: |
           echo "TAG=$(date "+%Y.%m.%d")" >> ${GITHUB_ENV}
       - name: Make Turtles and Providers chart
+        if: ${{ inputs.turtles_dev_chart == true }}
         run: |
-          if [[ ${{ inputs.turtles_dev_chart }} == true ]]; then
-            if [[ "${{ env.RANCHER_VERSION }}" =~ "prime" ]]; then
-              # Inject custom image into turtles chart deployment.yaml without using the system_default_registry prefix
-              # This is needed on Prime because the local registry is not accessible via system_default_registry
-              # Sed command uses range from `if` to `end` to replace templating by actual image
-              sed -i "/{{- if (contains \"sha256:\" .Values.image.tag) }}/,/{{- end}}/c\\        image: localhost:5000/rancher/turtles:v${{ env.TAG }}" \
-                charts/rancher-turtles/templates/deployment.yaml
-              # Verify the patch worked
-              if ! grep -q "image: localhost:5000/rancher/turtles:v${{ env.TAG }}" charts/rancher-turtles/templates/deployment.yaml; then
-                echo "ERROR: Failed to patch deployment.yaml with custom turtles image"
-                exit 1
-              fi
+          if [[ "${{ env.RANCHER_VERSION }}" =~ "prime" ]]; then
+            # Inject custom image into turtles chart deployment.yaml without using the system_default_registry prefix
+            # This is needed on Prime because the local registry is not accessible via system_default_registry
+            # Sed command uses range from `if` to `end` to replace templating by actual image
+            sed -i "/{{- if (contains \"sha256:\" .Values.image.tag) }}/,/{{- end}}/c\\        image: localhost:5000/rancher/turtles:v${{ env.TAG }}" \
+              charts/rancher-turtles/templates/deployment.yaml
+            # Verify the patch worked
+            if ! grep -q "image: localhost:5000/rancher/turtles:v${{ env.TAG }}" charts/rancher-turtles/templates/deployment.yaml; then
+              echo "ERROR: Failed to patch deployment.yaml with custom turtles image"
+              exit 1
             fi
+          fi
 
-            TARGET_BUILD=${{ env.BUILD_TYPE }} TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} make e2e-image-build
-            RELEASE_TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} CONTROLLER_IMAGE_VERSION=v${{ env.TAG }} make build-chart # verify-gen
-            docker run -d -p 5000:5000 --name registry registry:2
-            docker push ${{ env.CONTROLLER_IMG }}:v${{ env.TAG }}
-          fi
-          if [[ "${{ env.RANCHER_VERSION }}" =~ "2.13" || "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
-            RELEASE_TAG=v${{ env.TAG }} make build-providers-chart
-          fi
+          TARGET_BUILD=${{ env.BUILD_TYPE }} TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} make e2e-image-build
+          RELEASE_TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} CONTROLLER_IMAGE_VERSION=v${{ env.TAG }} make build-chart # verify-gen
+          docker run -d -p 5000:5000 --name registry registry:2
+          docker push ${{ env.CONTROLLER_IMG }}:v${{ env.TAG }}
+          RELEASE_TAG=v${{ env.TAG }} make build-providers-chart
 
       - name: Clone, build and publish artificial system charts for 2.13
         if: ${{ inputs.turtles_dev_chart == true && contains(env.RANCHER_VERSION, '2.13') || contains(inputs.grep_test_by_tag, '@upgrade')}}
@@ -380,13 +377,11 @@ jobs:
           docker run --name git-http-backend -d -p 4080:80 -v /tmp/system-charts:/git ynohat/git-http-backend
 
       - name: Copy chart files
+        if: ${{ inputs.turtles_dev_chart == true }}
         run: |
-          if [[ ${{ inputs.turtles_dev_chart }} == true ]]; then
-            cp ${{ github.workspace }}/out/package/rancher-turtles-${{ env.TAG }}.tgz ${{ runner.temp }}
-          fi
-          if [[ "${{ env.RANCHER_VERSION }}" =~ "2.13" || "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
-            cp ${{ github.workspace }}/out/package/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ runner.temp }}
-          fi
+          cp ${{ github.workspace }}/out/package/rancher-turtles-${{ env.TAG }}.tgz ${{ runner.temp }}
+          cp ${{ github.workspace }}/out/package/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ runner.temp }}
+
       - name: Checkout
         uses: actions/checkout@v6
       - name: Install Go
@@ -395,14 +390,12 @@ jobs:
           cache: false
           go-version-file: tests/go.mod
       - name: Copy chart files for chartmuseum
+        if: ${{ inputs.turtles_dev_chart == true }}
         run: |
-          if [[ ${{ inputs.turtles_dev_chart }} == true ]]; then
-            cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
-          fi
-          if [[ "${{ env.RANCHER_VERSION }}" =~ "2.13" || "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
-            mkdir ${{ github.workspace }}/tests/assets/providers
-            cp ${{ runner.temp }}/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets/providers
-          fi
+          cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
+          mkdir ${{ github.workspace }}/tests/assets/providers
+          cp ${{ runner.temp }}/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets/providers
+
           if [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
             cp /tmp/migrate-providers-ownership.sh ${{ github.workspace }}/tests/assets/
           fi
@@ -436,6 +429,7 @@ jobs:
           echo "rm_image_version=${RM_IMAGE_VERSION}" >> ${GITHUB_OUTPUT}
           echo "rm_version=${{ env.RANCHER_VERSION }}" >> ${GITHUB_OUTPUT}
       - name: Install Chartmuseum
+        if: ${{ inputs.turtles_dev_chart == true }}
         run: cd tests && make e2e-install-chartmuseum
       - name: Setup node
         uses: actions/setup-node@v6
@@ -454,7 +448,9 @@ jobs:
             e2e/capd_rke2_upgrade_clusterclass.spec.ts
             ${{ env.SPECS }}
         run: |
-          export CHARTMUSEUM_REPO=http://${{ needs.create-runner.outputs.public_dns }}
+          if [ ${{ inputs.turtles_dev_chart }} == true ]; then
+            export CHARTMUSEUM_REPO=http://${{ needs.create-runner.outputs.public_dns }}
+          fi
           cd tests && make start-cypress-tests
       - name: Upload Cypress screenshots
         if: failure()
