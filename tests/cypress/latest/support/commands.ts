@@ -485,7 +485,7 @@ Cypress.Commands.add('addCloudCredsVMware', (name: string, vsphere_username: str
   cy.contains(name).should('be.visible');
 });
 
-Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: string, repositoryType: string, repositoryBranch: string) => {
+Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: string, repositoryType: 'oci' | 'http' | 'git', repositoryBranch: string) => {
   cy.contains('local')
     .click();
   cy.clickNavMenu(['Apps', 'Repositories'])
@@ -502,14 +502,22 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
   cy.contains('Repository: Create')
     .should('be.visible');
   cy.typeValue('Name', repositoryName);
-  if (repositoryType === 'git') {
-    cy.contains('Git repository')
-      .click();
-    cy.typeValue('Git Repo URL', repositoryURL);
-    cy.typeValue('Git Branch', repositoryBranch);
-  } else {
-    cy.typeValue('Index URL', repositoryURL);
+  switch (repositoryType) {
+    case "git":
+      cy.contains('Git repository')
+        .click();
+      cy.typeValue('Git Repo URL', repositoryURL);
+      cy.typeValue('Git Branch', repositoryBranch);
+      break;
+    case "oci":
+      cy.contains('OCI Repository').click();
+      cy.typeValue('OCI Repository Host URL', repositoryURL);
+      break;
+    case "http":
+      cy.typeValue('Index URL', repositoryURL);
+      break;
   }
+
   cy.clickButton('Create');
   // Make sure the repo is active before leaving
   // Always press Refresh button as workaround for https://github.com/rancher/rancher/issues/49671
@@ -550,7 +558,7 @@ function checkApiStatus (retries = 20) {
 Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace, version, questions, refreshRepo = false, modifyYAMLOperation) => {
 
   const isUpdateOperation = operation == 'Update'
-  const turtlesChart = chartName == 'Rancher Turtles'
+
 
   // the 'Update' operation has been renamed to 'Edit' in 2.13.
   if (isRancherManagerVersion('>=2.13') && isUpdateOperation) {
@@ -590,6 +598,7 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
     cy.typeInFilter(chartName);
   }
   let chartSelector = isRancherManagerVersion('>=2.12') ? 'app-chart-cards-container' : 'chart-selection-grid';
+  const turtlesChart = chartName == 'Rancher Turtles'
   if (turtlesChart) {
     let turtlesChartSelector: string;
     const devChart = Cypress.env('turtles_dev_chart')
@@ -604,6 +613,13 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
       turtlesChartSelector = '"select-icon-grid-Rancher Turtles - the Cluster API Extension"';
     }
     chartSelector = turtlesChartSelector
+  }
+
+  const turtlesProvidersChart = chartName == 'Rancher Turtles Certified Providers'
+  // for 2.13 we use an external repo to install providers chart, and for 2.12 there is no need to install it.
+  if (turtlesProvidersChart && isRancherManagerVersion('>=2.13')) {
+    const devChart = Cypress.env('turtles_dev_chart')
+    chartSelector = devChart ? '"item-card-cluster/chartmuseum-repo/rancher-turtles-providers"' : '"item-card-cluster/turtles-providers-chart/rancher-turtles-providers"';
   }
 
   cy.getBySel(chartSelector).within(() => {
