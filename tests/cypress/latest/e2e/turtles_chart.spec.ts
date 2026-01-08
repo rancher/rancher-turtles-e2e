@@ -65,6 +65,7 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
         cy.task('log', "Adding turtles chart repo");
         cy.addRepository('turtles-chart', 'https://rancher.github.io/turtles/', 'http', 'none');
         if (isUpgrade) {
+          cy.burgerMenuOperate('open');
           cy.task('log', "Adding turtles-providers-chart repo");
           cy.addRepository('turtles-providers-chart', 'oci://registry.suse.com/rancher/charts/rancher-turtles-providers', 'oci', 'none')
         }
