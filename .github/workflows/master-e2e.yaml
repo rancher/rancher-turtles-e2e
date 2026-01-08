@@ -404,10 +404,10 @@ jobs:
           cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
           mkdir ${{ github.workspace }}/tests/assets/providers
           cp ${{ runner.temp }}/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets/providers
-
-          if [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
-            cp /tmp/migrate-providers-ownership.sh ${{ github.workspace }}/tests/assets/
-          fi
+      # Copy migration script from tmp to r/rancher-turtles-e2e workspace
+      - name: Copy Migration Script to r/rancher-turtles-e2e workspace
+        if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') }}
+        run: cp /tmp/migrate-providers-ownership.sh ${{ github.workspace }}/tests/assets/
       - name: Inject kube-vip controlplane IP for vsphere into capv-helm-values.yaml
         if: contains(needs.create-runner.outputs.uuid, 'vsphere')
         run: |
