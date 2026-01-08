@@ -56,13 +56,17 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
 
   if (isRancherManagerVersion("<=2.12")) {
     it("Add turtles GitRepo", () => {
-      if (devChart && !isUpgrade) {
+      if (devChart) {
         cy.task('log', "Adding turtles dev chart repo");
         expect(chartMuseumRepo, "checking chartmuseum repo").to.not.be.empty;
         cy.addRepository('chartmuseum-repo', `${chartMuseumRepo}:8080`, 'http', 'none');
       } else {
         cy.task('log', "Adding turtles chart repo");
         cy.addRepository('turtles-chart', 'https://rancher.github.io/turtles/', 'http', 'none');
+        if (isUpgrade) {
+          cy.task('log', "Adding turtles-providers-chart repo");
+          cy.addRepository('turtles-providers-chart', 'oci://registry.suse.com/rancher/charts/rancher-turtles-providers', 'oci', 'none')
+        }
       }
     })
 

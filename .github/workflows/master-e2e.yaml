@@ -516,6 +516,7 @@ jobs:
           RANCHER_PASSWORD: ${{ secrets.rancher_password }}
           QASE_TESTOPS_RUN_ID: ${{ steps.qase_run_id.outputs.qase_run_id }}
           SPEC: |
+            e2e/turtles_chart.spec.ts 
             e2e/capd_rke2_upgrade_clusterclass.spec.ts
             ${{ env.COMMON_SPECS }}
         run: |
