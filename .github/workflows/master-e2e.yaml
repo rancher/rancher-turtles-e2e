@@ -297,7 +297,7 @@ jobs:
         run: |
           if [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
             # Required for upgrade/migration tests
-            echo "RANCHER_VERSION=latest/2.12.3" >> ${GITHUB_ENV}
+            echo "RANCHER_VERSION=prime/2.12.5" >> ${GITHUB_ENV}
             echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> $GITHUB_ENV
             echo "SPECS=" >> ${GITHUB_ENV}
           else
@@ -484,7 +484,7 @@ jobs:
         id: rancher_upgrade
         if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:
-          RANCHER_VERSION: head/2.13
+          RANCHER_VERSION: prime/2.13.1 #TODO: Use head/2.13
           KUBECONFIG: /etc/rancher/k3s/k3s.yaml
           PUBLIC_DNS: ${{ needs.create-runner.outputs.public_dns }}
         run: cd tests && make e2e-upgrade-rancher

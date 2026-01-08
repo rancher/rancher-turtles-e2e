@@ -615,6 +615,11 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
   cy.contains('Charts: ' + chartName);
 
   if (version && version != "") {
+    cy.get('body').invoke('text').then((bodyText) => {
+      if (bodyText.includes('Show More')) {
+        cy.contains('Show More').click();
+      }
+    });
     cy.contains(version).click();
     cy.url().should("contain", version)
   }
