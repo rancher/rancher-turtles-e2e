@@ -56,7 +56,7 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
 
   if (isRancherManagerVersion("<=2.12")) {
     it("Add turtles GitRepo", () => {
-      if (devChart) {
+      if (devChart && !isUpgrade) {
         cy.task('log', "Adding turtles dev chart repo");
         expect(chartMuseumRepo, "checking chartmuseum repo").to.not.be.empty;
         cy.addRepository('chartmuseum-repo', `${chartMuseumRepo}:8080`, 'http', 'none');
