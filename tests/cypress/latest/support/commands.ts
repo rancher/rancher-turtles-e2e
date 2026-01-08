@@ -102,7 +102,7 @@ Cypress.Commands.add('deleteNamespace', (namespaces: string[]) => {
 // Command to set namespace selection
 Cypress.Commands.add('setNamespace', (namespace, namespaceID) => {
   const nsID: string = namespaceID || (namespace.startsWith('Project:')) ? '' : `ns_${namespace}`
-  cy.getBySel('namespaces-dropdown', {timeout: 18000}).trigger('click');
+  cy.getBySel('namespaces-dropdown', {timeout: 18000}).click();
   cy.get('.ns-clear').click();
   cy.get('.ns-options').within(() => {
     if (nsID != '') {
@@ -1120,12 +1120,12 @@ Cypress.Commands.add('verifyResourceCount', (clusterName, resourcePath, resource
 });
 
 // Command to verify CAPIProvider image registry
-Cypress.Commands.add('verifyCAPIProviderImage', (providerName, providerNamespace) => {
+Cypress.Commands.add('verifyCAPIProviderImage', (providerNamespace) => {
   const buildType = Cypress.env('turtles_build_type');
   const devChart = Cypress.env('turtles_dev_chart');
   let providerImageRegistry: string;
 
-  if (providerName === 'docker') {
+  if (providerNamespace == 'capd-system') {
     providerImageRegistry = 'gcr.io/k8s-staging-cluster-api';
   } else {
     if (isRancherManagerVersion('>=2.13')) {
@@ -1137,8 +1137,13 @@ Cypress.Commands.add('verifyCAPIProviderImage', (providerName, providerNamespace
         // dev=false - choose registry based on isPrimeChannel flag
         providerImageRegistry = isPrimeChannel() ? 'registry.rancher.com/rancher' : 'registry.k8s.io/cluster-api';
       }
+    // v2.12 checks
     } else {
-      providerImageRegistry = 'registry.suse.com/rancher';
+      if (providerNamespace.includes('kubeadm')) {
+        providerImageRegistry = 'registry.k8s.io/cluster-api';
+      } else {
+        providerImageRegistry = 'registry.suse.com/rancher';
+      }
     }
   }
 
