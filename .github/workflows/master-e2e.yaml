@@ -310,8 +310,11 @@ jobs:
           else
             echo "TURTLES_BRANCH=release-0.24" >> ${GITHUB_ENV}
           fi
+
+      # Checkout into r/turtles repo if dev=true to build turtles and providers chart;
+      # or if it is an upgrade test, then to copy the provider migration script
       - name: Check out rancher/turtles repo
-        if: ${{ inputs.turtles_dev_chart == true }}
+        if: ${{ inputs.turtles_dev_chart == true || contains(inputs.grep_test_by_tag, '@upgrade') }}
         uses: actions/checkout@v6
         with:
           repository: ${{ env.TURTLES_REPO }}
@@ -323,10 +326,12 @@ jobs:
           cache: false
           go-version-file: go.mod
 
-      # This step builds latest turtles chart and pushes latest turtles docker image to local docker registry
       - name: Set date variable
         run: |
           echo "TAG=$(date "+%Y.%m.%d")" >> ${GITHUB_ENV}
+
+      # This step builds latest turtles chart and pushes latest turtles docker image to local docker registry
+      # and build providers chart to push to chartmuseum in a later step
       - name: Make Turtles and Providers chart
         if: ${{ inputs.turtles_dev_chart == true }}
         run: |
@@ -350,7 +355,7 @@ jobs:
           RELEASE_TAG=v${{ env.TAG }} make build-providers-chart
 
       - name: Clone, build and publish artificial system charts for 2.13
-        if: ${{ inputs.turtles_dev_chart == true && contains(env.RANCHER_VERSION, '2.13') || contains(inputs.grep_test_by_tag, '@upgrade')}}
+        if: ${{ inputs.turtles_dev_chart == true && contains(env.RANCHER_VERSION, '2.13') }}
         run: |
           # Install yq if not present
           if ! command -v yq >/dev/null 2>&1; then
@@ -369,13 +374,17 @@ jobs:
           chmod +x scripts/build-local-rancher-charts.sh
           ./scripts/build-local-rancher-charts.sh
 
+          # Note allow port tcp/4080 by a firewall rule on GCP
+          docker run --name git-http-backend -d -p 4080:80 -v /tmp/system-charts:/git ynohat/git-http-backend
+
+      - name: Copy Migration Script (to be run after an upgrade from <=2.12 to >=2.13)
+        if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') }}
+        run: |
           # Migration script from rancher/turtles
           cp scripts/migrate-providers-ownership.sh /tmp
           chmod +x /tmp/migrate-providers-ownership.sh
 
-          # Note allow port tcp/4080 by a firewall rule on GCP
-          docker run --name git-http-backend -d -p 4080:80 -v /tmp/system-charts:/git ynohat/git-http-backend
-
+      # Copy chart files from turtles repo to local system/runner
       - name: Copy chart files
         if: ${{ inputs.turtles_dev_chart == true }}
         run: |
