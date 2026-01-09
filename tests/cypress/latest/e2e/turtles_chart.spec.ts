@@ -56,17 +56,23 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
 
   if (isRancherManagerVersion("<=2.12")) {
     it("Add turtles and turtles-providers GitRepo", () => {
-      if (devChart && !isUpgrade) {
-        // For upgrade test, dev=true refers to >=2.13 build; we do not install dev version of <=2.12;
+      if (devChart) {
         cy.task('log', "Adding turtles dev chart repo");
         expect(chartMuseumRepo, "checking chartmuseum repo").to.not.be.empty;
         cy.addRepository('chartmuseum-repo', `${chartMuseumRepo}:8080`, 'http', 'none');
+        if (isUpgrade) {
+          // For <=2.12, dev=true, and upgrade test, we will install turtles from standard chart repo;
+          // dev=true is only applicable for 2.13 or version test is upgrading to.
+          cy.burgerMenuOperate('open');
+          cy.task('log', "Adding turtles chart repo for upgrade test");
+          cy.addRepository('turtles-chart', 'https://rancher.github.io/turtles/', 'http', 'none');
+        }
       } else {
         cy.task('log', "Adding turtles chart repo");
         cy.addRepository('turtles-chart', 'https://rancher.github.io/turtles/', 'http', 'none');
         if (isUpgrade) {
           cy.burgerMenuOperate('open');
-          cy.task('log', "Adding turtles-providers-chart repo");
+          cy.task('log', "Adding turtles-providers-chart repo for upgrade test");
           cy.addRepository('turtles-providers-chart', 'oci://registry.suse.com/rancher/charts/rancher-turtles-providers', 'oci', 'none')
         }
       }
