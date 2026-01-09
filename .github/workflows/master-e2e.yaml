@@ -331,11 +331,10 @@ jobs:
           echo "TAG=$(date "+%Y.%m.%d")" >> ${GITHUB_ENV}
 
       # This step builds latest turtles chart and pushes latest turtles docker image to local docker registry
-      # and build providers chart to push to chartmuseum in a later step
-      - name: Make Turtles and Providers chart
+      - name: Make Turtles chart
         if: ${{ inputs.turtles_dev_chart == true }}
         run: |
-          if [[ "${{ env.RANCHER_VERSION }}" =~ "prime" ]]; then
+          if [[ "${{ env.RANCHER_VERSION }}" =~ "prime/2.13" ]]; then
             # Inject custom image into turtles chart deployment.yaml without using the system_default_registry prefix
             # This is needed on Prime because the local registry is not accessible via system_default_registry
             # Sed command uses range from `if` to `end` to replace templating by actual image
@@ -352,7 +351,11 @@ jobs:
           RELEASE_TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} CONTROLLER_IMAGE_VERSION=v${{ env.TAG }} make build-chart # verify-gen
           docker run -d -p 5000:5000 --name registry registry:2
           docker push ${{ env.CONTROLLER_IMG }}:v${{ env.TAG }}
-          RELEASE_TAG=v${{ env.TAG }} make build-providers-chart
+
+      # Build providers chart to push to chartmuseum in a later step
+      - name: Make Turtles Providers Chart
+        if: ${{ inputs.turtles_dev_chart == true && contains(env.RANCHER_VERSION, '2.13') }}
+        run: RELEASE_TAG=v${{ env.TAG }} make build-providers-chart
 
       - name: Clone, build and publish artificial system charts for 2.13
         if: ${{ inputs.turtles_dev_chart == true && contains(env.RANCHER_VERSION, '2.13') }}
@@ -385,11 +388,14 @@ jobs:
           chmod +x /tmp/migrate-providers-ownership.sh
 
       # Copy chart files from turtles repo to local system/runner
-      - name: Copy chart files
+      - name: Copy turtles chart files
         if: ${{ inputs.turtles_dev_chart == true }}
         run: |
           cp ${{ github.workspace }}/out/package/rancher-turtles-${{ env.TAG }}.tgz ${{ runner.temp }}
-          cp ${{ github.workspace }}/out/package/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ runner.temp }}
+
+      - name: Copy Turtles Providers chart files
+        if: ${{ inputs.turtles_dev_chart == true && contains(env.RANCHER_VERSION, '2.13' ) }}
+        run: cp ${{ github.workspace }}/out/package/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ runner.temp }}
 
       - name: Checkout
         uses: actions/checkout@v6
@@ -398,10 +404,13 @@ jobs:
         with:
           cache: false
           go-version-file: tests/go.mod
-      - name: Copy chart files for chartmuseum
+      - name: Copy turtles chart files for chartmuseum
         if: ${{ inputs.turtles_dev_chart == true }}
         run: |
           cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
+      - name: Copy turtles providers chart files for chartmuseum
+        if: ${{ inputs.turtles_dev_chart == true && contains(env.RANCHER_VERSION, '2.13') }}
+        run: |
           mkdir ${{ github.workspace }}/tests/assets/providers
           cp ${{ runner.temp }}/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets/providers
       # Copy migration script from tmp to r/rancher-turtles-e2e workspace
