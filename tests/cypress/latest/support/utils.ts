@@ -42,3 +42,5 @@ export const getClusterName = (className: string): string => {
 }
 
 export const turtlesNamespace = isRancherManagerVersion('>=2.13') ? 'cattle-turtles-system' : 'rancher-turtles-system'
+
+export const capiNamespace = isRancherManagerVersion('>=2.13') ? 'cattle-capi-system' : 'capi-system'
