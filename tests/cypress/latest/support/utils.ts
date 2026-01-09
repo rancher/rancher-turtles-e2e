@@ -42,3 +42,5 @@ export const getClusterName = (className: string): string => {
 }
 
 export const turtlesNamespace = isRancherManagerVersion('>=2.13') ? 'cattle-turtles-system' : 'rancher-turtles-system'
+
+export const isUpgrade = Cypress.env('grepTags') && (Cypress.env('grepTags')).includes('@upgrade')
