@@ -354,11 +354,11 @@ jobs:
 
       # Build providers chart to push to chartmuseum in a later step
       - name: Make Turtles Providers Chart
-        if: ${{ inputs.turtles_dev_chart == true && contains(env.RANCHER_VERSION, '2.13') || contains(inputs.grep_test_by_tag, '@upgrade') }}
+        if: ${{ inputs.turtles_dev_chart == true && (contains(env.RANCHER_VERSION, '2.13') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
         run: RELEASE_TAG=v${{ env.TAG }} make build-providers-chart
 
       - name: Clone, build and publish artificial system charts for 2.13
-        if: ${{ inputs.turtles_dev_chart == true && contains(env.RANCHER_VERSION, '2.13') || contains(inputs.grep_test_by_tag, '@upgrade') }}
+        if: ${{ inputs.turtles_dev_chart == true && (contains(env.RANCHER_VERSION, '2.13') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
         run: |
           # Install yq if not present
           if ! command -v yq >/dev/null 2>&1; then
@@ -394,7 +394,7 @@ jobs:
           cp ${{ github.workspace }}/out/package/rancher-turtles-${{ env.TAG }}.tgz ${{ runner.temp }}
 
       - name: Copy Turtles Providers chart files
-        if: ${{ inputs.turtles_dev_chart == true && contains(env.RANCHER_VERSION, '2.13') || contains(inputs.grep_test_by_tag, '@upgrade') }}
+        if: ${{ inputs.turtles_dev_chart == true && (contains(env.RANCHER_VERSION, '2.13') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
         run: cp ${{ github.workspace }}/out/package/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ runner.temp }}
 
       - name: Checkout
@@ -409,7 +409,7 @@ jobs:
         run: |
           cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
       - name: Copy turtles providers chart files for chartmuseum
-        if: ${{ inputs.turtles_dev_chart == true && contains(env.RANCHER_VERSION, '2.13') || contains(inputs.grep_test_by_tag, '@upgrade') }}
+        if: ${{ inputs.turtles_dev_chart == true && (contains(env.RANCHER_VERSION, '2.13') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
         run: |
           mkdir ${{ github.workspace }}/tests/assets/providers
           cp ${{ runner.temp }}/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets/providers
