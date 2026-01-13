@@ -19,7 +19,7 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import jsyaml from 'js-yaml';
 import yaml from 'js-yaml';
 import _ from 'lodash';
-import {isPrimeChannel, isRancherManagerVersion} from '~/support/utils';
+import {capiNamespace, isPrimeChannel, isRancherManagerVersion} from '~/support/utils';
 
 // Generic commands
 // Go to specific Sub Menu from Access Menu
@@ -1129,13 +1129,18 @@ Cypress.Commands.add('verifyCAPIProviderImage', (providerNamespace) => {
     providerImageRegistry = 'gcr.io/k8s-staging-cluster-api';
   } else {
     if (isRancherManagerVersion('>=2.13')) {
-      if (devChart) {
-        providerImageRegistry = buildType === 'prime'
-          ? 'registry.rancher.com/rancher'
-          : 'registry.k8s.io/cluster-api';
-      } else {
-        // dev=false - choose registry based on isPrimeChannel flag
-        providerImageRegistry = isPrimeChannel() ? 'registry.rancher.com/rancher' : 'registry.k8s.io/cluster-api';
+      if (devChart && buildType == 'prime') {
+        providerImageRegistry = 'registry.rancher.com/rancher'
+      } else if (isPrimeChannel()) {
+        providerImageRegistry = 'registry.rancher.com/rancher'
+      } else { // community
+        if (providerNamespace.includes('rke2') || providerNamespace.includes('fleet')) {
+          providerImageRegistry = 'ghcr.io/rancher';
+        } else if (providerNamespace.includes(capiNamespace)) {
+          providerImageRegistry = 'rancher/cluster-api-controller';
+        } else {
+          providerImageRegistry = 'registry.k8s.io/cluster-api';
+        }
       }
     // v2.12 checks
     } else {
