@@ -480,11 +480,14 @@ jobs:
             QASE_TESTOPS_RUN_ID=$(cat tests/cypress/latest/QASE_TESTOPS_RUN_ID.txt)
             echo "qase_run_id=${QASE_TESTOPS_RUN_ID}" >> ${GITHUB_OUTPUT}
           fi
+      - name: Set Rancher Manager Upgrade version
+        if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') }}
+        run: |
+          echo "RANCHER_VERSION=prime/2.13.1" >> ${GITHUB_ENV}
       - name: Upgrade Rancher Manager
-        id: rancher_upgrade
         if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:
-          RANCHER_VERSION: prime/2.13.1 #TODO: Use head/2.13
+          RANCHER_VERSION: ${{ env.RANCHER_VERSION }} #TODO: Use head/2.13
           KUBECONFIG: /etc/rancher/k3s/k3s.yaml
           PUBLIC_DNS: ${{ needs.create-runner.outputs.public_dns }}
         run: cd tests && make e2e-upgrade-rancher
@@ -507,7 +510,7 @@ jobs:
       - name: Cypress tests - Upgraded Rancher
         if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:
-          RANCHER_VERSION: ${{ steps.upgraded_component.outputs.rm_upgraded_image_version }}
+          RANCHER_VERSION: ${{ env.RANCHER_VERSION }}
           RANCHER_PASSWORD: ${{ secrets.rancher_password }}
           QASE_TESTOPS_RUN_ID: ${{ steps.qase_run_id.outputs.qase_run_id }}
           SPEC: |
@@ -585,6 +588,7 @@ jobs:
           fi
           if [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
             echo "### Rancher Manager Upgrade Information" >> ${GITHUB_STEP_SUMMARY}
+            echo "Rancher Manager Upgraded Version: ${{ steps.upgraded_component.outputs.rm_upgraded_version }}" >> ${GITHUB_STEP_SUMMARY}
             echo "Rancher Manager Upgraded Image: ${{ steps.upgraded_component.outputs.rm_upgraded_image_version }}" >> ${GITHUB_STEP_SUMMARY}
           fi
           echo "### Kubernetes" >> ${GITHUB_STEP_SUMMARY}
