@@ -61,7 +61,8 @@ declare global {
       addCloudCredsGCP(name: string, gcpCredentials: string): Chainable<Element>;
       addCloudCredsAzure(name: string, clientID: string, clientSecret: string, subscriptionID: string): Chainable<Element>;
       addCloudCredsVMware(name: string, vsphere_username: string, vsphere_password: string, vsphere_server: string, vsphere_server_port: string): Chainable<Element>;
-      addRepository(repositoryName: string, repositoryURL: string, repositoryType: string, repositoryBranch: string): Chainable<Element>;
+
+      addRepository(repositoryName: string, repositoryURL: string, repositoryType: 'oci' | 'http' | 'git', repositoryBranch: string): Chainable<Element>;
 
       typeInFilter(text: string, selector?: string): Chainable<Element>;
       goToHome(): Chainable<Element>;
