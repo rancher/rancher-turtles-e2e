@@ -4,6 +4,8 @@ metadata:
   name: replace_cluster_name
   labels:
     cni: calico
+  annotations:
+    cluster-api.cattle.io/cluster-description: "This is a custom description of Rancher Cluster"
 spec:
   clusterNetwork:
     pods:
