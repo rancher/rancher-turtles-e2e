@@ -31,3 +31,18 @@
 5. Do not run the runner using `run.sh`.
 6. Install and start the GitHub runner as a systemd service: `sudo ./svc.sh install` and `sudo ./svc.sh start`.
 7. Return to the runners page and verify the runner is registered and its state is **Idle**.
+
+## Extra manual steps for rancher/turtles runners
+1. Install kind by `go install sigs.k8s.io/kind@latest`
+2. Install helm by `curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash`
+3. Install kubectl by using kuberlr:
+    - `curl -L https://github.com/flavio/kuberlr/releases/download/v0.6.1/kuberlr_0.6.1_linux_amd64.tar.gz -o ~/kuberlr_0.6.1_linux_amd64.tar.gz`
+    - `tar xf kuberlr_0.6.1_linux_amd64.tar.gz`
+    - `cd kuberlr_0.6.1_linux_amd64/`
+    - `sudo mv kuberlr /usr/local/bin/`
+    - `cd /usr/local/bin/`
+    - `sudo ln -s $PWD/kuberlr $PWD/kubectl`
+4. Install clusterctl by:
+    - `curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.10.10/clusterctl-linux-amd64 -o ~/clusterctl`
+    - `chmod +x ~/clusterctl`
+    - `sudo mv ~/clusterctl /usr/local/bin/`
