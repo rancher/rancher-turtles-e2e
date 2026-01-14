@@ -30,6 +30,11 @@ export const isPrimeChannel = (): boolean => {
   return Cypress.env("rancher_version").includes('prime');
 }
 
+// Check if Rancher comes from pre-release Prime channel
+export const isPrePrimeChannel = (): boolean => {
+  return Cypress.env("rancher_version").includes('prime-alpha') || Cypress.env("rancher_version").includes('prime-rc');
+}
+
 export const isTurtlesPrimeBuild = (): boolean =>{
   return Cypress.env("turtles_build_type") === "prime";
 }
