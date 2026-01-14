@@ -43,6 +43,6 @@
     - `cd /usr/local/bin/`
     - `sudo ln -s $PWD/kuberlr $PWD/kubectl`
 4. Install clusterctl by:
-    - `curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.10.10/clusterctl-linux-amd64 -o ~/clusterctl`
+    - `curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.10.6/clusterctl-linux-amd64 -o ~/clusterctl`
     - `chmod +x ~/clusterctl`
     - `sudo mv ~/clusterctl /usr/local/bin/`
