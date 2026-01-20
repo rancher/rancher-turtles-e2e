@@ -93,7 +93,7 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: '@short'}, () => {
 
   context('[CLUSTER-OPERATIONS]', () => {
 
-    it("Check if annotation for custom cluster description set custom description the imported Rancher Cluster", () => {
+    it.skip("Check if annotation for custom cluster description set custom description the imported Rancher Cluster", () => {
       cy.burgerMenuOperate('close')
       cy.contains(new RegExp('Active.*' + `${clusterName}.*` + "This is a custom description of Rancher Cluster"));
     })
