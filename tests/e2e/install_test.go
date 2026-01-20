@@ -115,12 +115,13 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 					extraEnvIndex = 2
 				}
 
+				rancherPointVersion := os.Getenv("RANCHER_POINT_VERSION")
 				entries := []struct {
 					name  string
 					value string
 				}{
 					{"CATTLE_CHART_DEFAULT_URL", "http://" + rancherHostname + ":4080" + "/git/charts"}, // Can we leave it hardcoded?
-					{"CATTLE_CHART_DEFAULT_BRANCH", "dev-v2.13"},
+					{"CATTLE_CHART_DEFAULT_BRANCH", "dev-v" + rancherPointVersion},
 					{"CATTLE_RANCHER_TURTLES_VERSION", "108.0.0+up99.99.99"}, // Ensure using custom built turtles
 				}
 
