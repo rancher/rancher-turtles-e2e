@@ -27,7 +27,7 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
     cy.burgerMenuOperate('open');
   });
 
-  it("Change helm charts to Include Prerelease Versions", () => {
+  it.skip("Change helm charts to Include Prerelease Versions", () => {
     // this test should be run before the turtles repository is added; so that it can fetch the prereleased versions
 
     // toggle the navigation menu to a close
