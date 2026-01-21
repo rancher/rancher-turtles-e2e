@@ -14,7 +14,7 @@ limitations under the License.
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import {qase} from 'cypress-qase-reporter/mocha';
-import {getClusterName, skipClusterDeletion} from '~/support/utils';
+import {getClusterName, isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
 import {capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 import {vars} from '~/support/variables';
 
@@ -93,10 +93,12 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: '@short'}, () => {
 
   context('[CLUSTER-OPERATIONS]', () => {
 
-    it("Check if annotation for custom cluster description set custom description the imported Rancher Cluster", () => {
-      cy.burgerMenuOperate('close')
-      cy.contains(new RegExp('Active.*' + `${clusterName}.*` + "This is a custom description of Rancher Cluster"));
-    })
+    if (isRancherManagerVersion(">=2.13")) {
+      it("Check if annotation for custom cluster description set custom description the imported Rancher Cluster", () => {
+        cy.burgerMenuOperate('close')
+        cy.contains(new RegExp('Active.*' + `${clusterName}.*` + "This is a custom description of Rancher Cluster"));
+      })
+    }
 
     // fleet-addon provider checks (for rancher dev/2.10.3 and up)
     qase(42,
