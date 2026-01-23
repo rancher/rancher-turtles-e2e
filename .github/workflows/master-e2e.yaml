@@ -303,9 +303,14 @@ jobs:
           else
             echo "RANCHER_VERSION=${{ inputs.rancher_version }}" >> ${GITHUB_ENV}
           fi
+      - name: Set Rancher Manager point version
+        run: |
+          if [[ "${{ env.RANCHER_VERSION }}" =~ (2\.13|2\.14) ]]; then
+            echo RANCHER_POINT_VERSION="${BASH_REMATCH[1]}" >> ${GITHUB_ENV}
+          fi
       - name: Set rancher/turtles repo branch
         run: |
-          if [[ "${{ env.RANCHER_VERSION }}" =~ "2.13" || "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
+          if [[ ! "${{ env.RANCHER_VERSION }}" =~ "2.12" || "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
             echo "TURTLES_BRANCH=${{ env.TURTLES_BRANCH }}" >> ${GITHUB_ENV}
           else
             echo "TURTLES_BRANCH=release-0.24" >> ${GITHUB_ENV}
@@ -354,11 +359,11 @@ jobs:
 
       # Build providers chart to push to chartmuseum in a later step
       - name: Make Turtles Providers Chart
-        if: ${{ inputs.turtles_dev_chart == true && (contains(env.RANCHER_VERSION, '2.13') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
+        if: ${{ inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
         run: RELEASE_TAG=v${{ env.TAG }} make build-providers-chart
 
-      - name: Clone, build and publish artificial system charts for 2.13
-        if: ${{ inputs.turtles_dev_chart == true && (contains(env.RANCHER_VERSION, '2.13') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
+      - name: Clone, build and publish artificial system charts for 2.13 onwards
+        if: ${{ inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
         run: |
           # Install yq if not present
           if ! command -v yq >/dev/null 2>&1; then
@@ -369,7 +374,7 @@ jobs:
           # Dir outside github workspace must be used for destroy=false persistance
           export RANCHER_CHARTS_REPO_DIR=/tmp/system-charts/charts
           export RANCHER_CHART_DEV_VERSION=108.0.0+up99.99.99
-          export RANCHER_CHARTS_BASE_BRANCH=dev-v2.13
+          export RANCHER_CHARTS_BASE_BRANCH=dev-v${{ env.RANCHER_POINT_VERSION }}
           export CHART_RELEASE_DIR=${{ github.workspace }}/out/charts/rancher-turtles
           export HELM=helm
 
@@ -394,7 +399,7 @@ jobs:
           cp ${{ github.workspace }}/out/package/rancher-turtles-${{ env.TAG }}.tgz ${{ runner.temp }}
 
       - name: Copy Turtles Providers chart files
-        if: ${{ inputs.turtles_dev_chart == true && (contains(env.RANCHER_VERSION, '2.13') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
+        if: ${{ inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
         run: cp ${{ github.workspace }}/out/package/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ runner.temp }}
 
       - name: Checkout
@@ -409,7 +414,7 @@ jobs:
         run: |
           cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
       - name: Copy turtles providers chart files for chartmuseum
-        if: ${{ inputs.turtles_dev_chart == true && (contains(env.RANCHER_VERSION, '2.13') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
+        if: ${{ inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
         run: |
           mkdir ${{ github.workspace }}/tests/assets/providers
           cp ${{ runner.temp }}/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets/providers
