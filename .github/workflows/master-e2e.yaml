@@ -308,6 +308,9 @@ jobs:
           if [[ "${{ env.RANCHER_VERSION }}" =~ (2\.13|2\.14) ]]; then
             echo RANCHER_POINT_VERSION="${BASH_REMATCH[1]}" >> ${GITHUB_ENV}
           fi
+          if [[ "${{ env.RANCHER_VERSION }}" =~ (2\.12) && "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
+            echo RANCHER_POINT_VERSION="2.13" >> ${GITHUB_ENV}
+          fi
       - name: Set rancher/turtles repo branch
         run: |
           if [[ ! "${{ env.RANCHER_VERSION }}" =~ "2.12" || "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
