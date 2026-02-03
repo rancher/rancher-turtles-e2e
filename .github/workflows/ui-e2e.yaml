@@ -52,11 +52,11 @@ on:
         type: boolean
       runner_template:
         description: Runner template to use
-        default: capi-e2e-ci-runner-spot-n2-highmem-16-template-v3
+        default: capi-e2e-ci-runner-spot-n2-highmem-16-template-v4
         type: choice
         options:
-          - capi-e2e-ci-runner-spot-n2-highmem-16-template-v3
-          - capi-e2e-ci-runner-standard-n2-highmem-4-template-v4
+          - capi-e2e-ci-runner-spot-n2-highmem-16-template-v4
+          - capi-e2e-ci-runner-standard-n2-highmem-4-template-v5
   schedule:
     - cron: '0 3 * * *' # @short
     - cron: '0 4 * * *' # @vsphere
