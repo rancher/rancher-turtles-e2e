@@ -38,7 +38,6 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   config.env.k8s_version = process.env.K8S_VERSION_TO_PROVISION;
   config.env.rancher_version = process.env.RANCHER_VERSION;
   config.env.username = process.env.RANCHER_USER;
-  config.env.grep = process.env.GREP;
   config.env.grepTags = process.env.GREPTAGS;
   config.env.skip_cluster_delete = process.env.SKIP_CLUSTER_DELETE || "false";
   const clusterNameSuffixDefault: string = randomstring.generate({length: 4, capitalization: 'lowercase'})

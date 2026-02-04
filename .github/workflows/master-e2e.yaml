@@ -294,18 +294,27 @@ jobs:
         run: |
           if [[ "${{ inputs.grep_test_by_tag }}" =~ "@migration" ]]; then
             # Required for migration tests
-            echo "RANCHER_VERSION=prime/2.12.5" >> ${GITHUB_ENV}
+            echo "RANCHER_VERSION=head/2.12" >> ${GITHUB_ENV}
+            echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> $GITHUB_ENV
+            echo "SPECS=" >> ${GITHUB_ENV}
+          elif [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
+            # Required for upgrade tests
+            echo "RANCHER_VERSION=head/2.13" >> ${GITHUB_ENV}
             echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> $GITHUB_ENV
             echo "SPECS=" >> ${GITHUB_ENV}
           else
             echo "RANCHER_VERSION=${{ inputs.rancher_version }}" >> ${GITHUB_ENV}
           fi
       - name: Set Rancher Manager point version
+        if: ${{ inputs.turtles_dev_chart == true }}
         run: |
           if [[ "${{ env.RANCHER_VERSION }}" =~ (2\.13|2\.14) ]]; then
             echo RANCHER_POINT_VERSION="${BASH_REMATCH[1]}" >> ${GITHUB_ENV}
           fi
-          if [[ "${{ env.RANCHER_VERSION }}" =~ (2\.12) && "${{ inputs.grep_test_by_tag }}" =~ "@migration" ]]; then
+          if [[ "${{ env.RANCHER_VERSION }}" =~ 2.12 && "${{ inputs.grep_test_by_tag }}" =~ "@migration" ]]; then
+            echo RANCHER_POINT_VERSION="2.13" >> ${GITHUB_ENV}
+          fi
+          if [[ "${{ env.RANCHER_VERSION }}" =~ 2.13 && "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
             echo RANCHER_POINT_VERSION="2.13" >> ${GITHUB_ENV}
           fi
       - name: Set rancher/turtles repo branch
@@ -322,7 +331,7 @@ jobs:
       # Checkout into r/turtles repo if dev=true to build turtles and providers chart;
       # or if it's a migration test, then to copy the provider migration script
       - name: Check out rancher/turtles repo
-        if: ${{ inputs.turtles_dev_chart == true || contains(inputs.grep_test_by_tag, '@migration') }}
+        if: ${{ inputs.turtles_dev_chart == true || contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         uses: actions/checkout@v6
         with:
           repository: ${{ env.TURTLES_REPO }}
@@ -342,7 +351,7 @@ jobs:
       - name: Make Turtles chart
         if: ${{ inputs.turtles_dev_chart == true }}
         run: |
-          if [[ "${{ env.RANCHER_VERSION }}" =~ "prime/2.13" || "${{ inputs.grep_test_by_tag }}" =~ "@migration" ]]; then
+          if [[ "${{ env.RANCHER_VERSION }}" =~ "prime/2.13" || "${{ inputs.grep_test_by_tag }}" =~ "@migration" || "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
             # Inject custom image into turtles chart deployment.yaml without using the system_default_registry prefix
             # This is needed on Prime because the local registry is not accessible via system_default_registry
             # Sed command uses range from `if` to `end` to replace templating by actual image
@@ -362,11 +371,11 @@ jobs:
 
       # Build providers chart to push to chartmuseum in a later step
       - name: Make Turtles Providers Chart
-        if: ${{ inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12') || contains(inputs.grep_test_by_tag, '@migration')) }}
+        if: ${{ (inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12')) || contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade'))  }}
         run: RELEASE_TAG=v${{ env.TAG }} make build-providers-chart
 
       - name: Clone, build and publish artificial system charts for 2.13 onwards
-        if: ${{ inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12') || contains(inputs.grep_test_by_tag, '@migration')) }}
+        if: ${{ (inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12')) || contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
         run: |
           # Install yq if not present
           if ! command -v yq >/dev/null 2>&1; then
@@ -402,7 +411,7 @@ jobs:
           cp ${{ github.workspace }}/out/package/rancher-turtles-${{ env.TAG }}.tgz ${{ runner.temp }}
 
       - name: Copy Turtles Providers chart files
-        if: ${{ inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12') || contains(inputs.grep_test_by_tag, '@migration')) }}
+        if: ${{ (inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12')) || contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
         run: cp ${{ github.workspace }}/out/package/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ runner.temp }}
 
       - name: Checkout
@@ -417,7 +426,7 @@ jobs:
         run: |
           cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
       - name: Copy turtles providers chart files for chartmuseum
-        if: ${{ inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12') || contains(inputs.grep_test_by_tag, '@migration')) }}
+        if: ${{ (inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12')) || contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
         run: |
           mkdir ${{ github.workspace }}/tests/assets/providers
           cp ${{ runner.temp }}/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets/providers
@@ -505,17 +514,21 @@ jobs:
       - name: Set Rancher Manager Upgrade version
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') }}
         run: |
-          echo "RANCHER_VERSION=prime/2.13.1" >> ${GITHUB_ENV}
+          echo "RANCHER_VERSION=head/2.13" >> ${GITHUB_ENV}
+      - name: Set Rancher Manager Upgrade version
+        if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') }}
+        run: |
+          echo "RANCHER_VERSION=head/2.14" >> ${GITHUB_ENV}
       - name: Upgrade Rancher Manager
-        if: ${{ contains(inputs.grep_test_by_tag, '@migration') }}
+        if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:
-          RANCHER_VERSION: ${{ env.RANCHER_VERSION }} #TODO: Use head/2.13
+          RANCHER_VERSION: ${{ env.RANCHER_VERSION }}
           KUBECONFIG: /etc/rancher/k3s/k3s.yaml
           PUBLIC_DNS: ${{ needs.create-runner.outputs.public_dns }}
         run: cd tests && make e2e-upgrade-rancher
       - name: Extract component versions/informations after Rancher Upgrade
         id: upgraded_component
-        if: ${{ contains(inputs.grep_test_by_tag, '@migration') }}
+        if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         run: |
           # Extract Rancher Manager image version
           RM_UPGRADED_IMAGE_VERSION=$(kubectl get pod \
@@ -530,7 +543,7 @@ jobs:
         run: |
           ${{ github.workspace }}/tests/assets/migrate-providers-ownership.sh --adopt docker:capd-system
       - name: Cypress tests - Upgraded Rancher
-        if: ${{ contains(inputs.grep_test_by_tag, '@migration') }}
+        if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:
           RANCHER_VERSION: ${{ env.RANCHER_VERSION }}
           RANCHER_PASSWORD: ${{ secrets.rancher_password }}
@@ -544,7 +557,7 @@ jobs:
           fi
           cd tests && make start-cypress-tests
       - name: Upload Cypress screenshots (after-upgrade)
-        if: ${{ contains(inputs.grep_test_by_tag, '@migration') && failure() }}
+        if: ${{ (contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) && failure() }}
         uses: actions/upload-artifact@v6
         with:
           name: cypress-screenshots-after-upgrade-${{ github.run_number }}
@@ -553,7 +566,7 @@ jobs:
           if-no-files-found: ignore
       - name: Upload Cypress videos (after-upgrade)
         # Test run video is always captured, so this action uses "always()" condition
-        if: ${{ contains(inputs.grep_test_by_tag, '@migration') && always() }}
+        if: ${{ (contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) && always() }}
         uses: actions/upload-artifact@v6
         with:
           name: cypress-videos-after-upgrade-${{ github.run_number }}
@@ -608,7 +621,7 @@ jobs:
             echo "Installed CAPI Providers:" >> ${GITHUB_STEP_SUMMARY}
             echo "${PROVIDER_VERSIONS}" >> ${GITHUB_STEP_SUMMARY}
           fi
-          if [[ "${{ inputs.grep_test_by_tag }}" =~ "@migration" ]]; then
+          if [[ "${{ inputs.grep_test_by_tag }}" =~ "@migration" || "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
             echo "### Rancher Manager Upgrade Information" >> ${GITHUB_STEP_SUMMARY}
             echo "Rancher Manager Upgraded Version: ${{ steps.upgraded_component.outputs.rm_upgraded_version }}" >> ${GITHUB_STEP_SUMMARY}
             echo "Rancher Manager Upgraded Image: ${{ steps.upgraded_component.outputs.rm_upgraded_image_version }}" >> ${GITHUB_STEP_SUMMARY}

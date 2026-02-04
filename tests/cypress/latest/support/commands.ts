@@ -19,7 +19,7 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import jsyaml from 'js-yaml';
 import yaml from 'js-yaml';
 import _ from 'lodash';
-import {capiNamespace, isPrimeChannel, isPrePrimeChannel, isRancherManagerVersion} from '~/support/utils';
+import {capiNamespace, isPrimeChannel, isPrePrimeChannel, isRancherManagerVersion, isMigration} from '~/support/utils';
 
 // Generic commands
 // Go to specific Sub Menu from Access Menu
@@ -619,7 +619,8 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
   // for 2.13 we use an external repo to install providers chart, and for 2.12 there is no need to install it.
   if (turtlesProvidersChart && isRancherManagerVersion('>=2.13')) {
     const devChart = Cypress.env('turtles_dev_chart')
-    chartSelector = devChart ? '"item-card-cluster/chartmuseum-repo/rancher-turtles-providers"' : '"item-card-cluster/turtles-providers-chart/rancher-turtles-providers"';
+    const upgradeTest = Cypress.env('grepTags').includes('@upgrade')
+    chartSelector = devChart && !upgradeTest ? '"item-card-cluster/chartmuseum-repo/rancher-turtles-providers"' : '"item-card-cluster/turtles-providers-chart/rancher-turtles-providers"';
   }
 
   cy.getBySel(chartSelector).within(() => {
@@ -1145,11 +1146,9 @@ Cypress.Commands.add('verifyCAPIProviderImage', (providerNamespace) => {
     providerImageRegistry = 'gcr.io/k8s-staging-cluster-api';
   } else {
     if (isRancherManagerVersion('>=2.13')) {
-      if (devChart && buildType == 'prime') {
-        providerImageRegistry = 'registry.rancher.com/rancher'
-      } else if (isPrePrimeChannel()) {
+      if (isPrePrimeChannel() || isMigration) {
         providerImageRegistry = 'stgregistry.suse.com/rancher'
-      } else if (isPrimeChannel()) {
+      } else if ((devChart && buildType == 'prime') || isPrimeChannel()) {
         providerImageRegistry = 'registry.rancher.com/rancher'
       } else {
         // community

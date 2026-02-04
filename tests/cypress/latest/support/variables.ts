@@ -3,7 +3,7 @@ import {isRancherManagerVersion} from '~/support/utils';
 export const vars = {
   shortTimeout: 600000,
   fullTimeout: 1500000,
-  classBranch: isRancherManagerVersion('2.13') ? 'release/v0.25' : 'main',
+  classBranch: isRancherManagerVersion('2.12') ? 'release-0.24' : isRancherManagerVersion('2.13') ? 'release/v0.25' : 'main',
   capiClustersNS: 'capi-clusters',
   capiClassesNS: 'capi-classes',
   repoUrl: 'https://github.com/rancher/rancher-turtles-e2e',
