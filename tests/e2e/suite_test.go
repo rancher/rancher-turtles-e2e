@@ -38,6 +38,7 @@ var (
 	rancherLogCollector string
 	rancherVersion      string
 	turtlesDevChart     bool
+	isUpgradeTest       bool
 )
 
 /**
@@ -113,6 +114,7 @@ var _ = BeforeSuite(func() {
 	rancherLogCollector = os.Getenv("RANCHER_LOG_COLLECTOR")
 	rancherVersion = os.Getenv("RANCHER_VERSION")
 	turtlesDevChart = os.Getenv("TURTLES_DEV_CHART") == "true"
+	isUpgradeTest = strings.Contains(os.Getenv("GREPTAGS"), "upgrade") || strings.Contains(os.Getenv("GREPTAGS"), "migration")
 
 	// Extract Rancher Manager channel/version to install
 	if rancherVersion != "" {
