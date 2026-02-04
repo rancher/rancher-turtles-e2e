@@ -81,7 +81,7 @@ on:
         type: boolean
       runner_template:
         description: Runner template to use
-        default: capi-e2e-ci-runner-spot-n2-highmem-16-template-v3
+        default: capi-e2e-ci-runner-spot-n2-highmem-16-template-v4
         type: string
       test_description:
         description: Short description of the test

@@ -92,6 +92,6 @@ jobs:
       target_build_type: ${{ inputs.target_build_type || 'prime' }}
       turtles_chart_version: ${{ inputs.turtles_chart_version }}
       skip_cluster_delete: ${{ inputs.skip_cluster_delete || (github.event_name == 'schedule' && false) }}
-      runner_template: ${{ inputs.runner_template || 'capi-e2e-ci-runner-spot-n2-highmem-16-template-v3' }}
+      runner_template: ${{ inputs.runner_template || 'capi-e2e-ci-runner-spot-n2-highmem-16-template-v4' }}
       cluster_name_suffix: ${{ inputs.cluster_name_suffix || github.run_number }}
       grep_test_by_tag: ${{ inputs.grep_test_by_tag || (github.event.schedule == '0 3 * * *' && '@install @short') || (github.event.schedule == '0 4 * * *' && '@install @vsphere') || (github.event.schedule == '0 5 * * 6' && '@install @full') || (github.event.schedule == '0 3 * * 6' && '@install @migration @short') }}
