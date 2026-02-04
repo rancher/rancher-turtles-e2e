@@ -13,15 +13,13 @@ limitations under the License.
 */
 
 import '~/support/commands';
-import {isMigration, isRancherManagerVersion, turtlesNamespace} from '~/support/utils';
 import {vars} from '~/support/variables';
-
+import {isRancherManagerVersion, isMigration, isTurtlesDevChart, turtlesNamespace, isUpgrade} from '~/support/utils';
 
 Cypress.config();
 describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
   let chartMuseumRepo = Cypress.env('chartmuseum_repo')
   let turtlesVersion = Cypress.env('turtles_chart_version')
-  let devChart = Cypress.env('turtles_dev_chart')
 
   beforeEach(() => {
     cy.login();
@@ -43,31 +41,32 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
   })
 
   if (isRancherManagerVersion(">=2.13")) {
-    it("Add turtles and turtles-providers GitRepo", () => {
-      if (devChart) {
-        cy.task('log', "Adding chartmuseum repo");
+    it("Add turtles-providers GitRepo", () => {
+      if (isTurtlesDevChart) {
+        cy.task('log', "Adding chartmuseum repo for turtles-providers");
         expect(chartMuseumRepo, "checking chartmuseum repo").to.not.be.empty;
         cy.addRepository('chartmuseum-repo', `${chartMuseumRepo}:8080`, 'http', 'none');
       } else {
         cy.task('log', "Adding turtles-providers-chart repo");
         cy.addRepository('turtles-providers-chart', vars.turtlesProvidersOCIRepo, 'oci', 'none')
       }
+      
+      if (isUpgrade) {
+        cy.deleteKubernetesResource('local', ['Apps', 'Repositories'], 'chartmuseum-repo');
+        cy.burgerMenuOperate('open');
+        cy.task('log', "Removed chartmuseum-repo & Adding turtles-providers-chart repo");
+        cy.addRepository('turtles-providers-chart', vars.turtlesProvidersOCIRepo, 'oci', 'none')
+      }
     })
   }
 
   if (isRancherManagerVersion("<=2.12")) {
-    it("Add turtles and turtles-providers GitRepo", () => {
-      if (devChart) {
+    it("Add turtles GitRepo", () => {
+      if (isTurtlesDevChart || isMigration) {
         cy.task('log', "Adding turtles dev chart repo");
+        cy.task('log', "Adding turtles-providers-chart dev repo for migration test");
         expect(chartMuseumRepo, "checking chartmuseum repo").to.not.be.empty;
         cy.addRepository('chartmuseum-repo', `${chartMuseumRepo}:8080`, 'http', 'none');
-        if (isMigration) {
-          // For <=2.12, dev=true, and migration test, we will install turtles from standard chart repo;
-          // dev=true is only applicable for 2.13 or version test is upgrading to.
-          cy.burgerMenuOperate('open');
-          cy.task('log', "Adding turtles chart repo for migration test");
-          cy.addRepository('turtles-chart', 'https://rancher.github.io/turtles/', 'http', 'none');
-        }
       } else {
         cy.task('log', "Adding turtles chart repo");
         cy.addRepository('turtles-chart', 'https://rancher.github.io/turtles/', 'http', 'none');
@@ -77,16 +76,24 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
           cy.addRepository('turtles-providers-chart', vars.turtlesProvidersOCIRepo, 'oci', 'none')
         }
       }
+
+      if (isMigration) {
+        // For <=2.12, dev=true and migration test, we will install turtles from standard chart repo;
+        // dev=true is only applicable for 2.13 or version test is upgrading to.
+        cy.burgerMenuOperate('open');
+        cy.task('log', "Adding turtles chart repo for migration test");
+        cy.addRepository('turtles-chart', 'https://rancher.github.io/turtles/', 'http', 'none');
+      }
     })
 
       it('Install Turtles chart', {retries: 1}, () => {
         // if turtles dev chart is to be used, ignore the turtles chart version
-        if (devChart) {
+        if (isTurtlesDevChart) {
           turtlesVersion = ""
         }
 
         if (isMigration) {
-          turtlesVersion = '0.24.3'
+          turtlesVersion = '0.24.4'
         }
         cy.checkChart('local', 'Install', 'Rancher Turtles', turtlesNamespace, turtlesVersion);
       })
