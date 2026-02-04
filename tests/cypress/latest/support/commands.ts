@@ -602,13 +602,13 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
   if (turtlesChart) {
     let turtlesChartSelector: string;
     const devChart = Cypress.env('turtles_dev_chart')
-    const upgradeTest = Cypress.env('grepTags').includes('@upgrade')
+    const migrationTest = Cypress.env('grepTags').includes('@migration')
     // if dev==true; then for 2.13 and 2.12, the selector remains same;
     // if dev==false; then for 2.13 we use system integrated turtles, and for 2.12 we use turtles-chart repo to install turtles
     if (isRancherManagerVersion('>=2.13')) {
       turtlesChartSelector = devChart ? '"item-card-cluster/chartmuseum-repo/rancher-turtles"' : '"item-card-cluster/rancher-charts/rancher-turtles"';
     } else if (isRancherManagerVersion('2.12')) {
-      turtlesChartSelector = devChart && !upgradeTest ? '"item-card-cluster/chartmuseum-repo/rancher-turtles"' : '"item-card-cluster/turtles-chart/rancher-turtles"';
+      turtlesChartSelector = devChart && !migrationTest ? '"item-card-cluster/chartmuseum-repo/rancher-turtles"' : '"item-card-cluster/turtles-chart/rancher-turtles"';
     } else {
       turtlesChartSelector = '"select-icon-grid-Rancher Turtles - the Cluster API Extension"';
     }

@@ -17,7 +17,7 @@ import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletio
 import {vars} from '~/support/variables';
 
 Cypress.config();
-describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () => {
+describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, () => {
   const timeout = vars.shortTimeout
   const classNamePrefix = 'docker-rke2'
   const clusterName = getClusterName(classNamePrefix)
@@ -34,7 +34,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
     cy.burgerMenuOperate('open');
   });
 
-  context('Pre-Upgrade Resources and Cluster creation', () => {
+  context('Pre-Migration Resources and Cluster creation', () => {
     if (isRancherManagerVersion('2.12')) {
       it('Create & Setup the namespace for importing', () => {
         cy.createNamespace([vars.capiClustersNS, vars.capiClassesNS, capdProviderNS]);
@@ -118,7 +118,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
     }
   })
 
-  context('Post-Upgrade Cluster checks and Resources cleanup', () => {
+  context('Post-Migration Cluster checks and Resources cleanup', () => {
     // Migration script was ran to adopt provider resources into new Helm release (master-e2e.yaml)
 
     if (isRancherManagerVersion('2.13')) {
@@ -127,7 +127,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
         cy.checkChart('local', 'Install', 'Rancher Turtles Certified Providers', turtlesNamespace, undefined, undefined, false, undefined);
       })
 
-      it('Check cluster & Resources status post-upgrade', () => {
+      it('Check cluster & Resources status post-migration', () => {
         // Check Dockerprovider version is auto-upgraded
         cy.checkCAPIProvider(capdProviderName);
         cy.contains(capdProviderVersion);
