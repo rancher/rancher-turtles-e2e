@@ -51,3 +51,5 @@ export const turtlesNamespace = isRancherManagerVersion('>=2.13') ? 'cattle-turt
 export const capiNamespace = isRancherManagerVersion('>=2.13') ? 'cattle-capi-system' : 'capi-system'
 
 export const isMigration = Cypress.env('grepTags') && (Cypress.env('grepTags')).includes('@migration')
+
+export const isUpgrade = Cypress.env('grepTags') && (Cypress.env('grepTags')).includes('@upgrade')

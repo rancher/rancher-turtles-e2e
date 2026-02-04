@@ -106,7 +106,6 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 		By("Installing/Upgrading Rancher Manager", func() {
 			// Used for providing artifical system chart during install/upgrade
 			var extraFlags []string = nil
-			// TODO: is this condition suitable for upgrade?
 			if (isRancherManagerVersion(">=2.13")) && turtlesDevChart {
 				extraEnvIndex := 1
 				// For prime-alpha and prime-rc channels extraEnvIndex needs to be shifted
@@ -137,6 +136,11 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 				GinkgoWriter.Write([]byte(strings.Join(extraFlags, " ") + "\n"))
 			}
 
+			// Skip when upgrade/migration
+			if Label("install").MatchesLabelFilter(GinkgoLabelFilter()) && isUpgradeTest {
+				extraFlags = nil
+			}
+			fmt.Println(extraFlags)
 			err := rancher.DeployRancherManager(rancherHostname, rancherChannel, rancherVersion, rancherHeadVersion, "none", "none", extraFlags)
 			Expect(err).To(Not(HaveOccurred()))
 

@@ -619,7 +619,8 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
   // for 2.13 we use an external repo to install providers chart, and for 2.12 there is no need to install it.
   if (turtlesProvidersChart && isRancherManagerVersion('>=2.13')) {
     const devChart = Cypress.env('turtles_dev_chart')
-    chartSelector = devChart ? '"item-card-cluster/chartmuseum-repo/rancher-turtles-providers"' : '"item-card-cluster/turtles-providers-chart/rancher-turtles-providers"';
+    const upgradeTest = Cypress.env('grepTags').includes('@upgrade')
+    chartSelector = devChart && !upgradeTest ? '"item-card-cluster/chartmuseum-repo/rancher-turtles-providers"' : '"item-card-cluster/turtles-providers-chart/rancher-turtles-providers"';
   }
 
   cy.getBySel(chartSelector).within(() => {
