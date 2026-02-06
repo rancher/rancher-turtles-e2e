@@ -71,7 +71,7 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
       })
 
       it('Import CAPD RKE2 class-clusters using YAML', () => {
-        cy.readFile('./fixtures/docker/capd-rke2-class-cluster.yaml').then((data) => {
+        cy.readFile('./fixtures/docker/capd-rke2-class-cluster-v1beta1.yaml').then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_rke2_version/g, vars.rke2Version)
           data = data.replace(/replace_kind_version/g, vars.kindVersion)
@@ -154,7 +154,7 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
       })
 
       it("Scale up imported CAPD cluster by patching class-cluster yaml", () => {
-        cy.readFile('./fixtures/docker/capd-rke2-class-cluster.yaml').then((data) => {
+        cy.readFile('./fixtures/docker/capd-rke2-class-cluster-v1beta1.yaml').then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_rke2_version/g, vars.rke2Version)
           data = data.replace(/replace_kind_version/g, vars.kindVersion)

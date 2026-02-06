@@ -1,6 +1,6 @@
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
-import {getClusterName, skipClusterDeletion} from '~/support/utils';
+import {getClusterName, isAPIv1beta1, skipClusterDeletion} from '~/support/utils';
 import {capiClusterDeletion, capzResourcesCleanup, importedRancherClusterDeletion} from "~/support/cleanup_support";
 import {vars} from '~/support/variables';
 
@@ -21,6 +21,11 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: '@full'}, () => {
     cy.login();
     cy.burgerMenuOperate('open');
   });
+
+  let classClusterFileName = './fixtures/azure/capz-rke2-class-cluster.yaml'
+  if (isAPIv1beta1) {
+    classClusterFileName = './fixtures/azure/capz-rke2-class-cluster-v1beta1.yaml'
+  }
 
   context('[SETUP]', () => {
     it('Setup the namespace for importing', () => {
@@ -45,7 +50,7 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: '@full'}, () => {
   context('[CLUSTER-IMPORT]', () => {
     qase(78,
       it('Import CAPZ RKE2 class-cluster using YAML', () => {
-        cy.readFile('./fixtures/azure/capz-rke2-class-cluster.yaml').then((data) => {
+        cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_subscription_id/g, subscriptionID)
           data = data.replace(/replace_rke2_version/g, vars.rke2Version)
@@ -86,7 +91,7 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: '@full'}, () => {
     );
 
     it("Scale up imported CAPZ cluster by patching class-cluster yaml", () => {
-      cy.readFile('./fixtures/azure/capz-rke2-class-cluster.yaml').then((data) => {
+      cy.readFile(classClusterFileName).then((data) => {
         data = data.replace(/replicas: 2/g, 'replicas: 3')
 
         // workaround; these values need to be re-replaced before applying the scaling changes
