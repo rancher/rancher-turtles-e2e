@@ -1,4 +1,4 @@
-apiVersion: cluster.x-k8s.io/v1beta1
+apiVersion: cluster.x-k8s.io/v1beta2
 kind: Cluster
 metadata:
   name: {{ .Values.cluster.name }}
@@ -14,8 +14,9 @@ spec:
       cidrBlocks:
       - 192.168.0.0/16
   topology:
-    class: vsphere-rke2-example
-    classNamespace: capi-classes
+    classRef:
+      name: vsphere-rke2-example
+      namespace: capi-classes
     version: {{ .Values.cluster.rke2_version }}
     controlPlane:
       replicas: {{ .Values.cluster.control_plane_machine_count }}

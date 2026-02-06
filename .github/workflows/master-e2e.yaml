@@ -464,6 +464,7 @@ jobs:
       - name: Cypress tests
         id: cypress
         env:
+          TURTLES_BRANCH: ${{ env.TURTLES_BRANCH }}
           RANCHER_VERSION: ${{ env.RANCHER_VERSION }}
           RANCHER_PASSWORD: ${{ secrets.rancher_password }}
           SPEC: |
