@@ -52,4 +52,5 @@ export const capiNamespace = isRancherManagerVersion('>=2.13') ? 'cattle-capi-sy
 
 export const isMigration = Cypress.env('grepTags') && (Cypress.env('grepTags')).includes('@migration')
 
+// TODO: Once we move to 2.14 as the default version for testing; this condition can be changed to simply isRancherManagerVersion('<=2.13')
 export const isAPIv1beta1 = isRancherManagerVersion('<=2.12') || (isRancherManagerVersion('2.13') && !Cypress.env('turtles_dev_chart'))

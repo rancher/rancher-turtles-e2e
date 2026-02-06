@@ -94,7 +94,7 @@ describe('Import CAPV RKE2 Class-Cluster', {tags: '@vsphere'}, () => {
     });
 
     it('Add CAPV RKE2 ClusterClass Fleet Repo and check Applications', () => {
-      cy.addFleetGitRepo(classRepoName, vars.turtlesRepoUrl, vars.branch, classesPath, vars.capiClassesNS)
+      cy.addFleetGitRepo(classRepoName, vars.turtlesRepoUrl, vars.classbranch, classesPath, vars.capiClassesNS)
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(className);
 
