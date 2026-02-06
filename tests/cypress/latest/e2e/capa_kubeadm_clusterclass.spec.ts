@@ -1,6 +1,6 @@
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
-import {getClusterName, isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
+import {getClusterName, isAPIv1beta1, isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
 import {capaResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 import {vars} from '~/support/variables';
 
@@ -14,6 +14,10 @@ describe('Import CAPA Kubeadm Class-Cluster', {tags: '@full'}, () => {
   const providerName = 'aws'
   const accessKey = Cypress.env('aws_access_key')
   const secretKey = Cypress.env('aws_secret_key')
+  let classClusterFileName = './fixtures/aws/capa-kubeadm-class-cluster.yaml'
+  if (isAPIv1beta1) {
+    classClusterFileName = './fixtures/aws/capa-kubeadm-class-cluster-v1beta1.yaml'
+  }
 
   beforeEach(() => {
     cy.login();
@@ -49,7 +53,7 @@ describe('Import CAPA Kubeadm Class-Cluster', {tags: '@full'}, () => {
   context('[CLUSTER-IMPORT]', () => {
     qase(124,
       it('Import CAPA Kubeadm class-cluster using YAML', () => {
-        cy.readFile('./fixtures/aws/capa-kubeadm-class-cluster.yaml').then((data) => {
+        cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_k8sVersion/g, vars.k8sVersion)
           data = data.replace(/replace_amiID/g, vars.amiID)
@@ -92,7 +96,7 @@ describe('Import CAPA Kubeadm Class-Cluster', {tags: '@full'}, () => {
     );
 
     it("Scale up imported CAPA cluster by patching class-cluster yaml", () => {
-      cy.readFile('./fixtures/aws/capa-kubeadm-class-cluster.yaml').then((data) => {
+      cy.readFile(classClusterFileName).then((data) => {
         data = data.replace(/replicas: 2/g, 'replicas: 3')
 
         // workaround; these values need to be re-replaced before applying the scaling changes

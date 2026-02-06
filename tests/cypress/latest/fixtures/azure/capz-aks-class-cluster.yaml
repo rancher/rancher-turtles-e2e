@@ -1,4 +1,4 @@
-apiVersion: cluster.x-k8s.io/v1beta1
+apiVersion: cluster.x-k8s.io/v1beta2
 kind: Cluster
 metadata:
   labels:
@@ -11,8 +11,9 @@ spec:
       cidrBlocks:
       - 192.168.0.0/16
   topology:
-    class: azure-aks-example
-    classNamespace: capi-classes
+    classRef:
+      name: azure-aks-example
+      namespace: capi-classes
     variables:
     - name: subscriptionID
       value: "replace_subscription_id"
