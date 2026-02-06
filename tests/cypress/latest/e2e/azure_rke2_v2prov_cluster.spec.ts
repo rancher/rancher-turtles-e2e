@@ -5,7 +5,8 @@ import * as randomstring from "randomstring";
 import {vars} from '~/support/variables';
 
 Cypress.config();
-describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
+describe.skip('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
+  // Skipping the test until hostbusters bumps CAPI to v1.11.5
   let userID: string, ccID: string;
   let features = ['turtles']
   const timeout = vars.fullTimeout
