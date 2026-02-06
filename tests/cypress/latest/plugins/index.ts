@@ -37,6 +37,7 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   config.env.cluster = process.env.CLUSTER_NAME;
   config.env.k8s_version = process.env.K8S_VERSION_TO_PROVISION;
   config.env.rancher_version = process.env.RANCHER_VERSION;
+  config.env.turtles_branch = process.env.TURTLE_BRANCH || 'main';
   config.env.username = process.env.RANCHER_USER;
   config.env.grep = process.env.GREP;
   config.env.grepTags = process.env.GREPTAGS;

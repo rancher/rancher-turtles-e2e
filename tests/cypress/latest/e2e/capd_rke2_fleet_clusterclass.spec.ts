@@ -13,7 +13,7 @@ limitations under the License.
 
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import {skipClusterDeletion} from '~/support/utils';
+import {isAPIv1beta1, skipClusterDeletion} from '~/support/utils';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 import {vars} from '~/support/variables';
 
@@ -22,8 +22,11 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
   let clusterName: string
   const timeout = vars.shortTimeout
   const classNamePrefix = 'docker-rke2'
-  const path = '/tests/assets/rancher-turtles-fleet-example/capd/rke2/class-clusters'
-  const branch = 'main'
+  let path = '/tests/assets/rancher-turtles-fleet-example/capd/rke2/class-clusters'
+  if (isAPIv1beta1) {
+    path = '/tests/assets/rancher-turtles-fleet-example/capd/rke2/class-clusters-v1beta1'
+  }
+  const branch = vars.branch
   const classesPath = 'examples/clusterclasses/docker/rke2'
   const clustersRepoName = 'docker-rke2-class-clusters'
   const clusterClassRepoName = "docker-rke2-clusterclass"

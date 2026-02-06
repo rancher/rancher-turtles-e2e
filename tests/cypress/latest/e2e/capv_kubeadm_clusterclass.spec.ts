@@ -1,6 +1,6 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import {isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
+import {isAPIv1beta1, isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
 import {capiClusterDeletion, capvResourcesCleanup, importedRancherClusterDeletion} from "~/support/cleanup_support";
 import {vars} from '~/support/variables';
 
@@ -11,7 +11,10 @@ describe('Import CAPV Kubeadm Class-Cluster', {tags: '@vsphere'}, () => {
   const classRepoName = 'vsphere-kb-clusterclass'
   const className = 'vsphere-kubeadm-example'
   const clusterName = 'turtles-qa-capv-kb-example'
-  const path = '/tests/assets/rancher-turtles-fleet-example/capv/kubeadm/class-clusters'
+  let path = '/tests/assets/rancher-turtles-fleet-example/capv/kubeadm/class-clusters'
+  if (isAPIv1beta1) {
+    path = '/tests/assets/rancher-turtles-fleet-example/capv/kubeadm/class-clusters-v1beta1'
+  }
   const classesPath = 'examples/clusterclasses/vsphere/kubeadm'
   const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
   const providerName = 'vsphere'
