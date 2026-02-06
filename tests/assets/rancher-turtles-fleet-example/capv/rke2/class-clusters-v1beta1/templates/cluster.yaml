@@ -1,4 +1,4 @@
-apiVersion: cluster.x-k8s.io/v1beta2
+apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
   name: {{ .Values.cluster.name }}
@@ -14,15 +14,14 @@ spec:
       cidrBlocks:
       - 192.168.0.0/16
   topology:
-    classRef:
-      name: vsphere-kubeadm-example
-      namespace: capi-classes
-    version: {{ .Values.cluster.version }}
+    class: vsphere-rke2-example
+    classNamespace: capi-classes
+    version: {{ .Values.cluster.rke2_version }}
     controlPlane:
       replicas: {{ .Values.cluster.control_plane_machine_count }}
     workers:
       machineDeployments:
-      - class: vsphere-kubeadm-example-worker
+      - class: vsphere-rke2-example-worker
         name: md-0
         replicas: {{ .Values.cluster.worker_machine_count }}
     variables:
@@ -45,13 +44,17 @@ spec:
     - name: vSphereServer
       value: {{ .Values.vsphere.server }}
     - name: vSphereTemplate
-      value: {{ .Values.vsphere.kubeadm_template }}
+      value: {{ .Values.vsphere.rke2_template }}
     - name: controlPlaneIpAddr
       value: {{ .Values.cluster.control_plane_endpoint_ip }}
     - name: controlPlanePort
       value: 6443
     - name: kubeVIPInterface
       value: eth0
+    - name: productKey
+      value: {{ .Values.cluster.product_key | quote }}
+    - name: dockerAuthSecret
+      value: {{ .Values.cluster.docker_auth_token_secret_name }}
 ---
 kind: Bundle
 apiVersion: fleet.cattle.io/v1alpha1

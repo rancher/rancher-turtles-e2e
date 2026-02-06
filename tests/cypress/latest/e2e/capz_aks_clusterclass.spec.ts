@@ -1,6 +1,6 @@
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
-import {getClusterName, skipClusterDeletion} from '~/support/utils';
+import {getClusterName, isAPIv1beta1, skipClusterDeletion} from '~/support/utils';
 import {capiClusterDeletion, capzResourcesCleanup, importedRancherClusterDeletion} from "~/support/cleanup_support";
 import {vars} from '~/support/variables';
 
@@ -32,7 +32,7 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
     })
 
     qase(84, it('Add CAPZ AKS ClusterClass using fleet', () => {
-        cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.branch, classesPath, vars.capiClassesNS)
+      cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classbranch, classesPath, vars.capiClassesNS)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(classNamePrefix);
       })
@@ -42,7 +42,8 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
   context('[CLUSTER-IMPORT]', () => {
     qase(55,
       it('Import CAPZ AKS class-cluster using YAML', () => {
-        cy.readFile('./fixtures/azure/capz-aks-class-cluster.yaml').then((data) => {
+        const classClusterFileName = isAPIv1beta1 ? './fixtures/azure/capz-aks-class-cluster-v1beta1.yaml' : './fixtures/azure/capz-aks-class-cluster.yaml'
+        cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_subscription_id/g, subscriptionID)
           cy.importYAML(data, vars.capiClustersNS)

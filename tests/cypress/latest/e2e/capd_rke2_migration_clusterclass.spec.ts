@@ -44,11 +44,11 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
 
       it('Create Docker CAPIProvider & Calico CNI HelmOp', () => {
         // Calico CNI HelmOp
-        cy.addFleetGitRepo('calico-cni', vars.turtlesRepoUrl, vars.branch, 'examples/applications/cni/calico', vars.capiClustersNS)
+        cy.addFleetGitRepo('calico-cni', vars.turtlesRepoUrl, vars.classbranch, 'examples/applications/cni/calico', vars.capiClustersNS)
 
         // Docker rke2 lb-config
         cy.burgerMenuOperate('open');
-        cy.addFleetGitRepo('lb-docker', vars.turtlesRepoUrl, vars.branch, 'examples/applications/lb/docker', vars.capiClustersNS)
+        cy.addFleetGitRepo('lb-docker', vars.turtlesRepoUrl, vars.classbranch, 'examples/applications/lb/docker', vars.capiClustersNS)
 
         // Create Docker provider
         cy.createCAPIProvider(capdProviderName);
@@ -65,13 +65,13 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
 
 
       it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
-        cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.branch, classesPath, vars.capiClassesNS)
+        cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classbranch, classesPath, vars.capiClassesNS)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(classNamePrefix);
       })
 
       it('Import CAPD RKE2 class-clusters using YAML', () => {
-        cy.readFile('./fixtures/docker/capd-rke2-class-cluster.yaml').then((data) => {
+        cy.readFile('./fixtures/docker/capd-rke2-class-cluster-v1beta1.yaml').then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_rke2_version/g, vars.rke2Version)
           data = data.replace(/replace_kind_version/g, vars.kindVersion)
@@ -154,7 +154,7 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
       })
 
       it("Scale up imported CAPD cluster by patching class-cluster yaml", () => {
-        cy.readFile('./fixtures/docker/capd-rke2-class-cluster.yaml').then((data) => {
+        cy.readFile('./fixtures/docker/capd-rke2-class-cluster-v1beta1.yaml').then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_rke2_version/g, vars.rke2Version)
           data = data.replace(/replace_kind_version/g, vars.kindVersion)
