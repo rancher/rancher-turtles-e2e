@@ -1,4 +1,4 @@
-apiVersion: cluster.x-k8s.io/v1beta2
+apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
   labels:
@@ -13,9 +13,8 @@ spec:
       cidrBlocks:
       - 192.168.0.0/16
   topology:
-    classRef:
-      name: aws-rke2-example
-      namespace: capi-classes
+    class: aws-kubeadm-example
+    classNamespace: capi-classes
     controlPlane:
       replicas: 3
     variables:
@@ -24,16 +23,14 @@ spec:
     - name: sshKeyName
       value: turtles-qa-rke2
     - name: controlPlaneMachineType
-      value: t3.2xlarge
+      value: t3.xlarge
     - name: workerMachineType
-      value: t3.2xlarge
-    - name: amiID
-      value: replace_amiID
-    - name: cni
-      value: none
+      value: t3.xlarge
     - name: awsClusterIdentityName
       value: cluster-identity
-    version: replace_rke2_version
+    - name: amiID
+      value: replace_amiID
+    version: replace_k8sVersion
     workers:
       machineDeployments:
       - class: default-worker
