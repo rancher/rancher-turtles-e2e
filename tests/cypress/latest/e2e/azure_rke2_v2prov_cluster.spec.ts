@@ -1,12 +1,11 @@
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
-import {isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
+import {isAPIv1beta1, isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
 import * as randomstring from "randomstring";
 import {vars} from '~/support/variables';
 
 Cypress.config();
-describe.skip('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
-  // Skipping the test until hostbusters bumps CAPI to v1.11.5
+describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
   let userID: string, ccID: string;
   let features = ['turtles']
   const timeout = vars.fullTimeout
@@ -19,6 +18,10 @@ describe.skip('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () 
   }
 
   beforeEach(() => {
+    if (!isAPIv1beta1) {
+      cy.task('log', 'Skipping the test until Rancher CAPI (v2prov) is bumped to v1.11.5');
+      this.skip();
+    }
     cy.login();
     cy.burgerMenuOperate('open')
   });
