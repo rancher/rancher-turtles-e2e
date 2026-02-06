@@ -13,7 +13,13 @@ limitations under the License.
 
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
-import {isPrimeChannel, isRancherManagerVersion, isTurtlesPrimeBuild, turtlesNamespace, capiNamespace} from '~/support/utils';
+import {
+  capiNamespace,
+  isPrimeChannel,
+  isRancherManagerVersion,
+  isTurtlesPrimeBuild,
+  turtlesNamespace
+} from '~/support/utils';
 import {vars} from '~/support/variables';
 
 const buildType = Cypress.env('turtles_dev_chart') && isRancherManagerVersion('2.13') ? 'dev-v2.13' : Cypress.env('turtles_dev_chart') && isRancherManagerVersion('2.14') ? 'dev-v2.14' : 'prod';
