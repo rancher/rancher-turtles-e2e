@@ -22,15 +22,8 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
   let clusterName: string
   const timeout = vars.shortTimeout
   const classNamePrefix = 'docker-rke2'
-  let path = '/tests/assets/rancher-turtles-fleet-example/capd/rke2/class-clusters'
-  if (isAPIv1beta1) {
-    path = '/tests/assets/rancher-turtles-fleet-example/capd/rke2/class-clusters-v1beta1'
-  }
-  const branch = vars.branch
-  let classesPath = 'examples/clusterclasses/docker/rke2'
-  if (isAPIv1beta1) {
-    classesPath = 'examples/clusterclasses/docker/rke2-v1beta1'
-  }
+  const path = isAPIv1beta1 ? '/tests/assets/rancher-turtles-fleet-example/capd/rke2/class-clusters-v1beta1' : '/tests/assets/rancher-turtles-fleet-example/capd/rke2/class-clusters'
+  const classesPath = 'examples/clusterclasses/docker/rke2'
   const clustersRepoName = 'docker-rke2-class-clusters'
   const clusterClassRepoName = "docker-rke2-clusterclass"
   const dockerAuthUsernameBase64 = btoa(Cypress.env("docker_auth_username"))

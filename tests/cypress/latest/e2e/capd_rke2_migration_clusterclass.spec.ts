@@ -44,11 +44,11 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
 
       it('Create Docker CAPIProvider & Calico CNI HelmOp', () => {
         // Calico CNI HelmOp
-        cy.addFleetGitRepo('calico-cni', vars.turtlesRepoUrl, vars.branch, 'examples/applications/cni/calico', vars.capiClustersNS)
+        cy.addFleetGitRepo('calico-cni', vars.turtlesRepoUrl, vars.classbranch, 'examples/applications/cni/calico', vars.capiClustersNS)
 
         // Docker rke2 lb-config
         cy.burgerMenuOperate('open');
-        cy.addFleetGitRepo('lb-docker', vars.turtlesRepoUrl, vars.branch, 'examples/applications/lb/docker', vars.capiClustersNS)
+        cy.addFleetGitRepo('lb-docker', vars.turtlesRepoUrl, vars.classbranch, 'examples/applications/lb/docker', vars.capiClustersNS)
 
         // Create Docker provider
         cy.createCAPIProvider(capdProviderName);
