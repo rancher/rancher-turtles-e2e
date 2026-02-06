@@ -88,7 +88,8 @@ describe('Import CAPV Kubeadm Class-Cluster', {tags: '@vsphere'}, () => {
         .should('exist');
 
       // Add CAPV fleet repository
-      cy.addFleetGitRepo(clusterRepoName, vars.repoUrl, 'main', path);
+      // TODO: move branch capi-bump back to vars.branch before merge
+      cy.addFleetGitRepo(clusterRepoName, vars.repoUrl, "capi-bump", path);
 
       // Check CAPI cluster using its name
       cy.checkCAPICluster(clusterName);

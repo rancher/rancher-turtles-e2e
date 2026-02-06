@@ -27,7 +27,10 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
     path = '/tests/assets/rancher-turtles-fleet-example/capd/rke2/class-clusters-v1beta1'
   }
   const branch = vars.branch
-  const classesPath = 'examples/clusterclasses/docker/rke2'
+  let classesPath = 'examples/clusterclasses/docker/rke2'
+  if (isAPIv1beta1) {
+    classesPath = 'examples/clusterclasses/docker/rke2-v1beta1'
+  }
   const clustersRepoName = 'docker-rke2-class-clusters'
   const clusterClassRepoName = "docker-rke2-clusterclass"
   const dockerAuthUsernameBase64 = btoa(Cypress.env("docker_auth_username"))
@@ -61,7 +64,8 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
   context('[CLUSTER-IMPORT]', () => {
     it('Add CAPD cluster fleet repo and get cluster name', () => {
       cypressLib.checkNavIcon('cluster-management').should('exist');
-      cy.addFleetGitRepo(clustersRepoName, vars.repoUrl, branch, path);
+      // TODO: move branch capi-bump back to vars.branch before merge
+      cy.addFleetGitRepo(clustersRepoName, vars.repoUrl, "capi-bump", path);
 
       // Check CAPI cluster using its name prefix i.e. className
       cy.checkCAPICluster(classNamePrefix);
