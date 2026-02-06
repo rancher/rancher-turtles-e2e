@@ -47,6 +47,7 @@ docker run --init -v $PWD:/workdir -w /workdir \
     -e QASE_TESTOPS_RUN_ID=$QASE_TESTOPS_RUN_ID \
     -e SKIP_CLUSTER_DELETE=$SKIP_CLUSTER_DELETE \
     -e CLUSTER_NAME_SUFFIX=$CLUSTER_NAME_SUFFIX \
+    -e TURTLES_BRANCH=$TURTLES_BRANCH \
     -e "GREP=$GREP" \
     -e "GREPTAGS=$GREPTAGS" \
     -e "CI=$CI" \
