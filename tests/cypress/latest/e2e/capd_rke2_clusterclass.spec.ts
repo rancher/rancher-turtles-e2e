@@ -40,12 +40,11 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
 
   const classesPath = 'examples/clusterclasses/docker/rke2'
   const clusterClassRepoName = "docker-rke2-clusterclass"
+  const classClusterFileName = isAPIv1beta1 ? "./fixtures/docker/capd-rke2-class-cluster-v1beta1.yaml" : "./fixtures/docker/capd-rke2-class-cluster.yaml"
+
   const dockerAuthUsernameBase64 = btoa(Cypress.env("docker_auth_username"))
   const dockerAuthPasswordBase64 = btoa(Cypress.env("docker_auth_password"))
-  let classClusterfileName = "capd-rke2-class-cluster.yaml"
-  if (isAPIv1beta1) {
-    classClusterfileName = "capd-rke2-class-cluster-v1beta1.yaml"
-  }
+
   beforeEach(() => {
     cy.login();
     cy.burgerMenuOperate('open');
@@ -77,7 +76,7 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
   context('[CLUSTER-IMPORT]', () => {
     qase(29,
       it('Import CAPD RKE2 class-clusters using YAML', () => {
-        cy.readFile(`./fixtures/docker/${classClusterfileName}`).then((data) => {
+        cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_rke2_version/g, vars.rke2Version)
           data = data.replace(/replace_kind_version/g, vars.kindVersion)
@@ -122,7 +121,7 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
 
     qase(8,
       it("Scale up imported CAPD cluster by patching class-cluster yaml", () => {
-        cy.readFile(`./fixtures/docker/${classClusterfileName}`).then((data) => {
+        cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replicas: 2/g, 'replicas: 3')
 
           // workaround; these values need to be re-replaced before applying the scaling changes

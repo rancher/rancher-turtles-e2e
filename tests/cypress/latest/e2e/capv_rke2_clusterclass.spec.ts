@@ -12,10 +12,7 @@ describe('Import CAPV RKE2 Class-Cluster', {tags: '@vsphere'}, () => {
   const classRepoName = 'vsphere-rke2-clusterclass'
   const className = 'vsphere-rke2-example'
   const clusterName = 'turtles-qa-capv-rke2-example'
-  let path = '/tests/assets/rancher-turtles-fleet-example/capv/rke2/class-clusters'
-  if (isAPIv1beta1) {
-    path = '/tests/assets/rancher-turtles-fleet-example/capv/rke2/class-clusters-v1beta1'
-  }
+  const path = isAPIv1beta1 ? '/tests/assets/rancher-turtles-fleet-example/capv/rke2/class-clusters-v1beta1' : '/tests/assets/rancher-turtles-fleet-example/capv/rke2/class-clusters'
   const classesPath = 'examples/clusterclasses/vsphere/rke2'
   const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
   const providerName = 'vsphere'

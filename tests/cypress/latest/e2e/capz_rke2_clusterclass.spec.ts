@@ -11,6 +11,7 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: '@full'}, () => {
   const clusterName = getClusterName(classNamePrefix)
   const classesPath = 'examples/clusterclasses/azure/rke2'
   const clusterClassRepoName = classNamePrefix + '-clusterclass'
+  const classClusterFileName = isAPIv1beta1 ? './fixtures/azure/capz-rke2-class-cluster-v1beta1.yaml' : './fixtures/azure/capz-rke2-class-cluster.yaml'
 
   const clientID = Cypress.env("azure_client_id")
   const clientSecret = btoa(Cypress.env("azure_client_secret"))
@@ -22,10 +23,6 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: '@full'}, () => {
     cy.burgerMenuOperate('open');
   });
 
-  let classClusterFileName = './fixtures/azure/capz-rke2-class-cluster.yaml'
-  if (isAPIv1beta1) {
-    classClusterFileName = './fixtures/azure/capz-rke2-class-cluster-v1beta1.yaml'
-  }
 
   context('[SETUP]', () => {
     it('Setup the namespace for importing', () => {

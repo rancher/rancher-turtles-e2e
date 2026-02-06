@@ -42,10 +42,7 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
   context('[CLUSTER-IMPORT]', () => {
     qase(55,
       it('Import CAPZ AKS class-cluster using YAML', () => {
-        let classClusterFileName = './fixtures/azure/capz-aks-class-cluster.yaml'
-        if (isAPIv1beta1) {
-          classClusterFileName = './fixtures/azure/capz-aks-class-cluster-v1beta1.yaml'
-        }
+        const classClusterFileName = isAPIv1beta1 ? './fixtures/azure/capz-aks-class-cluster-v1beta1.yaml' : './fixtures/azure/capz-aks-class-cluster.yaml'
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_subscription_id/g, subscriptionID)

@@ -10,17 +10,12 @@ describe('Import CAPZ Kubeadm Class-Cluster', {tags: '@full'}, () => {
   const clusterName = getClusterName(classNamePrefix)
   const classesPath = 'examples/clusterclasses/azure/kubeadm'
   const clusterClassRepoName = "azure-kubeadm-clusterclass"
+  const classClusterFileName = isAPIv1beta1 ? './fixtures/azure/capz-kubeadm-class-cluster-v1beta1.yaml' : './fixtures/azure/capz-kubeadm-class-cluster.yaml'
 
   const clientID = Cypress.env("azure_client_id")
   const clientSecret = btoa(Cypress.env("azure_client_secret"))
   const subscriptionID = Cypress.env("azure_subscription_id")
   const tenantID = Cypress.env("azure_tenant_id")
-
-
-  let classClusterFileName = './fixtures/azure/capz-kubeadm-class-cluster.yaml'
-  if (isAPIv1beta1) {
-    classClusterFileName = './fixtures/azure/capz-kubeadm-class-cluster-v1beta1.yaml'
-  }
 
   beforeEach(() => {
     cy.login();
