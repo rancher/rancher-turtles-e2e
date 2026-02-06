@@ -11,14 +11,11 @@ describe('Import CAPA EKS Class-Cluster', {tags: '@full'}, () => {
   const clusterName = getClusterName(classNamePrefix)
   const classesPath = 'examples/clusterclasses/aws/eks'
   const clusterClassRepoName = 'aws-eks-clusterclass'
+  const classClusterFileName = isAPIv1beta1 ? './fixtures/aws/capa-eks-class-cluster-v1beta1.yaml' : './fixtures/aws/capa-eks-class-cluster.yaml'
+
   const providerName = 'aws'
   const accessKey = Cypress.env('aws_access_key')
   const secretKey = Cypress.env('aws_secret_key')
-
-  let classClusterFileName = './fixtures/aws/capa-eks-class-cluster.yaml'
-  if (isAPIv1beta1) {
-    classClusterFileName = './fixtures/aws/capa-eks-class-cluster-v1beta1.yaml'
-  }
 
   beforeEach(() => {
     cy.login();

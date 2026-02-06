@@ -11,10 +11,7 @@ describe('Import CAPV Kubeadm Class-Cluster', {tags: '@vsphere'}, () => {
   const classRepoName = 'vsphere-kb-clusterclass'
   const className = 'vsphere-kubeadm-example'
   const clusterName = 'turtles-qa-capv-kb-example'
-  let path = '/tests/assets/rancher-turtles-fleet-example/capv/kubeadm/class-clusters'
-  if (isAPIv1beta1) {
-    path = '/tests/assets/rancher-turtles-fleet-example/capv/kubeadm/class-clusters-v1beta1'
-  }
+  const path = isAPIv1beta1 ? '/tests/assets/rancher-turtles-fleet-example/capv/kubeadm/class-clusters-v1beta1' : '/tests/assets/rancher-turtles-fleet-example/capv/kubeadm/class-clusters'
   const classesPath = 'examples/clusterclasses/vsphere/kubeadm'
   const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
   const providerName = 'vsphere'

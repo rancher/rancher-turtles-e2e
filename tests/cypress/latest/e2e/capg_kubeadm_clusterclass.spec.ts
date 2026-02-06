@@ -12,12 +12,9 @@ describe('Import CAPG Kubeadm Class-Cluster', {tags: '@full'}, () => {
   const clusterName = getClusterName(classNamePrefix)
   const classesPath = 'examples/clusterclasses/gcp/kubeadm'
   const clusterClassRepoName = 'gcp-kubeadm-clusterclass'
-  const gcpProject = Cypress.env("gcp_project")
+  const classClusterFileName = isAPIv1beta1 ? './fixtures/gcp/capg-kubeadm-class-cluster-v1beta1.yaml' : './fixtures/gcp/capg-kubeadm-class-cluster.yaml'
 
-  let classClusterFileName = './fixtures/gcp/capg-kubeadm-class-cluster.yaml'
-  if (isAPIv1beta1) {
-    classClusterFileName = './fixtures/gcp/capg-kubeadm-class-cluster-v1beta1.yaml'
-  }
+  const gcpProject = Cypress.env("gcp_project")
 
   beforeEach(() => {
     cy.login();
