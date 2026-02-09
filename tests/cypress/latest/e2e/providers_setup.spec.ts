@@ -36,7 +36,7 @@ function matchAndWaitForProviderReadyStatus(
       cy.get('td').eq(2).should('contain.text', providerString);  // Name
       cy.get('td').eq(3).should('contain.text', providerType);    // Type
       cy.get('td').eq(4).should('contain.text', providerName);    // ProviderName
-      // Only check provider version for Rancher >=2.14 and -
+      // Only check provider version for Rancher >=2.13 and -
       // 1. prime rancher
       // 2. for turtles build with dev=true & target_build_type=prime
       if (isRancherManagerVersion('>=2.13') && (isPrimeChannel() || (buildType.includes("dev") && isTurtlesPrimeBuild()))) {
