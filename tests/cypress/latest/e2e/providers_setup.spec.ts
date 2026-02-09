@@ -16,7 +16,7 @@ import {qase} from 'cypress-qase-reporter/mocha';
 import {isPrimeChannel, isRancherManagerVersion, isTurtlesPrimeBuild, turtlesNamespace, capiNamespace} from '~/support/utils';
 import {vars} from '~/support/variables';
 
-const buildType = Cypress.env('turtles_dev_chart') ? 'dev' : 'prod';
+const buildType = Cypress.env('turtles_dev_chart') && isRancherManagerVersion('2.13') ? 'dev-2.13' : Cypress.env('turtles_dev_chart') && isRancherManagerVersion('2.14') ? 'dev-2.14' : 'prod';
 
 function matchAndWaitForProviderReadyStatus(
   providerString: string,
@@ -36,10 +36,10 @@ function matchAndWaitForProviderReadyStatus(
       cy.get('td').eq(2).should('contain.text', providerString);  // Name
       cy.get('td').eq(3).should('contain.text', providerType);    // Type
       cy.get('td').eq(4).should('contain.text', providerName);    // ProviderName
-      // Only check provider version for Rancher >=2.13 and -
+      // Only check provider version for Rancher >=2.14 and -
       // 1. prime rancher
       // 2. for turtles build with dev=true & target_build_type=prime
-      if (isRancherManagerVersion('>=2.13') && (isPrimeChannel() || (buildType=="dev" && isTurtlesPrimeBuild()))) {
+      if (isRancherManagerVersion('>=2.13') && (isPrimeChannel() || (buildType.includes("dev") && isTurtlesPrimeBuild()))) {
         cy.get('td').eq(5).should('contain.text', providerVersion); // InstalledVersion
       } else {
         cy.task('log', 'This is not a prime Rancher; skipping provider version check');
@@ -75,7 +75,7 @@ describe('Enable CAPI Providers', () => {
       google: 'v1.10.0',
       azure: 'v1.21.0'
     },
-    dev: {
+    'dev-2.13': {
       capi: 'v1.10.6',
       rke2: 'v0.21.1',
       kubeadm: 'v1.10.6',
@@ -84,6 +84,16 @@ describe('Enable CAPI Providers', () => {
       amazon: 'v2.9.1',
       google: 'v1.10.0',
       azure: 'v1.21.0'
+    },
+    'dev-2.14': {
+      capi: 'v1.11.5',
+      rke2: 'v0.22.0',
+      kubeadm: 'v1.11.5',
+      fleet: 'v0.13.0',
+      vsphere: 'v1.14.0',
+      amazon: 'v2.10.0',
+      google: 'v1.11.0',
+      azure: 'v1.22.0'
     }
   }
 
