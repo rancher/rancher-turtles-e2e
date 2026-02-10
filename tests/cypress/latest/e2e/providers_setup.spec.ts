@@ -16,7 +16,7 @@ import {qase} from 'cypress-qase-reporter/mocha';
 import {isPrimeChannel, isRancherManagerVersion, isTurtlesPrimeBuild, turtlesNamespace, capiNamespace} from '~/support/utils';
 import {vars} from '~/support/variables';
 
-const buildType = Cypress.env('turtles_dev_chart') && isRancherManagerVersion('2.13') ? 'dev-2.13' : Cypress.env('turtles_dev_chart') && isRancherManagerVersion('2.14') ? 'dev-2.14' : 'prod';
+const buildType = Cypress.env('turtles_dev_chart') && isRancherManagerVersion('2.13') ? 'dev-v2.13' : Cypress.env('turtles_dev_chart') && isRancherManagerVersion('2.14') ? 'dev-v2.14' : 'prod';
 
 function matchAndWaitForProviderReadyStatus(
   providerString: string,
@@ -75,7 +75,7 @@ describe('Enable CAPI Providers', () => {
       google: 'v1.10.0',
       azure: 'v1.21.0'
     },
-    'dev-2.13': {
+    'dev-v2.13': {
       capi: 'v1.10.6',
       rke2: 'v0.21.1',
       kubeadm: 'v1.10.6',
@@ -85,7 +85,7 @@ describe('Enable CAPI Providers', () => {
       google: 'v1.10.0',
       azure: 'v1.21.0'
     },
-    'dev-2.14': {
+    'dev-v2.14': {
       capi: 'v1.11.5',
       rke2: 'v0.22.0',
       kubeadm: 'v1.11.5',
@@ -136,32 +136,44 @@ describe('Enable CAPI Providers', () => {
           // @ts-ignore
           text.providers.bootstrapKubeadm.enabled = true;
           // @ts-ignore
+          text.providers.bootstrapKubeadm.enableAutomaticUpdate = true;
+          
+          // @ts-ignore
           text.providers.controlplaneKubeadm.enabled = true;
+          // @ts-ignore
+          text.providers.controlplaneKubeadm.enableAutomaticUpdate = true;
 
           const tags = Cypress.env('grepTags')
           if (tags) {
             if (tags.includes('@short')) {
               // @ts-ignore
               text.providers.infrastructureDocker.enabled = true;
+              // @ts-ignore
+              text.providers.infrastructureDocker.enableAutomaticUpdate = true;
             }
             if (tags.includes('@full')) {
               // @ts-ignore
               text.providers.infrastructureGCP.enabled = true;
+              // @ts-ignore
+              text.providers.infrastructureGCP.enableAutomaticUpdate = true;
               // @ts-ignore
               text.providers.infrastructureGCP.variables.GCP_B64ENCODED_CREDENTIALS = '';
 
               // @ts-ignore
               text.providers.infrastructureAzure.enabled = true;
               // @ts-ignore
+              text.providers.infrastructureAzure.enableAutomaticUpdate = true;
+
+              // @ts-ignore
               text.providers.infrastructureAWS.enabled = true;
+              // @ts-ignore
+              text.providers.infrastructureAWS.enableAutomaticUpdate = true;
             }
             if (tags.includes('@vsphere')) {
               // @ts-ignore
               text.providers.infrastructureVSphere.enabled = true;
               // @ts-ignore
-              text.providers.infrastructureVSphere.enableAutomaticUpdate = false;
-              // @ts-ignore
-              text.providers.infrastructureVSphere.version = 'v1.13.1';
+              text.providers.infrastructureVSphere.enableAutomaticUpdate = true;
             }
           }
         }
