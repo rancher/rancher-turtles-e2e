@@ -31,7 +31,7 @@ describe('Import CAPZ Kubeadm Class-Cluster', {tags: '@full'}, () => {
     })
 
     it('Add CAPZ Kubeadm ClusterClass Fleet Repo and check Azure CCM', () => {
-      cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.branch, classesPath, vars.capiClassesNS)
+      cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(classNamePrefix);
 
