@@ -70,7 +70,7 @@ describe('Import CAPV Kubeadm Class-Cluster', {tags: '@vsphere'}, () => {
     })
 
     it('Add CAPV Kubeadm ClusterClass Fleet Repo and check Applications', () => {
-      cy.addFleetGitRepo(classRepoName, vars.turtlesRepoUrl, vars.branch, classesPath, vars.capiClassesNS)
+      cy.addFleetGitRepo(classRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(className);
 
@@ -85,7 +85,7 @@ describe('Import CAPV Kubeadm Class-Cluster', {tags: '@vsphere'}, () => {
         .should('exist');
 
       // Add CAPV fleet repository
-      cy.addFleetGitRepo(clusterRepoName, vars.repoUrl, vars.branch, path);
+      cy.addFleetGitRepo(clusterRepoName, vars.repoUrl, 'main', path);
 
       // Check CAPI cluster using its name
       cy.checkCAPICluster(clusterName);

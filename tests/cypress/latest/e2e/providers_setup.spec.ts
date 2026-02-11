@@ -126,7 +126,7 @@ describe('Enable CAPI Providers', () => {
       // HelmOps to be used across all specs
       it('Add Applications fleet repo', () => {
         // Add upstream apps repo
-        cy.addFleetGitRepo('helm-ops', vars.turtlesRepoUrl, vars.branch, 'examples/applications/', vars.capiClustersNS);
+        cy.addFleetGitRepo('helm-ops', vars.turtlesRepoUrl, vars.classBranch, 'examples/applications/', vars.capiClustersNS);
       })
     );
 

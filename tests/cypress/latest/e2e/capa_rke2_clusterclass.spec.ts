@@ -36,7 +36,7 @@ describe('Import CAPA RKE2 Class-Cluster', {tags: '@full'}, () => {
 
     qase(116,
       it('Add CAPA RKE2 ClusterClass Fleet Repo and check Applications', () => {
-        cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.branch, classesPath, vars.capiClassesNS)
+        cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(classNamePrefix);
 

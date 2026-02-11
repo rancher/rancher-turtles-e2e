@@ -23,7 +23,7 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
   const timeout = vars.shortTimeout
   const classNamePrefix = 'docker-rke2'
   const path = '/tests/assets/rancher-turtles-fleet-example/capd/rke2/class-clusters'
-  const branch = vars.branch
+  const branch = 'main'
   const classesPath = 'examples/clusterclasses/docker/rke2'
   const clustersRepoName = 'docker-rke2-class-clusters'
   const clusterClassRepoName = "docker-rke2-clusterclass"
@@ -49,7 +49,7 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
     });
 
     it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
-      cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.branch, classesPath, vars.capiClassesNS)
+      cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(classNamePrefix);
     })

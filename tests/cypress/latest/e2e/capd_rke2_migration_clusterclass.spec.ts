@@ -44,11 +44,11 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
 
       it('Create Docker CAPIProvider & Calico CNI HelmOp', () => {
         // Calico CNI HelmOp
-        cy.addFleetGitRepo('calico-cni', vars.turtlesRepoUrl, vars.branch, 'examples/applications/cni/calico', vars.capiClustersNS)
+        cy.addFleetGitRepo('calico-cni', vars.turtlesRepoUrl, vars.classBranch, 'examples/applications/cni/calico', vars.capiClustersNS)
 
         // Docker rke2 lb-config
         cy.burgerMenuOperate('open');
-        cy.addFleetGitRepo('lb-docker', vars.turtlesRepoUrl, vars.branch, 'examples/applications/lb/docker', vars.capiClustersNS)
+        cy.addFleetGitRepo('lb-docker', vars.turtlesRepoUrl, vars.classBranch, 'examples/applications/lb/docker', vars.capiClustersNS)
 
         // Create Docker provider
         cy.createCAPIProvider(capdProviderName);
@@ -65,7 +65,7 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
 
 
       it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
-        cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.branch, classesPath, vars.capiClassesNS)
+        cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(classNamePrefix);
       })
