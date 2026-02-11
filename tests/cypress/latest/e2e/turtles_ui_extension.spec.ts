@@ -35,10 +35,8 @@ describe('Install CAPI extension - @install', {tags: '@install'}, () => {
       cy.contains('CAPI UI');
 
       if (isRancherManagerVersion('>=2.13')) {
-        cy.get('div[aria-label*="CAPI UI"]').within(() => {
-          cy.getBySel('item-card-header-action-menu').click();
-          cy.contains('Install').click();
-        })
+        cy.getBySel('item-card-header-action-menu').click();
+        cy.contains('Install').click();
       } else {
         cy.getBySel('extension-card-install-btn-capi').click();
       }
