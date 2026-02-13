@@ -1,4 +1,4 @@
-apiVersion: cluster.x-k8s.io/v1beta2
+apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
   labels:
@@ -13,9 +13,8 @@ spec:
       cidrBlocks:
       - 192.168.0.0/16
   topology:
-    classRef:
-      name: azure-rke2-example
-      namespace: capi-classes
+    class: azure-kubeadm-example
+    classNamespace: capi-classes
     controlPlane:
       replicas: 3
     variables:
@@ -27,9 +26,9 @@ spec:
       value: replace_cluster_name
     - name: azureClusterIdentityName
       value: cluster-identity
-    version: replace_rke2_version
+    version: replace_k8sVersion
     workers:
       machineDeployments:
-      - class: rke2-default-worker
+      - class: kubeadm-default-worker
         name: md-0
         replicas: 2

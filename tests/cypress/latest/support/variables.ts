@@ -3,7 +3,8 @@ import {isRancherManagerVersion} from '~/support/utils';
 export const vars = {
   shortTimeout: 600000,
   fullTimeout: 1500000,
-  classBranch: isRancherManagerVersion('2.13') ? 'release/v0.25' : 'main',
+  branch: Cypress.env('turtles_branch'),
+  classBranch: isRancherManagerVersion("2.13") && !Cypress.env('turtles_dev_chart') ? "release/v0.25" : Cypress.env('turtles_branch'),
   capiClustersNS: 'capi-clusters',
   capiClassesNS: 'capi-classes',
   repoUrl: 'https://github.com/rancher/rancher-turtles-e2e',

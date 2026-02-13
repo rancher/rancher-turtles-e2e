@@ -1,4 +1,4 @@
-apiVersion: cluster.x-k8s.io/v1beta2
+apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
   name: replace_cluster_name
@@ -16,10 +16,10 @@ spec:
       cidrBlocks:
         - 10.128.0.0/12
   topology:
-    classRef:
-      name: docker-kubeadm-example
-      namespace: capi-classes
+    class: docker-kubeadm-example
+    classNamespace: capi-classes
     controlPlane:
+      metadata: { }
       replicas: 3
     variables:
       - name: imageRepository

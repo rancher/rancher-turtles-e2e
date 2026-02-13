@@ -1,0 +1,20 @@
+vsphere:
+  server: replace_vsphere_server
+  username: replace_vsphere_username
+  password: replace_vsphere_password
+  datacenter: replace_vsphere_datacenter
+  datastore: replace_vsphere_datastore
+  network: replace_vsphere_network
+  resource_pool: replace_vsphere_resource_pool
+  folder: replace_vsphere_folder
+  rke2_template: replace_vsphere_rke2_template
+  kubeadm_template: replace_vsphere_kubeadm_template
+  ssh_authorized_key: replace_vsphere_ssh_authorized_key
+  tls_thumbprint: replace_vsphere_tls_thumbprint
+
+cluster:
+  name: turtles-qa-capv-kb-example
+  namespace: capi-clusters
+  version: v1.33.5
+  control_plane_machine_count: 3
+  worker_machine_count: 3

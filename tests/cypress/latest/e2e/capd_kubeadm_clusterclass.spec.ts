@@ -14,7 +14,7 @@ limitations under the License.
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import {qase} from 'cypress-qase-reporter/mocha';
-import {getClusterName, isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
+import {getClusterName, isAPIv1beta1, isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
 import {capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 import {vars} from '~/support/variables';
 
@@ -25,6 +25,8 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: '@short'}, () => {
   const clusterName = getClusterName(classNamePrefix)
   const classesPath = 'examples/clusterclasses/docker/kubeadm'
   const clusterClassRepoName = 'docker-kb-clusterclass'
+  const classClusterFileName = isAPIv1beta1 ? "./fixtures/docker/capd-kubeadm-class-cluster-v1beta1.yaml" : "./fixtures/docker/capd-kubeadm-class-cluster.yaml"
+
   const dockerRegistryConfigBase64 = btoa(Cypress.env('docker_registry_config'))
 
   beforeEach(() => {
@@ -59,7 +61,7 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: '@short'}, () => {
   context('[CLUSTER-IMPORT]', () => {
     qase(6,
       it('Import CAPD Kubeadm class-clusters using YAML', () => {
-        cy.readFile('./fixtures/docker/capd-kubeadm-class-cluster.yaml').then((data) => {
+        cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_kindVersion/g, vars.kindVersion)
           cy.importYAML(data, vars.capiClustersNS)
@@ -142,7 +144,7 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: '@short'}, () => {
 
     qase(95,
       it("Scale up imported CAPD cluster by patching class-cluster yaml", () => {
-        cy.readFile('./fixtures/docker/capd-kubeadm-class-cluster.yaml').then((data) => {
+        cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
 
           // workaround; these values need to be re-replaced before applying the scaling changes

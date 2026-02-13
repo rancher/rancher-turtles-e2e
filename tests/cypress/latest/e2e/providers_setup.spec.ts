@@ -13,7 +13,13 @@ limitations under the License.
 
 import '~/support/commands';
 import {qase} from 'cypress-qase-reporter/mocha';
-import {isPrimeChannel, isRancherManagerVersion, isTurtlesPrimeBuild, turtlesNamespace, capiNamespace} from '~/support/utils';
+import {
+  capiNamespace,
+  isPrimeChannel,
+  isRancherManagerVersion,
+  isTurtlesPrimeBuild,
+  turtlesNamespace
+} from '~/support/utils';
 import {vars} from '~/support/variables';
 
 const buildType = Cypress.env('turtles_dev_chart') && isRancherManagerVersion('2.13') ? 'dev-v2.13' : Cypress.env('turtles_dev_chart') && isRancherManagerVersion('2.14') ? 'dev-v2.14' : 'prod';
@@ -87,10 +93,10 @@ describe('Enable CAPI Providers', () => {
     },
     'dev-v2.14': {
       capi: 'v1.12.2',
-      rke2: 'v0.23.0',
+      rke2: 'v0.23.1',
       kubeadm: 'v1.12.2',
       fleet: 'v0.14.0',
-      vsphere: 'v1.14.0',
+      vsphere: 'v1.15.2',
       amazon: 'v2.10.0',
       google: 'v1.11.0',
       azure: 'v1.22.0'
