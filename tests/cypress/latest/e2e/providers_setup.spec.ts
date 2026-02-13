@@ -93,10 +93,10 @@ describe('Enable CAPI Providers', () => {
     },
     'dev-v2.14': {
       capi: 'v1.12.2',
-      rke2: 'v0.23.0',
+      rke2: 'v0.23.1',
       kubeadm: 'v1.12.2',
       fleet: 'v0.14.0',
-      vsphere: 'v1.14.0',
+      vsphere: 'v1.15.2',
       amazon: 'v2.10.0',
       google: 'v1.11.0',
       azure: 'v1.22.0'
