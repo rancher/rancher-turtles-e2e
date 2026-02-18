@@ -94,6 +94,13 @@ func isRancherManagerVersion(constraint string) bool {
 	return c.Check(v)
 }
 
+func isUpgrade() bool {
+	if Label("migration").MatchesLabelFilter(GinkgoLabelFilter()) || Label("upgrade").MatchesLabelFilter(GinkgoLabelFilter()) {
+		return true
+	}
+	return false
+}
+
 func FailWithReport(message string, callerSkip ...int) {
 	// Ensures the correct line numbers are reported
 	Fail(message, callerSkip[0]+1)

@@ -133,7 +133,16 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 						"--set-string", fmt.Sprintf("extraEnv[%d].value=%s", idx, e.value),
 					)
 				}
-				// Log the extra flags
+			}
+
+			// For upgrade tests we need to reset systemDefaultRegistry when upgrading from head/2.12 and only if the target channel is not Prime
+			// as head/2.12 and all Prime channels use their own systemDefaultRegistry values and resetting would cause issues with the upgrade
+			if isUpgrade() && isRancherManagerVersion(">=2.13") && !strings.Contains(rancherChannel, "prime") {
+				extraFlags = append(extraFlags, "--set", "systemDefaultRegistry=\"\"")
+			}
+
+			// Log the extra flags
+			if extraFlags != nil {
 				GinkgoWriter.Write([]byte(strings.Join(extraFlags, " ") + "\n"))
 			}
 
