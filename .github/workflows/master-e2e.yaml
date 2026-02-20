@@ -342,7 +342,7 @@ jobs:
       - name: Make Turtles chart
         if: ${{ inputs.turtles_dev_chart == true }}
         run: |
-          if [[ "${{ env.RANCHER_VERSION }}" =~ "prime/2.13" || "${{ inputs.grep_test_by_tag }}" =~ "@migration" ]]; then
+          if [[ "${{ env.RANCHER_VERSION }}" =~ (prime.*\/)(2\.13|2\.14) || "${{ inputs.grep_test_by_tag }}" =~ "@migration" ]]; then
             # Inject custom image into turtles chart deployment.yaml without using the system_default_registry prefix
             # This is needed on Prime because the local registry is not accessible via system_default_registry
             # Sed command uses range from `if` to `end` to replace templating by actual image
