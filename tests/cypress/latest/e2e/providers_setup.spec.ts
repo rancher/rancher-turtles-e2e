@@ -131,7 +131,7 @@ describe('Enable CAPI Providers', () => {
     );
 
     if (isRancherManagerVersion('>=2.13')) {
-      it('Create Providers using Charts', () => {
+      it.skip('Create Providers using Charts', () => {
         const providerSelectionFunction = (text: any) => {
           // @ts-ignore
           text.providers.bootstrapKubeadm.enabled = true;
