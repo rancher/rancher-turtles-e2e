@@ -19,7 +19,7 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import jsyaml from 'js-yaml';
 import yaml from 'js-yaml';
 import _ from 'lodash';
-import {capiNamespace, isPrimeChannel, isPrePrimeChannel, isRancherManagerVersion} from '~/support/utils';
+import {capiNamespace, isPrePrimeChannel, isPrimeChannel, isRancherManagerVersion} from '~/support/utils';
 
 // Generic commands
 // Go to specific Sub Menu from Access Menu
@@ -1146,7 +1146,11 @@ Cypress.Commands.add('verifyCAPIProviderImage', (providerNamespace) => {
   } else {
     if (isRancherManagerVersion('>=2.13')) {
       if (devChart && buildType == 'prime') {
-        providerImageRegistry = 'registry.rancher.com/rancher'
+        if (isPrePrimeChannel()) {
+          providerImageRegistry = 'stgregistry.suse.com/rancher'
+        } else {
+          providerImageRegistry = 'registry.rancher.com/rancher'
+        }
       } else if (isPrePrimeChannel()) {
         providerImageRegistry = 'stgregistry.suse.com/rancher'
       } else if (isPrimeChannel()) {
