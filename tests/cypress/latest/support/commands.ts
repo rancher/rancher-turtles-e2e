@@ -20,6 +20,7 @@ import jsyaml from 'js-yaml';
 import yaml from 'js-yaml';
 import _ from 'lodash';
 import {capiNamespace, isPrePrimeChannel, isPrimeChannel, isRancherManagerVersion} from '~/support/utils';
+import {vars} from '~/support/variables'
 
 // Generic commands
 // Go to specific Sub Menu from Access Menu
@@ -615,7 +616,7 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
     chartSelector = turtlesChartSelector
   }
 
-  const turtlesProvidersChart = chartName == 'Rancher Turtles Certified Providers'
+  const turtlesProvidersChart = chartName == vars.turtlesProvidersChartName
   // for 2.13 we use an external repo to install providers chart, and for 2.12 there is no need to install it.
   if (turtlesProvidersChart && isRancherManagerVersion('>=2.13')) {
     const devChart = Cypress.env('turtles_dev_chart')
@@ -650,6 +651,11 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
 
   cy.getBySel('btn-chart-install').click();
   cy.contains(operation + ': Step 1')
+
+  // TODO: This is a temp workaround until https://github.com/rancher/rancher/issues/53882 is fixed
+  if (chartName == "rancher-turtles-providers") {
+    cy.getBySel('name-ns-description-namespace').type(namespace + '{enter}');
+  }
   cy.clickButton('Next');
 
   // Used for entering questions and answering them
@@ -711,7 +717,7 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
       // Check if the installation panel has appeared;
       if (windowmanager.find('div[role=tabpanel]').length) {
         // Wait for both CRD and main helm chart to be installed
-        if (chartName == 'Rancher Turtles Certified Providers') {
+        if (chartName == vars.turtlesProvidersChartName) {
           cy.contains(new RegExp('SUCCESS: helm .*tgz'), {timeout: 140000}).should('be.visible');
         } else {
           cy.contains(new RegExp('SUCCESS: helm .*crd.*tgz.*SUCCESS: helm .*tgz'), {timeout: 140000}).should('be.visible');
