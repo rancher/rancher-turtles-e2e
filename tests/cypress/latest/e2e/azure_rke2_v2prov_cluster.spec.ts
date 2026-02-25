@@ -13,7 +13,7 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
   const k8sVersion = vars.rke2Version
   const clusterName = 'turtles-qa-azure-v2-' + randomstring.generate({length: 4, capitalization: "lowercase"})
 
-  if (isRancherManagerVersion('>=2.13')) {
+  if (isRancherManagerVersion('2.13')) {
     features.push('embedded-cluster-api');
   }
 
@@ -100,7 +100,7 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
           cy.getBySel('log').click();
           cy.contains('[INFO ] provisioning done');
 
-          if (isRancherManagerVersion('>=2.13')) {
+          if (isRancherManagerVersion('2.13')) {
             // Switch the features
             if (feature == 'turtles') {
               cy.setCAPIFeature('embedded-cluster-api', 'true');
