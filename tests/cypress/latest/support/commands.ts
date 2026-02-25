@@ -652,7 +652,7 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
   cy.getBySel('btn-chart-install').click();
   cy.contains(operation + ': Step 1')
 
-  // TODO: This is a temp workaround until https://github.com/rancher/rancher/issues/53882 is fixed
+  // TODO: This is a temp workaround until https://github.com/rancher/rancher/issues/53883 is fixed
   if (chartName == "rancher-turtles-providers") {
     cy.getBySel('name-ns-description-namespace').type(namespace + '{enter}');
   }

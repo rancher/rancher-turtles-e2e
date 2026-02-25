@@ -1,9 +1,4 @@
-import {
-  isPrePrimeChannel,
-  isPrimeChannel,
-  isRancherManagerVersion,
-  providersChartNeedsStgRegistry
-} from '~/support/utils';
+import {isPrePrimeChannel, isRancherManagerVersion,} from '~/support/utils';
 
 export const vars = {
   shortTimeout: 600000,
@@ -13,8 +8,8 @@ export const vars = {
   capiClassesNS: 'capi-classes',
   repoUrl: 'https://github.com/rancher/rancher-turtles-e2e',
   turtlesRepoUrl: 'https://github.com/rancher/turtles',
-  turtlesProvidersOCIRepo: providersChartNeedsStgRegistry() ? 'oci://stgregistry.suse.com/rancher/charts/rancher-turtles-providers' : 'oci://registry.suse.com/rancher/charts/rancher-turtles-providers', // For community head and prime-alpha/rc builds, use stgregistry, for released community and prime, use regular registry.
-  turtlesProvidersChartName: isPrePrimeChannel() || isPrimeChannel() ? 'rancher-turtles-providers' : 'Rancher Turtles Certified Providers', // This is only required until https://github.com/rancher/rancher/issues/53882 is fixed; chart appears to work well on head builds
+  turtlesProvidersOCIRepo: isPrePrimeChannel() ? 'oci://stgregistry.suse.com/rancher/charts/rancher-turtles-providers' : 'oci://registry.suse.com/rancher/charts/rancher-turtles-providers', // For prime-alpha/rc builds, use stgregistry, for community and prime, use regular registry.
+  turtlesProvidersChartName: isRancherManagerVersion('2.14') ? 'rancher-turtles-providers' : 'Rancher Turtles Certified Providers', // TODO: Remove this once https://github.com/rancher/rancher/issues/53883 is fixed
   kindVersion: isRancherManagerVersion('>=2.13')
   ? 'v1.34.0'
   : 'v1.33.4',
