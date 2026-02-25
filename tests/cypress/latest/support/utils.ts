@@ -35,6 +35,11 @@ export const isPrePrimeChannel = (): boolean => {
   return Cypress.env("rancher_version").includes('prime-alpha') || Cypress.env("rancher_version").includes('prime-rc');
 }
 
+// Check if Rancher should use staging registry to install Rancher Turtles Providers Chart
+export const providersChartNeedsStgRegistry = (): boolean => {
+  return !Cypress.env('turtles_dev_chart') && (Cypress.env("rancher_version").includes('-alpha') || Cypress.env("rancher_version").includes('-rc') || Cypress.env("rancher_version").includes('head'));
+}
+
 export const isTurtlesPrimeBuild = (): boolean =>{
   return Cypress.env("turtles_build_type") === "prime";
 }
