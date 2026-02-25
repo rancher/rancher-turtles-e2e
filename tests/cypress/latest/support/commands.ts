@@ -654,6 +654,7 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
 
   // TODO: This is a temp workaround until https://github.com/rancher/rancher/issues/53883 is fixed
   if (chartName == "rancher-turtles-providers") {
+    cy.setNamespace('All Namespaces', 'all_user');
     cy.getBySel('name-ns-description-namespace').type(namespace + '{enter}');
   }
   cy.clickButton('Next');
