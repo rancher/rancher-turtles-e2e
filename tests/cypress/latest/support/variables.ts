@@ -9,7 +9,7 @@ export const vars = {
   repoUrl: 'https://github.com/rancher/rancher-turtles-e2e',
   turtlesRepoUrl: 'https://github.com/rancher/turtles',
   turtlesProvidersOCIRepo: isPrePrimeChannel() ? 'oci://stgregistry.suse.com/rancher/charts/rancher-turtles-providers' : 'oci://registry.suse.com/rancher/charts/rancher-turtles-providers', // For prime-alpha/rc builds, use stgregistry, for community and prime, use regular registry.
-  turtlesProvidersChartName: isRancherManagerVersion('2.14') ? 'rancher-turtles-providers' : 'Rancher Turtles Certified Providers', // TODO: Remove this once https://github.com/rancher/rancher/issues/53883 is fixed
+  turtlesProvidersChartName: isPrePrimeChannel() ? 'rancher-turtles-providers' : 'Rancher Turtles Certified Providers', // TODO: Remove this once https://github.com/rancher/rancher/issues/53882 and 53883 is fixed; staging registry is currently broken for everything
   kindVersion: isRancherManagerVersion('>=2.13')
   ? 'v1.34.0'
   : 'v1.33.4',
