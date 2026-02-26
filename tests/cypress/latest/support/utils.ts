@@ -25,19 +25,23 @@ export const isRancherManagerVersion = (version: string) => {
   return semver.satisfies(rancherVersion, version)
 }
 
+const rancherVersion = Cypress.env("rancher_version");
+
 // Check if Rancher comes from Prime channel
 export const isPrimeChannel = (): boolean => {
-  return Cypress.env("rancher_version").includes('prime');
+  return rancherVersion.includes('prime');
 }
 
 // Check if Rancher comes from pre-release Prime channel
 export const isPrePrimeChannel = (): boolean => {
-  return Cypress.env("rancher_version").includes('prime-alpha') || Cypress.env("rancher_version").includes('prime-rc');
+  return rancherVersion.includes('prime-alpha') || rancherVersion.includes('prime-rc');
 }
+
+const isPreRelease = /(-alpha|-rc|head)/.test(rancherVersion);
 
 // Check if Rancher should use staging registry to install Rancher Turtles Providers Chart
 export const providersChartNeedsStgRegistry = (): boolean => {
-  return !Cypress.env('turtles_dev_chart') && (Cypress.env("rancher_version").includes('-alpha') || Cypress.env("rancher_version").includes('-rc') || Cypress.env("rancher_version").includes('head'));
+  return !Cypress.env('turtles_dev_chart') && isPreRelease
 }
 
 export const isTurtlesPrimeBuild = (): boolean =>{
