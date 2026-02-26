@@ -190,7 +190,7 @@ resource "libvirt_domain" "vm" {
         }
         source = {
           bridge = {
-            bridge = "br0"
+            bridge = var.bridge
           }
         }
         wait_for_ip = {

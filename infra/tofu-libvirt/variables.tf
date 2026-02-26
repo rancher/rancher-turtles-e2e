@@ -45,12 +45,6 @@ variable "root_password" {
   description = "Password for the cluster nodes"
 }
 
-variable "network_mode" {
-  type        = string
-  default     = "bridge"
-  description = "Network mode used by the cluster"
-}
-
 variable "vms" {
   default     = 1
   description = "Number of vm instances"
