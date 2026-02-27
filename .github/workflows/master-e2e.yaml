@@ -88,7 +88,7 @@ on:
         type: string
       upstream_cluster_version:
         description: Cluster upstream version where to install Rancher (K3s)
-        default: v1.32.3+k3s1
+        default: v1.34.4+k3s1
         type: string
       zone:
         description: GCP zone to host the runner
@@ -317,6 +317,13 @@ jobs:
             echo "TURTLES_BRANCH=release/v0.25" >> ${GITHUB_ENV}
           else
             echo "TURTLES_BRANCH=${{ env.TURTLES_BRANCH }}" >> ${GITHUB_ENV}
+          fi
+      - name: Set k3s Install version
+        run: |
+          if [[ "${{ env.RANCHER_VERSION }}" =~ (2\.12) ]]; then
+            echo INSTALL_K3S_VERSION="v1.32.3+k3s1" >> ${GITHUB_ENV}
+          else
+            echo INSTALL_K3S_VERSION=${{ inputs.upstream_cluster_version }} >> ${GITHUB_ENV}
           fi
 
       # Checkout into r/turtles repo if dev=true to build turtles and providers chart;
