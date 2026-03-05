@@ -1,5 +1,4 @@
 import '~/support/commands';
-import {qase} from 'cypress-qase-reporter/mocha';
 import {getClusterName, skipClusterDeletion} from '~/support/utils';
 import {capiClusterDeletion, capzResourcesCleanup, importedRancherClusterDeletion} from "~/support/cleanup_support";
 import {vars} from '~/support/variables';
@@ -31,19 +30,17 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: '@full'}, () => {
       cy.createAzureClusterIdentity(clientID, tenantID, clientSecret)
     })
 
-    qase(87, it('Add CAPZ RKE2 ClusterClass Fleet Repo and check Azure CCM', () => {
+    it('Add CAPZ RKE2 ClusterClass Fleet Repo and check Azure CCM', () => {
         cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(classNamePrefix);
 
         // Navigate to `local` cluster, More Resources > Fleet > HelmOps and ensure the charts are present.
         cy.checkFleetHelmOps(['azure-ccm', 'calico-cni']);
-      })
-    );
+    })
   })
 
   context('[CLUSTER-IMPORT]', () => {
-    qase(78,
       it('Import CAPZ RKE2 class-cluster using YAML', () => {
         cy.readFile('./fixtures/azure/capz-rke2-class-cluster.yaml').then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
@@ -54,9 +51,8 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: '@full'}, () => {
         // Check CAPI cluster using its name
         cy.checkCAPICluster(clusterName);
       })
-    );
 
-    qase(79, it('Auto import child CAPZ RKE2 cluster', () => {
+     it('Auto import child CAPZ RKE2 cluster', () => {
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
         cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
@@ -73,17 +69,15 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: '@full'}, () => {
         // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
         cy.checkCAPIClusterActive(clusterName, timeout);
       })
-    );
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
 
-    qase(80, it('Install App on imported cluster', {retries: 1}, () => {
+    it('Install App on imported cluster', {retries: 1}, () => {
         // Install Chart
         // We install Logging chart instead of Monitoring, since this is relatively lightweight.
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
-      })
-    );
+    })
 
     it("Scale up imported CAPZ cluster by patching class-cluster yaml", () => {
       cy.readFile('./fixtures/azure/capz-rke2-class-cluster.yaml').then((data) => {
@@ -115,20 +109,17 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: '@full'}, () => {
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
-      qase(82,
         it('Delete the CAPZ cluster', {retries: 1}, () => {
           // Remove CAPI Resources related to the cluster
           capiClusterDeletion(clusterName, timeout);
         })
-      );
 
-      qase(83, it('Delete the ClusterClass fleet repo and other resources', () => {
+      it('Delete the ClusterClass fleet repo and other resources', () => {
           // Remove the clusterclass repo
           cy.removeFleetGitRepo(clusterClassRepoName);
           // Cleanup other resources
           capzResourcesCleanup();
-        })
-      );
+      })
     }
   })
 });

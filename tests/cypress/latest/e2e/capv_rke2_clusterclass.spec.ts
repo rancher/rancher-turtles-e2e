@@ -1,6 +1,5 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import {qase} from 'cypress-qase-reporter/mocha';
 import {isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
 import {capiClusterDeletion, capvResourcesCleanup, importedRancherClusterDeletion} from "~/support/cleanup_support";
 import {vars} from '~/support/variables';
@@ -136,7 +135,7 @@ describe('Import CAPV RKE2 Class-Cluster', {tags: '@vsphere'}, () => {
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    qase(131, it('Validate kube-vip leader election ability across CPs', () => {
+    it('Validate kube-vip leader election ability across CPs', () => {
         function getActiveKubeVipLeaderNode() {
           cy.burgerMenuOperate('open');
           cy.contains(clusterName).click();
@@ -200,7 +199,6 @@ describe('Import CAPV RKE2 Class-Cluster', {tags: '@vsphere'}, () => {
         cy.verifyResourceCount(clusterName, ['Workloads', 'Pods'], 'kube-vip', 'kube-system', 3);
         cy.waitForAllRowsInState('Running', 300000);
       })
-    );
 
     it('Install App on imported cluster', {retries: 1}, () => {
       // Install Chart

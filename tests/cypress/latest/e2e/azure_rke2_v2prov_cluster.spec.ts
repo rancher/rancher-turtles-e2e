@@ -1,5 +1,4 @@
 import '~/support/commands';
-import {qase} from 'cypress-qase-reporter/mocha';
 import {isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
 import * as randomstring from "randomstring";
 import {vars} from '~/support/variables';
@@ -61,7 +60,6 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
       })
 
       // Create Azure RKE2 Cluster using YAML
-      qase(132,
         it('Create Azure RKE2 Cluster with feature - ' + feature, () => {
           cy.goToHome();
           cy.clickButton('Manage');
@@ -113,7 +111,6 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
           cy.searchCluster(clusterName);
           cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
         })
-      );
     })
 
     context('[TEARDOWN]', () => {

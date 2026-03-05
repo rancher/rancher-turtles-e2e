@@ -13,7 +13,6 @@ limitations under the License.
 */
 
 import '~/support/commands';
-import {qase} from 'cypress-qase-reporter/mocha';
 import {isMigration, isRancherManagerVersion, turtlesNamespace} from '~/support/utils';
 import {vars} from '~/support/variables';
 
@@ -80,7 +79,6 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
       }
     })
 
-    qase([2, 11],
       it('Install Turtles chart', {retries: 1}, () => {
         // if turtles dev chart is to be used, ignore the turtles chart version
         if (devChart) {
@@ -92,6 +90,5 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
         }
         cy.checkChart('local', 'Install', 'Rancher Turtles', turtlesNamespace, turtlesVersion);
       })
-    );
   }
 });
