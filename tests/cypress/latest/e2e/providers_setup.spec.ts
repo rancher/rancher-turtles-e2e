@@ -12,7 +12,6 @@ limitations under the License.
 */
 
 import '~/support/commands';
-import {qase} from 'cypress-qase-reporter/mocha';
 import {
   capiNamespace,
   isPrimeChannel,
@@ -129,13 +128,11 @@ describe('Enable CAPI Providers', () => {
       cy.createNamespace(capiNamespaces);
     })
 
-    qase(90,
       // HelmOps to be used across all specs
       it('Add Applications fleet repo', () => {
         // Add upstream apps repo
         cy.addFleetGitRepo('helm-ops', vars.turtlesRepoUrl, vars.classBranch, 'examples/applications/', vars.capiClustersNS);
       })
-    );
 
     if (isRancherManagerVersion('>=2.13')) {
       it('Create Providers using Charts', () => {
@@ -212,7 +209,6 @@ describe('Enable CAPI Providers', () => {
 
     // TODO: Use wizard to create providers, capi-ui-extension/issues/177
     providerTypes.forEach(providerType => {
-      qase(27,
         it('Create/Verify Kubeadm Providers - ' + providerType, () => {
           // Create CAPI Kubeadm providers
           if (providerType == 'control plane') {
@@ -243,7 +239,6 @@ describe('Enable CAPI Providers', () => {
             matchAndWaitForProviderReadyStatus(providerName, providerType, kubeadmProvider, kubeadmProviderVersion, namespace);
           }
         })
-      );
 
       it('Verify RKE2 Providers - ' + providerType, () => {
         if (providerType == 'control plane') {
@@ -292,7 +287,6 @@ describe('Enable CAPI Providers', () => {
       })
     }
 
-    qase(4,
       it('Create/Verify CAPD provider', () => {
         // Create Docker Infrastructure provider
         if (isRancherManagerVersion('>=2.13')) {
@@ -303,7 +297,6 @@ describe('Enable CAPI Providers', () => {
         }
         matchAndWaitForProviderReadyStatus(dockerProvider, 'infrastructure', dockerProvider, kubeadmProviderVersion, dockerProviderNamespace);
       })
-    );
   })
 
   context('vSphere provider', {tags: '@vsphere'}, () => {
@@ -314,7 +307,6 @@ describe('Enable CAPI Providers', () => {
         cy.createNamespace([vsphereProviderNamespace]);
       })
     }
-    qase(40,
       it('Create/Verify CAPV provider', () => {
         // Create vsphere Infrastructure provider
         // See capv_rke2_cluster.spec.ts for more details about `vsphere_secrets_json_base64` structure
@@ -336,7 +328,6 @@ describe('Enable CAPI Providers', () => {
         }
         matchAndWaitForProviderReadyStatus(vsphereProvider, 'infrastructure', vsphereProvider, vsphereProviderVersion, vsphereProviderNamespace);
       })
-    );
   })
 
   context('Cloud Providers', {tags: '@full'}, () => {
@@ -348,7 +339,6 @@ describe('Enable CAPI Providers', () => {
       })
     }
 
-    qase(13,
       it('Create/Verify CAPA provider', () => {
         const namespace = 'capa-system'
         // Create AWS Infrastructure provider
@@ -362,9 +352,7 @@ describe('Enable CAPI Providers', () => {
         }
         matchAndWaitForProviderReadyStatus(amazonProvider, providerType, amazonProvider, amazonProviderVersion, namespace);
       })
-    );
 
-    qase(28,
       it('Create/Verify CAPG provider', () => {
         const namespace = 'capg-system'
         // Create GCP Infrastructure provider
@@ -392,9 +380,7 @@ describe('Enable CAPI Providers', () => {
         }
         matchAndWaitForProviderReadyStatus(googleProvider, providerType, googleProvider, googleProviderVersion, namespace);
       })
-    );
 
-    qase(20,
       it('Create/Verify CAPZ provider', () => {
         const namespace = 'capz-system'
         // Create Azure Infrastructure provider
@@ -406,6 +392,5 @@ describe('Enable CAPI Providers', () => {
         }
         matchAndWaitForProviderReadyStatus(azureProvider, providerType, azureProvider, azureProviderVersion, namespace);
       })
-    );
   })
 });

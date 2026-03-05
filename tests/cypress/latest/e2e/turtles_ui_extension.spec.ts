@@ -13,7 +13,6 @@ limitations under the License.
 */
 
 import '~/support/commands';
-import {qase} from 'cypress-qase-reporter/mocha';
 import {isRancherManagerVersion} from "~/support/utils";
 
 Cypress.config();
@@ -28,7 +27,6 @@ describe('Install CAPI extension - @install', {tags: '@install'}, () => {
     cy.addRepository('capi-ui', 'https://rancher.github.io/capi-ui-extension', 'http', 'none')
   })
 
-  qase(3,
     it('Install CAPI extension', () => {
       cy.contains('Extensions')
         .click();
@@ -52,5 +50,4 @@ describe('Install CAPI extension - @install', {tags: '@install'}, () => {
         .children()
         .should('contain', 'UI for CAPI cluster provisioning');
     })
-  );
 });

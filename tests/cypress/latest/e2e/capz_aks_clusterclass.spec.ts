@@ -1,5 +1,4 @@
 import '~/support/commands';
-import {qase} from 'cypress-qase-reporter/mocha';
 import {getClusterName, skipClusterDeletion} from '~/support/utils';
 import {capiClusterDeletion, capzResourcesCleanup, importedRancherClusterDeletion} from "~/support/cleanup_support";
 import {vars} from '~/support/variables';
@@ -31,16 +30,15 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
       cy.createAzureClusterIdentity(clientID, tenantID, clientSecret);
     })
 
-    qase(84, it('Add CAPZ AKS ClusterClass using fleet', () => {
+    it('Add CAPZ AKS ClusterClass using fleet', () => {
         cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(classNamePrefix);
       })
-    );
   })
 
   context('[CLUSTER-IMPORT]', () => {
-    qase(55,
+
       it('Import CAPZ AKS class-cluster using YAML', () => {
         cy.readFile('./fixtures/azure/capz-aks-class-cluster.yaml').then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
@@ -50,9 +48,8 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
         // Check CAPI cluster using its name
         cy.checkCAPICluster(clusterName);
       })
-    );
 
-    qase(56, it('Auto import child CAPZ AKS cluster', () => {
+    it('Auto import child CAPZ AKS cluster', () => {
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
         cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
@@ -65,15 +62,13 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
         cy.searchCluster(clusterName);
         cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
       })
-    );
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    qase(57, it('Install App on imported cluster', {retries: 1}, () => {
+    it('Install App on imported cluster', {retries: 1}, () => {
         // Install Chart
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
-      })
-    );
+    })
 
     it('Remove imported CAPZ cluster from Rancher Manager', {retries: 1}, () => {
       // Delete the imported cluster
@@ -85,12 +80,11 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
-      qase(60, it('Delete the CAPZ cluster', () => {
+      it('Delete the CAPZ cluster', () => {
           // Remove CAPI Resources related to the cluster
           capiClusterDeletion(clusterName, timeout);
-        })
-      );
-
+      })
+      
       it('Delete the ClusterClass fleet repo and other resources', () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
