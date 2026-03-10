@@ -20,7 +20,7 @@ describe('First login on Rancher - @install', {tags: '@install'}, () => {
 
   it('Log in and accept terms and conditions',
   {
-    env: {
+    expose: {
       password: password,
     },
   }, () => {
