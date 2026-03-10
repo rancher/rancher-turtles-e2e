@@ -240,7 +240,7 @@ jobs:
       TURTLES_BRANCH: main
       CONTROLLER_IMG: localhost:5000/$TURTLES_REPO
       BROWSER: chrome
-      CYPRESS_DOCKER: 'cypress/included:15.2.0'
+      CYPRESS_DOCKER: 'cypress/included:15.11.0'
       # Inputs
       GREPTAGS: ${{ inputs.grep_test_by_tag }}
       TURTLES_CHART_VERSION: ${{ inputs.turtles_chart_version }}
