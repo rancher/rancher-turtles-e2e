@@ -18,10 +18,6 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
   }
 
   beforeEach(() => {
-    if (!isAPIv1beta1) {
-      cy.task('log', 'Skipping the test until Rancher CAPI (v2prov) is bumped to v1.11.5');
-      this.skip();
-    }
     cy.login();
     cy.burgerMenuOperate('open')
   });

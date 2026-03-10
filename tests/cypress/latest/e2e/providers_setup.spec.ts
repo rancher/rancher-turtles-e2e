@@ -73,14 +73,14 @@ describe('Enable CAPI Providers', () => {
   // Expected provider versions
   const providerVersions = {
     prod: {
-      capi: 'v1.10.6',
-      rke2: 'v0.21.1',
-      kubeadm: 'v1.10.6',
-      fleet: 'v0.12.0',
-      vsphere: 'v1.13.1',
-      amazon: 'v2.9.1',
-      google: 'v1.10.0',
-      azure: 'v1.21.0'
+      capi: 'v1.12.2',
+      rke2: 'v0.23.1',
+      kubeadm: 'v1.12.2',
+      fleet: 'v0.14.0',
+      vsphere: 'v1.15.2',
+      amazon: 'v2.10.1',
+      google: 'v1.11.0',
+      azure: 'v1.22.0'
     },
     'dev-v2.13': {
       capi: 'v1.10.6',
@@ -94,9 +94,9 @@ describe('Enable CAPI Providers', () => {
     },
     'dev-v2.14': {
       capi: 'v1.12.2',
-      rke2: 'v0.23.1',
+      rke2: 'v0.23.2',
       kubeadm: 'v1.12.2',
-      fleet: 'v0.14.0',
+      fleet: 'v0.14.1',
       vsphere: 'v1.15.2',
       amazon: 'v2.10.1',
       google: 'v1.11.0',
