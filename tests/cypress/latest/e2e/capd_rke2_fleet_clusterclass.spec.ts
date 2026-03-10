@@ -27,8 +27,8 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
   const classesPath = 'examples/clusterclasses/docker/rke2'
   const clustersRepoName = 'docker-rke2-class-clusters'
   const clusterClassRepoName = "docker-rke2-clusterclass"
-  const dockerAuthUsernameBase64 = btoa(Cypress.env("docker_auth_username"))
-  const dockerAuthPasswordBase64 = btoa(Cypress.env("docker_auth_password"))
+  const dockerAuthUsernameBase64 = btoa(Cypress.expose("docker_auth_username"))
+  const dockerAuthPasswordBase64 = btoa(Cypress.expose("docker_auth_password"))
 
   beforeEach(() => {
     cy.login();

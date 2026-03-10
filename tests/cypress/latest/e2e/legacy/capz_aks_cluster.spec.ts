@@ -12,10 +12,10 @@ describe('Import CAPZ AKS Cluster', {tags: '@full'}, () => {
   const branch = 'main'
   const path = '/tests/assets/rancher-turtles-fleet-example/capz/aks/clusters'
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
-  const clientID = Cypress.env("azure_client_id")
-  const clientSecret = btoa(Cypress.env("azure_client_secret"))
-  const subscriptionID = Cypress.env("azure_subscription_id")
-  const tenantID = Cypress.env("azure_tenant_id")
+  const clientID = Cypress.expose("azure_client_id")
+  const clientSecret = btoa(Cypress.expose("azure_client_secret"))
+  const subscriptionID = Cypress.expose("azure_subscription_id")
+  const tenantID = Cypress.expose("azure_tenant_id")
   const namespace = 'capz-system'
 
   beforeEach(() => {

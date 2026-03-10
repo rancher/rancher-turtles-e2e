@@ -12,7 +12,7 @@ describe('Import CAPG GKE Cluster', {tags: '@full'}, () => {
   const branch = 'main'
   const path = '/tests/assets/rancher-turtles-fleet-example/capg/gke/clusters'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
-  const gcpProject = Cypress.env("gcp_project")
+  const gcpProject = Cypress.expose("gcp_project")
   const namespace = 'capg-system'
 
   beforeEach(() => {

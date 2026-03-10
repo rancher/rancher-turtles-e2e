@@ -12,7 +12,7 @@ describe('Import CAPG Kubeadm Class-Cluster', {tags: '@full'}, () => {
   const clusterName = getClusterName(classNamePrefix)
   const classesPath = 'examples/clusterclasses/gcp/kubeadm'
   const clusterClassRepoName = 'gcp-kubeadm-clusterclass'
-  const gcpProject = Cypress.env("gcp_project")
+  const gcpProject = Cypress.expose("gcp_project")
 
   beforeEach(() => {
     cy.login();

@@ -14,7 +14,7 @@ describe('Import CAPV RKE2 Class-Cluster', {tags: '@vsphere'}, () => {
   const clusterName = 'turtles-qa-capv-rke2-example'
   const path = '/tests/assets/rancher-turtles-fleet-example/capv/rke2/class-clusters'
   const classesPath = 'examples/clusterclasses/vsphere/rke2'
-  const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
+  const vsphere_secrets_json_base64 = Cypress.expose("vsphere_secrets_json_base64")
   const providerName = 'vsphere'
 
   // Decode the base64 encoded secrets and make json object

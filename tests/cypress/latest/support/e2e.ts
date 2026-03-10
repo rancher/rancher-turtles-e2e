@@ -113,7 +113,7 @@ const resultFile = './fixtures/runtime_test_result.yaml'
 
 // reset the resultFile before every suite run (i.e. `*.spec.ts`); unless the failure is from @install tests
 before(function () {
-  if (Cypress.env("ci")) {
+  if (Cypress.expose("ci")) {
     cy.readFile(resultFile).then((data) => {
       const content = yaml.load(data);
       if (content['stop_cypress'] != 'true') {
@@ -125,7 +125,7 @@ before(function () {
 })
 
 beforeEach(function () {
-  if (Cypress.env("ci")) {
+  if (Cypress.expose("ci")) {
     cy.readFile(resultFile).then((data) => {
       const content = yaml.load(data)
       const result = content['test_result']
@@ -151,7 +151,7 @@ beforeEach(function () {
 });
 
 afterEach(function () {
-  if (Cypress.env("ci")) {
+  if (Cypress.expose("ci")) {
     const test_title = this.currentTest?.fullTitle?.() || '';
     const test_result = this.currentTest?.state || '';
 

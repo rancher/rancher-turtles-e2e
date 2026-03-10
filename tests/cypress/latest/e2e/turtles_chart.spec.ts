@@ -20,9 +20,9 @@ import {vars} from '~/support/variables';
 
 Cypress.config();
 describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
-  let chartMuseumRepo = Cypress.env('chartmuseum_repo')
-  let turtlesVersion = Cypress.env('turtles_chart_version')
-  let devChart = Cypress.env('turtles_dev_chart')
+  let chartMuseumRepo = Cypress.expose('chartmuseum_repo')
+  let turtlesVersion = Cypress.expose('turtles_chart_version')
+  let devChart = Cypress.expose('turtles_dev_chart')
 
   beforeEach(() => {
     cy.login();

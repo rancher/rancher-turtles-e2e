@@ -10,7 +10,7 @@ describe('Import CAPV RKE2 Cluster', {tags: '@vsphere'}, () => {
   const branch = 'main'
   const path = '/tests/assets/rancher-turtles-fleet-example/capv/rke2/clusters'
   const repoUrl = "https://github.com/rancher/rancher-turtles-e2e.git"
-  const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
+  const vsphere_secrets_json_base64 = Cypress.expose("vsphere_secrets_json_base64")
   const namespace = 'capv-system'
 
   // The `vsphere_secrets_json_base64` environment variable must be stored in GitHub Actions Secrets and BASE64 encoded.

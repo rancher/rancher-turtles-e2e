@@ -23,7 +23,7 @@ import {
 } from '~/support/utils';
 import {vars} from '~/support/variables';
 
-const buildType = Cypress.env('turtles_dev_chart') && isRancherManagerVersion('2.13') ? 'dev-v2.13' : Cypress.env('turtles_dev_chart') && isRancherManagerVersion('2.14') ? 'dev-v2.14' : 'prod';
+const buildType = Cypress.expose('turtles_dev_chart') && isRancherManagerVersion('2.13') ? 'dev-v2.13' : Cypress.expose('turtles_dev_chart') && isRancherManagerVersion('2.14') ? 'dev-v2.14' : 'prod';
 
 function matchAndWaitForProviderReadyStatus(
   providerString: string,
@@ -144,13 +144,13 @@ describe('Enable CAPI Providers', () => {
           text.providers.bootstrapKubeadm.enabled = true;
           // @ts-ignore
           text.providers.bootstrapKubeadm.enableAutomaticUpdate = true;
-          
+
           // @ts-ignore
           text.providers.controlplaneKubeadm.enabled = true;
           // @ts-ignore
           text.providers.controlplaneKubeadm.enableAutomaticUpdate = true;
 
-          const tags = Cypress.env('grepTags')
+          const tags = Cypress.expose('grepTags')
           if (tags) {
             if (tags.includes('@short')) {
               // @ts-ignore
@@ -318,7 +318,7 @@ describe('Enable CAPI Providers', () => {
       it('Create/Verify CAPV provider', () => {
         // Create vsphere Infrastructure provider
         // See capv_rke2_cluster.spec.ts for more details about `vsphere_secrets_json_base64` structure
-        const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
+        const vsphere_secrets_json_base64 = Cypress.expose("vsphere_secrets_json_base64")
         // Decode the base64 encoded secret and make json object
         const vsphere_secrets_json = JSON.parse(Buffer.from(vsphere_secrets_json_base64, 'base64').toString('utf-8'))
         // Access keys from the json object
@@ -352,7 +352,7 @@ describe('Enable CAPI Providers', () => {
       it('Create/Verify CAPA provider', () => {
         const namespace = 'capa-system'
         // Create AWS Infrastructure provider
-        cy.addCloudCredsAWS(amazonProvider, Cypress.env('aws_access_key'), Cypress.env('aws_secret_key'));
+        cy.addCloudCredsAWS(amazonProvider, Cypress.expose('aws_access_key'), Cypress.expose('aws_secret_key'));
         cy.burgerMenuOperate('open');
         if (isRancherManagerVersion('>=2.13')) {
           cy.checkCAPIMenu();
@@ -369,7 +369,7 @@ describe('Enable CAPI Providers', () => {
         const namespace = 'capg-system'
         // Create GCP Infrastructure provider
         if (isRancherManagerVersion('<2.13')) {
-          cy.addCloudCredsGCP(googleProvider, Cypress.env('gcp_credentials'));
+          cy.addCloudCredsGCP(googleProvider, Cypress.expose('gcp_credentials'));
         }
         cy.burgerMenuOperate('open');
         if (isRancherManagerVersion('>=2.13')) {
@@ -383,7 +383,7 @@ describe('Enable CAPI Providers', () => {
           cy.contains('Edit Config').click();
           cy.contains(`Provider: Google - ${googleProvider}`).should('exist');
           cy.typeValue('Credential Name', googleProvider);
-          cy.getBySel('text-area-auto-grow').type(Cypress.env('gcp_credentials'), {log: false});
+          cy.getBySel('text-area-auto-grow').type(Cypress.expose('gcp_credentials'), {log: false});
           cy.clickButton('Continue');
           cy.getBySel('cluster-prov-select-credential').contains(googleProvider).should('be.visible');
           cy.clickButton('Save');

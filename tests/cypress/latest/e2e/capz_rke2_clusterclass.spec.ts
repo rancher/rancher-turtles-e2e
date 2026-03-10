@@ -12,10 +12,10 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: '@full'}, () => {
   const classesPath = 'examples/clusterclasses/azure/rke2'
   const clusterClassRepoName = classNamePrefix + '-clusterclass'
 
-  const clientID = Cypress.env("azure_client_id")
-  const clientSecret = btoa(Cypress.env("azure_client_secret"))
-  const subscriptionID = Cypress.env("azure_subscription_id")
-  const tenantID = Cypress.env("azure_tenant_id")
+  const clientID = Cypress.expose("azure_client_id")
+  const clientSecret = btoa(Cypress.expose("azure_client_secret"))
+  const subscriptionID = Cypress.expose("azure_subscription_id")
+  const tenantID = Cypress.expose("azure_tenant_id")
 
   beforeEach(function () {
     cy.login();

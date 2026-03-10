@@ -12,8 +12,8 @@ describe('Import CAPA Kubeadm Class-Cluster', {tags: '@full'}, () => {
   const classesPath = 'examples/clusterclasses/aws/kubeadm'
   const clusterClassRepoName = 'aws-kb-clusterclass'
   const providerName = 'aws'
-  const accessKey = Cypress.env('aws_access_key')
-  const secretKey = Cypress.env('aws_secret_key')
+  const accessKey = Cypress.expose('aws_access_key')
+  const secretKey = Cypress.expose('aws_secret_key')
 
   beforeEach(() => {
     cy.login();

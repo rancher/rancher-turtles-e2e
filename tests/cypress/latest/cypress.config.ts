@@ -8,6 +8,7 @@ const qaseAPIToken = process.env.QASE_API_TOKEN
 export default defineConfig({
   defaultCommandTimeout: 30000,
   video: true,
+  allowCypressEnv: false,
   experimentalMemoryManagement: true,
   reporter: 'cypress-multi-reporters',
   reporterOptions: {
@@ -35,14 +36,13 @@ export default defineConfig({
       },
     },
   },
-  env: {
+  expose: {
     "grepFilterSpecs": true
   },
   e2e: {
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {
-
       // Help for memory issues.
       // Ref: https://www.bigbinary.com/blog/how-we-fixed-the-cypress-out-of-memory-error-in-chromium-browsers
       on("before:browser:launch", (browser, launchOptions) => {

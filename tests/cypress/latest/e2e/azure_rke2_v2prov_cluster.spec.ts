@@ -25,7 +25,7 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
   context('[SETUP]', () => {
     it('Create Azure Cloud credentials', () => {
       // Create Azure Cloud credentials
-      cy.addCloudCredsAzure('azure', Cypress.env('azure_client_id'), Cypress.env('azure_client_secret'), Cypress.env('azure_subscription_id'));
+      cy.addCloudCredsAzure('azure', Cypress.expose('azure_client_id'), Cypress.expose('azure_client_secret'), Cypress.expose('azure_subscription_id'));
     })
 
     it('Get user ID and Cloud credential ID', () => {

@@ -25,7 +25,7 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: '@short'}, () => {
   const clusterName = getClusterName(classNamePrefix)
   const classesPath = 'examples/clusterclasses/docker/kubeadm'
   const clusterClassRepoName = 'docker-kb-clusterclass'
-  const dockerRegistryConfigBase64 = btoa(Cypress.env('docker_registry_config'))
+  const dockerRegistryConfigBase64 = btoa(Cypress.expose('docker_registry_config'))
 
   beforeEach(() => {
     cy.login();

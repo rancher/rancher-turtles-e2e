@@ -29,13 +29,13 @@ describe('First login on Rancher - @install', {tags: '@install'}, () => {
 
   it('Change Rancher password', () => {
     // Change default password
-    cy.login(Cypress.env('username'), password);
+    cy.login(Cypress.expose('username'), password);
     cy.getBySel('nav_header_showUserMenu').click();
     cy.contains('Account & API Keys').click();
     cy.clickButton('Change Password');
     cy.typeValue('Current Password', password);
-    cy.typeValue('New Password', Cypress.env('password'), false, false);
-    cy.typeValue('Confirm Password', Cypress.env('password'), false, false);
+    cy.typeValue('New Password', Cypress.expose('password'), false, false);
+    cy.typeValue('Confirm Password', Cypress.expose('password'), false, false);
     cy.clickButton('Apply');
     cy.contains('Error').should('not.exist');
     cy.contains('Generate a random password').should('not.exist');
