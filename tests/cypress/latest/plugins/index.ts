@@ -15,7 +15,6 @@ limitations under the License.
 import randomstring from "randomstring";
 
 /// <reference types="cypress" />
-require('dotenv').config();
 
 /**
  * @type {Cypress.PluginConfig}

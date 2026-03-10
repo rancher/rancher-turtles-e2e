@@ -1,5 +1,4 @@
 import '~/support/commands';
-import {qase} from 'cypress-qase-reporter/mocha';
 import {isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
 import * as randomstring from "randomstring";
 import {vars} from '~/support/variables';
@@ -35,7 +34,7 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
       // Get the user id
       cy.getBySel('sortable-cell-0-1').then(($cell) => {
         userID = String($cell.text());
-        cy.task('log', `User ID: ${userID}`);
+        cy.task('suiteLog', `User ID: ${userID}`);
       });
 
       cy.burgerMenuOperate('open');
@@ -45,7 +44,7 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
       // Get the CC id
       cy.getBySel('sortable-cell-0-0').then(($cell) => {
         ccID = $cell.text();
-        cy.task('log', `Cloud credential ID: ${ccID}`);
+        cy.task('suiteLog', `Cloud credential ID: ${ccID}`);
       });
     })
   })

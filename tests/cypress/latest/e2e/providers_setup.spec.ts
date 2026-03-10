@@ -12,7 +12,6 @@ limitations under the License.
 */
 
 import '~/support/commands';
-import {qase} from 'cypress-qase-reporter/mocha';
 import {
   capiNamespace,
   isPrimeChannel,
@@ -49,7 +48,7 @@ function matchAndWaitForProviderReadyStatus(
       if (isRancherManagerVersion('>=2.13') && (isPrimeChannel() || (buildType.includes("dev") && isTurtlesPrimeBuild()))) {
         cy.get('td').eq(5).should('contain.text', providerVersion); // InstalledVersion
       } else {
-        cy.task('log', 'This is not a prime Rancher; skipping provider version check');
+        cy.task('suiteLog', 'This is not a prime Rancher; skipping provider version check');
       }
       cy.get('td').eq(6).should('contain.text', readyState);      // Phase
     });

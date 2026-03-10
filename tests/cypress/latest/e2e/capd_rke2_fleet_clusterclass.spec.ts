@@ -65,7 +65,7 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
       // Get the cluster name by its prefix and use it across the test
       cy.getBySel('sortable-cell-0-1').then(($cell) => {
         clusterName = $cell.text();
-        cy.task('log',`CAPI Cluster Name: ${clusterName}`);
+        cy.task('suiteLog',`CAPI Cluster Name: ${clusterName}`);
       });
     })
 

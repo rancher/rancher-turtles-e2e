@@ -1,5 +1,4 @@
 import '~/support/commands';
-import {qase} from 'cypress-qase-reporter/mocha';
 import {getClusterName, isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
 import {capaResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 import {vars} from '~/support/variables';

@@ -1,5 +1,4 @@
 import '~/support/commands';
-import {qase} from 'cypress-qase-reporter/mocha';
 import {getClusterName, skipClusterDeletion} from '~/support/utils';
 import {Cluster} from '~/support/structs';
 

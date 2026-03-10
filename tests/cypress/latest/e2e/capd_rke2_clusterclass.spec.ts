@@ -12,7 +12,6 @@ limitations under the License.
 */
 
 import '~/support/commands';
-import {qase} from 'cypress-qase-reporter/mocha';
 import {getClusterName, isRancherManagerVersion, skipClusterDeletion, turtlesNamespace} from '~/support/utils';
 import {Question} from '~/support/structs';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";

@@ -73,7 +73,7 @@ Cypress.Commands.add('clusterAutoImport', (clusterName, mode) => {
 // Command to create namespace
 Cypress.Commands.add('createNamespace', (namespaces: string[]) => {
   namespaces.forEach((namespace) => {
-    cy.task('log', `Creating Namespace: ${namespace}`);
+    cy.task('suiteLog', `Creating Namespace: ${namespace}`);
     cy.burgerMenuOperate('open');
     cy.contains('local')
       .click();
@@ -88,7 +88,7 @@ Cypress.Commands.add('createNamespace', (namespaces: string[]) => {
     cy.typeValue('Name', namespace);
     cy.clickButton('Create');
     cy.contains(new RegExp('Active.*' + namespace));
-    cy.task('log', `Namespace created: ${namespace}`);
+    cy.task('suiteLog', `Namespace created: ${namespace}`);
     cy.namespaceReset();
   })
 });

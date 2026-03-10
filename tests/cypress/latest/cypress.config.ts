@@ -80,9 +80,9 @@ export default defineConfig({
         //   process.stdout.write(`${key}=${value}\n`);
         // }
       });
-      // Register the 'log' task
+      // Register the 'suiteLog' task
       on('task', {
-        log(message) {
+        suiteLog(message) {
           console.log(message);
           return null; // Tasks must return a value or null
         },
