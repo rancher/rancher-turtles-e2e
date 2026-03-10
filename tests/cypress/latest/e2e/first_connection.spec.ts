@@ -18,16 +18,14 @@ Cypress.config();
 describe('First login on Rancher - @install', {tags: '@install'}, () => {
   const password = 'rancherpassword'
 
-  it('Log in and accept terms and conditions',
-  {
-    expose: {
-      password: password,
-    },
-  }, () => {
+  it('Log in and accept terms and conditions', () => {
+    const originalPassword = Cypress.expose('password');
+    Cypress.expose('password', password);
     cypressLib.firstLogin();
+    Cypress.expose('password', originalPassword);
+
   })
 
-  it('Change Rancher password', () => {
     // Change default password
     cy.login(Cypress.expose('username'), password);
     cy.getBySel('nav_header_showUserMenu').click();
