@@ -41,7 +41,7 @@ const isPreRelease = /(-alpha|-rc|head)/.test(rancherVersion);
 
 // Check if Rancher should use staging registry to install Rancher Turtles Providers Chart
 export const providersChartNeedsStgRegistry = (): boolean => {
-  return !Cypress.expose('turtles_dev_chart') && isPreRelease
+  return (!isTurtlesDevChart) && (isPreRelease)
 }
 
 export const isTurtlesPrimeBuild = (): boolean =>{
@@ -61,5 +61,9 @@ export const capiNamespace = isRancherManagerVersion('>=2.13') ? 'cattle-capi-sy
 
 export const isMigration = Cypress.expose('grepTags') && (Cypress.expose('grepTags')).includes('@migration')
 
+export const isUpgrade = Cypress.expose('grepTags') && (Cypress.expose('grepTags')).includes('@upgrade')
+
 // TODO: Once we move to 2.14 as the default version for testing; this condition can be changed to simply isRancherManagerVersion('<=2.13')
 export const isAPIv1beta1 = isRancherManagerVersion('<=2.12') || (isRancherManagerVersion('2.13') && !Cypress.expose('turtles_dev_chart'))
+
+export const isTurtlesDevChart = Cypress.expose('turtles_dev_chart')
