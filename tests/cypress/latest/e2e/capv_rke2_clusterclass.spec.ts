@@ -106,8 +106,7 @@ describe('Import CAPV RKE2 Class-Cluster', {tags: '@vsphere'}, () => {
         .should('exist');
 
       // Add CAPV fleet repository
-      // TODO: move branch capi-bump back to vars.branch before merge
-      cy.addFleetGitRepo(clusterRepoName, vars.repoUrl, "capi-bump", path);
+      cy.addFleetGitRepo(clusterRepoName, vars.repoUrl, vars.branch, path);
 
       // Check CAPI cluster using its name
       cy.checkCAPICluster(clusterName);

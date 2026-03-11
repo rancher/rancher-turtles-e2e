@@ -57,8 +57,7 @@ describe('Import CAPD RKE2 Class-Cluster using Fleet', {tags: '@short'}, () => {
   context('[CLUSTER-IMPORT]', () => {
     it('Add CAPD cluster fleet repo and get cluster name', () => {
       cypressLib.checkNavIcon('cluster-management').should('exist');
-      // TODO: move branch capi-bump back to vars.branch before merge
-      cy.addFleetGitRepo(clustersRepoName, vars.repoUrl, "capi-bump", path);
+      cy.addFleetGitRepo(clustersRepoName, vars.repoUrl, vars.branch, path);
 
       // Check CAPI cluster using its name prefix i.e. className
       cy.checkCAPICluster(classNamePrefix);
