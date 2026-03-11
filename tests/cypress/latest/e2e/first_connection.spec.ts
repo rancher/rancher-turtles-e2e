@@ -20,9 +20,11 @@ describe('First login on Rancher - @install', {tags: '@install'}, () => {
 
   it('Log in and accept terms and conditions', () => {
     // env: {password: password} can not be used here anymore
+
+    // Store original Cypress.expose to restore it later
     const originalExpose = Cypress.expose;
 
-    // Override Cypress.expose to include the temporary password for later firstLogin call
+    // Override Cypress.expose to include the temporary password for firstLogin call
     Cypress.expose = ((key?: string) => {
       if (key === 'password') {
         return password;
