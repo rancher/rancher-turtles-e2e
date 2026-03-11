@@ -19,9 +19,10 @@ describe('First login on Rancher - @install', {tags: '@install'}, () => {
   const password = 'rancherpassword'
 
   it('Log in and accept terms and conditions', () => {
+    // env: {password: password} can not be used here anymore
     const originalExpose = Cypress.expose;
 
-    // Intercept expose reads so firstLogin gets the temporary password.
+    // Override Cypress.expose to include the temporary password for later firstLogin call
     Cypress.expose = ((key?: string) => {
       if (key === 'password') {
         return password;
@@ -32,12 +33,13 @@ describe('First login on Rancher - @install', {tags: '@install'}, () => {
         return exposed?.[key];
       }
 
+      // Return original exposed object with modified password for the first login
       return {...exposed, password};
     }) as typeof Cypress.expose;
 
     cypressLib.firstLogin();
 
-    // Restore after the queued commands have executed.
+    // Restore after the queued commands are executed, probably not needed as expose is scoped to this it() block only
     cy.then(() => {
       Cypress.expose = originalExpose;
     });
