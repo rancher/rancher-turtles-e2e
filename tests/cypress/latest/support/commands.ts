@@ -19,7 +19,7 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import jsyaml from 'js-yaml';
 import yaml from 'js-yaml';
 import _ from 'lodash';
-import {capiNamespace, isPrePrimeChannel, isPrimeChannel, isRancherManagerVersion} from '~/support/utils';
+import {capiNamespace, isPrePrimeChannel, isPrimeChannel, isTurtlesPrimeBuild, isTurtlesDevChart, isRancherManagerVersion, isMigration} from '~/support/utils';
 import {vars} from '~/support/variables'
 
 // Generic commands
@@ -602,14 +602,12 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
   const turtlesChart = chartName == 'Rancher Turtles'
   if (turtlesChart) {
     let turtlesChartSelector: string;
-    const devChart = Cypress.expose('turtles_dev_chart')
-    const migrationTest = Cypress.expose('grepTags').includes('@migration')
     // if dev==true; then for 2.13 and 2.12, the selector remains same;
     // if dev==false; then for 2.13 we use system integrated turtles, and for 2.12 we use turtles-chart repo to install turtles
     if (isRancherManagerVersion('>=2.13')) {
-      turtlesChartSelector = devChart ? '"item-card-cluster/chartmuseum-repo/rancher-turtles"' : '"item-card-cluster/rancher-charts/rancher-turtles"';
+      turtlesChartSelector = isTurtlesDevChart ? '"item-card-cluster/chartmuseum-repo/rancher-turtles"' : '"item-card-cluster/rancher-charts/rancher-turtles"';
     } else if (isRancherManagerVersion('2.12')) {
-      turtlesChartSelector = devChart && !migrationTest ? '"item-card-cluster/chartmuseum-repo/rancher-turtles"' : '"item-card-cluster/turtles-chart/rancher-turtles"';
+      turtlesChartSelector = isTurtlesDevChart && !isMigration ? '"item-card-cluster/chartmuseum-repo/rancher-turtles"' : '"item-card-cluster/turtles-chart/rancher-turtles"';
     } else {
       turtlesChartSelector = '"select-icon-grid-Rancher Turtles - the Cluster API Extension"';
     }
@@ -619,8 +617,7 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
   const turtlesProvidersChart = chartName == vars.turtlesProvidersChartName
   // for 2.13 we use an external repo to install providers chart, and for 2.12 there is no need to install it.
   if (turtlesProvidersChart && isRancherManagerVersion('>=2.13')) {
-    const devChart = Cypress.expose('turtles_dev_chart')
-    chartSelector = devChart ? '"item-card-cluster/chartmuseum-repo/rancher-turtles-providers"' : '"item-card-cluster/turtles-providers-chart/rancher-turtles-providers"';
+    chartSelector = vars.turtlesProvidersChartSelector
   }
 
   cy.getBySel(chartSelector).within(() => {
@@ -742,9 +739,12 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
     cy.waitForAllRowsInState('Deployed', 180000);
     cy.namespaceReset();
   } else {
+    cy.contains('Installed Apps').should('be.visible');
     cy.setNamespace(namespace);
     cy.contains(new RegExp('Installed App:.*Deployed'), {timeout: 120000}).should('be.visible');
-    cy.waitForAllRowsInState('Active');
+    if (chartName != vars.turtlesProvidersChartName) {
+      cy.waitForAllRowsInState('Active');
+    }
     cy.namespaceReset();
   }
 });
@@ -1148,15 +1148,13 @@ Cypress.Commands.add('verifyResourceCount', (clusterName, resourcePath, resource
 
 // Command to verify CAPIProvider image registry
 Cypress.Commands.add('verifyCAPIProviderImage', (providerNamespace) => {
-  const buildType = Cypress.expose('turtles_build_type');
-  const devChart = Cypress.expose('turtles_dev_chart');
   let providerImageRegistry: string;
 
   if (providerNamespace == 'capd-system') {
     providerImageRegistry = 'gcr.io/k8s-staging-cluster-api';
   } else {
     if (isRancherManagerVersion('>=2.13')) {
-      if (devChart && buildType == 'prime') {
+      if (isTurtlesDevChart && isTurtlesPrimeBuild()) {
         if (isPrePrimeChannel()) {
           providerImageRegistry = 'stgregistry.suse.com/rancher'
         } else {
@@ -1164,7 +1162,7 @@ Cypress.Commands.add('verifyCAPIProviderImage', (providerNamespace) => {
         }
       } else if (isPrePrimeChannel()) {
         providerImageRegistry = 'stgregistry.suse.com/rancher'
-      } else if (isPrimeChannel()) {
+      } else if ((isTurtlesDevChart && isTurtlesPrimeBuild()) || isPrimeChannel()) {
         providerImageRegistry = 'registry.rancher.com/rancher'
       } else {
         // community
@@ -1213,3 +1211,35 @@ Cypress.Commands.add('setCAPIFeature', (featureName, featureValue) => {
     cy.contains(new RegExp('Disabled.*' + featureName));
   }
 });
+
+export function matchAndWaitForProviderReadyStatus(
+  providerString: string,
+  providerType: string,
+  providerName: string,
+  providerVersion: string,
+  providerNamespace: string,
+  timeout: number = vars.shortTimeout,
+) {
+  const readyState = 'Ready'; // Default state
+  cy.reload();
+  cy.get('tr.main-row', {timeout: timeout})
+    .contains('a', providerString)
+    .closest('tr')
+    .within(() => {
+      cy.get('td').eq(1).should('contain.text', readyState);    // State
+      cy.get('td').eq(2).should('contain.text', providerString);  // Name
+      cy.get('td').eq(3).should('contain.text', providerType);    // Type
+      cy.get('td').eq(4).should('contain.text', providerName);    // ProviderName
+      // Only check provider version for Rancher >=2.13 and -
+      // 1. pre-prime & prime rancher
+      // 2. for turtles build with dev=true & target_build_type=prime
+      if (isRancherManagerVersion('>=2.13') && (isPrimeChannel() || (isTurtlesDevChart && isTurtlesPrimeBuild()))) {
+        cy.get('td').eq(5).should('contain.text', providerVersion); // InstalledVersion
+      } else {
+        cy.task('log', 'This is not a prime Rancher; skipping provider version check');
+      }
+      cy.get('td').eq(6).should('contain.text', readyState);      // Phase
+    });
+    // Verify provider image
+    cy.verifyCAPIProviderImage(providerNamespace);
+}
