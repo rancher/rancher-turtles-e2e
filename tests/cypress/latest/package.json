@@ -22,6 +22,10 @@
     "url": "https://github.com/rancher/rancher-turtles-e2e/issues"
   },
   "homepage": "https://github.com/rancher/rancher-turtles-e2e",
+  "overrides": {
+    "diff": "8.0.2",
+    "serialize-javascript": "7.0.3"
+  },
   "dependencies": {
     "@rancher-ecp-qa/cypress-library": "^2.2.0",
     "cy-verify-downloads": "^0.3.0",
