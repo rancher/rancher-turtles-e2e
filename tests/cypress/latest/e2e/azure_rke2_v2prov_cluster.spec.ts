@@ -1,5 +1,4 @@
 import '~/support/commands';
-import {qase} from 'cypress-qase-reporter/mocha';
 import {isAPIv1beta1, isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
 import * as randomstring from "randomstring";
 import {vars} from '~/support/variables';
@@ -25,7 +24,7 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
   context('[SETUP]', () => {
     it('Create Azure Cloud credentials', () => {
       // Create Azure Cloud credentials
-      cy.addCloudCredsAzure('azure', Cypress.env('azure_client_id'), Cypress.env('azure_client_secret'), Cypress.env('azure_subscription_id'));
+      cy.addCloudCredsAzure('azure', Cypress.expose('azure_client_id'), Cypress.expose('azure_client_secret'), Cypress.expose('azure_subscription_id'));
     })
 
     it('Get user ID and Cloud credential ID', () => {
@@ -35,7 +34,7 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
       // Get the user id
       cy.getBySel('sortable-cell-0-1').then(($cell) => {
         userID = String($cell.text());
-        cy.task('log', `User ID: ${userID}`);
+        cy.task('suiteLog', `User ID: ${userID}`);
       });
 
       cy.burgerMenuOperate('open');
@@ -45,7 +44,7 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
       // Get the CC id
       cy.getBySel('sortable-cell-0-0').then(($cell) => {
         ccID = $cell.text();
-        cy.task('log', `Cloud credential ID: ${ccID}`);
+        cy.task('suiteLog', `Cloud credential ID: ${ccID}`);
       });
     })
   })

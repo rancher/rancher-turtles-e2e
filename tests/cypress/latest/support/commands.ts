@@ -73,7 +73,7 @@ Cypress.Commands.add('clusterAutoImport', (clusterName, mode) => {
 // Command to create namespace
 Cypress.Commands.add('createNamespace', (namespaces: string[]) => {
   namespaces.forEach((namespace) => {
-    cy.task('log', `Creating Namespace: ${namespace}`);
+    cy.task('suiteLog', `Creating Namespace: ${namespace}`);
     cy.burgerMenuOperate('open');
     cy.contains('local')
       .click();
@@ -88,7 +88,7 @@ Cypress.Commands.add('createNamespace', (namespaces: string[]) => {
     cy.typeValue('Name', namespace);
     cy.clickButton('Create');
     cy.contains(new RegExp('Active.*' + namespace));
-    cy.task('log', `Namespace created: ${namespace}`);
+    cy.task('suiteLog', `Namespace created: ${namespace}`);
     cy.namespaceReset();
   })
 });
@@ -602,8 +602,8 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
   const turtlesChart = chartName == 'Rancher Turtles'
   if (turtlesChart) {
     let turtlesChartSelector: string;
-    const devChart = Cypress.env('turtles_dev_chart')
-    const migrationTest = Cypress.env('grepTags').includes('@migration')
+    const devChart = Cypress.expose('turtles_dev_chart')
+    const migrationTest = Cypress.expose('grepTags').includes('@migration')
     // if dev==true; then for 2.13 and 2.12, the selector remains same;
     // if dev==false; then for 2.13 we use system integrated turtles, and for 2.12 we use turtles-chart repo to install turtles
     if (isRancherManagerVersion('>=2.13')) {
@@ -619,7 +619,7 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
   const turtlesProvidersChart = chartName == vars.turtlesProvidersChartName
   // for 2.13 we use an external repo to install providers chart, and for 2.12 there is no need to install it.
   if (turtlesProvidersChart && isRancherManagerVersion('>=2.13')) {
-    const devChart = Cypress.env('turtles_dev_chart')
+    const devChart = Cypress.expose('turtles_dev_chart')
     chartSelector = devChart ? '"item-card-cluster/chartmuseum-repo/rancher-turtles-providers"' : '"item-card-cluster/turtles-providers-chart/rancher-turtles-providers"';
   }
 
@@ -1144,8 +1144,8 @@ Cypress.Commands.add('verifyResourceCount', (clusterName, resourcePath, resource
 
 // Command to verify CAPIProvider image registry
 Cypress.Commands.add('verifyCAPIProviderImage', (providerNamespace) => {
-  const buildType = Cypress.env('turtles_build_type');
-  const devChart = Cypress.env('turtles_dev_chart');
+  const buildType = Cypress.expose('turtles_build_type');
+  const devChart = Cypress.expose('turtles_dev_chart');
   let providerImageRegistry: string;
 
   if (providerNamespace == 'capd-system') {

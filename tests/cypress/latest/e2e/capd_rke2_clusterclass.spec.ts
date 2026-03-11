@@ -12,7 +12,6 @@ limitations under the License.
 */
 
 import '~/support/commands';
-import {qase} from 'cypress-qase-reporter/mocha';
 import {
   getClusterName,
   isAPIv1beta1,
@@ -42,8 +41,8 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
   const clusterClassRepoName = "docker-rke2-clusterclass"
   const classClusterFileName = isAPIv1beta1 ? "./fixtures/docker/capd-rke2-class-cluster-v1beta1.yaml" : "./fixtures/docker/capd-rke2-class-cluster.yaml"
 
-  const dockerAuthUsernameBase64 = btoa(Cypress.env("docker_auth_username"))
-  const dockerAuthPasswordBase64 = btoa(Cypress.env("docker_auth_password"))
+  const dockerAuthUsernameBase64 = btoa(Cypress.expose("docker_auth_username"))
+  const dockerAuthPasswordBase64 = btoa(Cypress.expose("docker_auth_password"))
 
   beforeEach(() => {
     cy.login();

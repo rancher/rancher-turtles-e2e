@@ -18,24 +18,44 @@ Cypress.config();
 describe('First login on Rancher - @install', {tags: '@install'}, () => {
   const password = 'rancherpassword'
 
-  it('Log in and accept terms and conditions',
-  {
-    env: {
-      password: password,
-    },
-  }, () => {
+  it('Log in and accept terms and conditions', () => {
+    // env: {password: password} can not be used here anymore
+
+    // Store original Cypress.expose to restore it later
+    const originalExpose = Cypress.expose;
+
+    // Override Cypress.expose to include the temporary password for firstLogin call
+    Cypress.expose = ((key?: string) => {
+      if (key === 'password') {
+        return password;
+      }
+
+      const exposed = originalExpose();
+      if (typeof key === 'string') {
+        return exposed?.[key];
+      }
+
+      // Return original exposed object with modified password for the first login
+      return {...exposed, password};
+    }) as typeof Cypress.expose;
+
     cypressLib.firstLogin();
+
+    // Restore after the queued commands are executed, probably not needed as expose is scoped to this it() block only
+    cy.then(() => {
+      Cypress.expose = originalExpose;
+    });
   })
 
   it('Change Rancher password', () => {
     // Change default password
-    cy.login(Cypress.env('username'), password);
+    cy.login(Cypress.expose('username'), password);
     cy.getBySel('nav_header_showUserMenu').click();
     cy.contains('Account & API Keys').click();
     cy.clickButton('Change Password');
     cy.typeValue('Current Password', password);
-    cy.typeValue('New Password', Cypress.env('password'), false, false);
-    cy.typeValue('Confirm Password', Cypress.env('password'), false, false);
+    cy.typeValue('New Password', Cypress.expose('password'), false, false);
+    cy.typeValue('Confirm Password', Cypress.expose('password'), false, false);
     cy.clickButton('Apply');
     cy.contains('Error').should('not.exist');
     cy.contains('Generate a random password').should('not.exist');

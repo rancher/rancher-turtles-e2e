@@ -1,6 +1,5 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import {qase} from 'cypress-qase-reporter/mocha';
 import {skipClusterDeletion} from '~/support/utils';
 
 Cypress.config();
@@ -12,7 +11,7 @@ describe('Import CAPG GKE Cluster', {tags: '@full'}, () => {
   const branch = 'main'
   const path = '/tests/assets/rancher-turtles-fleet-example/capg/gke/clusters'
   const repoUrl = 'https://github.com/rancher/rancher-turtles-e2e.git'
-  const gcpProject = Cypress.env("gcp_project")
+  const gcpProject = Cypress.expose("gcp_project")
   const namespace = 'capg-system'
 
   beforeEach(() => {

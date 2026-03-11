@@ -13,7 +13,6 @@ limitations under the License.
 */
 
 import '~/support/commands';
-import {qase} from 'cypress-qase-reporter/mocha';
 import {isRancherManagerVersion} from "~/support/utils";
 
 Cypress.config();

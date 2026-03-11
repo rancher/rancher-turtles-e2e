@@ -26,8 +26,8 @@ describe('Import CAPD RKE2 Class-Cluster using Fleet', {tags: '@short'}, () => {
   const classesPath = 'examples/clusterclasses/docker/rke2'
   const clustersRepoName = 'docker-rke2-class-clusters'
   const clusterClassRepoName = "docker-rke2-clusterclass"
-  const dockerAuthUsernameBase64 = btoa(Cypress.env("docker_auth_username"))
-  const dockerAuthPasswordBase64 = btoa(Cypress.env("docker_auth_password"))
+  const dockerAuthUsernameBase64 = btoa(Cypress.expose("docker_auth_username"))
+  const dockerAuthPasswordBase64 = btoa(Cypress.expose("docker_auth_password"))
 
   beforeEach(() => {
     cy.login();
@@ -64,7 +64,7 @@ describe('Import CAPD RKE2 Class-Cluster using Fleet', {tags: '@short'}, () => {
       // Get the cluster name by its prefix and use it across the test
       cy.getBySel('sortable-cell-0-1').then(($cell) => {
         clusterName = $cell.text();
-        cy.task('log',`CAPI Cluster Name: ${clusterName}`);
+        cy.task('suiteLog',`CAPI Cluster Name: ${clusterName}`);
       });
     })
 

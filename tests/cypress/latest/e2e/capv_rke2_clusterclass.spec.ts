@@ -1,6 +1,5 @@
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import {qase} from 'cypress-qase-reporter/mocha';
 import {isAPIv1beta1, isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
 import {capiClusterDeletion, capvResourcesCleanup, importedRancherClusterDeletion} from "~/support/cleanup_support";
 import {vars} from '~/support/variables';
@@ -14,7 +13,7 @@ describe('Import CAPV RKE2 Class-Cluster', {tags: '@vsphere'}, () => {
   const clusterName = 'turtles-qa-capv-rke2-example'
   const path = isAPIv1beta1 ? '/tests/assets/rancher-turtles-fleet-example/capv/rke2/class-clusters-v1beta1' : '/tests/assets/rancher-turtles-fleet-example/capv/rke2/class-clusters'
   const classesPath = 'examples/clusterclasses/vsphere/rke2'
-  const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
+  const vsphere_secrets_json_base64 = Cypress.expose("vsphere_secrets_json_base64")
   const providerName = 'vsphere'
 
   // Decode the base64 encoded secrets and make json object

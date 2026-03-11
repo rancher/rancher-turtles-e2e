@@ -23,8 +23,8 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
   const clusterName = getClusterName(classNamePrefix)
   const classesPath = 'examples/clusterclasses/docker/rke2'
   const clusterClassRepoName = "docker-rke2-clusterclass"
-  const dockerAuthUsernameBase64 = btoa(Cypress.env("docker_auth_username"))
-  const dockerAuthPasswordBase64 = btoa(Cypress.env("docker_auth_password"))
+  const dockerAuthUsernameBase64 = btoa(Cypress.expose("docker_auth_username"))
+  const dockerAuthPasswordBase64 = btoa(Cypress.expose("docker_auth_password"))
   const capdProviderNS = 'capd-system'
   const capdProviderName = 'docker'
   const capdProviderVersion = 'v1.10.6'
@@ -105,7 +105,7 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
         cy.deleteKubernetesResource('local', ['Apps', 'Installed Apps'], 'rancher-turtles', turtlesNamespace);
         cy.contains(new RegExp('"rancher-turtles" uninstalled'), {timeout: timeout}).should('be.visible');
         cy.get('.closer').click();
-        
+
         // Patch CRDs with cattle-turtles-system namespace
         ['capiproviders.turtles-capi.cattle.io', 'clusterctlconfigs.turtles-capi.cattle.io'].forEach((resourceName) => {
           const resourceKind = 'CustomResourceDefinitions';

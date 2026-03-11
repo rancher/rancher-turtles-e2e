@@ -1,5 +1,4 @@
 import '~/support/commands';
-import {qase} from 'cypress-qase-reporter/mocha';
 import {getClusterName, isAPIv1beta1, isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
 import {capaResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 import {vars} from '~/support/variables';
@@ -14,8 +13,8 @@ describe('Import CAPA RKE2 Class-Cluster', {tags: '@full'}, () => {
   const classClusterFileName = isAPIv1beta1 ? './fixtures/aws/capa-rke2-class-cluster-v1beta1.yaml' : './fixtures/aws/capa-rke2-class-cluster.yaml'
 
   const providerName = 'aws'
-  const accessKey = Cypress.env('aws_access_key')
-  const secretKey = Cypress.env('aws_secret_key')
+  const accessKey = Cypress.expose('aws_access_key')
+  const secretKey = Cypress.expose('aws_secret_key')
 
   beforeEach(() => {
     cy.login();

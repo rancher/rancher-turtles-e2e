@@ -19,6 +19,10 @@ import './cleanup_support';
 import {Cluster, Question} from './structs';
 import {register as registerCypressGrep} from '@cypress/grep'
 
+// This ensures the qase() function exists globally before ANY spec file loads
+(window as any).qase = (id: any, fn: any) => fn;
+console.log('Qase global initialized');
+
 declare global {
   namespace Cypress {
     interface Chainable {
@@ -113,7 +117,7 @@ const resultFile = './fixtures/runtime_test_result.yaml'
 
 // reset the resultFile before every suite run (i.e. `*.spec.ts`); unless the failure is from @install tests
 before(function () {
-  if (Cypress.env("ci")) {
+  if (Cypress.expose("ci")) {
     cy.readFile(resultFile).then((data) => {
       const content = yaml.load(data);
       if (content['stop_cypress'] != 'true') {
@@ -125,7 +129,7 @@ before(function () {
 })
 
 beforeEach(function () {
-  if (Cypress.env("ci")) {
+  if (Cypress.expose("ci")) {
     cy.readFile(resultFile).then((data) => {
       const content = yaml.load(data)
       const result = content['test_result']
@@ -134,24 +138,24 @@ beforeEach(function () {
       const run_delete_tests = content['run_delete_tests']
       if (result == 'failed') {
         if (stop_cypress == 'true') {
-          cy.task('log', 'Stopping test run - previous test(s) have failed')
+          cy.task('suiteLog', 'Stopping test run - previous test(s) have failed')
           Cypress.stop()
         } else if (skip_all_tests == 'true') {
           // Skip tests if a setup test failed; in case cluster is created, do not skip if it is a @delete test
           if (run_delete_tests == 'true' && this.currentTest?.fullTitle?.().includes('[TEARDOWN]')) {
-            cy.task('log', 'CAPI Cluster was created; running delete tests for a proper cleanup.')
+            cy.task('suiteLog', 'CAPI Cluster was created; running delete tests for a proper cleanup.')
           } else {
-            cy.task('log', 'A [SETUP]/[CLUSTER-IMPORT] test has failed - skipping rest of the tests.')
+            cy.task('suiteLog', 'A [SETUP]/[CLUSTER-IMPORT] test has failed - skipping rest of the tests.')
             this.skip();
           }
         }
       }
     });
-  } else cy.task('log', 'Not running in GitHub Actions - skipping test result check');
+  } else cy.task('suiteLog', 'Not running in GitHub Actions - skipping test result check');
 });
 
 afterEach(function () {
-  if (Cypress.env("ci")) {
+  if (Cypress.expose("ci")) {
     const test_title = this.currentTest?.fullTitle?.() || '';
     const test_result = this.currentTest?.state || '';
 

@@ -1,6 +1,4 @@
 import '~/support/commands';
-
-import {qase} from 'cypress-qase-reporter/mocha';
 import {getClusterName, isAPIv1beta1, skipClusterDeletion} from '~/support/utils';
 import {capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 import {vars} from '~/support/variables';
@@ -14,7 +12,7 @@ describe('Import CAPG Kubeadm Class-Cluster', {tags: '@full'}, () => {
   const clusterClassRepoName = 'gcp-kubeadm-clusterclass'
   const classClusterFileName = isAPIv1beta1 ? './fixtures/gcp/capg-kubeadm-class-cluster-v1beta1.yaml' : './fixtures/gcp/capg-kubeadm-class-cluster.yaml'
 
-  const gcpProject = Cypress.env("gcp_project")
+  const gcpProject = Cypress.expose("gcp_project")
 
   beforeEach(() => {
     cy.login();

@@ -13,7 +13,6 @@ limitations under the License.
 
 import '~/support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import {qase} from 'cypress-qase-reporter/mocha';
 import {getClusterName, isAPIv1beta1, isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
 import {capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
 import {vars} from '~/support/variables';
@@ -27,7 +26,7 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: '@short'}, () => {
   const clusterClassRepoName = 'docker-kb-clusterclass'
   const classClusterFileName = isAPIv1beta1 ? "./fixtures/docker/capd-kubeadm-class-cluster-v1beta1.yaml" : "./fixtures/docker/capd-kubeadm-class-cluster.yaml"
 
-  const dockerRegistryConfigBase64 = btoa(Cypress.env('docker_registry_config'))
+  const dockerRegistryConfigBase64 = btoa(Cypress.expose('docker_registry_config'))
 
   beforeEach(() => {
     cy.login();
