@@ -19,22 +19,28 @@ describe('First login on Rancher - @install', {tags: '@install'}, () => {
   const password = 'rancherpassword'
 
   it('Log in and accept terms and conditions', () => {
-    // Store the env object in a variable for easier access
-    const env = Cypress.expose();
+    const originalExpose = Cypress.expose;
 
-    // Save the original value (so we don't lose it forever)
-    const originalPassword = Cypress.expose('password');
-    //console.log('original password over expose: ', Cypress.expose('password'));
+    // Intercept expose reads so firstLogin gets the temporary password.
+    Cypress.expose = ((key?: string) => {
+      if (key === 'password') {
+        return password;
+      }
 
-    // Set the temporary password for the login
-    env.password = password
-    //console.log('changed password over expose: ', Cypress.expose('password'));
+      const exposed = originalExpose();
+      if (typeof key === 'string') {
+        return exposed?.[key];
+      }
+
+      return {...exposed, password};
+    }) as typeof Cypress.expose;
 
     cypressLib.firstLogin();
 
-    // Restore the original value
-    env.password = originalPassword;
-    //console.log('restored password over expose: ', Cypress.expose('password'));
+    // Restore after the queued commands have executed.
+    cy.then(() => {
+      Cypress.expose = originalExpose;
+    });
   })
 
   it('Change Rancher password', () => {
