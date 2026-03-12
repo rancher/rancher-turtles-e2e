@@ -1,0 +1,19 @@
+# For Remote Connection
+libvirt_uri="qemu+ssh://<USER>@<HOST>/system?keyfile=/home/<USER>/.ssh/id_rsa&sshauth=privkey&no_verify=1&known_hosts_verify=0&socket=/var/run/libvirt/virtqemud-sock"
+
+# For Local Connection
+#libvirt_uri="qemu:///system?socket=/var/run/libvirt/virtqemud-sock"
+image_uri = "https://download.opensuse.org/tumbleweed/appliances/openSUSE-MicroOS.x86_64-ContainerHost-kvm-and-xen.qcow2"
+
+private_key_path = "/home/<USER>/.ssh/id_rsa"
+
+authorized_keys = [
+    "ssh-rsa AAAAB3Nza...",
+]
+
+root_password = "password"
+vm_name = "turtles-e2e-tw"
+vms = 1
+vm_memory = 8
+vm_vcpu = 4
+vm_disk_size = 60
