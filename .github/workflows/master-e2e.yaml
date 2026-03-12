@@ -594,7 +594,7 @@ jobs:
           echo "Rancher Manager Image: ${{ steps.component.outputs.rm_image_version }}" >> ${GITHUB_STEP_SUMMARY}
           echo "Rancher Manager Version: ${{ steps.component.outputs.rm_version }}" >> ${GITHUB_STEP_SUMMARY}
           echo "CertManager Image: ${{ steps.component.outputs.cert_manager_image_version }}" >> ${GITHUB_STEP_SUMMARY}
-          if [[ "${{ env.RANCHER_VERSION }}" =~ "2.13" ]]; then
+          if [[ "${{ env.RANCHER_VERSION }}" =~ (2\.13|2\.14) ]]; then
             TURTLES_NAMESPACE="cattle-turtles-system"
           else
             TURTLES_NAMESPACE="rancher-turtles-system"
