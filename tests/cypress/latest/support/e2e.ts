@@ -52,7 +52,8 @@ declare global {
       createCAPICluster(cluster: Cluster): Chainable<Element>;
       checkCAPICluster(clustername: string): Chainable<Element>;
       checkCAPIClusterClass(classname: string): Chainable<Element>;
-      checkCAPIClusterActive(clustername: string, timeout?: number): Chainable<Element>;
+
+      checkCAPIClusterActive(clustername: string, timeout?: number, skipMDCheck?: boolean): Chainable<Element>; // skipMDCheck is required while using MachinePools, in case of GKE
       checkCAPIClusterProvisioned(clustername: string, timeout?: number): Chainable<Element>;
       checkCAPIClusterDeleted(clustername: string, timeout: number): Chainable<Element>;
       checkCAPIMenu(): Chainable<Element>;
