@@ -43,7 +43,7 @@ function matchAndWaitForProviderReadyStatus(
       cy.get('td').eq(3).should('contain.text', providerType);    // Type
       cy.get('td').eq(4).should('contain.text', providerName);    // ProviderName
       // Only check provider version for Rancher >=2.13 and -
-      // 1. prime rancher
+      // 1. pre-prime & prime rancher
       // 2. for turtles build with dev=true & target_build_type=prime
       if (isRancherManagerVersion('>=2.13') && (isPrimeChannel() || (buildType.includes("dev") && isTurtlesPrimeBuild()))) {
         cy.get('td').eq(5).should('contain.text', providerVersion); // InstalledVersion
@@ -73,12 +73,12 @@ describe('Enable CAPI Providers', () => {
   const providerVersions = {
     prod: {
       capi: 'v1.12.2',
-      rke2: 'v0.23.1',
+      rke2: 'v0.24.1',
       kubeadm: 'v1.12.2',
-      fleet: 'v0.14.0',
+      fleet: 'v0.14.1',
       vsphere: 'v1.15.2',
       amazon: 'v2.10.1',
-      google: 'v1.11.0',
+      google: 'v1.11.1',
       azure: 'v1.22.0'
     },
     'dev-v2.13': {
@@ -93,12 +93,12 @@ describe('Enable CAPI Providers', () => {
     },
     'dev-v2.14': {
       capi: 'v1.12.2',
-      rke2: 'v0.23.2',
+      rke2: 'v0.24.1',
       kubeadm: 'v1.12.2',
       fleet: 'v0.14.1',
       vsphere: 'v1.15.2',
       amazon: 'v2.10.1',
-      google: 'v1.11.0',
+      google: 'v1.11.1',
       azure: 'v1.22.0'
     }
   }
