@@ -22,7 +22,27 @@ import {
 } from '~/support/utils';
 import {vars} from '~/support/variables';
 
-const buildType = Cypress.expose('turtles_dev_chart') && isRancherManagerVersion('2.13') ? 'dev-v2.13' : Cypress.expose('turtles_dev_chart') && isRancherManagerVersion('2.14') ? 'dev-v2.14' : 'prod';
+type BuildType = 'prod-v2.13' | 'prod-v2.14' | 'dev-v2.13' | 'dev-v2.14';
+
+const buildType = determineBuildType();
+
+function determineBuildType(): BuildType {
+  const isDevChart = Cypress.expose('turtles_dev_chart');
+
+  if (isDevChart && isRancherManagerVersion('2.13')) {
+    return 'dev-v2.13';
+  }
+  if (isDevChart && isRancherManagerVersion('2.14')) {
+    return 'dev-v2.14';
+  }
+  if (isRancherManagerVersion('2.13')) {
+    return 'prod-v2.13';
+  }
+  if (isRancherManagerVersion('2.14')) {
+    return 'prod-v2.14';
+  }
+  return undefined as unknown as BuildType; // This should never happen, but it satisfies the type checker
+}
 
 function matchAndWaitForProviderReadyStatus(
   providerString: string,
@@ -71,7 +91,17 @@ describe('Enable CAPI Providers', () => {
 
   // Expected provider versions
   const providerVersions = {
-    prod: {
+    'prod-v2.13': {
+      capi: 'v1.10.6',
+      rke2: 'v0.21.1',
+      kubeadm: 'v1.10.6',
+      fleet: 'v0.12.0',
+      vsphere: 'v1.13.1',
+      amazon: 'v2.9.1',
+      google: 'v1.10.0',
+      azure: 'v1.21.0'
+    },
+    'prod-v2.14': {
       capi: 'v1.12.2',
       rke2: 'v0.24.1',
       kubeadm: 'v1.12.2',
