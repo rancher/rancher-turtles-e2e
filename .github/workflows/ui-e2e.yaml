@@ -83,6 +83,8 @@ jobs:
       docker_auth_username: ${{ secrets.DOCKER_AUTH_USERNAME }}
       docker_auth_password: ${{ secrets.DOCKER_AUTH_PASSWORD }}
       docker_registry_config: ${{ secrets.DOCKER_REGISTRY_CONFIG }}
+      providers_oci_repo: ${{ secrets.PROVIDERS_OCI_REPO }}
+      providers_stg_oci_repo: ${{ secrets.PROVIDERS_STG_OCI_REPO }}
     with:
       test_description: "UI - e2e tests with Standard K3s"
       destroy_runner: ${{ github.event_name == 'schedule' && true || inputs.destroy_runner }}

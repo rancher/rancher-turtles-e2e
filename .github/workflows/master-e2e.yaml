@@ -60,6 +60,12 @@ on:
       docker_registry_config:
         description: DOCKER_REGISTRY_CONFIG to perform docker login
         required: true
+      providers_oci_repo:
+        description: OCI Repo for fetching turtles providers chart
+        required: true
+      providers_stg_oci_repo:
+        description: OCI Staging repo for fetching turtles providers chart on dev and pre-prime builds
+        required: true
     inputs:
       cert-manager_version:
         description: Version of cert-manager to use
