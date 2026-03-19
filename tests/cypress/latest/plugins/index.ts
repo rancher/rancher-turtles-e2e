@@ -43,6 +43,8 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   config.expose.skip_cluster_delete = process.env.SKIP_CLUSTER_DELETE || "false";
   const clusterNameSuffixDefault: string = randomstring.generate({length: 4, capitalization: 'lowercase'})
   config.expose.cluster_name_suffix = process.env.CLUSTER_NAME_SUFFIX || clusterNameSuffixDefault;
+  config.env.providers_oci_repo = process.env.PROVIDERS_OCI_REPO;
+  config.env.providers_stg_oci_repo = process.env.PROVIDERS_STG_OCI_REPO;
 
   // Secrets
   config.expose.password = process.env.RANCHER_PASSWORD;

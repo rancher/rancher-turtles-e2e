@@ -261,6 +261,8 @@ jobs:
       DOCKER_AUTH_USERNAME: ${{ secrets.docker_auth_username }}
       DOCKER_AUTH_PASSWORD: ${{ secrets.docker_auth_password }}
       DOCKER_REGISTRY_CONFIG: ${{ secrets.docker_registry_config }}
+      PROVIDERS_OCI_REPO: ${{ secrets.providers_oci_repo }}
+      PROVIDERS_STG_OCI_REPO: ${{ secrets.providers_stg_oci_repo }}
       # Common specs: @short @vsphere @full
       SPECS: |
         e2e/providers_setup.spec.ts

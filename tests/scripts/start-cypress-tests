@@ -51,6 +51,8 @@ docker run --init -v $PWD:/workdir -w /workdir \
     -e "GREP=$GREP" \
     -e "GREPTAGS=$GREPTAGS" \
     -e "CI=$CI" \
+    -e PROVIDERS_OCI_REPO=$PROVIDERS_OCI_REPO \
+    -e PROVIDERS_STG_OCI_REPO=$PROVIDERS_STG_OCI_REPO \
     --add-host host.docker.internal:host-gateway \
     --ipc=host \
     $CYPRESS_DOCKER \
