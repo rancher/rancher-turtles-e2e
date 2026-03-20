@@ -1,0 +1,32 @@
+apiVersion: cluster.x-k8s.io/v1beta2
+kind: Cluster
+metadata:
+  name: replace_cluster_name
+  labels:
+    cluster-api.cattle.io/rancher-auto-import: "true"
+    owner: turtles-qa
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+        - 192.168.0.0/16
+  topology:
+    classRef:
+      name: gcp-gke-example
+      namespace: capi-classes
+    version: replace_k8sVersion
+    variables:
+      - name: project
+        value: replace_gcp_project
+      - name: region
+        value: asia-south2
+      - name: networkName
+        value: rancher-turtles-e2e-ci
+    workers:
+      machinePools:
+        - class: default-system
+          name: spool      # making sure the final pool name is less than 40 char
+          replicas: 3      # GKE regional clusters (us-west1 has 3 zones) require machine pool replicas to be a multiple of the zone count (1 node per zone × 3 zones = 3 replicas minimum).
+        - class: default-worker
+          name: wpool     # making sure the final pool name is less than 40 char
+          replicas: 3     # GKE regional clusters (us-west1 has 3 zones) require machine pool replicas to be a multiple of the zone count (1 node per zone × 3 zones = 3 replicas minimum).
