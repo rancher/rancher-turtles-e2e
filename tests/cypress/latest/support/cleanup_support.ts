@@ -35,9 +35,13 @@ export function capiClusterDeletion(clusterName: string, timeout: number, cluste
 
 const capiClustersNS = 'capi-clusters'
 
-export function capzResourcesCleanup() {
-  cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', capiClustersNS)
-  cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'cluster-identity', 'capz-system')
+export function capzResourcesCleanup(aso: boolean = false) {
+  if (aso) {
+    cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'aso-credential-secret', capiClustersNS)
+  } else {
+    cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', capiClustersNS)
+    cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'cluster-identity', 'capz-system')
+  }
 }
 
 export function capaResourcesCleanup() {

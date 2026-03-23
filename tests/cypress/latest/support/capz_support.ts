@@ -8,6 +8,16 @@ Cypress.Commands.add('createAzureClusterIdentity', (clientID, tenantID, clientSe
     });
 });
 
+Cypress.Commands.add('createAzureASOCredential', (clientID, tenantID, clientSecret, subscriptionID: string) => {
+    cy.readFile('./fixtures/azure/aso-credential-secret.yaml').then((data) => {
+        data = data.replace(/replace_client_id/g, clientID)
+        data = data.replace(/replace_tenant_id/g, tenantID)
+        data = data.replace(/replace_client_secret/g, clientSecret)
+        data = data.replace(/replace_subscription_id/g, subscriptionID)
+        cy.importYAML(data)
+    });
+})
+
 // Create values.yaml Secret
 Cypress.Commands.add('createCAPZValuesSecret', (clientID, tenantID, subscriptionID) => {
     cy.readFile('./fixtures/azure/capz-helm-values-secret.yaml').then((data) => {

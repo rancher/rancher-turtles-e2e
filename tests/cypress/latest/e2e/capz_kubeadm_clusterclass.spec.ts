@@ -60,7 +60,7 @@ describe('Import CAPZ Kubeadm Class-Cluster', {tags: '@full'}, () => {
       // Check child cluster is created and auto-imported
       // This is checked by ensuring the cluster is available in navigation menu
       cy.goToHome();
-      cy.contains(clusterName).should('exist');
+      cy.contains(clusterName, {timeout: timeout}).should('exist'); // extra timeout is required in 2.14; ref: https://github.com/rancher/rancher-turtles-e2e/issues/430
 
       // Check cluster is Active
       cy.searchCluster(clusterName);

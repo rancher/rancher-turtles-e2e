@@ -27,7 +27,7 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
     })
 
     it('Create AzureClusterIdentity', () => {
-      cy.createAzureClusterIdentity(clientID, tenantID, clientSecret);
+      cy.createAzureASOCredential(clientID, tenantID, clientSecret, subscriptionID);
     })
 
     qase(84, it('Add CAPZ AKS ClusterClass using fleet', () => {
@@ -44,7 +44,6 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
         const classClusterFileName = isAPIv1beta1 ? './fixtures/azure/capz-aks-class-cluster-v1beta1.yaml' : './fixtures/azure/capz-aks-class-cluster.yaml'
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
-          data = data.replace(/replace_subscription_id/g, subscriptionID)
           cy.importYAML(data, vars.capiClustersNS)
         });
         // Check CAPI cluster using its name
@@ -95,7 +94,7 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
         // Cleanup other resources
-        capzResourcesCleanup();
+        capzResourcesCleanup(true);
       })
     }
   })

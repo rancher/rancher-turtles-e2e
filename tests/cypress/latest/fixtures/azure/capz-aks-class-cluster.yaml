@@ -15,14 +15,12 @@ spec:
       name: azure-aks-example
       namespace: capi-classes
     variables:
-    - name: subscriptionID
-      value: "replace_subscription_id"
     - name: location
       value: westeurope # this is one of the regions supported by ClusterClass definition
     - name: resourceGroup
       value: replace_cluster_name
-    - name: azureClusterIdentityName
-      value: cluster-identity
+    - name: asoCredentialSecretName
+      value: aso-credential-secret   # should be in the same namespace as the cluster
     version: v1.33.5 # Highest available
     workers:
       machinePools:

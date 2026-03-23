@@ -83,6 +83,8 @@ declare global {
       // Functions declared in capz_support.js
       createCAPZValuesSecret(clientID: string, tenantID: string, subscriptionID: string): Chainable<Element>;
       createAzureClusterIdentity(clientID: string, tenantID: string, clientSecret: string): Chainable<Element>;
+
+      createAzureASOCredential(clientID: string, tenantID: string, clientSecret: string, subscriptionID: string): Chainable<Element>;
       deleteKubernetesResource(clusterName: string, resourcePath: string[], resourceName: string, namespace?: string): Chainable<Element>;
     }
   }
