@@ -26,7 +26,7 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
       cy.namespaceAutoImport('Disable');
     })
 
-    it('Create AzureClusterIdentity', () => {
+    it('Create AzureASOCredential', () => {
       cy.createAzureASOCredential(clientID, tenantID, clientSecret, subscriptionID);
     })
 
