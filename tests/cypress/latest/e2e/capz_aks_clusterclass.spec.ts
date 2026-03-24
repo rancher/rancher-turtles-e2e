@@ -12,7 +12,7 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
   const clusterClassRepoName = "azure-aks-clusterclass"
 
   const clientID = Cypress.expose("azure_client_id")
-  const clientSecret = btoa(Cypress.expose("azure_client_secret"))
+  const clientSecret = Cypress.expose("azure_client_secret")
   const subscriptionID = Cypress.expose("azure_subscription_id")
   const tenantID = Cypress.expose("azure_tenant_id")
 

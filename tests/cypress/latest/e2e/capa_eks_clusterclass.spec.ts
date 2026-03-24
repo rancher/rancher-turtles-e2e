@@ -83,7 +83,8 @@ describe('Import CAPA EKS Class-Cluster', {tags: '@full'}, () => {
       it('Install App on imported cluster', {retries: 1}, () => {
         // Install Chart
         // We install Logging chart instead of Monitoring, since this is relatively lightweight.
-        cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
+        // Chart version 109.0.0 (Rancher 2.14) requires k8s version >=1.33
+        cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system', '108.0');
       })
     );
 
