@@ -14,7 +14,7 @@ describe('Import CAPG GKE Class-Cluster', {tags: '@full'}, () => {   // This tes
   const classClusterFileName = './fixtures/gcp/capg-gke-class-cluster.yaml'
 
   const gcpProject = Cypress.expose('gcp_project')
-  const k8sVersion = 'v1.35.0'      // this version is different from GCP Kubeadm version
+  const k8sVersion = 'v1.34.4'      // this version is different from GCP Kubeadm version
 
   beforeEach(() => {
     cy.login();
@@ -27,7 +27,7 @@ describe('Import CAPG GKE Class-Cluster', {tags: '@full'}, () => {   // This tes
     })
 
 
-      it('Add CAPG GKE ClusterClass Fleet Repo and check GCP CCM', () => {
+    it('Add CAPG GKE ClusterClass Fleet Repo', () => {
         cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(classNamePrefix);
