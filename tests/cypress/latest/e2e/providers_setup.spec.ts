@@ -39,7 +39,12 @@ function determineBuildType(): BuildType {
   if (isRancherManagerVersion('2.14')) {
     return 'prod-v2.14';
   }
-  return undefined as unknown as BuildType; // This should never happen, but it satisfies the type checker
+  throw new Error('Unable to determine build type. Check Rancher Manager version.'); // This should never happen, but it satisfies the type checker
+}
+
+function navigateToProviders() {
+  cy.checkCAPIMenu();
+  cy.contains('Providers').click();
 }
 
 if (isRancherManagerVersion('>2.12')) {
@@ -185,14 +190,12 @@ describe('Enable CAPI Providers', () => {
     })
 
     it('Verify Core CAPI Provider', () => {
-      cy.checkCAPIMenu();
-      cy.contains('Providers').click();
+      navigateToProviders()
       matchAndWaitForProviderReadyStatus(coreCAPIProvider, 'core', coreCAPIProvider, coreCAPIProviderVersion, capiNamespace);
     });
 
     it('Verify Fleet addon provider', () => {
-      cy.checkCAPIMenu();
-      cy.contains('Providers').click();
+      navigateToProviders()
       matchAndWaitForProviderReadyStatus(fleetProvider, 'addon', fleetProvider, fleetProviderVersion, 'fleet-addon-system');
     });
 
@@ -219,14 +222,12 @@ describe('Enable CAPI Providers', () => {
         if (providerType == 'control plane') {
           const namespace = 'rke2-control-plane-system'
           const providerName = rke2Provider + '-' + 'control-plane'
-          cy.checkCAPIMenu();
-          cy.contains('Providers').click();
+          navigateToProviders()
           matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', rke2Provider, rke2ProviderVersion, namespace);
         } else {
           const namespace = 'rke2-bootstrap-system'
           const providerName = rke2Provider + '-' + providerType
-          cy.checkCAPIMenu();
-          cy.contains('Providers').click();
+          navigateToProviders()
           matchAndWaitForProviderReadyStatus(providerName, providerType, rke2Provider, rke2ProviderVersion, namespace);
         }
       });
@@ -257,8 +258,7 @@ describe('Enable CAPI Providers', () => {
     const dockerProviderNamespace = 'capd-system'
     it('Create/Verify CAPD provider', () => {
       // Create Docker Infrastructure provider
-      cy.checkCAPIMenu();
-      cy.contains('Providers').click();
+      navigateToProviders()
       matchAndWaitForProviderReadyStatus(dockerProvider, 'infrastructure', dockerProvider, kubeadmProviderVersion, dockerProviderNamespace);
     })
   })
@@ -291,16 +291,14 @@ describe('Enable CAPI Providers', () => {
       // Create AWS Infrastructure provider
       cy.addCloudCredsAWS(amazonProvider, Cypress.expose('aws_access_key'), Cypress.expose('aws_secret_key'));
       cy.burgerMenuOperate('open');
-      cy.checkCAPIMenu();
-      cy.contains('Providers').click();
+      navigateToProviders()
       matchAndWaitForProviderReadyStatus(amazonProvider, providerType, amazonProvider, amazonProviderVersion, namespace);
     })
 
     it('Create/Verify CAPG provider', () => {
       const namespace = 'capg-system'
       // Create GCP Infrastructure provider
-      cy.burgerMenuOperate('open');
-      cy.checkCAPIMenu();
+      navigateToProviders()
       cy.contains('Providers').click();
 
       // Create GCP Cloud Credential until https://github.com/rancher/dashboard/issues/15391 is fixed
@@ -320,8 +318,7 @@ describe('Enable CAPI Providers', () => {
     it('Create/Verify CAPZ provider', () => {
       const namespace = 'capz-system'
       // Create Azure Infrastructure provider
-      cy.checkCAPIMenu();
-      cy.contains('Providers').click();
+      navigateToProviders()
       matchAndWaitForProviderReadyStatus(azureProvider, providerType, azureProvider, azureProviderVersion, namespace);
     })
   })
