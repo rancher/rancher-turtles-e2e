@@ -14,7 +14,7 @@ limitations under the License.
 
 import '~/support/commands';
 import {vars} from '~/support/variables';
-import {isRancherManagerVersion, isMigration, isTurtlesDevChart, turtlesNamespace, isUpgrade} from '~/support/utils';
+import {isMigration, isRancherManagerVersion, isTurtlesDevChart, isUpgrade, turtlesNamespace} from '~/support/utils';
 
 Cypress.config();
 describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
@@ -95,7 +95,7 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
       if (isMigration) {
         turtlesVersion = '0.24.4'
       }
-      cy.checkChart('local', 'Install', 'Rancher Turtles', turtlesNamespace, turtlesVersion);
+      cy.checkChart('local', 'Install', 'Rancher Turtles', turtlesNamespace, {version: turtlesVersion});
     })
   }
 });

@@ -94,14 +94,14 @@ describe('Enable CAPI Providers', () => {
     })
  
     it('Verify Core CAPI Provider', () => {
-      cy.checkCAPIMenu();
-      cy.contains('Providers').click();
+      cy.navigateToProviders();
+      ;
       matchAndWaitForProviderReadyStatus(coreCAPIProvider, 'core', coreCAPIProvider, coreCAPIProviderVersion, capiNamespace);
     });
 
     it('Verify Fleet addon provider', () => {
-      cy.checkCAPIMenu();
-      cy.contains('Providers').click();
+      cy.navigateToProviders();
+      ;
       matchAndWaitForProviderReadyStatus(fleetProvider, 'addon', fleetProvider, fleetProviderVersion, turtlesNamespace);
     });
 
@@ -131,14 +131,13 @@ describe('Enable CAPI Providers', () => {
         if (providerType == 'control plane') {
           const namespace = 'rke2-control-plane-system'
           const providerName = rke2Provider + '-' + 'control-plane'
-          cy.checkCAPIMenu();
-          cy.contains('Providers').click();
+          cy.navigateToProviders();
+          ;
           matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', rke2Provider, rke2ProviderVersion, namespace);
          } else {
           const namespace = 'rke2-bootstrap-system'
           const providerName = rke2Provider + '-' + providerType
-          cy.checkCAPIMenu();
-          cy.contains('Providers').click();
+          cy.navigateToProviders();
           matchAndWaitForProviderReadyStatus(providerName, providerType, rke2Provider, rke2ProviderVersion, namespace);
         }
       });

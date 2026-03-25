@@ -19,7 +19,16 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import jsyaml from 'js-yaml';
 import yaml from 'js-yaml';
 import _ from 'lodash';
-import {capiNamespace, isPrePrimeChannel, isPrimeChannel, isTurtlesPrimeBuild, isTurtlesDevChart, isRancherManagerVersion, isMigration, isAPIv1beta1} from '~/support/utils';
+import {
+  capiNamespace,
+  isAPIv1beta1,
+  isMigration,
+  isPrePrimeChannel,
+  isPrimeChannel,
+  isRancherManagerVersion,
+  isTurtlesDevChart,
+  isTurtlesPrimeBuild
+} from '~/support/utils';
 import {vars} from '~/support/variables'
 
 // Generic commands
@@ -359,12 +368,15 @@ Cypress.Commands.add('checkFleetHelmOps', (appList: string[]) => {
     cy.getBySel('sortable-cell-0-1').should('exist');
   })
 })
+Cypress.Commands.add('navigateToProviders', () => {
+  cy.checkCAPIMenu();
+  cy.contains('Providers').click();
+})
 
 // Command to add CAPI Custom provider
 Cypress.Commands.add('addCustomProvider', (name, namespace, providerName, providerType, version, url) => {
   // Navigate to providers Menu
-  cy.checkCAPIMenu();
-  cy.contains('Providers').click();
+  cy.navigateToProviders();
   cy.clickButton('Create');
   cy.getBySel('select-icon-grid-custom').click();
 
@@ -389,8 +401,7 @@ Cypress.Commands.add('addCustomProvider', (name, namespace, providerName, provid
 // Command to add CAPI Infrastructure provider
 Cypress.Commands.add('addInfraProvider', (providerType, namespace, cloudCredentials) => {
   // Navigate to providers Menu
-  cy.checkCAPIMenu();
-  cy.contains('Providers').click();
+  cy.navigateToProviders();
   cy.clickButton('Create');
   const selector = "'select-icon-grid-" + providerType + "'"
   cy.getBySel(selector).click();
@@ -561,196 +572,195 @@ function checkApiStatus (retries = 20) {
 // You can optionally provide an array of questions and answer them before the installation starts
 // Example1: cy.checkChart('local', 'Alerting', 'default', [{ menuEntry: '(None)', checkbox: 'Enable Microsoft Teams' }]);
 // Example2: cy.checkChart('capg-kubeadm', Rancher Turtles', 'cattle-turtles-system', [{ menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Seamless integration with Fleet and CAPI'},{ menuEntry: 'Rancher webhook cleanup settings', inputBoxTitle: 'Webhook Cleanup Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.28.0'}]);
-Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace, version, questions, refreshRepo = false, modifyYAMLOperation) => {
+Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace, options = {}) => {
+  const isTurtlesChart = chartName === 'Rancher Turtles';
+  const isTurtlesProvidersChart = chartName === vars.turtlesProvidersChartName;
+  const isUpdateOperation = operation == vars.updateOperation;
 
-  const isUpdateOperation = operation == 'Update'
+  const getChartSelector = () => {
+    if (isTurtlesChart) {
+      if (isRancherManagerVersion('>=2.13')) {
+        return isTurtlesDevChart ? '"item-card-cluster/chartmuseum-repo/rancher-turtles"' : '"item-card-cluster/rancher-charts/rancher-turtles"';
+      }
 
+      if (isRancherManagerVersion('2.12')) {
+        return isTurtlesDevChart && !isMigration ? '"item-card-cluster/chartmuseum-repo/rancher-turtles"' : '"item-card-cluster/turtles-chart/rancher-turtles"';
+      }
 
-  // the 'Update' operation has been renamed to 'Edit' in 2.13.
-  if (isRancherManagerVersion('>=2.13') && isUpdateOperation) {
-    operation = 'Edit'
-  }
+      return '"select-icon-grid-Rancher Turtles - the Cluster API Extension"';
+    }
+
+    // for >=2.13 we use an external repo to install providers chart, and for 2.12 there is no need to install it.
+    if (isTurtlesProvidersChart && isRancherManagerVersion('>=2.13')) {
+      return vars.turtlesProvidersChartSelector;
+    }
+
+    return 'app-chart-cards-container';
+  };
+
+  const performInstallation = () => {
+    cy.clickNavMenu(['Apps', 'Repositories']);
+    // Select All Repositories and click Action/Refresh
+    cy.waitForAllRowsInState('Active');
+    cy.wait(500);
+
+    if (options.refreshRepo) {
+      cy.get('div.checkbox-outer-container.check').click();
+      cy.wait(500);
+      cy.contains('Refresh').click();
+      cy.waitForAllRowsInState('Active');
+      cy.wait(1000);
+    }
+
+    cy.clickNavMenu(['Apps', 'Charts']);
+    cy.getBySel('charts-header-title').should('be.visible');
+    cy.typeInFilter(chartName, 'input[data-testid="charts-filter-input"]');
+
+    cy.getBySel(getChartSelector()).within(() => {
+      cy.contains(chartName, {timeout: 10000}).then($el => {
+        cy.wait(500);
+        cy.wrap($el).should('be.visible').click();
+      });
+    });
+    cy.contains(`Charts: ${chartName}`);
+
+    if (options.version) {
+      cy.get('body').invoke('text').then((bodyText) => {
+        if (bodyText.includes('Show More')) {
+          cy.contains('Show More').click();
+        }
+      });
+      cy.contains(options.version).click();
+      cy.url().should("contain", options.version);
+    }
+
+    if (isTurtlesChart && isUpdateOperation) {
+      cy.get('body').invoke('text').then((bodyText) => {
+        if (bodyText.includes('Current')) {
+          cy.contains('Current').click();
+        }
+      });
+    }
+
+    cy.getBySel('btn-chart-install').click();
+    cy.contains(operation + ': Step 1');
+
+    // TODO: This is a temp workaround until https://github.com/rancher/rancher/issues/53883 is fixed
+    if (chartName == "rancher-turtles-providers") {
+      cy.setNamespace('All Namespaces', 'all_user');
+      cy.getBySel('name-ns-description-namespace').type(namespace + '{enter}');
+    }
+    cy.clickButton('Next');
+
+    // Used for entering questions and answering them
+    if (options.questions) {
+      // Some apps like Alerting show questions page directly so no further action needed here
+      // Some other apps like Turtles have a 'Customize install settings' checkbox or its variant which needs to be clicked
+      if (isTurtlesChart && isUpdateOperation) {
+        cy.contains('Customize install settings').should('be.visible').click();
+      }
+
+      options.questions.forEach((question) => {
+        if (question.checkbox) {
+          cy.contains('a', question.menuEntry).click();
+          cy.contains(question.checkbox).click();
+        } else if (question.inputBoxTitle && question.inputBoxValue) {
+          cy.contains(question.menuEntry).click();
+          cy.contains(question.inputBoxTitle).siblings('input').clear().type(question.inputBoxValue);
+        }
+      });
+    }
+
+    if (options.modifyYAMLOperation) {
+      cy.get('.CodeMirror').then((editor) => {
+        // @ts-expect-error known error with CodeMirror
+        let text = yaml.load(editor[0].CodeMirror.getValue());
+        // @ts-ignore
+        options.modifyYAMLOperation(text);
+        // @ts-expect-error known error with CodeMirror
+        editor[0].CodeMirror.setValue(yaml.dump(text));
+      });
+    }
+
+    const buttonText = isRancherManagerVersion('>=2.13') && (isUpdateOperation) ? 'Save changes' : operation;
+    cy.clickButton(buttonText);
+
+    // If 'namespaces <namespace> not found' error or `Error` button is visible,
+    // wait for `Error` button to disappear and click on the `Install` button again
+    cy.get('.main-layout').then((mainLayout) => {
+      if (mainLayout.find('div.banner.error.footer-error').length) {
+        // Wait for the `Error` button to disappear; it changes to `Install` after a few seconds
+        cy.get('button.btn.bg-error', {timeout: 10000}).should('not.exist');
+        // Adding hard wait to allow Install button to become clickable
+        cy.wait(2000);
+        cy.clickButton(operation);
+      }
+    });
+
+    // This is 1s more than the time required for the installation tabpanel to appear;
+    // or in case of Turtles, Rancher pod restarts, so this is enough time to start restarting Rancher
+    cy.wait(10000);
+
+    if (isTurtlesChart) {
+      // Poll /dashboard/about until it returns HTTP 200 and then reload the page
+      checkApiStatus();
+    } else {
+      if (isTurtlesProvidersChart) {
+        cy.contains(new RegExp('SUCCESS: helm .*tgz'), {timeout: 140000}).should('be.visible');
+      } else {
+        // Wait for both CRD and main helm chart to be installed
+        cy.contains(new RegExp('SUCCESS: helm .*crd.*tgz.*SUCCESS: helm .*tgz'), {timeout: 140000}).should('be.visible');
+      }
+      cy.get('.closer').click();
+    }
+
+    cy.contains('Installed Apps').should('be.visible');
+    cy.setNamespace(namespace);
+
+    if (operation == 'Install') {
+      // All resources (usually an App and its CRD) in the namespaces are deployed (green badge)
+      cy.waitForAllRowsInState('Deployed', 180000);
+    } else {
+      cy.contains(new RegExp('Installed App:.*Deployed'), {timeout: 120000}).should('be.visible');
+      if (!isTurtlesProvidersChart) {
+        cy.waitForAllRowsInState('Active');
+      }
+    }
+
+    cy.namespaceReset();
+  };
 
   // Click on the cluster
   cy.get('.side-menu .clusters').within(() => {
     cy.contains(clusterName).click();
-  })
-  cy.get('.nav').contains('Apps').click();
+  });
 
-  // Select All Repositories and click Action/Refresh
-  cy.get('.nav').contains('Repositories').click();
-  cy.waitForAllRowsInState('Active');
-  cy.wait(500);
-  if (refreshRepo && refreshRepo == true) {
-    cy.get('div.checkbox-outer-container.check').click();
-    cy.wait(500);
-    cy.contains('Refresh').click();
-    cy.waitForAllRowsInState('Active');
-    cy.wait(1000);
-  }
+  if (operation === 'Install' && Cypress.currentRetry > 0) {
+    cy.clickNavMenu(['Apps', 'Installed Apps']);
+    cy.contains('Installed Apps', {timeout: 10000}).should('be.visible');
 
-  cy.get('.nav').contains('Charts').click();
+    // check if the desired namespace is available, if it is, the app was installed successfully in previous try
+    cy.getBySel('namespaces-dropdown').click();
+    cy.get('div.ns-dropdown-menu').then((dropdownMenu) => {
+      const namespaceFound = dropdownMenu.find(`div[id='ns_${namespace}']`).length > 0
 
-  if (isRancherManagerVersion('>=2.12')) {
-    cy.getBySel('charts-header-title').should('be.visible');
-  } else {
-    cy.contains('Featured Charts').should('be.visible'); // TODO check if this cannot be unified with 2.12
-  }
+      // close the dropdown
+      cy.getBySel('namespaces-dropdown').click();
 
-  // Chart filter input is not normal filter in 2.12 :(
-  if (isRancherManagerVersion('>=2.12')) {
-    cy.getBySel('charts-filter-input').clear().type(chartName);
-  } else {
-    cy.typeInFilter(chartName);
-  }
-  let chartSelector = isRancherManagerVersion('>=2.12') ? 'app-chart-cards-container' : 'chart-selection-grid';
-  const turtlesChart = chartName == 'Rancher Turtles'
-  if (turtlesChart) {
-    let turtlesChartSelector: string;
-    // if dev==true; then for 2.13 and 2.12, the selector remains same;
-    // if dev==false; then for 2.13 we use system integrated turtles, and for 2.12 we use turtles-chart repo to install turtles
-    if (isRancherManagerVersion('>=2.13')) {
-      turtlesChartSelector = isTurtlesDevChart ? '"item-card-cluster/chartmuseum-repo/rancher-turtles"' : '"item-card-cluster/rancher-charts/rancher-turtles"';
-    } else if (isRancherManagerVersion('2.12')) {
-      turtlesChartSelector = isTurtlesDevChart && !isMigration ? '"item-card-cluster/chartmuseum-repo/rancher-turtles"' : '"item-card-cluster/turtles-chart/rancher-turtles"';
-    } else {
-      turtlesChartSelector = '"select-icon-grid-Rancher Turtles - the Cluster API Extension"';
-    }
-    chartSelector = turtlesChartSelector
-  }
-
-  const turtlesProvidersChart = chartName == vars.turtlesProvidersChartName
-  // for 2.13 we use an external repo to install providers chart, and for 2.12 there is no need to install it.
-  if (turtlesProvidersChart && isRancherManagerVersion('>=2.13')) {
-    chartSelector = vars.turtlesProvidersChartSelector
-  }
-
-  cy.getBySel(chartSelector).within(() => {
-    cy.contains(chartName, {timeout: 10000}).then($el => {
-      cy.wait(500);
-      cy.wrap($el).should('be.visible').click();
-    });
-  })
-  cy.contains('Charts: ' + chartName);
-
-  if (version && version != "") {
-    cy.get('body').invoke('text').then((bodyText) => {
-      if (bodyText.includes('Show More')) {
-        cy.contains('Show More').click();
-      }
-    });
-    cy.contains(version).click();
-    cy.url().should("contain", version)
-  }
-
-  if (turtlesChart && isUpdateOperation) {
-    cy.get('body').invoke('text').then((bodyText) => {
-      if (bodyText.includes('Current')) {
-        cy.contains('Current').click();
-      }
-    });
-  }
-
-  cy.getBySel('btn-chart-install').click();
-  cy.contains(operation + ': Step 1')
-
-  // TODO: This is a temp workaround until https://github.com/rancher/rancher/issues/53883 is fixed
-  if (chartName == "rancher-turtles-providers") {
-    cy.setNamespace('All Namespaces', 'all_user');
-    cy.getBySel('name-ns-description-namespace').type(namespace + '{enter}');
-  }
-  cy.clickButton('Next');
-
-  // Used for entering questions and answering them
-  if (questions) {
-    // Some apps like Alerting show questions page directly so no further action needed here
-    // Some other apps like Turtles have a 'Customize install settings' checkbox or its variant which needs to be clicked
-    if (turtlesChart && isUpdateOperation) {
-      cy.contains('Customize install settings').should('be.visible').click();
-    }
-
-    questions.forEach((question) => {
-      if (question.checkbox) {
-        cy.contains('a', question.menuEntry).click();
-        cy.contains(question.checkbox).click(); // TODO make sure the checkbox is enabled
-      } else if (question.inputBoxTitle && question.inputBoxValue) {
-        cy.contains(question.menuEntry).click();
-        cy.contains(question.inputBoxTitle).siblings('input').clear().type(question.inputBoxValue);
-      }
-    });
-  }
-
-  if (modifyYAMLOperation) {
-    cy.get('.CodeMirror')
-      .then((editor) => {
-        // @ts-expect-error known error with CodeMirror
-        let text = yaml.load(editor[0].CodeMirror.getValue());
-        // @ts-ignore
-        modifyYAMLOperation(text);
-        // @ts-expect-error known error with CodeMirror
-        editor[0].CodeMirror.setValue(yaml.dump(text));
-      })
-  }
-
-  if (isRancherManagerVersion('>=2.13') && isUpdateOperation) {
-    cy.clickButton('Save changes');
-  } else {
-    cy.clickButton(operation);
-  }
-
-  // If 'namespaces <namespace> not found' error or `Error` button is visible,
-  // wait for `Error` button to disappear and click on the `Install` button again
-  cy.get('.main-layout').then((mainLayout) => {
-    if (mainLayout.find('div.banner.error.footer-error').length) {
-      // Wait for the `Error` button to disappear; it changes to `Install` after a few seconds
-      cy.get('button.btn.bg-error', {timeout: 10000}).should('not.exist');
-      cy.clickButton(operation);
-    }
-  })
-
-  // This is 1s more than the time required for the installation tabpanel to appear;
-  // or in case of Turtles, Rancher pod restarts, so this is enough time to start restarting Rancher
-  cy.wait(10000);
-
-  if (turtlesChart) {
-    // Poll /dashboard/about until it returns HTTP 200 and then reload the page
-    checkApiStatus();
-  } else {
-    cy.get("div.wm.drag-end").then((windowmanager) => {
-      // Check if the installation panel has appeared;
-      if (windowmanager.find('div[role=tabpanel]').length) {
-        // Wait for both CRD and main helm chart to be installed
-        if (chartName == vars.turtlesProvidersChartName) {
-          cy.contains(new RegExp('SUCCESS: helm .*tgz'), {timeout: 140000}).should('be.visible');
-        } else {
-          cy.contains(new RegExp('SUCCESS: helm .*crd.*tgz.*SUCCESS: helm .*tgz'), {timeout: 140000}).should('be.visible');
-        }
-        cy.get('.closer').click();
-      } else {
-        // If the installation panel failed to appear for some reason, manually check for app installation
-        // Installed Apps should have loaded by now, set the namespace and check if the app name is available in the list;
-        cy.contains('Installed Apps').should('be.visible');
-        cy.setNamespace(namespace)
+      // if the namespace is found, chances are the app was installed successfully in previous try
+      if (namespaceFound) {
+        cy.setNamespace(namespace);
         cy.typeInFilter(chartName, 'input[aria-label="Filter table results"]');
-        cy.getBySel('sortable-cell-0-1').should('exist');
+        cy.waitForAllRowsInState('Deployed');
+        cy.task('suiteLog', `Chart ${chartName} is already installed and deployed. Skipping installation.`);
+        cy.namespaceReset()
+      } else {
+        // perform installation again if the namespace is not found, i.e. the chart was not installed in previous try
+        performInstallation()
       }
-    })
-  }
-
-  if (operation == 'Install') {
-    // All resources (usually an App and its CRD) in the namespaces are deployed (green badge)
-    cy.contains('Installed Apps').should('be.visible');
-    cy.setNamespace(namespace);
-    cy.waitForAllRowsInState('Deployed', 180000);
-    cy.namespaceReset();
+    });
   } else {
-    cy.contains('Installed Apps').should('be.visible');
-    cy.setNamespace(namespace);
-    cy.contains(new RegExp('Installed App:.*Deployed'), {timeout: 120000}).should('be.visible');
-    if (chartName != vars.turtlesProvidersChartName) {
-      cy.waitForAllRowsInState('Active');
-    }
-    cy.namespaceReset();
+    performInstallation();
   }
 });
 
@@ -1095,8 +1105,7 @@ Cypress.Commands.add('createCAPIProvider', (providerName) => {
 // Check CAPIProvider ready status
 Cypress.Commands.add('checkCAPIProvider', (providerName) => {
   // Navigate to providers Menu
-  cy.checkCAPIMenu();
-  cy.contains('Providers').click();
+  cy.navigateToProviders();
   cy.typeInFilter(providerName);
   cy.waitForAllRowsInState('Ready');
 });

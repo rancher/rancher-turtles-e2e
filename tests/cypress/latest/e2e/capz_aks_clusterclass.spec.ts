@@ -69,7 +69,6 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
 
   context('[CLUSTER-OPERATIONS]', () => {
     qase(57, it('Install App on imported cluster', {retries: 1}, () => {
-        // Install Chart
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
     );

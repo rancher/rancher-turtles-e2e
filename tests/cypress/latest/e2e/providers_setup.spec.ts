@@ -39,12 +39,7 @@ function determineBuildType(): BuildType {
   if (isRancherManagerVersion('2.14')) {
     return 'prod-v2.14';
   }
-  throw new Error('Unable to determine build type. Check Rancher Manager version.'); // This should never happen, but it satisfies the type checker
-}
-
-function navigateToProviders() {
-  cy.checkCAPIMenu();
-  cy.contains('Providers').click();
+  return undefined as unknown as BuildType; // This should never happen, but it satisfies the type checker
 }
 
 if (isRancherManagerVersion('>2.12')) {
@@ -179,7 +174,10 @@ describe('Enable CAPI Providers', () => {
       // Install Rancher Turtles Certified Providers chart
       let operation = isRancherManagerVersion('2.14') && isUpgrade ? 'Upgrade' : 'Install'
       let turtlesProvidersChartVersion = providersChartNeedsStgRegistry() && isRancherManagerVersion('2.13') ? '0.25' : undefined // TODO: Remove this once https://github.com/rancher/rancher/issues/53882 and 53883 is fixed; staging registry is currently broken for everything
-      cy.checkChart('local', operation, vars.turtlesProvidersChartName, turtlesNamespace, turtlesProvidersChartVersion, undefined, false, providerSelectionFunction);
+      cy.checkChart('local', operation, vars.turtlesProvidersChartName, turtlesNamespace, {
+        version: turtlesProvidersChartVersion,
+        modifyYAMLOperation: providerSelectionFunction
+      });
     })
 
     it('Wait for all the providers to be Ready', {retries: 2}, () => {
@@ -190,12 +188,12 @@ describe('Enable CAPI Providers', () => {
     })
 
     it('Verify Core CAPI Provider', () => {
-      navigateToProviders()
+      cy.navigateToProviders();
       matchAndWaitForProviderReadyStatus(coreCAPIProvider, 'core', coreCAPIProvider, coreCAPIProviderVersion, capiNamespace);
     });
 
     it('Verify Fleet addon provider', () => {
-      navigateToProviders()
+      cy.navigateToProviders();
       matchAndWaitForProviderReadyStatus(fleetProvider, 'addon', fleetProvider, fleetProviderVersion, 'fleet-addon-system');
     });
 
@@ -222,12 +220,12 @@ describe('Enable CAPI Providers', () => {
         if (providerType == 'control plane') {
           const namespace = 'rke2-control-plane-system'
           const providerName = rke2Provider + '-' + 'control-plane'
-          navigateToProviders()
+          cy.navigateToProviders();
           matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', rke2Provider, rke2ProviderVersion, namespace);
         } else {
           const namespace = 'rke2-bootstrap-system'
           const providerName = rke2Provider + '-' + providerType
-          navigateToProviders()
+          cy.navigateToProviders();
           matchAndWaitForProviderReadyStatus(providerName, providerType, rke2Provider, rke2ProviderVersion, namespace);
         }
       });
@@ -258,7 +256,7 @@ describe('Enable CAPI Providers', () => {
     const dockerProviderNamespace = 'capd-system'
     it('Create/Verify CAPD provider', () => {
       // Create Docker Infrastructure provider
-      navigateToProviders()
+      cy.navigateToProviders();
       matchAndWaitForProviderReadyStatus(dockerProvider, 'infrastructure', dockerProvider, kubeadmProviderVersion, dockerProviderNamespace);
     })
   })
@@ -291,14 +289,14 @@ describe('Enable CAPI Providers', () => {
       // Create AWS Infrastructure provider
       cy.addCloudCredsAWS(amazonProvider, Cypress.expose('aws_access_key'), Cypress.expose('aws_secret_key'));
       cy.burgerMenuOperate('open');
-      navigateToProviders()
+      cy.navigateToProviders();
       matchAndWaitForProviderReadyStatus(amazonProvider, providerType, amazonProvider, amazonProviderVersion, namespace);
     })
 
     it('Create/Verify CAPG provider', () => {
       const namespace = 'capg-system'
       // Create GCP Infrastructure provider
-      navigateToProviders()
+      cy.navigateToProviders();
       cy.contains('Providers').click();
 
       // Create GCP Cloud Credential until https://github.com/rancher/dashboard/issues/15391 is fixed
@@ -318,7 +316,7 @@ describe('Enable CAPI Providers', () => {
     it('Create/Verify CAPZ provider', () => {
       const namespace = 'capz-system'
       // Create Azure Infrastructure provider
-      navigateToProviders()
+      cy.navigateToProviders();
       matchAndWaitForProviderReadyStatus(azureProvider, providerType, azureProvider, azureProviderVersion, namespace);
     })
   })

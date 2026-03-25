@@ -135,8 +135,6 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: '@short'}, () => {
 
     qase(7,
       it('Install App on imported cluster', {retries: 1}, () => {
-        // Install Chart
-        // We install Logging chart instead of Monitoring, since this is relatively lightweight.
         cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
     );

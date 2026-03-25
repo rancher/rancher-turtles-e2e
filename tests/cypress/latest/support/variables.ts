@@ -26,5 +26,6 @@ export const vars = {
   : 'ami-07cded2dd011bc687', // Private copy of ami-0cd9e4e7906f4c9dd from eu-west-2
   gcpImageId: isRancherManagerVersion('>=2.13')
   ? 'cluster-api-ubuntu-2404-v1-34-1-1762253907'
-  : 'cluster-api-ubuntu-2404-v1-33-5-1762252437'
+    : 'cluster-api-ubuntu-2404-v1-33-5-1762252437',
+  updateOperation: isRancherManagerVersion('>=2.13') ? 'Edit' : 'Update'
 };

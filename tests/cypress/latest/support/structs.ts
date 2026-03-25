@@ -39,3 +39,10 @@ export type Question = {
     inputBoxTitle: string
     inputBoxValue: string
 }
+
+export type ChartInstallExtraOptions = {
+    version?: string
+    questions?: Question[]
+    refreshRepo?: boolean
+    modifyYAMLOperation?: (text: any) => void
+}

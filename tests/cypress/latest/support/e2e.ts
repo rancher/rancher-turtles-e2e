@@ -16,7 +16,7 @@ import './commands';
 import yaml from 'js-yaml';
 import './capz_support';
 import './cleanup_support';
-import {Cluster, Question} from './structs';
+import {ChartInstallExtraOptions, Cluster} from './structs';
 import {register as registerCypressGrep} from '@cypress/grep'
 
 // This ensures the qase() function exists globally before ANY spec file loads
@@ -37,11 +37,12 @@ declare global {
       checkFleetGitRepoActive(repoName: string, workspace?: string): Chainable<Element>;
       fleetNamespaceToggle(toggleOption: string): Chainable<Element>;
       verifyTableRow(rowNumber: number, expectedText1?: string | RegExp, expectedText2?: string | RegExp): Chainable<Element>;
+
       waitForAllRowsInState(desiredState: string, timeout?: number): Chainable<Element>;
       accesMenuSelection(menuPaths: string[]): Chainable<Element>;
       burgerMenuOperate(operation: 'open' | 'close'): Chainable<Element>;
 
-      checkChart(clusterName: string, operation: string, chartName: string, namespace: string, version?: string, questions?: Question[], refreshRepo?: boolean, modifyYAMLOperation?: (text: any) => void): Chainable<Element>;
+      checkChart(clusterName: string, operation: string, chartName: string, namespace: string, options?: ChartInstallExtraOptions): Chainable<Element>;
 
       deleteCluster(clusterName: string, timeout?: number): Chainable<Element>;
       searchCluster(clusterName: string): Chainable<Element>;
@@ -59,6 +60,8 @@ declare global {
       checkCAPIMenu(): Chainable<Element>;
       checkFleetHelmOps(appList: string[]): Chainable<Element>;
       namespaceReset(): Chainable<Element>;
+
+      navigateToProviders(): Chainable<Element>;
       addCustomProvider(name: string, namespace: string, providerName: string, providerType: string, version?: string, url?: string): Chainable<Element>;
       addInfraProvider(providerType: string, namespace: string, cloudCredentials?: string): Chainable<Element>;
       removeCAPIResource(resourceType: string, resourceName: string, timeout?: number): Chainable<Element>;

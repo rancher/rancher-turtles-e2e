@@ -124,7 +124,7 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
     if (isRancherManagerVersion('2.13')) {
       it('Create Fleet Provider using provider charts', () => {
         // Install Rancher Turtles Certified Providers chart with default values
-        cy.checkChart('local', 'Install', 'Rancher Turtles Certified Providers', turtlesNamespace, undefined, undefined, false, undefined);
+        cy.checkChart('local', 'Install', 'Rancher Turtles Certified Providers', turtlesNamespace);
       })
 
       it('Check cluster & Resources status post-migration', () => {
@@ -148,8 +148,6 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
       })
 
       it('Install App on imported cluster', {retries: 1}, () => {
-        // Install Chart
-        // We install Logging chart instead of Monitoring, since this is relatively lightweight.
         cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
 
