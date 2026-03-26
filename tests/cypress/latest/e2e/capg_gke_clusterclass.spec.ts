@@ -7,11 +7,6 @@ import {vars} from '~/support/variables';
 
 Cypress.config();
 describe('Import CAPG GKE Class-Cluster', {tags: '@full'}, () => {
-  if (isRancherManagerVersion('<=2.13')) {
-    // This test will only work in CAPG 1.11, i.e. Rancher >= 2.14, Turtles >= 0.26
-    return;
-  }
-
   const timeout = vars.fullTimeout * 2
   const classNamePrefix = 'gcp-gke'
   const clusterName = getClusterName(classNamePrefix)
@@ -22,7 +17,11 @@ describe('Import CAPG GKE Class-Cluster', {tags: '@full'}, () => {
   const gcpProject = Cypress.expose('gcp_project')
   const k8sVersion = 'v1.34.4'      // this version is different from GCP Kubeadm version
 
-  beforeEach(() => {
+  beforeEach(function () {
+    if (isRancherManagerVersion('<2.14')) {
+      // This test will only work in CAPG 1.11, i.e. Rancher >= 2.14, Turtles >= 0.26
+      this.skip();
+    }
     cy.login();
     cy.burgerMenuOperate('open');
   });
