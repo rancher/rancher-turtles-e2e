@@ -28,11 +28,13 @@ describe('Import CAPG GKE Class-Cluster', {tags: '@full'}, () => {
   });
 
   context('[SETUP]', () => {
-    it('Setup the namespace for importing', () => {
-      cy.namespaceAutoImport('Disable');
-    })
+    qase('396',
+      it('Setup the namespace for importing', () => {
+        cy.namespaceAutoImport('Disable');
+      })
+    );
 
-    qase('',
+    qase('397',
       it('Add CAPG GKE ClusterClass Fleet Repo', () => {
         cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
@@ -42,7 +44,7 @@ describe('Import CAPG GKE Class-Cluster', {tags: '@full'}, () => {
   })
 
   context('[CLUSTER-IMPORT]', () => {
-    qase('',
+    qase('398',
       it('Import CAPG GKE class-cluster using YAML', () => {
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
@@ -55,7 +57,7 @@ describe('Import CAPG GKE Class-Cluster', {tags: '@full'}, () => {
       })
     );
 
-    qase('',
+    qase('399',
       it('Auto import child CAPG cluster', () => {
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
         cy.checkCAPIClusterProvisioned(clusterName, timeout);
@@ -76,7 +78,7 @@ describe('Import CAPG GKE Class-Cluster', {tags: '@full'}, () => {
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    qase('',
+    qase('400',
       it('Install App on imported cluster', {retries: 1}, () => {
       // Install Chart
       // We install Logging chart instead of Monitoring, since this is relatively lightweight.
@@ -84,7 +86,7 @@ describe('Import CAPG GKE Class-Cluster', {tags: '@full'}, () => {
       })
     );
 
-    qase('',
+    qase('403',
       it('Remove imported CAPG cluster from Rancher Manager', {retries: 1}, () => {
       // Delete the imported cluster
       // Ensure that the provisioned CAPI cluster still exists
@@ -96,14 +98,14 @@ describe('Import CAPG GKE Class-Cluster', {tags: '@full'}, () => {
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
-      qase('',
+      qase('401',
         it('Delete the CAPG cluster', {retries: 1}, () => {
           // Remove CAPI Resources related to the cluster
           capiClusterDeletion(clusterName, timeout);
         })
       );
 
-      qase('',
+      qase('402',
         it('Delete the ClusterClass fleet repo', () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
