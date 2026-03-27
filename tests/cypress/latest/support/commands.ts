@@ -19,7 +19,7 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import jsyaml from 'js-yaml';
 import yaml from 'js-yaml';
 import _ from 'lodash';
-import {capiNamespace, isPrePrimeChannel, isPrimeChannel, isTurtlesPrimeBuild, isTurtlesDevChart, isRancherManagerVersion, isMigration} from '~/support/utils';
+import {capiNamespace, isPrePrimeChannel, isPrimeChannel, isTurtlesPrimeBuild, isTurtlesDevChart, isRancherManagerVersion, isMigration, isAPIv1beta1} from '~/support/utils';
 import {vars} from '~/support/variables'
 
 // Generic commands
@@ -320,6 +320,9 @@ Cypress.Commands.add('checkCAPIClusterProvisioned', (clusterName, timeout) => {
     timeout = timeout
   } else {
     timeout = 90000
+  }
+  if (!isAPIv1beta1) {
+    cy.getBySel('sortable-cell-0-3', {timeout: timeout}).should('have.text', 'True');
   }
   cy.contains(new RegExp('Provisioned.*' + clusterName), {timeout: timeout});
 });
