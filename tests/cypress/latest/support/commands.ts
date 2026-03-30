@@ -575,7 +575,7 @@ function checkApiStatus (retries = 20) {
 Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace, options = {}) => {
   const isTurtlesChart = chartName === 'Rancher Turtles';
   const isTurtlesProvidersChart = chartName === vars.turtlesProvidersChartName;
-  const isUpdateOperation = operation == vars.updateOperation;
+  const isUpdateOperation = operation == vars.chartUpdateOperation;
 
   const getChartSelector = () => {
     if (isTurtlesChart) {
@@ -598,7 +598,7 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
     return 'app-chart-cards-container';
   };
 
-  const performInstallation = () => {
+  const performOperation = () => {
     cy.clickNavMenu(['Apps', 'Repositories']);
     // Select All Repositories and click Action/Refresh
     cy.waitForAllRowsInState('Active');
@@ -756,11 +756,11 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
         cy.namespaceReset()
       } else {
         // perform installation again if the namespace is not found, i.e. the chart was not installed in previous try
-        performInstallation()
+        performOperation()
       }
     });
   } else {
-    performInstallation();
+    performOperation();
   }
 });
 

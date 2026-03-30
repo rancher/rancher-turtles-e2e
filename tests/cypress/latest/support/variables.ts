@@ -1,4 +1,4 @@
-import {isRancherManagerVersion, providersChartNeedsStgRegistry, isTurtlesDevChart, isUpgrade} from '~/support/utils';
+import {isRancherManagerVersion, isTurtlesDevChart, isUpgrade, providersChartNeedsStgRegistry} from '~/support/utils';
 
 export const vars = {
   shortTimeout: 600000,
@@ -27,5 +27,5 @@ export const vars = {
   gcpImageId: isRancherManagerVersion('>=2.13')
   ? 'cluster-api-ubuntu-2404-v1-34-1-1762253907'
     : 'cluster-api-ubuntu-2404-v1-33-5-1762252437',
-  updateOperation: isRancherManagerVersion('>=2.13') ? 'Edit' : 'Update'
+  chartUpdateOperation: isRancherManagerVersion('>=2.13') ? 'Edit' : 'Update'
 };
