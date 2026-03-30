@@ -22,12 +22,6 @@ describe('Post Upgrade', {tags: '@upgrade'}, () => {
     cy.waitForAllRowsInState('Deployed', vars.shortTimeout);
   })
 
-  it('Delete the Pre-upgrade Resources', () => {
-    cy.removeFleetGitRepo('helm-ops');
-    cy.deleteKubernetesResource('local', ['Storage', 'ConfigMaps'], 'docker-rke2-lb-config', vars.capiClustersNS);
-    cy.deleteKubernetesResource('local', ['Apps', 'Repositories'], 'turtles-providers-chart');
-  })
-
   it("Add turtles-providers GitRepo", () => {
     cy.task('log', "Adding chartmuseum repo for turtles-providers");
     expect(chartMuseumRepo, "checking chartmuseum repo").to.not.be.empty;
