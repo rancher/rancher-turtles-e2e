@@ -14,7 +14,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     steps:
       - name: Cleanup
-        uses: rancher/aws-janitor@v0.3.0
+        uses: rancher/aws-janitor@84b177ff822fb41a00b892d4294769fef3815dc5 # v0.3.0
         with:
           regions: ap-south-2
           commit: true
@@ -25,12 +25,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Authenticate to GCP
-        uses: google-github-actions/auth@v3
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
         with:
           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
         
       - name: Setup gcloud
-        uses: google-github-actions/setup-gcloud@v3
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3
         
       - name: Cleanup
         continue-on-error: true
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
      - name: Login to Azure
-       uses: azure/login@v2.3.0
+       uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5 # v2.3.0
        with:
          creds: ${{ secrets.AZURE_CREDENTIALS }}
     
