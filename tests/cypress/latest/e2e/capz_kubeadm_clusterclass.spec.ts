@@ -16,6 +16,9 @@ describe('Import CAPZ Kubeadm Class-Cluster', {tags: '@full'}, () => {
   const clientSecret = btoa(Cypress.expose("azure_client_secret"))
   const subscriptionID = Cypress.expose("azure_subscription_id")
   const tenantID = Cypress.expose("azure_tenant_id")
+  const k8sVersion = isAPIv1beta1
+  ? vars.k8sVersion
+  : 'v1.34.3'
 
   beforeEach(() => {
     cy.login();
@@ -45,7 +48,7 @@ describe('Import CAPZ Kubeadm Class-Cluster', {tags: '@full'}, () => {
     it('Import CAPZ Kubeadm class-cluster using YAML', () => {
       cy.readFile(classClusterFileName).then((data) => {
         data = data.replace(/replace_cluster_name/g, clusterName)
-        data = data.replace(/replace_k8sVersion/g, vars.k8sVersion)
+        data = data.replace(/replace_k8sVersion/g, k8sVersion)
         data = data.replace(/replace_subscription_id/g, subscriptionID)
         cy.importYAML(data, vars.capiClustersNS)
       });
@@ -83,7 +86,7 @@ describe('Import CAPZ Kubeadm Class-Cluster', {tags: '@full'}, () => {
 
         // workaround; these values need to be re-replaced before applying the scaling changes
         data = data.replace(/replace_cluster_name/g, clusterName)
-        data = data.replace(/replace_k8sVersion/g, vars.k8sVersion)
+        data = data.replace(/replace_k8sVersion/g, k8sVersion)
         data = data.replace(/replace_subscription_id/g, subscriptionID)
         cy.importYAML(data, vars.capiClustersNS)
       })

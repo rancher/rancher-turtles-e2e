@@ -9,8 +9,12 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
   let features = ['turtles']
   const timeout = vars.fullTimeout
   const userName = 'admin'
-  const k8sVersion = vars.rke2Version
   const clusterName = 'turtles-qa-azure-v2-' + randomstring.generate({length: 4, capitalization: "lowercase"})
+  const clusterFileName = isAPIv1beta1 ? './fixtures/azure/azure-rke2-cluster-v1beta1.yaml' : './fixtures/azure/azure-rke2-cluster.yaml'
+  const rkeConfigFileName = isAPIv1beta1 ? './fixtures/azure/azure-rke-config-v1beta1.yaml' : './fixtures/azure/azure-rke-config.yaml'
+  const k8sVersion = isAPIv1beta1
+  ? vars.rke2Version
+  : 'v1.35.3+rke2r1'
 
   if (isRancherManagerVersion('2.13')) {
     features.push('embedded-cluster-api');
@@ -52,7 +56,7 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
   features.forEach((feature) => {
     context('[CLUSTER-IMPORT]', () => {
       it('Create the AzureConfig', () => {
-        cy.readFile('./fixtures/azure/azure-rke-config.yaml').then((data) => {
+        cy.readFile(rkeConfigFileName).then((data) => {
           data = data.replace(/replace_user_id/g, userID)
           data = data.replace(/replace_cluster_name/g, clusterName)
           cy.importYAML(data)
@@ -76,7 +80,7 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
           cy.clickButton('Save and Continue');
           cy.getBySel('yaml-editor-code-mirror').should('be.visible');
 
-          cy.readFile('./fixtures/azure/azure-rke2-cluster.yaml').then((data) => {
+          cy.readFile(clusterFileName).then((data) => {
             cy.get('.CodeMirror')
               .then((editor) => {
                 data = data.replace(/replace_user_id/g, userID)

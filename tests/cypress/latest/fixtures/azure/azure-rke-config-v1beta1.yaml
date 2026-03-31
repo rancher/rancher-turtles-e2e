@@ -13,9 +13,9 @@ dockerPort: "2376"
 enablePublicIpStandardSku: false
 environment: AzurePublicCloud
 faultDomainCount: "3"
-image: canonical:ubuntu-24_04-lts:server-gen1:latest
+image: canonical:UbuntuServer:18.04-LTS:latest
 location: centralindia
-managedDisks: true
+managedDisks: false
 noPublicIp: false
 nsg: rancher-managed-BZhXsqxh
 resourceGroup: replace_cluster_name

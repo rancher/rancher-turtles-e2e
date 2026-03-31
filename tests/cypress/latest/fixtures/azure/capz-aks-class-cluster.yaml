@@ -21,7 +21,7 @@ spec:
       value: replace_cluster_name
     - name: asoCredentialSecretName
       value: aso-credential-secret   # should be in the same namespace as the cluster
-    version: v1.33.5 # Highest available
+    version: v1.34.2
     workers:
       machinePools:
       - class: default-system

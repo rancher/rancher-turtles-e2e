@@ -12,8 +12,6 @@ spec:
   rkeConfig:
     chartValues:
       rke2-calico: {}
-      rke2-ingress-nginx: {}
-      rke2-traefik: {}
     etcd:
       snapshotRetention: 5
       snapshotScheduleCron: 0 */5 * * *
@@ -21,11 +19,9 @@ spec:
       cni: calico
       disable-kube-proxy: false
       etcd-expose-metrics: false
-      ingress-controller: traefik
     machinePoolDefaults: {}
     machinePools:
     - controlPlaneRole: true
-      drainBeforeDelete: true
       etcdRole: true
       machineConfigRef:
         kind: AzureConfig
@@ -37,7 +33,6 @@ spec:
     machineSelectorConfig:
     - config:
         protect-kernel-defaults: false
-    networking: {}    
     registries: {}
     upgradeStrategy:
       controlPlaneConcurrency: "1"

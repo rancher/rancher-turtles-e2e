@@ -16,6 +16,9 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: '@full'}, () => {
   const clientSecret = btoa(Cypress.expose("azure_client_secret"))
   const subscriptionID = Cypress.expose("azure_subscription_id")
   const tenantID = Cypress.expose("azure_tenant_id")
+  const k8sVersion = isAPIv1beta1
+  ? vars.k8sVersion
+  : 'v1.34.3+rke2r1'
 
   beforeEach(function () {
     cy.login();
@@ -49,7 +52,7 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: '@full'}, () => {
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_subscription_id/g, subscriptionID)
-          data = data.replace(/replace_rke2_version/g, vars.rke2Version)
+          data = data.replace(/replace_rke2_version/g, k8sVersion)
           cy.importYAML(data, vars.capiClustersNS)
         });
         // Check CAPI cluster using its name
@@ -91,7 +94,7 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: '@full'}, () => {
         // workaround; these values need to be re-replaced before applying the scaling changes
         data = data.replace(/replace_cluster_name/g, clusterName)
         data = data.replace(/replace_subscription_id/g, subscriptionID)
-        data = data.replace(/replace_rke2_version/g, vars.rke2Version)
+        data = data.replace(/replace_rke2_version/g, k8sVersion)
         cy.importYAML(data, vars.capiClustersNS)
       })
 
