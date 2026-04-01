@@ -37,19 +37,13 @@ export const isPrePrimeChannel = (): boolean => {
   return rancherVersion.includes('prime-alpha') || rancherVersion.includes('prime-rc')
 }
 
-// For everything except rc|alpha/2.13 builds (dev=false), it will return true
-export const providerImageUsesStgRegistry = (): boolean => {
-  return isPrePrimeChannel() || (rancherVersion.includes('2.13') && isPreReleaseOrHead);
-}
-
-const isPreRelease = /(-alpha|-rc)/.test(rancherVersion);
-
-const isPreReleaseOrHead = isPreRelease || rancherVersion.includes('head');
+export const isPreRelease = /(-alpha|-rc)/.test(rancherVersion);
+export const isHeadBuild = rancherVersion.includes('head');
 
 
 // Check if Rancher should use staging registry to install Rancher Turtles Providers Chart
 export const providersChartNeedsStgRegistry = (): boolean => {
-  return (!isTurtlesDevChart) && (isPreReleaseOrHead)
+  return (!isTurtlesDevChart) && (isPreRelease || isHeadBuild);
 }
 
 // Check if Rancher Turtles Providers chart should use staging registry chart name

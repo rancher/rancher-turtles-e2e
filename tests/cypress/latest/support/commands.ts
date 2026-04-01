@@ -22,12 +22,14 @@ import _ from 'lodash';
 import {
   capiNamespace,
   isAPIv1beta1,
+  isHeadBuild,
   isMigration,
+  isPrePrimeChannel,
+  isPreRelease,
   isPrimeChannel,
   isRancherManagerVersion,
   isTurtlesDevChart,
-  isTurtlesPrimeBuild,
-  providerImageUsesStgRegistry
+  isTurtlesPrimeBuild
 } from '~/support/utils';
 import {vars} from '~/support/variables'
 
@@ -1176,20 +1178,22 @@ const PROVIDER_REGISTRIES = {
  */
 function getV213PlusRegistry(providerNamespace: string): string {
   const isPrimeDev = isTurtlesDevChart && isTurtlesPrimeBuild();
-  const usesStgRegistry = providerImageUsesStgRegistry();
+  const usesStgRegistry = isPrePrimeChannel() || (isRancherManagerVersion('2.13') && isHeadBuild);
 
-  // Prime dev builds: choose between staging and production registry
-  if (isPrimeDev) {
-    return usesStgRegistry ? PROVIDER_REGISTRIES.SUSE_STG : PROVIDER_REGISTRIES.RANCHER_PRIME;
+  // Special handling for 2.13 prerelease community builds
+  if (isRancherManagerVersion('2.13') && isPreRelease && !isPrimeChannel()) {
+    return isPrimeDev ? PROVIDER_REGISTRIES.RANCHER_PRIME : getCommunityRegistry(providerNamespace);
   }
 
-  // Community or Prime prod builds using staging registry
+  // Staging registry takes precedence for:
+  // - Prime prerelease channels (prime-alpha, prime-rc)
+  // - 2.13 head builds (2.13 alpha/rc community builds already handled above)
   if (usesStgRegistry) {
     return PROVIDER_REGISTRIES.SUSE_STG;
   }
 
-  // Prime channel (non-dev) uses production registry
-  if (isPrimeChannel()) {
+  // Prime builds (dev or channel) use production registry
+  if (isPrimeDev || isPrimeChannel()) {
     return PROVIDER_REGISTRIES.RANCHER_PRIME;
   }
 

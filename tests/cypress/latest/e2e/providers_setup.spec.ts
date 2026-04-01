@@ -182,8 +182,7 @@ describe('Enable CAPI Providers', () => {
 
     it('Wait for all the providers to be Ready', {retries: 2}, () => {
       // Adding this extra check so that retry is not needed in other tests.
-      cy.checkCAPIMenu();
-      cy.contains('Providers').click();
+      cy.navigateToProviders();
       cy.waitForAllRowsInState('Ready', vars.shortTimeout);
     })
 
@@ -204,14 +203,12 @@ describe('Enable CAPI Providers', () => {
         if (providerType == 'control plane') {
           const namespace = kubeadmProviderNamespaces[1]
           const providerName = kubeadmProvider + '-' + 'control-plane'
-          cy.checkCAPIMenu();
-          cy.contains('Providers').click();
+          cy.navigateToProviders();
           matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', kubeadmProvider, kubeadmProviderVersion, namespace);
         } else {
           const namespace = kubeadmProviderNamespaces[0]
           const providerName = kubeadmProvider + '-' + providerType
-          cy.checkCAPIMenu();
-          cy.contains('Providers').click();
+          cy.navigateToProviders()
           matchAndWaitForProviderReadyStatus(providerName, providerType, kubeadmProvider, kubeadmProviderVersion, namespace);
         }
       })
@@ -276,8 +273,7 @@ describe('Enable CAPI Providers', () => {
       const vspherePort = '443';
       cy.addCloudCredsVMware(vsphereProvider, vsphereUsername, vspherePassword, vsphereServer, vspherePort);
       cy.burgerMenuOperate('open');
-      cy.checkCAPIMenu();
-      cy.contains('Providers').click();
+      cy.navigateToProviders();
       matchAndWaitForProviderReadyStatus(vsphereProvider, 'infrastructure', vsphereProvider, vsphereProviderVersion, vsphereProviderNamespace);
     })
   })
@@ -297,7 +293,6 @@ describe('Enable CAPI Providers', () => {
       const namespace = 'capg-system'
       // Create GCP Infrastructure provider
       cy.navigateToProviders();
-      cy.contains('Providers').click();
 
       // Create GCP Cloud Credential until https://github.com/rancher/dashboard/issues/15391 is fixed
       cy.get('tr.main-row').contains('a', googleProvider).closest('tr').within(() => {
