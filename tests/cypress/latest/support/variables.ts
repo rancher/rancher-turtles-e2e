@@ -1,4 +1,10 @@
-import {isRancherManagerVersion, isTurtlesDevChart, isUpgrade, providersChartNeedsStgRegistry} from '~/support/utils';
+import {
+  isRancherManagerVersion,
+  isTurtlesDevChart,
+  isUpgrade,
+  needsProvidersStgChartName,
+  providersChartNeedsStgRegistry
+} from '~/support/utils';
 
 export const vars = {
   shortTimeout: 600000,
@@ -10,7 +16,7 @@ export const vars = {
   repoUrl: 'https://github.com/rancher/rancher-turtles-e2e',
   turtlesRepoUrl: 'https://github.com/rancher/turtles',
   turtlesProvidersOCIRepo: providersChartNeedsStgRegistry() ? Cypress.expose('providers_stg_oci_repo') : Cypress.expose('providers_oci_repo'), // For alpha|rc|head builds, use stgregistry, for released versions, use regular registry.
-  turtlesProvidersChartName: providersChartNeedsStgRegistry() ? 'rancher-turtles-providers' : 'Rancher Turtles Certified Providers', // TODO: Remove this once https://github.com/rancher/rancher/issues/53882 and 53883 is fixed; staging registry is currently broken for everything
+  turtlesProvidersChartName: needsProvidersStgChartName() ? 'rancher-turtles-providers' : 'Rancher Turtles Certified Providers',
   turtlesProvidersChartSelector: isRancherManagerVersion('2.13') && isUpgrade ? '"item-card-cluster/turtles-providers-chart/rancher-turtles-providers"' : isTurtlesDevChart ? '"item-card-cluster/chartmuseum-repo/rancher-turtles-providers"' : '"item-card-cluster/turtles-providers-chart/rancher-turtles-providers"',
   kindVersion: isRancherManagerVersion('>=2.13')
   ? 'v1.34.0'
