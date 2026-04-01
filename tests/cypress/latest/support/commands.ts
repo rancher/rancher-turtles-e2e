@@ -23,11 +23,11 @@ import {
   capiNamespace,
   isAPIv1beta1,
   isMigration,
-  isPrePrimeChannel,
   isPrimeChannel,
   isRancherManagerVersion,
   isTurtlesDevChart,
-  isTurtlesPrimeBuild
+  isTurtlesPrimeBuild,
+  providerImageUsesStgRegistry
 } from '~/support/utils';
 import {vars} from '~/support/variables'
 
@@ -1160,43 +1160,99 @@ Cypress.Commands.add('verifyResourceCount', (clusterName, resourcePath, resource
   });
 });
 
-// Command to verify CAPIProvider image registry
-Cypress.Commands.add('verifyCAPIProviderImage', (providerNamespace) => {
-  let providerImageRegistry: string;
+// Container image registry URLs used by CAPI providers
+const PROVIDER_REGISTRIES = {
+  K8S_STAGING: 'gcr.io/k8s-staging-cluster-api',
+  SUSE_STG: 'stgregistry.suse.com/rancher',
+  RANCHER_PRIME: 'registry.rancher.com/rancher',
+  RANCHER_GHCR: 'ghcr.io/rancher',
+  RANCHER_CAPI: 'rancher/cluster-api-controller',
+  K8S_PROD: 'registry.k8s.io/cluster-api',
+  SUSE_PROD: 'registry.suse.com/rancher',
+} as const;
 
-  if (providerNamespace == 'capd-system') {
-    providerImageRegistry = 'gcr.io/k8s-staging-cluster-api';
-  } else {
-    if (isRancherManagerVersion('>=2.13')) {
-      if (isTurtlesDevChart && isTurtlesPrimeBuild()) {
-        if (isPrePrimeChannel()) {
-          providerImageRegistry = 'stgregistry.suse.com/rancher'
-        } else {
-          providerImageRegistry = 'registry.rancher.com/rancher'
-        }
-      } else if (isPrePrimeChannel()) {
-        providerImageRegistry = 'stgregistry.suse.com/rancher'
-      } else if ((isTurtlesDevChart && isTurtlesPrimeBuild()) || isPrimeChannel()) {
-        providerImageRegistry = 'registry.rancher.com/rancher'
-      } else {
-        // community
-        if (providerNamespace.includes('rke2') || providerNamespace.includes('fleet')) {
-          providerImageRegistry = 'ghcr.io/rancher';
-        } else if (providerNamespace.includes(capiNamespace)) {
-          providerImageRegistry = 'rancher/cluster-api-controller';
-        } else {
-          providerImageRegistry = 'registry.k8s.io/cluster-api';
-        }
-      }
-    // v2.12 checks
-    } else {
-      if (providerNamespace.includes('kubeadm')) {
-        providerImageRegistry = 'registry.k8s.io/cluster-api';
-      } else {
-        providerImageRegistry = 'registry.suse.com/rancher';
-      }
-    }
+/**
+ * Get provider image registry for Rancher 2.13+
+ */
+function getV213PlusRegistry(providerNamespace: string): string {
+  const isPrimeDev = isTurtlesDevChart && isTurtlesPrimeBuild();
+  const usesStgRegistry = providerImageUsesStgRegistry();
+
+  // Prime dev builds: choose between staging and production registry
+  if (isPrimeDev) {
+    return usesStgRegistry ? PROVIDER_REGISTRIES.SUSE_STG : PROVIDER_REGISTRIES.RANCHER_PRIME;
   }
+
+  // Community or Prime prod builds using staging registry
+  if (usesStgRegistry) {
+    return PROVIDER_REGISTRIES.SUSE_STG;
+  }
+
+  // Prime channel (non-dev) uses production registry
+  if (isPrimeChannel()) {
+    return PROVIDER_REGISTRIES.RANCHER_PRIME;
+  }
+
+  // Community builds: registry depends on provider namespace
+  return getCommunityRegistry(providerNamespace);
+}
+
+/**
+ * Get provider image registry for community builds
+ */
+function getCommunityRegistry(providerNamespace: string): string {
+  if (providerNamespace.includes('rke2') || providerNamespace.includes('fleet')) {
+    return PROVIDER_REGISTRIES.RANCHER_GHCR;
+  }
+
+  if (providerNamespace.includes(capiNamespace)) {
+    return PROVIDER_REGISTRIES.RANCHER_CAPI;
+  }
+
+  return PROVIDER_REGISTRIES.K8S_PROD;
+}
+
+/**
+ * Get provider image registry for Rancher 2.12
+ */
+function getV212Registry(providerNamespace: string): string {
+  if (providerNamespace.includes('kubeadm')) {
+    return PROVIDER_REGISTRIES.K8S_PROD;
+  }
+  return PROVIDER_REGISTRIES.SUSE_PROD;
+}
+
+/**
+ * Determines the correct container image registry for a CAPI provider.
+ *
+ * Registry selection depends on:
+ * - Rancher version (2.12 vs 2.13+)
+ * - Build type (Prime vs Community, Dev vs Prod)
+ * - Registry environment (Staging vs Production)
+ * - Provider namespace (determines upstream registry for community builds)
+ *
+ * @param providerNamespace - The Kubernetes namespace where the provider is deployed
+ * @returns The expected container registry URL
+ */
+function determineProviderImageRegistry(providerNamespace: string): string {
+  // Special case: CAPD always uses k8s staging registry
+  if (providerNamespace === 'capd-system') {
+    return PROVIDER_REGISTRIES.K8S_STAGING;
+  }
+
+  if (isRancherManagerVersion('>=2.13')) {
+    return getV213PlusRegistry(providerNamespace);
+  }
+
+  return getV212Registry(providerNamespace);
+}
+
+/**
+ * Verifies that the CAPI provider deployment uses the correct container image registry.
+ * Navigates to the provider's namespace and checks that the expected registry is visible.
+ */
+Cypress.Commands.add('verifyCAPIProviderImage', (providerNamespace) => {
+  const providerImageRegistry = determineProviderImageRegistry(providerNamespace);
 
   cy.exploreCluster('local');
   cy.accesMenuSelection(['Workloads', 'Deployments']);
