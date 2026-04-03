@@ -14,6 +14,7 @@ limitations under the License.
 import '~/support/commands';
 import {
   capiNamespace,
+  isCypressTag,
   isRancherManagerVersion,
   isTurtlesDevChart,
   isUpgrade,
@@ -137,15 +138,13 @@ describe('Enable CAPI Providers', () => {
         // @ts-ignore
         text.providers.controlplaneKubeadm.enableAutomaticUpdate = true;
 
-        const tags = Cypress.expose('grepTags')
-        if (tags) {
-          if (tags.includes('@short') || tags.includes('@upgrade')) {
+        if (isCypressTag('@short') || isCypressTag('@upgrade')) {
             // @ts-ignore
             text.providers.infrastructureDocker.enabled = true;
             // @ts-ignore
             text.providers.infrastructureDocker.enableAutomaticUpdate = true;
           }
-          if (tags.includes('@full')) {
+        if (isCypressTag('@full')) {
             // @ts-ignore
             text.providers.infrastructureGCP.enabled = true;
             // @ts-ignore
@@ -163,13 +162,12 @@ describe('Enable CAPI Providers', () => {
             // @ts-ignore
             text.providers.infrastructureAWS.enableAutomaticUpdate = true;
           }
-          if (tags.includes('@vsphere')) {
+        if (isCypressTag('@vsphere')) {
             // @ts-ignore
             text.providers.infrastructureVSphere.enabled = true;
             // @ts-ignore
             text.providers.infrastructureVSphere.enableAutomaticUpdate = true;
           }
-        }
       }
       // Install Rancher Turtles Certified Providers chart
       let operation = isRancherManagerVersion('2.14') && isUpgrade ? 'Upgrade' : 'Install'

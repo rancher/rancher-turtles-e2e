@@ -3,13 +3,7 @@ import semver from 'semver';
 // Implemented but not used yet
 
 export const isCypressTag = (tag: string) => {
-  return (new RegExp(tag)).test(Cypress.expose("cypress_tags"));
-}
-
-// Check the K8s version
-export const isK8sVersion = (version: string) => {
-  version = version.toLowerCase();
-  return (new RegExp(version)).test(Cypress.expose("k8s_version"));
+  return Cypress.expose('grepTags').includes(tag);
 }
 
 // Check Rancher Manager version
@@ -68,10 +62,10 @@ export const turtlesNamespace = isRancherManagerVersion('>=2.13') ? 'cattle-turt
 
 export const capiNamespace = isRancherManagerVersion('>=2.13') ? 'cattle-capi-system' : 'capi-system'
 
-export const isMigration = Cypress.expose('grepTags') && (Cypress.expose('grepTags')).includes('@migration')
+export const isMigration = isCypressTag('@migration')
 
 export const isAPIv1beta1 = isRancherManagerVersion('<=2.13')
 
-export const isUpgrade = Cypress.expose('grepTags') && (Cypress.expose('grepTags')).includes('@upgrade')
+export const isUpgrade = isCypressTag('@upgrade')
 
 export const isTurtlesDevChart = Cypress.expose('turtles_dev_chart')

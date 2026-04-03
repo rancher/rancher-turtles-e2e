@@ -19,7 +19,7 @@ docker network create \
 # Start Cypress tests with docker - only root or user with uid 1000 is working
 docker run --init -v $PWD:/workdir -w /workdir \
     --user 1000:$(id -g) \
-    -e CYPRESS_TAGS=$CYPRESS_TAGS \
+    -e "GREPTAGS=$GREPTAGS" \
     -e CHARTMUSEUM_REPO=$CHARTMUSEUM_REPO \
     -e TURTLES_DEV_CHART=$TURTLES_DEV_CHART \
     -e TURTLES_CHART_VERSION=$TURTLES_CHART_VERSION \
@@ -49,7 +49,6 @@ docker run --init -v $PWD:/workdir -w /workdir \
     -e CLUSTER_NAME_SUFFIX=$CLUSTER_NAME_SUFFIX \
     -e TURTLES_BRANCH=$TURTLES_BRANCH \
     -e TURTLES_CHART_DEV_VERSION=$TURTLES_CHART_DEV_VERSION \
-    -e "GREPTAGS=$GREPTAGS" \
     -e "CI=$CI" \
     -e PROVIDERS_OCI_REPO=$PROVIDERS_OCI_REPO \
     -e PROVIDERS_STG_OCI_REPO=$PROVIDERS_STG_OCI_REPO \
