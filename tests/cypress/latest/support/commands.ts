@@ -646,11 +646,17 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
     cy.getBySel('btn-chart-install').click();
     cy.contains(operation + ': Step 1');
 
-    // TODO: This is a temp workaround until https://github.com/rancher/rancher/issues/53883 is fixed
-    if (chartName == "rancher-turtles-providers") {
-      cy.setNamespace('All Namespaces', 'all_user');
-      cy.getBySel('name-ns-description-namespace').type(namespace + '{enter}');
-    }
+
+    // Select namespace if an option is given
+    cy.get('div.step__basic').then((step) => {
+      const namespaceSelectorTestID = "name-ns-description-namespace"
+      const namespaceRequired = step.find(`div[data-testid=${namespaceSelectorTestID}]`).length
+      if (namespaceRequired) {
+        cy.setNamespace('All Namespaces', 'all_user')
+        cy.getBySel(namespaceSelectorTestID).type(namespace + '{enter}');
+      }
+    });
+
     cy.clickButton('Next');
 
     // Used for entering questions and answering them
@@ -1049,7 +1055,7 @@ Cypress.Commands.add('deleteKubernetesResource', (clusterName = 'local', resourc
 
   // using `cy.clickNavMenu()` does not always work here, so we explicitly wait after clicking a label.
   resourcePath.forEach(label => {
-    cy.get('nav').contains(label).click()
+    cy.get('.nav').contains(label).click()
     cy.wait(1000);
   });
 
@@ -1063,6 +1069,36 @@ Cypress.Commands.add('deleteKubernetesResource', (clusterName = 'local', resourc
   cy.getBySel('sortable-cell-0-1', {timeout: 60000}).should('not.exist');
   cy.namespaceReset();
 })
+
+Cypress.Commands.add('checkKubernetesResource', (clusterName = 'local', resourcePath: string[], resourceName: string, shouldExist: boolean, namespace: string, timeout: number = 60000) => {
+  cy.exploreCluster(clusterName);
+
+  // Check if the namespace exists in the dropdown before attempting to set it
+  cy.getBySel('namespaces-dropdown').click();
+  cy.get('div.ns-dropdown-menu').then((dropdownMenu) => {
+    const namespaceFound = dropdownMenu.find(`div[id='ns_${namespace}']`).length > 0;
+
+    // Close the dropdown
+    cy.getBySel('namespaces-dropdown').click();
+
+    if (!namespaceFound && !shouldExist) {
+      // Namespace doesn't exist, so the resource can't exist either
+      return;
+    }
+
+    cy.setNamespace(namespace);
+    // Sometimes if a resource does not exist in a namespace, the navigation menu won't be visible. So we navigate after a namespace has been set.
+    cy.clickNavMenu(resourcePath);
+
+    cy.typeInFilter(resourceName);
+    if (shouldExist) {
+      cy.getBySel('sortable-cell-0-1', {timeout}).should('exist');
+    } else {
+      cy.getBySel('sortable-cell-0-1', {timeout}).should('not.exist');
+    }
+    cy.namespaceReset();
+  });
+});
 
 Cypress.Commands.add('exploreCluster', (clusterName: string) => {
   cy.burgerMenuOperate('open');

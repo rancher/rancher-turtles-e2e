@@ -89,6 +89,8 @@ declare global {
       createAzureClusterIdentity(clientID: string, tenantID: string, clientSecret: string): Chainable<Element>;
       createAzureASOCredential(clientID: string, tenantID: string, clientSecret: string, subscriptionID: string): Chainable<Element>;
       deleteKubernetesResource(clusterName: string, resourcePath: string[], resourceName: string, namespace?: string): Chainable<Element>;
+
+      checkKubernetesResource(clusterName: string, resourcePath: string[], resourceName: string, shouldExist: boolean, namespace: string, timeout?: number): Chainable<Element>;
     }
   }
 }

@@ -138,7 +138,7 @@ describe('Enable CAPI Providers', () => {
         // @ts-ignore
         text.providers.controlplaneKubeadm.enableAutomaticUpdate = true;
 
-        if (isCypressTag('@short') || isCypressTag('@upgrade')) {
+        if (isCypressTag('@short') || isCypressTag('@upgrade') || isCypressTag('@switch')) {
             // @ts-ignore
             text.providers.infrastructureDocker.enabled = true;
             // @ts-ignore
@@ -247,7 +247,7 @@ describe('Enable CAPI Providers', () => {
     });
   });
 
-  context('Docker provider', {tags: ['@short', '@upgrade']}, () => {
+  context('Docker provider', {tags: ['@short', '@upgrade', '@switch']}, () => {
     const dockerProviderNamespace = 'capd-system'
     it('Verify CAPD provider', () => {
       // Verify Docker Infrastructure provider
