@@ -1,9 +1,0 @@
-namespace: capi-clusters
-
-helm:
-  values:
-    clustername_prefix: turtles-qa-aws-eks
-    region: ap-south-2
-    version: v1.32
-    worker_machine_count: 1
-

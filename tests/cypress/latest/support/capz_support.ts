@@ -17,13 +17,3 @@ Cypress.Commands.add('createAzureASOCredential', (clientID, tenantID, clientSecr
         cy.importYAML(data)
     });
 })
-
-// Create values.yaml Secret
-Cypress.Commands.add('createCAPZValuesSecret', (clientID, tenantID, subscriptionID) => {
-    cy.readFile('./fixtures/azure/capz-helm-values-secret.yaml').then((data) => {
-        data = data.replace(/replace_client_id/g, clientID)
-        data = data.replace(/replace_tenant_id/g, tenantID)
-        data = data.replace(/replace_subscription_id/g, subscriptionID)
-        cy.importYAML(data)
-    });
-});

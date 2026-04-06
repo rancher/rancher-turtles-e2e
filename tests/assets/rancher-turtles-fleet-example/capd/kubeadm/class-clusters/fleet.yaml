@@ -1,5 +1,0 @@
-namespace: capi-clusters
-
-helm:
-  values:
-    clustername_prefix: turtles-qa-docker-kubeadm

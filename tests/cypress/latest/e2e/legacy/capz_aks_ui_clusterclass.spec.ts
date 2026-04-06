@@ -85,7 +85,7 @@ describe('Create CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
     cy.contains(clusterName).click();
 
     // Install Chart
-    cy.checkChart('Install', 'Logging', 'cattle-logging-system');
+    cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
   })
 
   if (skipClusterDeletion) {
