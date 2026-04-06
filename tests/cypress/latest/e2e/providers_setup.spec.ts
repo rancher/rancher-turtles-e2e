@@ -196,8 +196,8 @@ describe('Enable CAPI Providers', () => {
 
     // TODO: Use wizard to create providers, capi-ui-extension/issues/177
     providerTypes.forEach(providerType => {
-      it('Create/Verify Kubeadm Providers - ' + providerType, () => {
-        // Create CAPI Kubeadm providers
+      it('Verify Kubeadm Providers - ' + providerType, () => {
+        // Verify CAPI Kubeadm providers
         if (providerType == 'control plane') {
           const namespace = kubeadmProviderNamespaces[1]
           const providerName = kubeadmProvider + '-' + 'control-plane'
@@ -247,10 +247,10 @@ describe('Enable CAPI Providers', () => {
     });
   });
 
-  context('Docker provider', {tags: '@short'}, () => {
+  context('Docker provider', {tags: ['@short', '@upgrade']}, () => {
     const dockerProviderNamespace = 'capd-system'
-    it('Create/Verify CAPD provider', () => {
-      // Create Docker Infrastructure provider
+    it('Verify CAPD provider', () => {
+      // Verify Docker Infrastructure provider
       cy.navigateToProviders();
       matchAndWaitForProviderReadyStatus(dockerProvider, 'infrastructure', dockerProvider, kubeadmProviderVersion, dockerProviderNamespace);
     })
@@ -258,8 +258,8 @@ describe('Enable CAPI Providers', () => {
 
   context('vSphere provider', {tags: '@vsphere'}, () => {
     const vsphereProviderNamespace = 'capv-system'
-    it('Create/Verify CAPV provider', () => {
-      // Create vsphere Infrastructure provider
+    it('Verify CAPV provider', () => {
+      // Verify vsphere Infrastructure provider
       // See capv_rke2_cluster.spec.ts for more details about `vsphere_secrets_json_base64` structure
       const vsphere_secrets_json_base64 = Cypress.expose("vsphere_secrets_json_base64")
       // Decode the base64 encoded secret and make json object
@@ -278,18 +278,18 @@ describe('Enable CAPI Providers', () => {
 
   context('Cloud Providers', {tags: '@full'}, () => {
     const providerType = 'infrastructure'
-    it('Create/Verify CAPA provider', () => {
+    it('Verify CAPA provider', () => {
       const namespace = 'capa-system'
-      // Create AWS Infrastructure provider
+      // Verify AWS Infrastructure provider
       cy.addCloudCredsAWS(amazonProvider, Cypress.expose('aws_access_key'), Cypress.expose('aws_secret_key'));
       cy.burgerMenuOperate('open');
       cy.navigateToProviders();
       matchAndWaitForProviderReadyStatus(amazonProvider, providerType, amazonProvider, amazonProviderVersion, namespace);
     })
 
-    it('Create/Verify CAPG provider', () => {
+    it('Verify CAPG provider', () => {
       const namespace = 'capg-system'
-      // Create GCP Infrastructure provider
+      // Verify GCP Infrastructure provider
       cy.navigateToProviders();
 
       // Create GCP Cloud Credential until https://github.com/rancher/dashboard/issues/15391 is fixed
@@ -306,9 +306,9 @@ describe('Enable CAPI Providers', () => {
       matchAndWaitForProviderReadyStatus(googleProvider, providerType, googleProvider, googleProviderVersion, namespace);
     })
 
-    it('Create/Verify CAPZ provider', () => {
+    it('Verify CAPZ provider', () => {
       const namespace = 'capz-system'
-      // Create Azure Infrastructure provider
+      // Verify Azure Infrastructure provider
       cy.navigateToProviders();
       matchAndWaitForProviderReadyStatus(azureProvider, providerType, azureProvider, azureProviderVersion, namespace);
     })

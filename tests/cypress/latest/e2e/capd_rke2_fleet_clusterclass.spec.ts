@@ -26,8 +26,6 @@ describe('Import CAPD RKE2 Class-Cluster using Fleet', {tags: '@short'}, () => {
   const classesPath = 'examples/clusterclasses/docker/rke2'
   const clustersRepoName = 'docker-rke2-class-clusters'
   const clusterClassRepoName = "docker-rke2-clusterclass"
-  const dockerAuthUsernameBase64 = btoa(Cypress.expose("docker_auth_username"))
-  const dockerAuthPasswordBase64 = btoa(Cypress.expose("docker_auth_password"))
 
   beforeEach(() => {
     cy.login();
@@ -40,11 +38,7 @@ describe('Import CAPD RKE2 Class-Cluster using Fleet', {tags: '@short'}, () => {
 
     it('Create Docker Auth Secret', () => {
       // Prevention for Docker.io rate limiting
-      cy.readFile('./fixtures/docker/capd-auth-token-secret.yaml').then((data) => {
-        data = data.replace(/replace_cluster_docker_auth_username/, dockerAuthUsernameBase64)
-        data = data.replace(/replace_cluster_docker_auth_password/, dockerAuthPasswordBase64)
-        cy.importYAML(data, vars.capiClustersNS)
-      })
+      cy.createDockerAuthSecret();
     });
 
     it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {

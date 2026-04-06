@@ -312,8 +312,7 @@ Cypress.Commands.add('checkCAPIClusterClass', (className) => {
 
 // Command to check CAPI cluster Active status
 Cypress.Commands.add('checkCAPIClusterActive', (clusterName, timeout = 90000, skipMDCheck = false) => {
-  cy.checkCAPIMenu();
-  cy.contains(new RegExp('Provisioned.*' + clusterName), {timeout: timeout});
+  cy.checkCAPIClusterProvisioned(clusterName, timeout);
   if (!skipMDCheck) {
     cy.contains('Machine Deployments').click();
     cy.contains(new RegExp('Running.*' + clusterName), {timeout: timeout});
@@ -1284,6 +1283,14 @@ Cypress.Commands.add('setCAPIFeature', (featureName, featureValue) => {
   } else {
     cy.contains(new RegExp('Disabled.*' + featureName));
   }
+});
+
+Cypress.Commands.add('createDockerAuthSecret', () => {
+  cy.readFile('./fixtures/docker/capd-auth-token-secret.yaml').then((data) => {
+    data = data.replace(/replace_cluster_docker_auth_username/, vars.dockerAuthUsernameBase64)
+    data = data.replace(/replace_cluster_docker_auth_password/, vars.dockerAuthPasswordBase64)
+    cy.importYAML(data, vars.capiClustersNS)
+  })
 });
 
 export function matchAndWaitForProviderReadyStatus(

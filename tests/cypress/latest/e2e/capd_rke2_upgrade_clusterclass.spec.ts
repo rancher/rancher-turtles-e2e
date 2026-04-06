@@ -12,8 +12,6 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
   const classesPath = 'examples/clusterclasses/docker/rke2'
   const clusterClassRepoName = 'docker-rke2-clusterclass'
   const classClusterFileName = isAPIv1beta1 ? "./fixtures/docker/capd-rke2-class-cluster-v1beta1.yaml" : "./fixtures/docker/capd-rke2-class-cluster.yaml"
-  const dockerAuthUsernameBase64 = btoa(Cypress.expose("docker_auth_username"))
-  const dockerAuthPasswordBase64 = btoa(Cypress.expose("docker_auth_password"))
 
   beforeEach(() => {
     cy.login();
@@ -24,11 +22,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
     if (isRancherManagerVersion('2.13')) {
       it('Create Docker Auth Secret', () => {
         // Prevention for Docker.io rate limiting
-        cy.readFile('./fixtures/docker/capd-auth-token-secret.yaml').then((data) => {
-          data = data.replace(/replace_cluster_docker_auth_username/, dockerAuthUsernameBase64)
-          data = data.replace(/replace_cluster_docker_auth_password/, dockerAuthPasswordBase64)
-          cy.importYAML(data, vars.capiClustersNS)
-        })
+        cy.createDockerAuthSecret();
       });
 
 
@@ -91,18 +85,33 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
         cy.checkCAPIClusterActive(clusterName, timeout);
       })
 
-      it('Install App on imported cluster', {retries: 1}, () => {
-        // Install Chart
-        // We install Logging chart instead of Monitoring, since this is relatively lightweight.
-        cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
-      })
-
-      it("Scale up imported CAPD cluster by patching class-cluster yaml", () => {
+      it("Upgrade kubernetes version of imported CAPD cluster by patching class-cluster yaml", () => {
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_rke2_version/g, vars.rke2Version)
           data = data.replace(/replace_kind_version/g, vars.kindVersion)
+          cy.importYAML(data, vars.capiClustersNS)
+        });
+
+        // Check CAPI cluster upgrade status
+        cy.checkCAPIMenu();
+        cy.contains('Machine Sets').click();
+        cy.contains(vars.rke2Version, {timeout: timeout});
+        cy.contains('v1.34', {timeout: timeout}).should('not.exist');
+
+        cy.checkCAPIClusterProvisioned(clusterName, timeout);
+        cy.contains(vars.rke2Version);
+        cy.checkCAPIClusterActive(clusterName);
+      })
+
+      it("Scale up imported CAPD cluster by patching class-cluster yaml", () => {
+        cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replicas: 2/g, 'replicas: 3')
+
+          // workaround; these values need to be re-replaced before applying the scaling changes
+          data = data.replace(/replace_cluster_name/g, clusterName)
+          data = data.replace(/replace_rke2_version/g, vars.rke2Version)
+          data = data.replace(/replace_kind_version/g, vars.kindVersion)
           cy.importYAML(data, vars.capiClustersNS)
         });
 
@@ -112,6 +121,10 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
         cy.typeInFilter(clusterName);
         cy.get('.content > .count', {timeout: timeout}).should('have.text', '3');
         cy.checkCAPIClusterActive(clusterName);
+      })
+
+      it('Install App on imported cluster', {retries: 1}, () => {
+        cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
 
       it('Remove imported CAPD cluster from Rancher Manager and Delete the CAPD cluster', {retries: 1}, () => {

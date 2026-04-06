@@ -41,9 +41,6 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
   const clusterClassRepoName = "docker-rke2-clusterclass"
   const classClusterFileName = isAPIv1beta1 ? "./fixtures/docker/capd-rke2-class-cluster-v1beta1.yaml" : "./fixtures/docker/capd-rke2-class-cluster.yaml"
 
-  const dockerAuthUsernameBase64 = btoa(Cypress.expose("docker_auth_username"))
-  const dockerAuthPasswordBase64 = btoa(Cypress.expose("docker_auth_password"))
-
   beforeEach(() => {
     cy.login();
     cy.burgerMenuOperate('open');
@@ -56,11 +53,7 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
 
     it('Create Docker Auth Secret', () => {
       // Prevention for Docker.io rate limiting
-      cy.readFile('./fixtures/docker/capd-auth-token-secret.yaml').then((data) => {
-        data = data.replace(/replace_cluster_docker_auth_username/, dockerAuthUsernameBase64)
-        data = data.replace(/replace_cluster_docker_auth_password/, dockerAuthPasswordBase64)
-        cy.importYAML(data, vars.capiClustersNS)
-      });
+      cy.createDockerAuthSecret();
     });
 
     qase(91,
@@ -90,7 +83,7 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
     qase(101,
       it('Auto import child CAPD cluster', () => {
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-        cy.checkCAPIClusterProvisioned(clusterName, vars.shortTimeout);
+        cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
         // Check child cluster is created and auto-imported
         // This is checked by ensuring the cluster is available in navigation menu

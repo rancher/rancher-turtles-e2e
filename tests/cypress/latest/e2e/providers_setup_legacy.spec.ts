@@ -160,7 +160,7 @@ describe('Enable CAPI Providers', () => {
     it('Create CAPIProviders Namespaces', () => {
       cy.createNamespace([vsphereProviderNamespace]);
     })
-    it('Create/Verify CAPV provider', () => {
+    it('Create CAPV provider', () => {
       // Create vsphere Infrastructure provider
       // See capv_rke2_cluster.spec.ts for more details about `vsphere_secrets_json_base64` structure
       const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
@@ -185,7 +185,7 @@ describe('Enable CAPI Providers', () => {
       cy.createNamespace(cloudProviderNamespaces);
     })
 
-    it('Create/Verify CAPA provider', () => {
+    it('Create CAPA provider', () => {
       const namespace = 'capa-system'
       // Create AWS Infrastructure provider
       cy.addCloudCredsAWS(amazonProvider, Cypress.expose('aws_access_key'), Cypress.expose('aws_secret_key'));

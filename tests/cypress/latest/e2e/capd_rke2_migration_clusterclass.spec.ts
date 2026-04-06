@@ -23,8 +23,6 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
   const clusterName = getClusterName(classNamePrefix)
   const classesPath = 'examples/clusterclasses/docker/rke2'
   const clusterClassRepoName = "docker-rke2-clusterclass"
-  const dockerAuthUsernameBase64 = btoa(Cypress.expose("docker_auth_username"))
-  const dockerAuthPasswordBase64 = btoa(Cypress.expose("docker_auth_password"))
   const capdProviderNS = 'capd-system'
   const capdProviderName = 'docker'
   const capdProviderVersion = 'v1.10.6'
@@ -56,11 +54,7 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
 
       it('Create Docker Auth Secret', () => {
         // Prevention for Docker.io rate limiting
-        cy.readFile('./fixtures/docker/capd-auth-token-secret.yaml').then((data) => {
-          data = data.replace(/replace_cluster_docker_auth_username/, dockerAuthUsernameBase64)
-          data = data.replace(/replace_cluster_docker_auth_password/, dockerAuthPasswordBase64)
-          cy.importYAML(data, vars.capiClustersNS)
-        })
+        cy.createDockerAuthSecret();
       });
 
 

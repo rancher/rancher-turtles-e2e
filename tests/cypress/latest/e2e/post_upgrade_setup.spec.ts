@@ -6,6 +6,7 @@ Cypress.config();
 describe('Post Upgrade', {tags: '@upgrade'}, () => {
   let chartMuseumRepo = Cypress.expose('chartmuseum_repo')
   let turtlesChartDevVersion = Cypress.expose('turtles_chart_dev_version')
+  const timeout = vars.shortTimeout
 
   beforeEach(() => {
     cy.login();
@@ -18,8 +19,8 @@ describe('Post Upgrade', {tags: '@upgrade'}, () => {
     cy.clickNavMenu(['Apps', 'Installed Apps']);
     cy.typeInFilter('rancher-turtles');
     cy.getBySel('sortable-cell-0-1').should('exist');
-    cy.contains(turtlesChartDevVersion, {timeout: vars.shortTimeout});
-    cy.waitForAllRowsInState('Deployed', vars.shortTimeout);
+    cy.contains(turtlesChartDevVersion, {timeout: timeout});
+    cy.waitForAllRowsInState('Deployed', timeout);
   })
 
   it("Add turtles-providers GitRepo", () => {
