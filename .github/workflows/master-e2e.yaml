@@ -87,7 +87,7 @@ on:
         type: boolean
       runner_template:
         description: Runner template to use
-        default: rancher-turtles-e2e-ci-spot-20260407172301280300000001
+        default: rancher-turtles-e2e-ci-spot-20260407183521070100000001
         type: string
       test_description:
         description: Short description of the test
