@@ -9,3 +9,10 @@ Fixes #
 - [ ] GitHub Actions (if applicable)
 
 ### Special notes for your reviewer:
+
+<!-- e2e-result-start -->
+### E2E Test Results:
+
+| Run Name | Run Result |
+|----------|------------|
+<!-- e2e-result-end -->
