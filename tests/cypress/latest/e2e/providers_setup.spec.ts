@@ -91,7 +91,7 @@ describe('Enable CAPI Providers', () => {
     },
     'dev-v2.14': {
       capi: 'v1.12.2',
-      rke2: 'v0.24.1',
+      rke2: 'v0.24.2',
       kubeadm: 'v1.12.2',
       fleet: 'v0.14.1',
       vsphere: 'v1.15.2',
@@ -171,7 +171,7 @@ describe('Enable CAPI Providers', () => {
       }
       // Install Rancher Turtles Certified Providers chart
       let operation = isRancherManagerVersion('2.14') && isUpgrade ? 'Upgrade' : 'Install'
-      let turtlesProvidersChartVersion = providersChartNeedsStgRegistry() && isRancherManagerVersion('2.13') ? '0.25' : undefined // TODO: Remove this once https://github.com/rancher/rancher/issues/53882 and 53883 is fixed; staging registry is currently broken for everything
+      let turtlesProvidersChartVersion = providersChartNeedsStgRegistry() && isRancherManagerVersion('2.13') ? '0.25' : providersChartNeedsStgRegistry() && isRancherManagerVersion('2.14') ? '0.26' : undefined // TODO: Remove this once https://github.com/rancher/rancher/issues/53882 and 53883 is fixed; staging registry is currently broken for everything
       cy.checkChart('local', operation, vars.turtlesProvidersChartName, turtlesNamespace, {
         version: turtlesProvidersChartVersion,
         modifyYAMLOperation: providerSelectionFunction

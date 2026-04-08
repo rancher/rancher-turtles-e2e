@@ -29,7 +29,8 @@ import {
   isPrimeChannel,
   isRancherManagerVersion,
   isTurtlesDevChart,
-  isTurtlesPrimeBuild
+  isTurtlesPrimeBuild,
+  providersChartNeedsStgRegistry
 } from '~/support/utils';
 import {vars} from '~/support/variables'
 
@@ -631,6 +632,8 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
           cy.contains('Show More').click();
         }
       });
+      // Select first of the matching listed version
+      cy.getBySel('chart-version-link').first().click();
       cy.contains(options.version).click();
       cy.url().should("contain", options.version);
     }
@@ -645,7 +648,6 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
 
     cy.getBySel('btn-chart-install').click();
     cy.contains(operation + ': Step 1');
-
 
     // Select namespace if an option is given
     cy.get('div.step__basic').then((step) => {
