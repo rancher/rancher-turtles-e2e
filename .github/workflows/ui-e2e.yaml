@@ -53,10 +53,10 @@ on:
         type: boolean
       runner_template:
         description: Runner template to use
-        default: rancher-turtles-e2e-ci-spot-20260408100439746100000001
+        default: rancher-turtles-e2e-ci-spot-20260408143220770600000001
         type: choice
         options:
-          - rancher-turtles-e2e-ci-spot-20260408100439746100000001
+          - rancher-turtles-e2e-ci-spot-20260408143220770600000001
           - capi-e2e-ci-runner-standard-n2-highmem-4-template-v5
   schedule:
     - cron: '0 3 * * *' # @short
