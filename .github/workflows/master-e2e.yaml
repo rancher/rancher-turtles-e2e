@@ -713,3 +713,53 @@ jobs:
         env:
           WORKSPACE: ${{ github.workspace }}
         run: cd tests && make vsphere-runner-cleanup
+
+  report-pr-result:
+    if: always()
+    needs: [e2e]
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Find PR and comment result
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          BRANCH="${{ github.head_ref || github.ref_name }}"
+
+          PR_NUMBER=$(gh pr list --repo "$REPO" --head "$BRANCH" --state open \
+            --json number --jq '.[0].number // empty')
+
+          if [[ -z "$PR_NUMBER" ]]; then
+            echo "No open PR found for branch $BRANCH, skipping comment."
+            exit 0
+          fi
+
+          RESULT="${{ needs.e2e.result }}"
+          case "$RESULT" in
+            success)   STATUS="✅ Success" ;;
+            failure)   STATUS="❌ Failure" ;;
+            cancelled) STATUS="⚠️ Cancelled" ;;
+            skipped)   STATUS="⏭️ Skipped" ;;
+            *)         STATUS="❓ Unknown" ;;
+          esac
+
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          cat > /tmp/comment.md <<EOF
+          **E2E Test Result: ${STATUS}**
+
+          | Parameter | Value |
+          |---|---|
+          | Rancher Version | \`${{ inputs.rancher_version }}\` |
+          | Test Tags | \`${{ inputs.grep_test_by_tag }}\` |
+          | Build Type | \`${{ inputs.target_build_type || 'N/A' }}\` |
+          | Dev Chart | \`${{ inputs.turtles_dev_chart }}\` |
+          | Destroy Runner | \`${{ inputs.destroy_runner }}\` |
+          | Skip Cluster Delete | \`${{ inputs.skip_cluster_delete || false }}\` |
+          | Run | [#${{ github.run_number }}](${RUN_URL}) |
+          | Result | ${STATUS} |
+          EOF
+
+          gh pr comment "$PR_NUMBER" --repo "$REPO" --body-file /tmp/comment.md
