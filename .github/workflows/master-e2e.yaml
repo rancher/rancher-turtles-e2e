@@ -721,7 +721,7 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - name: Find PR and comment result
+      - name: Find PR and update description with result
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
@@ -732,7 +732,7 @@ jobs:
             --json number --jq '.[0].number // empty')
 
           if [[ -z "$PR_NUMBER" ]]; then
-            echo "No open PR found for branch $BRANCH, skipping comment."
+            echo "No open PR found for branch $BRANCH, skipping."
             exit 0
           fi
 
@@ -747,8 +747,10 @@ jobs:
 
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          cat > /tmp/comment.md <<EOF
-          **E2E Test Result: ${STATUS}**
+          cat > /tmp/e2e_result.md <<EOF
+          <!-- e2e-result-start -->
+          ---
+          ### E2E Test Result: ${STATUS}
 
           | Parameter | Value |
           |---|---|
@@ -760,6 +762,23 @@ jobs:
           | Skip Cluster Delete | \`${{ inputs.skip_cluster_delete || false }}\` |
           | Run | [#${{ github.run_number }}](${RUN_URL}) |
           | Result | ${STATUS} |
+          <!-- e2e-result-end -->
           EOF
 
-          gh pr comment "$PR_NUMBER" --repo "$REPO" --body-file /tmp/comment.md
+          # Get current PR body
+          gh pr view "$PR_NUMBER" --repo "$REPO" --json body --jq '.body' > /tmp/pr_body.txt
+
+          # Replace existing result section or append
+          if grep -q '<!-- e2e-result-start -->' /tmp/pr_body.txt; then
+            sed -i '/<!-- e2e-result-start -->/,/<!-- e2e-result-end -->/{
+              /<!-- e2e-result-start -->/{
+                r /tmp/e2e_result.md
+              }
+              d
+            }' /tmp/pr_body.txt
+          else
+            echo "" >> /tmp/pr_body.txt
+            cat /tmp/e2e_result.md >> /tmp/pr_body.txt
+          fi
+
+          gh pr edit "$PR_NUMBER" --repo "$REPO" --body-file /tmp/pr_body.txt
