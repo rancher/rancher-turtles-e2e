@@ -18,7 +18,7 @@ import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletio
 import {vars} from '~/support/variables';
 
 Cypress.config();
-describe('Import CAPD RKE2 Class-Cluster using Fleet', {tags: '@short'}, () => {
+describe('Import CAPD RKE2 (Default CNI) Class-Cluster using Fleet', {tags: '@short'}, () => {
   let clusterName: string
   const timeout = vars.shortTimeout
   const classNamePrefix = 'docker-rke2'
@@ -82,6 +82,15 @@ describe('Import CAPD RKE2 Class-Cluster using Fleet', {tags: '@short'}, () => {
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
+    it('Check rke2 Default CNI', () => {
+      cy.contains(clusterName).click();
+      cy.accesMenuSelection(['Workloads', 'Pods']);
+      cy.setNamespace('All Namespaces', 'all_user');
+      // Filter out cni pods by image name
+      cy.typeInFilter('calico');
+      cy.waitForAllRowsInState('Running', timeout);
+    })
+
     it('Install App on imported cluster', {retries: 1}, () => {
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
