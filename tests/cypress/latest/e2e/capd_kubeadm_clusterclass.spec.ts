@@ -117,13 +117,12 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: '@short'}, () => {
       })
     )
 
-    // Skip until https://github.com/rancher/turtles/issues/1880 is fixed
     qase(43,
-      xit('Check if annotation for externally-managed cluster is set', () => {
-        cy.searchCluster(clusterName)
-        // click the three-dots menu and click View YAML
-        cy.getBySel('sortable-table-0-action-button').click();
-        cy.contains('View YAML').click();
+      it('Check if annotation for externally-managed cluster is set', () => {
+        cy.searchCluster(clusterName);
+        cy.getBySel('sortable-cell-0-1').click();
+        cy.getBySel('related').click();
+        cy.get('a[href*="management.cattle.io.cluster/c-"]').click();
         const annotation = 'provisioning.cattle.io/externally-managed: \'true\'';
         cy.get('.CodeMirror').then((editor) => {
           // @ts-expect-error known error with CodeMirror
