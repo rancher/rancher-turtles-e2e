@@ -3,10 +3,12 @@
 set -evxo pipefail
 
 # Variables
-RANCHER_LOG_COLLECTER="https://github.com/rancherlabs/support-tools/raw/29c3f69978a1480fa918b32775a57993750739a4/collection/rancher/v2.x/logs-collector/rancher2_logs_collector.sh"
+RANCHER_LOG_COLLECTER_COMMIT="29c3f69978a1480fa918b32775a57993750739a4"
+RANCHER_LOG_COLLECTER="https://github.com/rancherlabs/support-tools/raw/${RANCHER_LOG_COLLECTER_COMMIT}/collection/rancher/v2.x/logs-collector/rancher2_logs_collector.sh"
 # RANCHER_LOG_COLLECTER_SHA256=$(curl -sSfL ${RANCHER_LOG_COLLECTER} | sha256sum)
 RANCHER_LOG_COLLECTER_SHA256="c3a29113c74149da2232ca3510a373d3ac7e225d04ef5ebf12371e2f9fe5e6ac" # commit 29c3f69978a1480fa918b32775a57993750739a4
 RANCHER_LOG_COLLECTER="https://raw.githubusercontent.com/rancherlabs/support-tools/master/collection/rancher/v2.x/logs-collector/rancher2_logs_collector.sh"
+
 CRUST_VERSION="v0.13.1"
 CRUST_GATHER_INSTALLER="https://raw.githubusercontent.com/crust-gather/crust-gather/refs/tags/${CRUST_VERSION}/install.sh"
 # CRUST_GATHER_INSTALLER_SHA256=$(curl -sSfL ${CRUST_GATHER_INSTALLER} | sha256sum)
