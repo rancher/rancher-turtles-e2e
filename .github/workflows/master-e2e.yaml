@@ -87,7 +87,7 @@ on:
         type: boolean
       runner_template:
         description: Runner template to use
-        default: capi-e2e-ci-runner-spot-n2-highmem-16-template-v4
+        default: rancher-turtles-e2e-ci-spot-20260414141337391900000001
         type: string
       test_description:
         description: Short description of the test
@@ -247,7 +247,7 @@ jobs:
       TURTLES_CHART_DEV_VERSION: 108.0.0+up99.99.99
       CONTROLLER_IMG: localhost:5000/$TURTLES_REPO
       BROWSER: chrome
-      CYPRESS_DOCKER: 'cypress/included:15.11.0'
+      CYPRESS_DOCKER: 'cypress/included:15.11.0@sha256:3d31c71a3f444c6905a724396ae6fe8c5099133207455fe36d2c6bf38446dc96'
       # Inputs
       GREPTAGS: ${{ inputs.grep_test_by_tag }}
       TURTLES_CHART_VERSION: ${{ inputs.turtles_chart_version }}
@@ -301,18 +301,23 @@ jobs:
           username: ${{ secrets.docker_auth_username }}
           password: ${{ secrets.docker_auth_password }}
       - name: Install helm
-        run: curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+        run: |
+          HELM_VERSION="3.20.1"
+          HELM_SHA256="0165ee4a2db012cc657381001e593e981f42aa5707acdd50658326790c9d0dc3"
+          curl -sk https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz -o helm.tar.gz
+          echo "${HELM_SHA256} helm.tar.gz" | sha256sum -c -
+          tar -xzf helm.tar.gz --strip-components=1 -C /usr/local/bin/ linux-amd64/helm && rm helm.tar.gz
       - name: Set Rancher Manager Install version
         run: |
           if [[ "${{ inputs.grep_test_by_tag }}" =~ "@migration" ]]; then
             # Required for migration tests
             echo "RANCHER_VERSION=head/2.12" >> ${GITHUB_ENV}
-            echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> $GITHUB_ENV
+            echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> ${GITHUB_ENV}
             echo "SPECS=" >> ${GITHUB_ENV}
           elif [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
             # Required for upgrade tests
             echo "RANCHER_VERSION=prime/2.13.3" >> ${GITHUB_ENV}
-            echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> $GITHUB_ENV
+            echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> ${GITHUB_ENV}
           else
             echo "RANCHER_VERSION=${{ inputs.rancher_version }}" >> ${GITHUB_ENV}
           fi
@@ -399,12 +404,6 @@ jobs:
       - name: Clone, build and publish artificial system charts for 2.13 onwards
         if: ${{ (inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12')) || contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
         run: |
-          # Install yq if not present
-          if ! command -v yq >/dev/null 2>&1; then
-            sudo curl -L https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /usr/local/bin/yq
-            sudo chmod +x /usr/local/bin/yq
-          fi
-
           # Dir outside github workspace must be used for destroy=false persistance
           export RANCHER_CHARTS_REPO_DIR=/tmp/system-charts/charts
           export RANCHER_CHART_DEV_VERSION=${{ env.TURTLES_CHART_DEV_VERSION }}
@@ -701,7 +700,7 @@ jobs:
         run: |
           RUN_ID=${{ needs.e2e.outputs.qase_run_id }}
           if [ -n "$RUN_ID" ]; then
-            curl -X POST \
+            curl -X POST --data-raw="" \
               --url https://api.qase.io/v1/run/RT/${RUN_ID}/complete \
               -H "Token: ${{ secrets.QASE_API_TOKEN }}" \
               -H 'accept: application/json'
