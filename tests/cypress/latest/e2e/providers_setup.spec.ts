@@ -126,8 +126,8 @@ describe('Enable CAPI Providers', () => {
       cy.addFleetGitRepo('helm-ops', vars.turtlesRepoUrl, vars.classBranch, 'examples/applications/', vars.capiClustersNS);
     })
 
-    if (isRancherManagerVersion('>=2.14')) {
-      qase('', it('Enable turtles feature gate: use-caapf', () => {
+    if (isRancherManagerVersion('>=2.14.1')) {
+      it('Enable turtles feature gate: use-caapf', () => {
         const enableFeatureGate = (text: any) => {
           // to disable the feature flag, simply removing this data won't be enough. The value must be reset to "false".
           text.data["rancher-turtles"] = `{"features": {"use-caapf": {"enabled": "true"}}}`;
@@ -153,7 +153,7 @@ describe('Enable CAPI Providers', () => {
         cy.get('.CodeMirror-code').contains("use-caapf=true");
         cy.clickButton('Close');
         cy.namespaceReset();
-      }));
+      });
     }
     it('Create Providers using Charts', () => {
       const providerSelectionFunction = (text: any) => {
@@ -167,7 +167,7 @@ describe('Enable CAPI Providers', () => {
         // @ts-ignore
         text.providers.controlplaneKubeadm.enableAutomaticUpdate = true;
 
-        // fleet-addon needs to be explicitly enabled for 2.14.
+        // fleet-addon needs to be explicitly enabled starting >=2.14.1.
         // @ts-ignore
         text.providers.addonFleet.enabled = true;
 
