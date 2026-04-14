@@ -1,6 +1,9 @@
+GINKGO_VERSION:=v2.28.1
+GOMEGA_VERSION:=v1.39.1
+
 deps:
-	@go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo
-	@go install -mod=mod github.com/onsi/gomega
+	@go install -mod=mod github.com/onsi/ginkgo/v2/ginkgo@$(GINKGO_VERSION)
+	@go install -mod=mod github.com/onsi/gomega@$(GOMEGA_VERSION)
 	@go mod tidy
 
 # Generate tests description file
