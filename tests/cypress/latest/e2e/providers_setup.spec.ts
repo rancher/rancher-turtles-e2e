@@ -126,6 +126,35 @@ describe('Enable CAPI Providers', () => {
       cy.addFleetGitRepo('helm-ops', vars.turtlesRepoUrl, vars.classBranch, 'examples/applications/', vars.capiClustersNS);
     })
 
+    if (isRancherManagerVersion('>=2.14')) {
+      qase('', it('Enable turtles feature gate: use-caapf', () => {
+        const enableFeatureGate = (text: any) => {
+          // to disable the feature flag, simply removing this data won't be enough. The value must be reset to "false".
+          text.data["rancher-turtles"] = `{"features": {"use-caapf": {"enabled": "true"}}}`;
+        }
+        cy.editKubernetesResource({
+          name: "rancher-config",
+          clusterName: "local",
+          resourcePath: ["More Resources", "Core", "ConfigMaps"],
+          namespace: "cattle-system",
+          modifyYAMLOperation: enableFeatureGate
+        });
+
+        // Ensure the turtles deployment has the feature gate enabled
+        cy.setNamespace(turtlesNamespace)
+        cy.clickNavMenu(["Workloads", "Deployments"]);
+        cy.typeInFilter('rancher-turtles-controller-manager');
+        // We need to explicitly wait for the turtles controller deployment to restart
+        cy.getBySel('sortable-cell-0-0').contains('In Progress', {timeout: 30000});
+        cy.getBySel('sortable-cell-0-0').contains('Active', {timeout: 30000});
+        cy.getBySel('sortable-table-0-action-button').click();
+        cy.get('div.dropdownTarget').contains('Show Configuration').click();
+        cy.getBySel('btn-yaml-tab').click();
+        cy.get('.CodeMirror-code').contains("use-caapf=true");
+        cy.clickButton('Close');
+        cy.namespaceReset();
+      }));
+    }
     it('Create Providers using Charts', () => {
       const providerSelectionFunction = (text: any) => {
         // @ts-ignore
@@ -137,6 +166,10 @@ describe('Enable CAPI Providers', () => {
         text.providers.controlplaneKubeadm.enabled = true;
         // @ts-ignore
         text.providers.controlplaneKubeadm.enableAutomaticUpdate = true;
+
+        // fleet-addon needs to be explicitly enabled for 2.14.
+        // @ts-ignore
+        text.providers.addonFleet.enabled = true;
 
         if (isCypressTag('@short') || isCypressTag('@upgrade') || isCypressTag('@switch')) {
             // @ts-ignore

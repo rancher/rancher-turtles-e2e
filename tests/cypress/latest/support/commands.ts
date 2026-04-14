@@ -29,8 +29,7 @@ import {
   isPrimeChannel,
   isRancherManagerVersion,
   isTurtlesDevChart,
-  isTurtlesPrimeBuild,
-  providersChartNeedsStgRegistry
+  isTurtlesPrimeBuild
 } from '~/support/utils';
 import {vars} from '~/support/variables'
 
@@ -1069,6 +1068,37 @@ Cypress.Commands.add('deleteKubernetesResource', (clusterName = 'local', resourc
   cy.wait(2000); // needed for 2.12
   cy.typeInFilter(resourceName);
   cy.getBySel('sortable-cell-0-1', {timeout: 60000}).should('not.exist');
+  cy.namespaceReset();
+})
+
+Cypress.Commands.add('editKubernetesResource', (options) => {
+  cy.exploreCluster(options.clusterName);
+  cy.setNamespace(options.namespace);
+  // using `cy.clickNavMenu()` does not always work here, so we explicitly wait after clicking a label.
+  options.resourcePath.forEach(label => {
+    cy.get('.nav').contains(label).click()
+    cy.wait(1000);
+  });
+
+  cy.typeInFilter(options.name);
+  cy.getBySel('sortable-cell-0-1').should('exist');
+  cy.viewport(1920, 1080);
+  cy.getBySel('sortable-table-0-action-button').click();
+  cy.get('div.dropdownTarget').contains('Edit YAML').click();
+
+  if (options.modifyYAMLOperation) {
+    cy.get('.CodeMirror').then((editor) => {
+      // @ts-expect-error known error with CodeMirror
+      let text = yaml.load(editor[0].CodeMirror.getValue());
+      // @ts-ignore
+      options.modifyYAMLOperation(text);
+      // @ts-expect-error known error with CodeMirror
+      editor[0].CodeMirror.setValue(yaml.dump(text));
+    });
+  }
+  cy.clickButton('Save');
+  // ensure there was no error with Editing the YAML.
+  cy.getBySel('error-banner0', {timeout: 3000}).should('not.exist');
   cy.namespaceReset();
 })
 

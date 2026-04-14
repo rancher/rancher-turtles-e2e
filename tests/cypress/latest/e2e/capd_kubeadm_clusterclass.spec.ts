@@ -117,6 +117,7 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: '@short'}, () => {
       })
     )
 
+    // Ref: https://github.com/rancher/turtles/issues/1880
     qase(43,
       it('Check if annotation for externally-managed cluster is set', () => {
         cy.searchCluster(clusterName);

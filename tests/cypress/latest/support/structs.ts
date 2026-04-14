@@ -46,3 +46,12 @@ export type ChartInstallExtraOptions = {
     refreshRepo?: boolean
     modifyYAMLOperation?: (text: any) => void
 }
+
+export type EditKubernetesResourceOptions = {
+    clusterName: string,
+    name: string,
+    resourcePath: string[]
+    namespace: string
+    modifyYAMLOperation?: (text: any) => void
+    timeout?: number
+}
