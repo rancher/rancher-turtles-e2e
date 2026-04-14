@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -evxo pipefail
+set -eo pipefail
 
 # Variables
 RANCHER_LOG_COLLECTER_COMMIT="29c3f69978a1480fa918b32775a57993750739a4"

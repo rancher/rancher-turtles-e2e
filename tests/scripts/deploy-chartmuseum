@@ -3,7 +3,7 @@
 # This script deploys a local helm repo to host the turtles dev chart
 # because it is not exported anywhere else.
 
-set -e
+set -eo pipefail
 
 # Set the caller as the user that will run the service
 CALLER=${SUDO_USER:-$(whoami)}
