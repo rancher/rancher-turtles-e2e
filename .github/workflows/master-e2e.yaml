@@ -305,7 +305,7 @@ jobs:
           HELM_VERSION="3.20.1"
           HELM_SHA256="0165ee4a2db012cc657381001e593e981f42aa5707acdd50658326790c9d0dc3"
           curl -sk https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz -o helm.tar.gz
-          echo "${HELM_SHA256} helm.tar.gz" | sha256sum -c -
+          echo "${HELM_SHA256}  helm.tar.gz" | sha256sum -c -
           sudo tar -xzf helm.tar.gz --strip-components=1 -C /usr/local/bin/ linux-amd64/helm && rm helm.tar.gz
       - name: Set Rancher Manager Install version
         run: |
