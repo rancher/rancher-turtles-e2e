@@ -5,6 +5,18 @@
 
 set -eo pipefail
 
+# Variables
+
+# Chartmuseum installer (pinned by tag + checksum)
+CHARTMUSEUM_VERSION="v0.16.5"
+CHARTMUSEUM_INSTALLER_URL="https://raw.githubusercontent.com/helm/chartmuseum/refs/tags/${CHARTMUSEUM_VERSION}/scripts/get-chartmuseum"
+CHARTMUSEUM_INSTALLER_SHA256="f1116c09104abb4610b5d00be0ef80e625ec44838fb10e9fb042d16970f79356"
+# To refresh SHA256:
+# CHARTMUSEUM_INSTALLER_SHA256="$(curl -sSfL "${CHARTMUSEUM_INSTALLER_URL}" | sha256sum | awk '{print $1}')"
+
+# Helm plugin used to push charts into chartmuseum
+HELM_PUSH_PLUGIN_VERSION="0.10.4"
+
 # Set the caller as the user that will run the service
 CALLER=${SUDO_USER:-$(whoami)}
 
@@ -31,10 +43,8 @@ EOF
 
 # Download and install chartmuseum
 # Due to GH API rate limiting, we need to specify the chartmuseum version
-CHARTMUSEUM_VERSION="v0.16.5"
-CHARTMUSEUM_INSTALLER_SHA256="f1116c09104abb4610b5d00be0ef80e625ec44838fb10e9fb042d16970f79356" # v0.16.5
-export DESIRED_VERSION=${CHARTMUSEUM_VERSION}
-curl https://raw.githubusercontent.com/helm/chartmuseum/refs/tags/${CHARTMUSEUM_VERSION}/scripts/get-chartmuseum -o get-chartmuseum.sh
+export DESIRED_VERSION="${CHARTMUSEUM_VERSION}"
+curl -L "${CHARTMUSEUM_INSTALLER_URL}" -o get-chartmuseum.sh
 echo "${CHARTMUSEUM_INSTALLER_SHA256}  get-chartmuseum.sh" | sha256sum -c -
 chmod +x get-chartmuseum.sh
 ./get-chartmuseum.sh
@@ -43,7 +53,7 @@ chmod +x get-chartmuseum.sh
 systemctl start chartmuseum
 
 # Download and install helm-push plugin and do not fail if exists
-helm plugin install https://github.com/chartmuseum/helm-push.git --version 0.10.4 || true
+helm plugin install https://github.com/chartmuseum/helm-push.git --version "${HELM_PUSH_PLUGIN_VERSION}" || true
 
 # Create a local helm repo
 helm repo add chartmuseum http://localhost:8080
