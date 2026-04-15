@@ -9,6 +9,7 @@ sudo rm /etc/systemd/system/chartmuseum.service
 sudo systemctl daemon-reload
 sudo rm /usr/local/bin/chartmuseum
 sudo helm plugin uninstall cm-push
+sudo rm -r /root/.local/share/helm
 # remove all helm repos
 helm repo remove $(helm repo list -o json | jq -r '.[] | .name')
 # Stop all docker containers and remove everything
