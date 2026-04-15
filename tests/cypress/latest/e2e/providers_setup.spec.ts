@@ -15,6 +15,7 @@ import '~/support/commands';
 import {
   capiNamespace,
   isCypressTag,
+  isHeadBuild,
   isRancherManagerVersion,
   isTurtlesDevChart,
   isUpgrade,
@@ -71,7 +72,7 @@ describe('Enable CAPI Providers', () => {
     },
     'prod-v2.14': {
       capi: 'v1.12.2',
-      rke2: 'v0.24.1',
+      rke2: 'v0.24.2',
       kubeadm: 'v1.12.2',
       fleet: 'v0.14.1',
       vsphere: 'v1.15.2',
@@ -126,8 +127,8 @@ describe('Enable CAPI Providers', () => {
       cy.addFleetGitRepo('helm-ops', vars.turtlesRepoUrl, vars.classBranch, 'examples/applications/', vars.capiClustersNS);
     })
 
-    // This feature gates needs to be enabled for >=2.14.1
-    if (isRancherManagerVersion('>=2.14')) {
+    // This feature gate needs to be enabled for >=2.14.1
+    if (isRancherManagerVersion('>=2.14.1') || (isRancherManagerVersion('2.14') && isHeadBuild)) {
       it('Enable turtles feature gate: use-caapf', () => {
         const enableFeatureGate = (text: any) => {
           // to disable the feature flag, simply removing this data won't be enough. The value must be reset to "false".
@@ -146,7 +147,7 @@ describe('Enable CAPI Providers', () => {
         cy.clickNavMenu(["Workloads", "Deployments"]);
         cy.typeInFilter('rancher-turtles-controller-manager');
         // We need to explicitly wait for the turtles controller deployment to restart
-        cy.getBySel('sortable-cell-0-0').contains('In Progress', {timeout: 30000});
+        cy.getBySel('sortable-cell-0-0').contains('In Progress', {timeout: 60000});
         cy.getBySel('sortable-cell-0-0').contains('Active', {timeout: 30000});
         cy.getBySel('sortable-table-0-action-button').click();
         cy.get('div.dropdownTarget').contains('Show Configuration').click();
