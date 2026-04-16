@@ -58,6 +58,7 @@ on:
         options:
           - rancher-turtles-e2e-ci-spot-20260414141337391900000001
           - rancher-turtles-e2e-ci-standard-20260414141535697900000001
+          - pvala-ci-spot-20260416111203983500000001
   schedule:
     - cron: '0 3 * * *' # @short
     - cron: '0 4 * * *' # @vsphere
