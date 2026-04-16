@@ -11,16 +11,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import '~/support/commands';
+import '../support/commands';
 import {
   capiNamespace,
   isMigration,
   isRancherManagerVersion,
   isTurtlesDevChart,
   turtlesNamespace
-} from '~/support/utils';
-import {vars} from '~/support/variables';
-import {matchAndWaitForProviderReadyStatus} from "~/support/commands";
+} from '../support/utils';
+import {vars} from '../support/variables';
+import {matchAndWaitForProviderReadyStatus} from "../support/commands";
 
 const buildType = isTurtlesDevChart && isRancherManagerVersion('2.12') ? 'dev-v2.12' : 'prod';
 

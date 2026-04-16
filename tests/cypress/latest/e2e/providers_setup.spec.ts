@@ -11,7 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import '~/support/commands';
+import '../support/commands';
 import {
   capiNamespace,
   isCypressTag,
@@ -21,9 +21,9 @@ import {
   isUpgrade,
   providersChartNeedsStgRegistry,
   turtlesNamespace,
-} from '~/support/utils';
-import {vars} from '~/support/variables';
-import {matchAndWaitForProviderReadyStatus} from "~/support/commands";
+} from '../support/utils';
+import {vars} from '../support/variables';
+import {matchAndWaitForProviderReadyStatus} from "../support/commands";
 
 type BuildType = 'prod-v2.13' | 'prod-v2.14' | 'dev-v2.13' | 'dev-v2.14';
 const buildType = determineBuildType();

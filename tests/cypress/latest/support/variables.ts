@@ -4,7 +4,7 @@ import {
   isUpgrade,
   needsProvidersStgChartName,
   providersChartNeedsStgRegistry
-} from '~/support/utils';
+} from './utils';
 
 export const vars = {
   shortTimeout: 600000,

@@ -1,8 +1,8 @@
-import '~/support/commands';
+import '../support/commands';
 
-import {getClusterName, isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
-import {capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
-import {vars} from '~/support/variables';
+import {getClusterName, isRancherManagerVersion, skipClusterDeletion} from '../support/utils';
+import {capiClusterDeletion, importedRancherClusterDeletion} from "../support/cleanup_support";
+import {vars} from '../support/variables';
 
 
 Cypress.config();

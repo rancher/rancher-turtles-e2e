@@ -12,9 +12,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import '~/support/commands';
-import {vars} from '~/support/variables';
-import {isMigration, isRancherManagerVersion, isTurtlesDevChart, isUpgrade, turtlesNamespace} from '~/support/utils';
+import '../support/commands';
+import {vars} from '../support/variables';
+import {isMigration, isRancherManagerVersion, isTurtlesDevChart, isUpgrade, turtlesNamespace} from '../support/utils';
 
 Cypress.config();
 describe('Install Turtles Chart - @install', {tags: '@install'}, () => {

@@ -11,17 +11,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import '~/support/commands';
+import '../support/commands';
 import {
   getClusterName,
   isAPIv1beta1,
   isRancherManagerVersion,
   skipClusterDeletion,
   turtlesNamespace
-} from '~/support/utils';
-import {Question} from '~/support/structs';
-import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
-import {vars} from '~/support/variables';
+} from '../support/utils';
+import {Question} from '../support/structs';
+import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "../support/cleanup_support";
+import {vars} from '../support/variables';
 
 
 Cypress.config();

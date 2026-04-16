@@ -1,7 +1,7 @@
-import '~/support/commands';
-import {getClusterName, isAPIv1beta1, skipClusterDeletion} from '~/support/utils';
-import {capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
-import {vars} from '~/support/variables';
+import '../support/commands';
+import {getClusterName, isAPIv1beta1, skipClusterDeletion} from '../support/utils';
+import {capiClusterDeletion, importedRancherClusterDeletion} from "../support/cleanup_support";
+import {vars} from '../support/variables';
 
 Cypress.config();
 describe('Import CAPG Kubeadm Class-Cluster', {tags: '@full'}, () => {

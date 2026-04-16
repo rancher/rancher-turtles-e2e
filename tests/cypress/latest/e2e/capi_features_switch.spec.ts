@@ -1,7 +1,7 @@
-import '~/support/commands';
-import {capiNamespace, getClusterName, isRancherManagerVersion, turtlesNamespace} from '~/support/utils';
-import {capdResourcesCleanup, capiClusterDeletion} from '~/support/cleanup_support';
-import {vars} from '~/support/variables';
+import '../support/commands';
+import {capiNamespace, getClusterName, isRancherManagerVersion, turtlesNamespace} from '../support/utils';
+import {capdResourcesCleanup, capiClusterDeletion} from '../support/cleanup_support';
+import {vars} from '../support/variables';
 
 Cypress.config();
 describe('Switch CAPI Feature Flags', {tags: '@switch'}, () => {

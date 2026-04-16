@@ -30,8 +30,8 @@ import {
   isRancherManagerVersion,
   isTurtlesDevChart,
   isTurtlesPrimeBuild
-} from '~/support/utils';
-import {vars} from '~/support/variables'
+} from './utils';
+import {vars} from './variables'
 
 // Generic commands
 // Go to specific Sub Menu from Access Menu

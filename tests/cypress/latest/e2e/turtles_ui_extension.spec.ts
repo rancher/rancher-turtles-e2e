@@ -12,8 +12,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import '~/support/commands';
-import {isRancherManagerVersion} from "~/support/utils";
+import '../support/commands';
+import {isRancherManagerVersion} from "../support/utils";
 
 Cypress.config();
 describe('Install CAPI extension - @install', {tags: '@install'}, () => {

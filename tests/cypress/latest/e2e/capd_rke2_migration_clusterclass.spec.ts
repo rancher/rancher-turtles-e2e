@@ -11,10 +11,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import '~/support/commands';
-import {getClusterName, isRancherManagerVersion, turtlesNamespace} from '~/support/utils';
-import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
-import {vars} from '~/support/variables';
+import '../support/commands';
+import {getClusterName, isRancherManagerVersion, turtlesNamespace} from '../support/utils';
+import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "../support/cleanup_support";
+import {vars} from '../support/variables';
 
 Cypress.config();
 describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, () => {

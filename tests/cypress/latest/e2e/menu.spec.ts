@@ -12,7 +12,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import '~/support/commands';
+import '../support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 
 Cypress.config();

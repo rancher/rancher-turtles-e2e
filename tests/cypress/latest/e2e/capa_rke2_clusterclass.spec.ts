@@ -1,7 +1,7 @@
-import '~/support/commands';
-import {getClusterName, isAPIv1beta1, isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
-import {capaResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
-import {vars} from '~/support/variables';
+import '../support/commands';
+import {getClusterName, isAPIv1beta1, isRancherManagerVersion, skipClusterDeletion} from '../support/utils';
+import {capaResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "../support/cleanup_support";
+import {vars} from '../support/variables';
 
 Cypress.config();
 describe('Import CAPA RKE2 Class-Cluster', {tags: '@full'}, () => {

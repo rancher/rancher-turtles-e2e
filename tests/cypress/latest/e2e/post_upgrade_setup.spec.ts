@@ -1,6 +1,6 @@
-import '~/support/commands';
-import {vars} from '~/support/variables';
-import {turtlesNamespace} from '~/support/utils';
+import '../support/commands';
+import {vars} from '../support/variables';
+import {turtlesNamespace} from '../support/utils';
 
 Cypress.config();
 describe('Post Upgrade', {tags: '@upgrade'}, () => {

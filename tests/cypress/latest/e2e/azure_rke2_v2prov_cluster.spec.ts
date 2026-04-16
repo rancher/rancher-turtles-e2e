@@ -1,7 +1,7 @@
-import '~/support/commands';
-import {isAPIv1beta1, isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
+import '../support/commands';
+import {isAPIv1beta1, isRancherManagerVersion, skipClusterDeletion} from '../support/utils';
 import * as randomstring from "randomstring";
-import {vars} from '~/support/variables';
+import {vars} from '../support/variables';
 
 Cypress.config();
 describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {

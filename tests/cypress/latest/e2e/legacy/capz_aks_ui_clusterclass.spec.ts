@@ -1,6 +1,6 @@
-import '~/support/commands';
-import {getClusterName, skipClusterDeletion} from '~/support/utils';
-import {Cluster} from '~/support/structs';
+import '../support/commands';
+import {getClusterName, skipClusterDeletion} from '../support/utils';
+import {Cluster} from '../support/structs';
 
 Cypress.config();
 describe('Create CAPZ AKS Class-Cluster', {tags: '@full'}, () => {

@@ -1,8 +1,7 @@
-
-import '~/support/commands';
-import {getClusterName, isRancherManagerVersion, isAPIv1beta1} from '~/support/utils';
-import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
-import {vars} from '~/support/variables';
+import '../support/commands';
+import {getClusterName, isRancherManagerVersion, isAPIv1beta1} from '../support/utils';
+import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "../support/cleanup_support";
+import {vars} from '../support/variables';
 
 Cypress.config();
 describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () => {

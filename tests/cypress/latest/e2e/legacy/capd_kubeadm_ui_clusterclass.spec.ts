@@ -11,10 +11,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import '~/support/commands';
-import {getClusterName, skipClusterDeletion} from '~/support/utils';
-import {capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
-import {Cluster} from "~/support/structs";
+import '../support/commands';
+import {getClusterName, skipClusterDeletion} from '../support/utils';
+import {capiClusterDeletion, importedRancherClusterDeletion} from "../support/cleanup_support";
+import {Cluster} from "../support/structs";
 
 Cypress.config();
 describe('Create CAPD', {tags: '@short'}, () => {

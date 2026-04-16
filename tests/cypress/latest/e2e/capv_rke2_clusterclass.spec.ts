@@ -1,8 +1,8 @@
-import '~/support/commands';
+import '../support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import {isAPIv1beta1, isRancherManagerVersion, skipClusterDeletion} from '~/support/utils';
-import {capiClusterDeletion, capvResourcesCleanup, importedRancherClusterDeletion} from "~/support/cleanup_support";
-import {vars} from '~/support/variables';
+import {isAPIv1beta1, isRancherManagerVersion, skipClusterDeletion} from '../support/utils';
+import {capiClusterDeletion, capvResourcesCleanup, importedRancherClusterDeletion} from "../support/cleanup_support";
+import {vars} from '../support/variables';
 
 Cypress.config();
 describe('Import CAPV RKE2 Class-Cluster', {tags: '@vsphere'}, () => {

@@ -11,11 +11,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import '~/support/commands';
+import '../support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import {isAPIv1beta1, skipClusterDeletion} from '~/support/utils';
-import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "~/support/cleanup_support";
-import {vars} from '~/support/variables';
+import {isAPIv1beta1, skipClusterDeletion} from '../support/utils';
+import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "../support/cleanup_support";
+import {vars} from '../support/variables';
 
 Cypress.config();
 describe('Import CAPD RKE2 (Default CNI) Class-Cluster using Fleet', {tags: '@short'}, () => {
