@@ -14,8 +14,8 @@ limitations under the License.
 import '~/support/commands';
 import {
   capiNamespace,
+  isCaapfDisabled,
   isCypressTag,
-  isHeadBuild,
   isRancherManagerVersion,
   isTurtlesDevChart,
   isUpgrade,
@@ -128,7 +128,7 @@ describe('Enable CAPI Providers', () => {
     })
 
     // This feature gate needs to be enabled for >=2.14.1
-    if (isRancherManagerVersion('>=2.14.1') || (isRancherManagerVersion('2.14') && isHeadBuild)) {
+    if (isCaapfDisabled) {
       it('Enable turtles feature gate: use-caapf', () => {
         const enableFeatureGate = (text: any) => {
           // to disable the feature flag, simply removing this data won't be enough. The value must be reset to "false".
@@ -173,7 +173,7 @@ describe('Enable CAPI Providers', () => {
         // @ts-ignore
         text.providers.addonFleet.enabled = true;
 
-        if (isCypressTag('@short') || isCypressTag('@upgrade') || isCypressTag('@switch')) {
+        if (isCypressTag('@nocaapf') || isCypressTag('@upgrade') || isCypressTag('@switch')) {
             // @ts-ignore
             text.providers.infrastructureDocker.enabled = true;
             // @ts-ignore
@@ -260,29 +260,9 @@ describe('Enable CAPI Providers', () => {
         }
       });
     })
-
-    xit('Custom Fleet addon config', () => {
-      // Skipped as we are unable to install Monitoring app on clusters without cattle-fleet-system namespace
-      // Ref. https://github.com/rancher/fleet/issues/3521
-      // Allows Fleet addon to be installed on specific clusters only
-
-      const clusterName = 'local';
-      const resourceKind = 'configMap';
-      const resourceName = 'fleet-addon-config';
-      const namespace = turtlesNamespace;
-      const patch = {
-        data: {
-          manifests: {
-            isNestedIn: true,
-            spec: {cluster: {selector: {matchLabels: {cni: 'by-fleet-addon-kindnet'}}}}
-          }
-        }
-      };
-       cy.patchYamlResource(clusterName, namespace, resourceKind, resourceName, patch);
-    });
   });
 
-  context('Docker provider', {tags: ['@short', '@upgrade', '@switch']}, () => {
+  context('Docker provider', {tags: ['@nocaapf', '@upgrade', '@switch']}, () => {
     const dockerProviderNamespace = 'capd-system'
     it('Verify CAPD provider', () => {
       // Verify Docker Infrastructure provider

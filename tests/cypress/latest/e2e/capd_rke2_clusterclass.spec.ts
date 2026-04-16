@@ -25,7 +25,7 @@ import {vars} from '~/support/variables';
 
 
 Cypress.config();
-describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
+describe('Import CAPD RKE2 Class-Cluster', {tags: '@nocaapf'}, () => {
   const timeout = vars.shortTimeout
   const classNamePrefix = 'docker-rke2'
   const clusterName = getClusterName(classNamePrefix)

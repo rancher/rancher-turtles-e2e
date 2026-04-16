@@ -878,23 +878,14 @@ Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, paths, targe
     cy.contains(workspace).should('be.visible').click();
   }
 
-  if (isRancherManagerVersion('>=2.12')) {
-    cy.accesMenuSelection(['Continuous Delivery', 'App Bundles']);
-    // replacement for cy.getBySel('masthead-create').should('be.visible');
-    cy.contains('Create App Bundle').should('be.visible');
-    selectWorkspace(workspace);
-    cy.clickButton('Create App Bundle');
-    // Click on gitrepo container
-    cy.contains('Git Repos').should('be.visible').click();
-    cy.contains('App Bundle:').should('be.visible');
-
-  } else {
-    cy.accesMenuSelection(['Continuous Delivery', 'Git Repos']);
-    cy.getBySel('masthead-create').should('be.visible');
-    selectWorkspace(workspace);
-    cy.clickButton('Add Repository');
-    cy.contains('Git Repo:').should('be.visible');
-  }
+  cy.accesMenuSelection(['Continuous Delivery', 'App Bundles']);
+  // replacement for cy.getBySel('masthead-create').should('be.visible');
+  cy.contains('Create App Bundle').should('be.visible');
+  selectWorkspace(workspace);
+  cy.clickButton('Create App Bundle');
+  // Click on gitrepo container
+  cy.contains('Git Repos').should('be.visible').click();
+  cy.contains('App Bundle:').should('be.visible');
 
   cy.typeValue('Name', repoName);
   cy.clickButton("Next");
@@ -925,11 +916,7 @@ Cypress.Commands.add('addFleetGitRepo', (repoName, repoUrl, branch, paths, targe
 Cypress.Commands.add('removeFleetGitRepo', (repoName, workspace = 'fleet-local') => {
   cy.checkFleetGitRepoActive(repoName, workspace);
   // Click on the actions menu and select 'Delete' from the menu
-  if (isRancherManagerVersion('>=2.12')) {
-    cy.getBySel('masthead-action-menu').should('be.visible').click();
-  } else {
-    cy.get('.actions .btn.actions').click();
-  }
+  cy.getBySel('masthead-action-menu').should('be.visible').click();
   cy.get('.icon.group-icon.icon-trash').click({ctrlKey: true}); // this will prevent to display confirmation dialog
   cy.wait(2000); // needed for 2.12
   cy.goToFleetGitRepos(workspace);
@@ -941,11 +928,7 @@ Cypress.Commands.add('removeFleetGitRepo', (repoName, workspace = 'fleet-local')
 Cypress.Commands.add('forceUpdateFleetGitRepo', (repoName, workspace) => {
   cy.checkFleetGitRepoActive(repoName, workspace);
   // Click on the actions menu and select 'Force Update' from the menu
-  if (isRancherManagerVersion('>=2.12')) {
-    cy.getBySel('masthead-action-menu').should('be.visible').click();
-  } else {
-    cy.get('.actions .btn.actions').click();
-  }
+  cy.getBySel('masthead-action-menu').should('be.visible').click();
   // On prime 2.13.0-alpha4 the refresh icon selector didn't change but parent <div> must be clicked
   cy.get('.icon.group-icon.icon-refresh').parent().click();
   cy.clickButton('Update')
@@ -955,7 +938,7 @@ Cypress.Commands.add('forceUpdateFleetGitRepo', (repoName, workspace) => {
 Cypress.Commands.add('goToFleetGitRepos', (workspace = 'fleet-local') => {
   // Go to 'Continuous Delivery' > 'Git Repos'
   cy.burgerMenuOperate('open');
-  const gitRepoMenuLocation = isRancherManagerVersion('>=2.12') ? ['Continuous Delivery', 'Resources', 'Git Repos'] : ['Continuous Delivery', 'Git Repos'];
+  const gitRepoMenuLocation = ['Continuous Delivery', 'Resources', 'Git Repos']
   cy.accesMenuSelection(gitRepoMenuLocation);
   cy.getBySel('masthead-create').should('be.visible');
   // Change the workspace using the dropdown on the top bar
@@ -971,11 +954,7 @@ Cypress.Commands.add('checkFleetGitRepoActive', (repoName, workspace) => {
   cy.url().should("include", "fleet/fleet.cattle.io.gitrepo/" + workspace + "/" + repoName)
   // Ensure there are no errors after waiting for a few seconds
   cy.wait(5000);
-  if (isRancherManagerVersion('>=2.12')) {
-    cy.get('.badge-state', {timeout: 3000}).should("not.contain", "Error");
-  } else {
-    cy.get('.badge-state', {timeout: 3000}).should("not.contain", "Err Applied");
-  }
+  cy.get('.badge-state', {timeout: 10000}).should("not.contain", "Error");
 })
 
 // Fleet namespace toggle

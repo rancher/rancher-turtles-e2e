@@ -272,6 +272,7 @@ jobs:
       PROVIDERS_STG_OCI_REPO: ${{ secrets.providers_stg_oci_repo }}
       # Common specs: @short @vsphere @full
       SPECS: |
+        e2e/capd_rke2_nocaapf_clusterclass.spec.ts
         e2e/providers_setup_legacy.spec.ts
         e2e/providers_setup.spec.ts
         e2e/capd_rke2_clusterclass.spec.ts
