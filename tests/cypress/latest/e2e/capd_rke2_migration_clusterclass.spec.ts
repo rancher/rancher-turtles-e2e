@@ -185,7 +185,7 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
         capdResourcesCleanup();
 
         // Uninstall Rancher Turtles providers chart
-        cy.deleteKubernetesResource('local', ['Apps', 'Installed Apps'], 'rancher-turtles-providers', turtlesNamespace);
+        cy.deleteKubernetesResource('local', ['Apps', 'Installed Apps'], vars.turtlesProvidersHelmApp, turtlesNamespace);
         cy.get('.closer').click();
 
         // Remove namespaces

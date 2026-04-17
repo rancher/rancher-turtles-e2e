@@ -12,7 +12,6 @@ limitations under the License.
 */
 
 import '../support/commands';
-import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import {getClusterName, isAPIv1beta1, isRancherManagerVersion, skipClusterDeletion} from '../support/utils';
 import {capiClusterDeletion, importedRancherClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
@@ -101,25 +100,9 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: '@short'}, () => {
       })
     }
 
-    // fleet-addon provider checks (for rancher dev/2.10.3 and up)
-    qase(42,
-      // skip due to turtles/issues/1329
-      xit('Check if cluster is registered in Fleet only once', () => {
-        cypressLib.accesMenu('Continuous Delivery');
-        cy.contains('Dashboard').should('be.visible');
-        cypressLib.accesMenu('Clusters');
-        cy.fleetNamespaceToggle('fleet-default');
-        // Verify the cluster is registered and Active
-        const rowNumber = 0
-        cy.verifyTableRow(rowNumber, 'Active', clusterName);
-        // Make sure there is only one registered cluster in fleet (there should be one table row)
-        cy.get('table.sortable-table').find(`tbody tr[data-testid="sortable-table-${rowNumber}-row"]`).should('have.length', 1);
-      })
-    )
-
     // Ref: https://github.com/rancher/turtles/issues/1880
     qase(43,
-      it('Check if annotation for externally-managed cluster is set', () => {
+      it('Check the annotation for externally-managed fleet is set on cluster', () => {
         cy.searchCluster(clusterName);
         cy.getBySel('sortable-cell-0-1').click();
         cy.getBySel('related').click();
