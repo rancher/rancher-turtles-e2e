@@ -14,8 +14,8 @@ limitations under the License.
 import '../support/commands';
 import {
   capiNamespace,
+  isCaapfDisabled,
   isCypressTag,
-  isHeadBuild,
   isRancherManagerVersion,
   isTurtlesDevChart,
   isUpgrade,
@@ -92,7 +92,7 @@ describe('Enable CAPI Providers', () => {
     },
     'dev-v2.14': {
       capi: 'v1.12.2',
-      rke2: 'v0.24.2',
+      rke2: 'v0.24.3',
       kubeadm: 'v1.12.2',
       fleet: 'v0.14.1',
       vsphere: 'v1.15.2',
@@ -128,7 +128,7 @@ describe('Enable CAPI Providers', () => {
     })
 
     // This feature gate needs to be enabled for >=2.14.1
-    if (isRancherManagerVersion('>=2.14.1') || (isRancherManagerVersion('2.14') && isHeadBuild)) {
+    if (isCaapfDisabled) {
       it('Enable turtles feature gate: use-caapf', () => {
         const enableFeatureGate = (text: any) => {
           // to disable the feature flag, simply removing this data won't be enough. The value must be reset to "false".
@@ -260,26 +260,6 @@ describe('Enable CAPI Providers', () => {
         }
       });
     })
-
-    xit('Custom Fleet addon config', () => {
-      // Skipped as we are unable to install Monitoring app on clusters without cattle-fleet-system namespace
-      // Ref. https://github.com/rancher/fleet/issues/3521
-      // Allows Fleet addon to be installed on specific clusters only
-
-      const clusterName = 'local';
-      const resourceKind = 'configMap';
-      const resourceName = 'fleet-addon-config';
-      const namespace = turtlesNamespace;
-      const patch = {
-        data: {
-          manifests: {
-            isNestedIn: true,
-            spec: {cluster: {selector: {matchLabels: {cni: 'by-fleet-addon-kindnet'}}}}
-          }
-        }
-      };
-       cy.patchYamlResource(clusterName, namespace, resourceKind, resourceName, patch);
-    });
   });
 
   context('Docker provider', {tags: ['@short', '@upgrade', '@switch']}, () => {
