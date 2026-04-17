@@ -11,18 +11,18 @@ npm install
 KIND_SUBNET='172.19.0.0/16'
 KIND_GATEWAY='172.19.0.1'
 
+# Docker 28+ fix: Allow traffic from interface used by k3s to KIND network.
+# Ref. https://github.com/moby/moby/issues/49792
+TRUSTED_INTERFACE='flannel.1:cni0'
+
 docker network create \
     --driver=bridge \
     --subnet=${KIND_SUBNET} \
     --gateway=${KIND_GATEWAY} \
     --opt "com.docker.network.bridge.enable_ip_masquerade"="true" \
     --opt "com.docker.network.driver.mtu"="1500" \
+    --opt "com.docker.network.bridge.trusted_host_interfaces=${TRUSTED_INTERFACE}" \
     kind || true
-
-# Docker 28+ fix: Allow traffic from other host interfaces to KIND subnet.
-# Bypasses conntrack to prevent packets being dropped as INVALID.
-# Note: The rule should be present as 3rd entry of `sudo iptables -t raw -S` output
-sudo iptables -t raw -I PREROUTING -d ${KIND_SUBNET} -j ACCEPT
 
 # Start Cypress tests with docker - only root or user with uid 1000 is working
 docker run --init -v $PWD:/workdir -w /workdir \
