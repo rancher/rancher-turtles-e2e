@@ -1,35 +1,23 @@
-/*
-Copyright © 2022 - 2023 SUSE LLC
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-    http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 
 import '../support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import {isCaapfDisabled, skipClusterDeletion} from '../support/utils';
+import {skipClusterDeletion, turtlesNamespace, isCaapfDisabled} from '../support/utils';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Import CAPD RKE2 (Default CNI) Class-Cluster using Fleet', {tags: '@short'}, () => {
+describe('Import CAPD RKE2 (Default CNI & No-Caapf) Class-Cluster using Fleet', {tags: '@short'}, () => {
   let clusterName: string
   const timeout = vars.shortTimeout
   const classNamePrefix = 'docker-rke2'
-  const path = '/tests/assets/rancher-turtles-fleet-example/capd/rke2/class-clusters-v1beta1'
+  const path = '/tests/assets/rancher-turtles-fleet-example/capd/rke2/class-clusters'
   const classesPath = 'examples/clusterclasses/docker/rke2'
   const clustersRepoName = 'docker-rke2-class-clusters'
   const clusterClassRepoName = "docker-rke2-clusterclass"
 
   beforeEach(function () {
-    if (isCaapfDisabled) {
-      // This test is only meant for <2.14.1
+    if (!isCaapfDisabled) {
+      // This test is only meant for >=2.14.1
       this.skip();
     }
     cy.login();
@@ -37,14 +25,32 @@ describe('Import CAPD RKE2 (Default CNI) Class-Cluster using Fleet', {tags: '@sh
   });
 
   context('[SETUP]', () => {
+    it('Create Docker Resources', () => {
+      // Docker rke2 lb-config
+      cy.addFleetGitRepo('lb-docker', vars.turtlesRepoUrl, vars.classBranch, 'examples/applications/lb/docker', vars.capiClustersNS);
+      cy.burgerMenuOperate('open');
+      // Prevention for Docker.io rate limiting
+      cy.createDockerAuthSecret();
+    });
+
     it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
 
-    it('Create Docker Auth Secret', () => {
-      // Prevention for Docker.io rate limiting
-      cy.createDockerAuthSecret();
-    });
+    it('Install turtles-providers-chart for Docker, RKE2', () => {
+      const providerSelectionFunction = (text: any) => {
+        // @ts-ignore
+        text.providers.infrastructureDocker.enabled = true;
+        // @ts-ignore
+        text.providers.infrastructureDocker.enableAutomaticUpdate = true;
+      }
+
+      // Install Rancher Turtles Certified Providers chart
+      cy.checkChart('local', 'Install', vars.turtlesProvidersChartName, turtlesNamespace, {
+      version: undefined,
+      modifyYAMLOperation: providerSelectionFunction
+      });
+    })
 
     it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
       cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
@@ -70,8 +76,7 @@ describe('Import CAPD RKE2 (Default CNI) Class-Cluster using Fleet', {tags: '@sh
     it('Auto import child CAPD cluster', () => {
       // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
       cy.checkCAPIClusterProvisioned(clusterName, timeout);
-
-      // Check child cluster is created and auto-imported
+       // Check child cluster is created and auto-imported
       // This is checked by ensuring the cluster is available in navigation menu
       cy.goToHome();
       cy.contains(clusterName).should('exist');
@@ -94,6 +99,31 @@ describe('Import CAPD RKE2 (Default CNI) Class-Cluster using Fleet', {tags: '@sh
       // Filter out cni pods by image name
       cy.typeInFilter('calico');
       cy.waitForAllRowsInState('Running', timeout);
+    })
+
+    it('Check if cluster is registered in Fleet only once', () => {
+      cypressLib.accesMenu('Continuous Delivery');
+      cy.contains('Dashboard').should('be.visible');
+      cypressLib.accesMenu('Clusters');
+      cy.fleetNamespaceToggle('fleet-default');
+      // Verify the cluster is registered and Active
+      const rowNumber = 0
+      cy.verifyTableRow(rowNumber, 'Active', clusterName);
+      // Make sure there is only one registered cluster in fleet (there should be one table row)
+      cy.get('table.sortable-table').find(`tbody tr[data-testid="sortable-table-${rowNumber}-row"]`).should('have.length', 1);
+    })
+
+    it('Check the annotation for externally-managed fleet is not set on cluster', () => {
+      cy.searchCluster(clusterName);
+      cy.getBySel('sortable-cell-0-1').click();
+      cy.getBySel('related').click();
+      cy.get('a[href*="management.cattle.io.cluster/c-"]').click();
+      const annotation = 'provisioning.cattle.io/externally-managed: \'true\'';
+      cy.get('.CodeMirror').then((editor) => {
+        // @ts-expect-error known error with CodeMirror
+        const text = editor[0].CodeMirror.getValue();
+        expect(text).to.not.include(annotation);
+      });
     })
 
     it('Install App on imported cluster', {retries: 1}, () => {
@@ -122,5 +152,16 @@ describe('Import CAPD RKE2 (Default CNI) Class-Cluster using Fleet', {tags: '@sh
         capdResourcesCleanup();
       })
     }
+
+    it('Delete the provider-charts and other resources', () => {
+      // Remove the lb-config
+      cy.removeFleetGitRepo('lb-docker');
+      cy.deleteKubernetesResource('local', ['Storage', 'ConfigMaps'], 'docker-rke2-lb-config', vars.capiClustersNS);
+
+      // Uninstall Rancher Turtles Providers chart
+      cy.deleteKubernetesResource('local', ['Apps', 'Installed Apps'], vars.turtlesProvidersHelmApp, turtlesNamespace);
+      cy.contains(new RegExp(`"${vars.turtlesProvidersHelmApp}"` + ' uninstalled'), {timeout: timeout}).should('be.visible');
+      cy.get('.closer').click();
+    })
   })
 });

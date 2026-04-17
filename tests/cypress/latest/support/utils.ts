@@ -69,3 +69,5 @@ export const isAPIv1beta1 = isRancherManagerVersion('<=2.13')
 export const isUpgrade = isCypressTag('@upgrade')
 
 export const isTurtlesDevChart = Cypress.expose('turtles_dev_chart')
+
+export const isCaapfDisabled = (isRancherManagerVersion('>=2.14.1') || (isRancherManagerVersion('2.14') && isHeadBuild))
