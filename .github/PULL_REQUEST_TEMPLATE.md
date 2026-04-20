@@ -13,6 +13,6 @@ Fixes #
 <!-- e2e-result-start -->
 ### E2E Test Results:
 
-| Run Name | Run Result |
-|----------|------------|
+| Run Name | Run Result | Notes |
+|----------|------------|-------|
 <!-- e2e-result-end -->

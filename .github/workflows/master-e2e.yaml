@@ -750,7 +750,7 @@ jobs:
 
           RUN_NAME="[${{ github.run_number }}] Rancher-${{ inputs.rancher_version }} - **${{ inputs.grep_test_by_tag }}** dev=${{ inputs.turtles_dev_chart }} destroy=${{ inputs.destroy_runner }}"
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          NEW_ROW="| [${RUN_NAME}](${RUN_URL}) | ${STATUS} |"
+          NEW_ROW="| [${RUN_NAME}](${RUN_URL}) | ${STATUS} | |"
 
           # Get current PR body
           gh pr view "$PR_NUMBER" --repo "$REPO" --json body --jq '.body' > /tmp/pr_body.txt
