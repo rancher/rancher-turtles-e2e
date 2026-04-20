@@ -632,7 +632,7 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
         }
       });
       // Select first of the matching listed version
-      cy.getBySel('chart-version-link').first().click();
+      cy.getBySel('chart-versions').first().click();
       cy.contains(options.version).click();
       cy.url().should("contain", options.version);
     }
