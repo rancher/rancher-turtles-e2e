@@ -60,18 +60,26 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
         // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
         cy.checkCAPIClusterActive(clusterName, timeout);
       })
+
+      it('Check the fleet-addon annotation and finalizer is set on clusters', () => {
+        // Check the externally-managed annotation is set on Rancher management cluster
+        cy.checkExternalFleetAnnotation(clusterName);
+
+        // Check the finalizer is set on CAPI cluster
+        cy.viewCAPIClusterYAML(clusterName);
+        cy.get('.CodeMirror').then((editor) => {
+          // @ts-expect-error known error with CodeMirror
+          const text = editor[0].CodeMirror.getValue();
+          expect(text).to.include('fleet.addons.cluster.x-k8s.io');
+        });
+      })
     }
   })
 
   context('Post-Upgrade Cluster checks and Resources cleanup', () => {
     if (isRancherManagerVersion('2.14')) {
       it('Check cluster & Resources status post-upgrade', () => {
-        // Check CAPI cluster using its name
-        cy.checkCAPICluster(clusterName);
-
-        // click the three-dots menu and click View YAML
-        cy.getBySel('sortable-table-0-action-button').click();
-        cy.contains('View YAML').click();
+        cy.viewCAPIClusterYAML(clusterName);
         cy.get('.CodeMirror').then((editor) => {
           // @ts-expect-error known error with CodeMirror
           const text = editor[0].CodeMirror.getValue();
@@ -82,6 +90,19 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
         cy.searchCluster(clusterName);
         cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
         cy.checkCAPIClusterActive(clusterName, timeout);
+      })
+
+      it('Check the fleet-addon annotation and finalizer is not set on clusters', () => {
+        // Check the externally-managed annotation is not set on Rancher management cluster
+        cy.checkExternalFleetAnnotation(clusterName, false);
+
+        // Check the finalizer is not set on CAPI cluster
+        cy.viewCAPIClusterYAML(clusterName);
+        cy.get('.CodeMirror').then((editor) => {
+          // @ts-expect-error known error with CodeMirror
+          const text = editor[0].CodeMirror.getValue();
+          expect(text).not.to.include('fleet.addons.cluster.x-k8s.io');
+        });
       })
 
       it("Upgrade kubernetes version of imported CAPD cluster by patching class-cluster yaml", () => {

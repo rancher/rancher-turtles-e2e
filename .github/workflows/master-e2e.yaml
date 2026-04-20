@@ -542,7 +542,7 @@ jobs:
       - name: Set Rancher Manager Upgrade version
         if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') }}
         run: |
-          echo "RANCHER_VERSION=prime-alpha/2.14.1-alpha2" >> ${GITHUB_ENV}
+          echo "RANCHER_VERSION=prime-alpha/2.14.1-alpha3" >> ${GITHUB_ENV}
       - name: Upgrade Rancher Manager
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:

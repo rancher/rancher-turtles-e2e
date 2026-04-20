@@ -1338,6 +1338,33 @@ Cypress.Commands.add('createDockerAuthSecret', () => {
   })
 });
 
+Cypress.Commands.add('checkExternalFleetAnnotation', (clusterName, required = true) => {
+  cy.searchCluster(clusterName);
+  cy.getBySel('sortable-cell-0-1').click();
+  cy.getBySel('related').click();
+  cy.get('a[href*="management.cattle.io.cluster/c-"]').click();
+  const annotation = 'provisioning.cattle.io/externally-managed: \'true\'';
+
+  cy.get('.CodeMirror').then((editor) => {
+    // @ts-expect-error known error with CodeMirror
+    const text = editor[0].CodeMirror.getValue();
+    if (required) {
+      expect(text).to.include(annotation);
+    } else {
+      expect(text).to.not.include(annotation);
+    }
+  });
+});
+
+// TODO: Add assertFunc(text: string) param
+Cypress.Commands.add('viewCAPIClusterYAML', (clusterName) => {
+  // Check CAPI cluster using its name
+  cy.checkCAPICluster(clusterName);
+  // click the three-dots menu and click View YAML
+  cy.getBySel('sortable-table-0-action-button').click();
+  cy.contains('View YAML').click();
+});
+
 export function matchAndWaitForProviderReadyStatus(
   providerString: string,
   providerType: string,

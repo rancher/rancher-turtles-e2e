@@ -102,16 +102,16 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: '@short'}, () => {
 
     // Ref: https://github.com/rancher/turtles/issues/1880
     qase(43,
-      it('Check the annotation for externally-managed fleet is set on cluster', () => {
-        cy.searchCluster(clusterName);
-        cy.getBySel('sortable-cell-0-1').click();
-        cy.getBySel('related').click();
-        cy.get('a[href*="management.cattle.io.cluster/c-"]').click();
-        const annotation = 'provisioning.cattle.io/externally-managed: \'true\'';
+      it('Check the fleet-addon annotation and finalizer is set on clusters', () => {
+        // Check the externally-managed annotation is set on Rancher management cluster
+        cy.checkExternalFleetAnnotation(clusterName);
+
+        // Check the finalizer is set on CAPI cluster
+        cy.viewCAPIClusterYAML(clusterName);
         cy.get('.CodeMirror').then((editor) => {
           // @ts-expect-error known error with CodeMirror
           const text = editor[0].CodeMirror.getValue();
-          expect(text).to.include(annotation);
+          expect(text).to.include('fleet.addons.cluster.x-k8s.io');
         });
       })
     )

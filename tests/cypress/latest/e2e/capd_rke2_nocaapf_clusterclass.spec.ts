@@ -114,16 +114,16 @@ describe('Import CAPD RKE2 (Default CNI & No-Caapf) Class-Cluster using Fleet', 
       cy.get('table.sortable-table').find(`tbody tr[data-testid="sortable-table-${rowNumber}-row"]`).should('have.length', 1);
     })
 
-    it('Check the annotation for externally-managed fleet is not set on cluster', () => {
-      cy.searchCluster(clusterName);
-      cy.getBySel('sortable-cell-0-1').click();
-      cy.getBySel('related').click();
-      cy.get('a[href*="management.cattle.io.cluster/c-"]').click();
-      const annotation = 'provisioning.cattle.io/externally-managed: \'true\'';
+    it('Check the fleet-addon annotation and finalizer is not set on clusters', () => {
+      // Check the externally-managed annotation is set on Rancher management cluster
+      cy.checkExternalFleetAnnotation(clusterName, false);
+
+      // Check the finalizer is not set on CAPI cluster
+      cy.viewCAPIClusterYAML(clusterName);
       cy.get('.CodeMirror').then((editor) => {
         // @ts-expect-error known error with CodeMirror
         const text = editor[0].CodeMirror.getValue();
-        expect(text).to.not.include(annotation);
+        expect(text).not.to.include('fleet.addons.cluster.x-k8s.io');
       });
     })
 

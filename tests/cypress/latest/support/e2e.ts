@@ -85,6 +85,8 @@ declare global {
       verifyCAPIProviderImage(providerNamespace: string): Chainable<Element>;
       setCAPIFeature(featureName: string, featureValue: string): Chainable<Element>;
       createDockerAuthSecret(): Chainable<Element>;
+      checkExternalFleetAnnotation(clustername: string, required?: boolean): Chainable<Element>;
+      viewCAPIClusterYAML(clustername: string): Chainable<Element>;
       // Functions declared in capz_support.js
       createAzureClusterIdentity(clientID: string, tenantID: string, clientSecret: string): Chainable<Element>;
       createAzureASOCredential(clientID: string, tenantID: string, clientSecret: string, subscriptionID: string): Chainable<Element>;
