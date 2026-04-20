@@ -72,7 +72,7 @@ describe('Enable CAPI Providers', () => {
     },
     'prod-v2.14': {
       capi: 'v1.12.2',
-      rke2: 'v0.24.2',
+      rke2: 'v0.24.3',
       kubeadm: 'v1.12.2',
       fleet: 'v0.14.1',
       vsphere: 'v1.15.2',
@@ -92,7 +92,7 @@ describe('Enable CAPI Providers', () => {
     },
     'dev-v2.14': {
       capi: 'v1.12.2',
-      rke2: 'v0.24.2',
+      rke2: 'v0.24.3',
       kubeadm: 'v1.12.2',
       fleet: 'v0.14.1',
       vsphere: 'v1.15.2',
