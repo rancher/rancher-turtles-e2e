@@ -151,7 +151,7 @@ jobs:
     steps:
       # actions/checkout MUST come before auth
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Generate UUID and Runner hostname
         id: generator
         run: |
@@ -175,12 +175,12 @@ jobs:
           fi
       - name: Authenticate to GCP
         if: ${{ needs.determine-runner.outputs.initial-runner != 'vsphere' }}
-        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
           credentials_json: ${{ secrets.gcp_credentials }}
       - name: Setup gcloud
         if: ${{ needs.determine-runner.outputs.initial-runner != 'vsphere' }}
-        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
       - name: Create runner
         if: ${{ needs.determine-runner.outputs.initial-runner != 'vsphere' }}
         run: |
@@ -297,7 +297,7 @@ jobs:
           echo 'Defaults secure_path="/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin"' | sudo tee /etc/sudoers.d/0-custom_secure_path
       # To be removed if hitting pull ratelimits
       - name: Log in to Docker Hub
-        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           username: ${{ secrets.docker_auth_username }}
           password: ${{ secrets.docker_auth_password }}
@@ -360,13 +360,13 @@ jobs:
       # or if it's a migration test, then to copy the provider migration script
       - name: Check out rancher/turtles repo
         if: ${{ inputs.turtles_dev_chart == true || contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: ${{ env.TURTLES_REPO }}
           ref: ${{ env.TURTLES_BRANCH }}
       - name: Install Go
         if: ${{ inputs.turtles_dev_chart == true }}
-        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
           cache: false
           go-version-file: go.mod
@@ -437,9 +437,9 @@ jobs:
         run: cp ${{ github.workspace }}/out/package/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ runner.temp }}
 
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Install Go
-        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
         with:
           cache: false
           go-version-file: tests/go.mod
@@ -489,7 +489,7 @@ jobs:
         if: ${{ inputs.turtles_dev_chart == true }}
         run: cd tests && make e2e-install-chartmuseum
       - name: Setup node
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: current
       - name: Cypress tests
@@ -513,7 +513,7 @@ jobs:
           cd tests && make start-cypress-tests
       - name: Upload Cypress screenshots
         if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: cypress-screenshots-${{ github.run_number }}
           path: tests/cypress/latest/screenshots
@@ -522,7 +522,7 @@ jobs:
       - name: Upload Cypress videos
         # Test run video is always captured, so this action uses "always()" condition
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: cypress-videos-${{ github.run_number }}
           path: tests/cypress/latest/videos
@@ -584,7 +584,7 @@ jobs:
           cd tests && make start-cypress-tests
       - name: Upload Cypress screenshots (after-upgrade)
         if: ${{ (contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) && failure() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: cypress-screenshots-after-upgrade-${{ github.run_number }}
           path: tests/cypress/latest/screenshots
@@ -593,7 +593,7 @@ jobs:
       - name: Upload Cypress videos (after-upgrade)
         # Test run video is always captured, so this action uses "always()" condition
         if: ${{ (contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) && always() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: cypress-videos-after-upgrade-${{ github.run_number }}
           path: tests/cypress/latest/videos
@@ -608,7 +608,7 @@ jobs:
           bash ${{ env.RANCHER_LOG_COLLECTOR }}
       - name: Upload cluster logs
         if: ${{ always() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: support-logs
           path: ${{ github.workspace }}/logs/*
@@ -670,13 +670,13 @@ jobs:
     steps:
       # actions/checkout MUST come before auth
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Authenticate to GCP
-        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
           credentials_json: ${{ secrets.gcp_credentials }}
       - name: Setup gcloud
-        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
       - name: Delete GCP secrets
         run: |
           gcloud --quiet secrets delete PAT_TOKEN_${{ needs.create-runner.outputs.uuid }} || true
