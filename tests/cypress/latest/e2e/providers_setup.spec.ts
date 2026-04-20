@@ -14,11 +14,11 @@ limitations under the License.
 import '../support/commands';
 import {
   capiNamespace,
-  isUseCAAPFSupported,
   isCypressTag,
   isRancherManagerVersion,
   isTurtlesDevChart,
   isUpgrade,
+  isUseCAAPFSupported,
   providersChartNeedsStgRegistry,
   turtlesNamespace,
 } from '../support/utils';
@@ -206,7 +206,7 @@ describe('Enable CAPI Providers', () => {
       }
       // Install Rancher Turtles Certified Providers chart
       let operation = isRancherManagerVersion('2.14') && isUpgrade ? 'Upgrade' : 'Install'
-      let turtlesProvidersChartVersion = providersChartNeedsStgRegistry() && isRancherManagerVersion('2.13') ? '0.25' : providersChartNeedsStgRegistry() && isRancherManagerVersion('2.14') ? '0.26' : undefined // TODO: Remove this once https://github.com/rancher/rancher/issues/53882 and 53883 is fixed; staging registry is currently broken for everything
+      let turtlesProvidersChartVersion = providersChartNeedsStgRegistry() && isRancherManagerVersion('2.13') ? '0.25' : undefined
       cy.checkChart('local', operation, vars.turtlesProvidersChartName, turtlesNamespace, {
         version: turtlesProvidersChartVersion,
         modifyYAMLOperation: providerSelectionFunction
