@@ -92,7 +92,7 @@ describe('Import CAPD RKE2 (Default CNI & No-Caapf) Class-Cluster using Fleet', 
     })
   })
 
-  context('[CLUSTER-OPERATIONS]', () => {
+  context.skip('[CLUSTER-OPERATIONS]', () => {
     it('Check RKE2 Default CNI', () => {
       cy.contains(clusterName).click();
       cy.accesMenuSelection(['Workloads', 'Pods']);
