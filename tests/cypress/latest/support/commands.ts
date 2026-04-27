@@ -29,7 +29,8 @@ import {
   isPrimeChannel,
   isRancherManagerVersion,
   isTurtlesDevChart,
-  isTurtlesPrimeBuild
+  isTurtlesPrimeBuild,
+  isUpgrade
 } from './utils';
 import {vars} from './variables'
 
@@ -580,23 +581,19 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
 
   const getChartSelector = () => {
     if (isTurtlesChart) {
-      if (isRancherManagerVersion('>=2.13')) {
-        return isTurtlesDevChart ? '"item-card-cluster/chartmuseum-repo/rancher-turtles"' : '"item-card-cluster/rancher-charts/rancher-turtles"';
-      }
-
       if (isRancherManagerVersion('2.12')) {
-        return isTurtlesDevChart && !isMigration ? '"item-card-cluster/chartmuseum-repo/rancher-turtles"' : '"item-card-cluster/turtles-chart/rancher-turtles"';
+        return isTurtlesDevChart && !isMigration ? 'item-card-cluster/chartmuseum-repo/rancher-turtles' : 'item-card-cluster/turtles-chart/rancher-turtles';
       }
 
-      return '"select-icon-grid-Rancher Turtles - the Cluster API Extension"';
+      return isTurtlesDevChart ? 'item-card-cluster/chartmuseum-repo/rancher-turtles' : 'item-card-cluster/rancher-charts/rancher-turtles';
     }
 
     // for >=2.13 we use an external repo to install providers chart, and for 2.12 there is no need to install it.
-    if (isTurtlesProvidersChart && isRancherManagerVersion('>=2.13')) {
-      return `"${vars.turtlesProvidersChartSelector}"`;
+    if (isTurtlesProvidersChart) {
+      return isRancherManagerVersion('2.13') && isUpgrade ? 'item-card-cluster/turtles-providers-chart/rancher-turtles-providers' : isTurtlesDevChart ? 'item-card-cluster/chartmuseum-repo/rancher-turtles-providers' : 'item-card-cluster/turtles-providers-chart/rancher-turtles-providers';
     }
 
-    return 'app-chart-cards-container';
+    return `item-card-cluster/rancher-charts/rancher-${chartName.toLowerCase()}`;
   };
 
   const performOperation = () => {
@@ -617,13 +614,8 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
     cy.getBySel('charts-header-title').should('be.visible');
     cy.typeInFilter(chartName, 'input[data-testid="charts-filter-input"]');
 
-    cy.getBySel(getChartSelector()).within(() => {
-      cy.contains(chartName, {timeout: 10000}).then($el => {
-        cy.wait(500);
-        cy.wrap($el).should('be.visible').click();
-      });
-    });
-    cy.contains(`Charts: ${chartName}`);
+    cy.getBySel(`"${getChartSelector()}"`).should('be.visible', {timeout: 1000}).click();
+    cy.contains('Charts:');
 
     if (options.version) {
       cy.get('body').invoke('text').then((bodyText) => {
@@ -632,8 +624,7 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
         }
       });
       // Select first of the matching listed version
-      cy.getBySel('chart-versions').first().click();
-      cy.contains(options.version).click();
+      cy.getBySel('chart-versions').contains(options.version).first().click();
       cy.url().should("contain", options.version);
     }
 

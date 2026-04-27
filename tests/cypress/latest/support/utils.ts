@@ -40,13 +40,6 @@ export const providersChartNeedsStgRegistry = (): boolean => {
   return (!isTurtlesDevChart) && (isPreRelease || isHeadBuild);
 }
 
-// Check if Rancher Turtles Providers chart should use staging registry chart name
-// Returns true for Rancher 2.13 alpha/rc builds
-// TODO: Remove this once https://github.com/rancher/rancher/issues/53882 and 53883 is fixed; staging registry is currently broken for everything
-export const needsProvidersStgChartName = (): boolean => {
-  return isRancherManagerVersion('2.13') && isPreRelease && !isTurtlesDevChart
-}
-
 export const isTurtlesPrimeBuild = (): boolean =>{
   return Cypress.expose("turtles_build_type") === "prime";
 }

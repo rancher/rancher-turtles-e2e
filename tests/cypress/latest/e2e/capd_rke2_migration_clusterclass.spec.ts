@@ -118,7 +118,7 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
     if (isRancherManagerVersion('2.13')) {
       it('Create Fleet Provider using provider charts', () => {
         // Install Rancher Turtles Certified Providers chart with default values
-        cy.checkChart('local', 'Install', 'Rancher Turtles Certified Providers', turtlesNamespace);
+        cy.checkChart('local', 'Install', vars.turtlesProvidersChartName, turtlesNamespace);
       })
 
       it('Check cluster & Resources status post-migration', () => {
