@@ -623,8 +623,13 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
           cy.contains('Show More').click();
         }
       });
+
       // Select first of the matching listed version
-      cy.getBySel('chart-versions').contains(options.version).first().click();
+      if (isRancherManagerVersion('<=2.12')) {
+        cy.get('div.chart-content__right-bar__section--cVersion').contains(options.version).first().click();
+      } else {
+        cy.getBySel('chart-versions').contains(options.version).first().click();
+      }
       cy.url().should("contain", options.version);
     }
 
