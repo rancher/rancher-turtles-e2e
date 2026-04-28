@@ -399,7 +399,7 @@ jobs:
 
       # Build providers chart to push to chartmuseum in a later step
       - name: Make Turtles Providers Chart
-        if: ${{ (inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12')) || contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade'))  }}
+        if: ${{ (inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12')) || contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
         run: RELEASE_TAG=v${{ env.TAG }} make build-providers-chart
 
       - name: Clone, build and publish artificial system charts for 2.13 onwards

@@ -1,11 +1,11 @@
 import '../support/commands';
 import {vars} from '../support/variables';
-import {turtlesNamespace} from '../support/utils';
+import {isTurtlesDevChart, turtlesNamespace} from '../support/utils';
 
 Cypress.config();
 describe('Post Upgrade', {tags: '@upgrade'}, () => {
-  let chartMuseumRepo = Cypress.expose('chartmuseum_repo')
-  let turtlesChartDevVersion = Cypress.expose('turtles_chart_dev_version')
+  // Since we upgrade to 2.14, turtles chart version value can be hardcoded for dev=false
+  let turtlesChartVersion: string = isTurtlesDevChart ? Cypress.expose('turtles_chart_dev_version') : '0.26';
   const timeout = vars.shortTimeout
 
   beforeEach(() => {
@@ -19,13 +19,8 @@ describe('Post Upgrade', {tags: '@upgrade'}, () => {
     cy.clickNavMenu(['Apps', 'Installed Apps']);
     cy.typeInFilter('rancher-turtles');
     cy.getBySel('sortable-cell-0-1').should('exist');
-    cy.contains(turtlesChartDevVersion, {timeout: timeout});
+    cy.contains(turtlesChartVersion, {timeout: timeout});
     cy.waitForAllRowsInState('Deployed', timeout);
   })
 
-  it("Add turtles-providers GitRepo", () => {
-    cy.task('log', "Adding chartmuseum repo for turtles-providers");
-    expect(chartMuseumRepo, "checking chartmuseum repo").to.not.be.empty;
-    cy.addRepository('chartmuseum-repo', `${chartMuseumRepo}:8080`, 'http', 'none');
-  })
 });

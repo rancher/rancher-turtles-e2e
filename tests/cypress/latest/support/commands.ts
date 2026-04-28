@@ -505,39 +505,43 @@ Cypress.Commands.add('addCloudCredsVMware', (name: string, vsphere_username: str
 });
 
 Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: string, repositoryType: 'oci' | 'http' | 'git', repositoryBranch: string) => {
-  cy.contains('local')
-    .click();
+  cy.burgerMenuOperate('open');
+  cy.contains('local').click();
   cy.clickNavMenu(['Apps', 'Repositories'])
   // Make sure we are in the 'Repositories' screen (test failed here before)
   // Test fails sporadically here, screen stays in pending state forever
   // Ensuring "Loading..." overlay screen is not present.
   cy.contains('Loading...', {timeout: 35000}).should('not.exist');
-  cy.contains('header', 'Repositories')
-    .should('be.visible');
-  cy.contains('Create')
-    .should('be.visible');
+  cy.contains('header', 'Repositories').should('be.visible');
+  cy.contains('Create').should('be.visible');
 
-  cy.clickButton('Create');
-  cy.contains('Repository: Create')
-    .should('be.visible');
-  cy.typeValue('Name', repositoryName);
-  switch (repositoryType) {
-    case "git":
-      cy.contains('Git repository')
-        .click();
-      cy.typeValue('Git Repo URL', repositoryURL);
-      cy.typeValue('Git Branch', repositoryBranch);
-      break;
-    case "oci":
-      cy.contains('OCI Repository').click();
-      cy.typeValue('OCI Repository Host URL', repositoryURL);
-      break;
-    case "http":
-      cy.typeValue('Index URL', repositoryURL);
-      break;
-  }
+  // Check if the repository already exists; if it does not, then add it, otherwise simply refresh it and return
+  cy.typeInFilter(repositoryName);
+  cy.get('.sortable-table').then((row) => {
+    if (row.find('tr.no-results').length > 0) {
+      cy.clickButton('Create');
+      cy.contains('Repository: Create').should('be.visible');
+      cy.typeValue('Name', repositoryName);
+      switch (repositoryType) {
+        case "git":
+          cy.contains('Git repository').click();
+          cy.typeValue('Git Repo URL', repositoryURL);
+          cy.typeValue('Git Branch', repositoryBranch);
+          break;
+        case "oci":
+          cy.contains('OCI Repository').click();
+          cy.typeValue('OCI Repository Host URL', repositoryURL);
+          break;
+        case "http":
+          cy.typeValue('Index URL', repositoryURL);
+          break;
+      }
+      cy.clickButton('Create');
+    } else {
+      cy.task('suiteLog', `Repository ${repositoryName} already exists; skipping.`)
+    }
+  })
 
-  cy.clickButton('Create');
   // Make sure the repo is active before leaving
   // Always press Refresh button as workaround for https://github.com/rancher/rancher/issues/49671
   cy.wait(1000);
@@ -581,14 +585,9 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
 
   const getChartSelector = () => {
     if (isTurtlesChart) {
-      if (isRancherManagerVersion('2.12')) {
-        return isTurtlesDevChart && !isMigration ? 'item-card-cluster/chartmuseum-repo/rancher-turtles' : 'item-card-cluster/turtles-chart/rancher-turtles';
-      }
-
-      return isTurtlesDevChart ? 'item-card-cluster/chartmuseum-repo/rancher-turtles' : 'item-card-cluster/rancher-charts/rancher-turtles';
+      return isRancherManagerVersion('2.12') && isMigration ? 'item-card-cluster/turtles-chart/rancher-turtles' : isTurtlesDevChart ? 'item-card-cluster/chartmuseum-repo/rancher-turtles' : 'item-card-cluster/turtles-chart/rancher-turtles'
     }
 
-    // for >=2.13 we use an external repo to install providers chart, and for 2.12 there is no need to install it.
     if (isTurtlesProvidersChart) {
       return isRancherManagerVersion('2.13') && isUpgrade ? 'item-card-cluster/turtles-providers-chart/rancher-turtles-providers' : isTurtlesDevChart ? 'item-card-cluster/chartmuseum-repo/rancher-turtles-providers' : 'item-card-cluster/turtles-providers-chart/rancher-turtles-providers';
     }
