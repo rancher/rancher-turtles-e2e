@@ -15,7 +15,7 @@ CHARTMUSEUM_INSTALLER_SHA256="f1116c09104abb4610b5d00be0ef80e625ec44838fb10e9fb0
 # CHARTMUSEUM_INSTALLER_SHA256="$(curl -sSfL "${CHARTMUSEUM_INSTALLER_URL}" | sha256sum | awk '{print $1}')"
 
 # Helm plugin used to push charts into chartmuseum
-HELM_PUSH_PLUGIN_VERSION="0.10.4"
+HELM_PUSH_PLUGIN_VERSION="0.11.1"
 
 # Set the caller as the user that will run the service
 CALLER=${SUDO_USER:-$(whoami)}
