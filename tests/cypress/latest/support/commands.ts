@@ -630,6 +630,13 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
         cy.getBySel('chart-versions').contains(options.version).first().click();
       }
       cy.url().should("contain", options.version);
+    } else {
+      // If a version is not provided, this ensures that latest chart version is selected.
+      if (isRancherManagerVersion('<=2.12')) {
+        cy.get('div.chart-content__right-bar__section--cVersion').first().click();
+      } else {
+        cy.getBySel('chart-versions').first().click();
+      }
     }
 
     if (isTurtlesChart && isUpdateOperation) {
