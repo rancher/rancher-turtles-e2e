@@ -17,6 +17,7 @@ What tests are doing:
     2.13). These tests are only supported with `dev=true` options; `dev=true` is applicable to 2.13.
 12. Upgrade tests from 2.13 to 2.14 to test turtles CAPI upgrade from v1.10 to v1.12. These tests are only supported
     with `dev=true` options; `dev=true` is applicable to 2.14.
+13. Add Feature Switch test for 2.13 to test switch between `embedded-cluster-api` and `turtles` features switch.
 
 ## Running the tests locally
 
