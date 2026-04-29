@@ -538,7 +538,7 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
       }
       cy.clickButton('Create');
     } else {
-      cy.task('suiteLog', `Repository ${repositoryName} already exists; skipping.`)
+      cy.task('suiteLog', `Repository ${repositoryName} already exists; skipping.`);
     }
   })
 

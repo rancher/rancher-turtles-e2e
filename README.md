@@ -13,7 +13,10 @@ What tests are doing:
 8. Install App on imported CAPI cluster
 9. Scale the imported CAPI cluster
 10. Remove & Delete the imported CAPI cluster
-
+11. Migration test from 2.12 to 2.13 to test turtles migration from an external chart(2.12) to system integrated chart(
+    2.13). These tests are only supported with `dev=true` options; `dev=true` is applicable to 2.13.
+12. Upgrade tests from 2.13 to 2.14 to test turtles CAPI upgrade from v1.10 to v1.12. These tests are only supported
+    with `dev=true` options; `dev=true` is applicable to 2.14.
 
 ## Running the tests locally
 
@@ -26,7 +29,7 @@ What tests are doing:
 1. `cd tests/cypress/latest`
 2. Install Cypress and its dependencies: `npm install`
 3. Export the following ENV VAR: `RANCHER_URL` (format: `https://<FQDN>/dashboard`), `RANCHER_PASSWORD`, `RANCHER_USER`,
-   `GREPTAGS=@install [@short @full|@vsphere]`, and provider specific env var:
+   `GREPTAGS=@install [@short @full @upgrade @migration | @vsphere ]`, and provider specific env var:
     1. CAPA - `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
     2. CAPG - `GCP_CREDENTIALS` and `GCP_PROJECT`
     3. CAPZ - `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, and `AZURE_SUBSCRIPTION_ID`.

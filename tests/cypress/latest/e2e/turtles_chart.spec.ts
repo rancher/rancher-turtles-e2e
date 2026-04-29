@@ -65,8 +65,9 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
       }
 
       if (isUpgrade) {
-        // Used in Pre-migration: For Upgrade tests; providers will be installed from turtles-providers-chart repo
+        // Used in Pre-upgrade: For Upgrade tests; providers will be installed from turtles-providers-chart repo
         installTurtlesProvidersRepo();
+        // In Post-upgrade, providers will be installed using chartmuseum repo
       }
     })
   }
@@ -83,11 +84,7 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
         // Used in Pre-migration: For Migration test; turtles will be installed from turtles-chart repo.
         // dev=true is only applicable for 2.13 or version test is upgrading to.
         installTurtlesRepo();
-
-        // Used in Post-migration: We add turtles-providers-chart repo for dev=false to install providers charts
-        if (!isTurtlesDevChart) {
-          installTurtlesProvidersRepo();
-        }
+        // In Post-migration, chartmuseum repo will be used to install providers chart
       }
     })
 
