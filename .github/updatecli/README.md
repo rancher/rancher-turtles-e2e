@@ -44,9 +44,9 @@ An Updatecli manifest usually defines:
 - **targets**: the files or values to update in this repository
 - **actions**: follow-up operations such as creating a pull request.
 
-The actions part is done by `_scm.github.yaml` template which is loaded automatically for all manifest. The template uses values from `values.yaml` for PR labels and destination branch name.
+The actions part is done by `_scm.github.yaml` template which is loaded automatically for all manifest. The template uses values from `values.yaml` file for PR labels and destination branch name.
 
-The `values.yaml` file is used to override default values in the manifest, such as labels for PRs or destination branch name.
+In general the `values.yaml` is used to inject values used by manifests.
 
 ## Running locally
 
