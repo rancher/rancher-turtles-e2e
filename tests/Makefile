@@ -1,6 +1,10 @@
-GINKGO_CLI_VERSION:=v2.28.1
+# Use same version of ginkgo cli as the one used in go.mod to avoid version mismatch issues
+GINKGO_CLI_VERSION:=$(shell go list -m -f '{{.Version}}' github.com/onsi/ginkgo/v2)
 
 deps:
+	@echo "--------------------------------------------------"
+	@echo "Current Ginkgo CLI Version: $(GINKGO_CLI_VERSION)"
+	@echo "--------------------------------------------------"
 	@go install github.com/onsi/ginkgo/v2/ginkgo@$(GINKGO_CLI_VERSION)
 	@go mod tidy
 
