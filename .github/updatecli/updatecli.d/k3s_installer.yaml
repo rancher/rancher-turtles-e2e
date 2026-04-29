@@ -1,0 +1,50 @@
+name: "[updatecli] Bump k3s installer"
+pipelineid: "k3s_installer_update"
+
+sources:
+  k3sInstallerVersion:
+    name: "Get latest K3s installer version"
+    kind: "githubrelease"
+    spec:
+      owner: "k3s-io"
+      repository: "k3s"
+      token: '{{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}'
+      versionfilter:
+        kind: "semver"
+        pattern: "^1.35"
+
+  k3sInstallerSha:
+    name: "Get SHA256 of k3s installer"
+    kind: "shell"
+    spec:
+      command: 'curl -sL "https://raw.githubusercontent.com/k3s-io/k3s/{{ source "k3sInstallerVersion" }}/install.sh" | sha256sum | awk ''{print $1}'''
+    dependson:
+      - k3sInstallerVersion
+
+
+targets:
+  k3sInstallerVersion:
+    name: "Update k3sInstallerVersion"
+    kind: "file"
+    sourceid: k3sInstallerVersion
+    # {{ if .scm.enabled }}
+    scmid: default
+    actionid: default
+    # {{ end }}
+    spec:
+      file: "tests/e2e/install_test.go"
+      matchpattern: '(k3sInstallerVersion)(\s*=\s*)".*"'
+      replacepattern: '$1$2"{{ source "k3sInstallerVersion" }}"'
+
+  k3sInstallerSha:
+    name: "Update k3sInstallerSHA256"
+    kind: "file"
+    sourceid: k3sInstallerSha
+    # {{ if .scm.enabled }}
+    scmid: default
+    actionid: default
+    # {{ end }}
+    spec:
+      file: "tests/e2e/install_test.go"
+      matchpattern: '(k3sInstallerSHA256)(\s*=*\s)".*"'
+      replacepattern: '$1$2"{{ source "k3sInstallerSha" }}"'

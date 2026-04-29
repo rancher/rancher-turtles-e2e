@@ -32,10 +32,10 @@ import (
 )
 
 const (
-	k3sInstallerFile   = "k3s-install.sh"
+	k3sInstallerFile    = "k3s-install.sh"
 	k3sInstallerVersion = "v1.35.3+k3s1"
-	k3sInstallerURL    = "https://raw.githubusercontent.com/k3s-io/k3s/" + k3sInstallerVersion + "/install.sh"
-	k3sInstallerSHA256 = "8598e002e61d658fed7b7542fc6d2c66d8da6eae69e088830105d2ee1ffb6d91" // v1.35.3+k3s1
+	k3sInstallerURL     = "https://raw.githubusercontent.com/k3s-io/k3s/" + k3sInstallerVersion + "/install.sh"
+	k3sInstallerSHA256  = "8598e002e61d658fed7b7542fc6d2c66d8da6eae69e088830105d2ee1ffb6d91"
 )
 
 func sha256File(filePath string) (string, error) {

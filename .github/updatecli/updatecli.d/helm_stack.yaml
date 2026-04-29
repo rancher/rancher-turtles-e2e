@@ -1,0 +1,119 @@
+name: "[updatecli] Bump Helm stack"
+pipelineid: "helm_v3_stack_update"
+
+sources:
+  helmCliVersion:
+    name: "Get latest Helm v3 CLI version"
+    kind: "githubrelease"
+    spec:
+      owner: "helm"
+      repository: "helm"
+      token: '{{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}'
+      versionfilter:
+        kind: "semver"
+        pattern: "^3"
+    transformers:
+      - trimprefix: "v"
+
+  helmCliSha:
+    name: "Get Helm v3 CLI SHA256"
+    kind: "shell"
+    spec:
+      # Direct link to the sha256 file Helm provides for each release
+      command: 'curl -sL https://get.helm.sh/helm-v{{ source "helmCliVersion" }}-linux-amd64.tar.gz.sha256'
+    dependson:
+      - helmCliVersion
+
+  chartmuseumVersion:
+    name: "Get latest ChartMuseum version"
+    kind: "githubrelease"
+    spec:
+      owner: "helm"
+      repository: "chartmuseum"
+      token: '{{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}'
+
+  chartmuseumSha:
+    name: "Get ChartMuseum SHA256"
+    kind: "shell"
+    spec:
+      # Direct link to the sha256 file ChartMuseum provides for each release
+      command: 'curl -sL https://raw.githubusercontent.com/helm/chartmuseum/refs/tags/{{ source "chartmuseumVersion" }}/scripts/get-chartmuseum | sha256sum | awk ''{print $1}'''
+    dependson:
+      - chartmuseumVersion
+
+  helmPluginVersion:
+    name: "Get latest Helm Push Plugin version"
+    kind: "githubrelease"
+    spec:
+      owner: "chartmuseum"
+      repository: "helm-push"
+      token: '{{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}'
+    transformers:
+      - trimprefix: "v"
+
+targets:
+  helmCliVersion:
+    name: "Update HELM_VERSION"
+    kind: "file"
+    sourceid: helmCliVersion
+    # {{ if .scm.enabled }}
+    scmid: default
+    actionid: default
+    # {{ end }}
+    spec:
+      file: ".github/workflows/master-e2e.yaml"
+      matchpattern: 'HELM_VERSION=".*"'
+      replacepattern: 'HELM_VERSION="{{ source "helmCliVersion" }}"'
+
+  helmCliSha:
+    name: "Update HELM_SHA256"
+    kind: "file"
+    sourceid: helmCliSha
+    # {{ if .scm.enabled }}
+    scmid: default
+    actionid: default
+    # {{ end }}
+    spec:
+      file: ".github/workflows/master-e2e.yaml"
+      matchpattern: 'HELM_SHA256=".*"'
+      replacepattern: 'HELM_SHA256="{{ source "helmCliSha" }}"'
+
+  chartmuseumVersion:
+    name: "Update CHARTMUSEUM_VERSION"
+    kind: "file"
+    sourceid: chartmuseumVersion
+    # {{ if .scm.enabled }}
+    scmid: default
+    actionid: default
+    # {{ end }}
+    spec:
+      file: "tests/scripts/deploy-chartmuseum"
+      matchpattern: 'CHARTMUSEUM_VERSION=".*"'
+      replacepattern: 'CHARTMUSEUM_VERSION="{{ source "chartmuseumVersion" }}"'
+
+  chartmuseumSha:
+    name: "Update CHARTMUSEUM_INSTALLER_SHA256"
+    kind: "file"
+    sourceid: chartmuseumSha
+    # {{ if .scm.enabled }}
+    scmid: default
+    actionid: default
+    # {{ end }}
+    spec:
+      file: "tests/scripts/deploy-chartmuseum"
+      # Using (?m) for multiline mode to ensure ^ matches the start of lines to not capture the commented-out line
+      matchpattern: '(?m)^CHARTMUSEUM_INSTALLER_SHA256=".*"'
+      replacepattern: 'CHARTMUSEUM_INSTALLER_SHA256="{{ source "chartmuseumSha" }}"'
+
+  helmPluginVersion:
+    name: "Update HELM_PUSH_PLUGIN_VERSION"
+    kind: "file"
+    sourceid: helmPluginVersion
+    # {{ if .scm.enabled }}
+    scmid: default
+    actionid: default
+    # {{ end }}
+    spec:
+      file: "tests/scripts/deploy-chartmuseum"
+      matchpattern: 'HELM_PUSH_PLUGIN_VERSION=".*"'
+      replacepattern: 'HELM_PUSH_PLUGIN_VERSION="{{ source "helmPluginVersion" }}"'

@@ -1,0 +1,92 @@
+name: "[updatecli] Bump Logging stack"
+pipelineid: "logging_stack_update"
+
+sources:
+  logCollectorCommit:
+    name: "Get latest Rancher log collector commit from master branch"
+    kind: "shell"
+    spec:
+      command: >
+        curl -sL -H "Authorization: token {{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}"
+        "https://api.github.com/repos/rancherlabs/support-tools/commits?path=collection/rancher/v2.x/logs-collector/rancher2_logs_collector.sh&sha=master&per_page=1"
+        | jq -r '.[0].sha'
+
+  logCollectorSha:
+    name: "Get SHA256 of Rancher log collector"
+    kind: "shell"
+    spec:
+      command: 'curl -sL "https://raw.githubusercontent.com/rancherlabs/support-tools/{{ source "logCollectorCommit" }}/collection/rancher/v2.x/logs-collector/rancher2_logs_collector.sh" | sha256sum | awk ''{print $1}'''
+    dependson:
+      - logCollectorCommit
+
+  crustGatherVersion:
+    name: "Get latest Crust Gather version"
+    kind: "githubrelease"
+    spec:
+      owner: "crust-gather"
+      repository: "crust-gather"
+      token: '{{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}'
+
+  crustGatherSha:
+    name: "Get SHA256 of Crust Gather"
+    kind: "shell"
+    spec:
+      command: 'curl -sL "https://raw.githubusercontent.com/crust-gather/crust-gather/refs/tags/{{ source "crustGatherVersion" }}/install.sh" | sha256sum | awk ''{print $1}'''
+    dependson:
+      - crustGatherVersion
+
+
+targets:
+  logCollectorCommit:
+    name: "Update RANCHER_LOG_COLLECTER_COMMIT"
+    kind: "file"
+    sourceid: logCollectorCommit
+    # {{ if .scm.enabled }}
+    scmid: default
+    actionid: default
+    # {{ end }}
+    spec:
+      file: ".github/scripts/collect-rancher-logs.sh"
+      matchpattern: 'RANCHER_LOG_COLLECTER_COMMIT=".*"'
+      replacepattern: 'RANCHER_LOG_COLLECTER_COMMIT="{{ source "logCollectorCommit" }}"'
+
+  logCollectorSha:
+    name: "Update RANCHER_LOG_COLLECTER_SHA256"
+    kind: "file"
+    sourceid: logCollectorSha
+    # {{ if .scm.enabled }}
+    scmid: default
+    actionid: default
+    # {{ end }}
+    spec:
+      file: ".github/scripts/collect-rancher-logs.sh"
+      # Using (?m) for multiline mode to ensure ^ matches the start of lines to not capture the commented-out line
+      matchpattern: '(?m)^RANCHER_LOG_COLLECTER_SHA256=".*"'
+      replacepattern: 'RANCHER_LOG_COLLECTER_SHA256="{{ source "logCollectorSha" }}"'
+
+  crustGatherVersion:
+    name: "Update CRUST_GATHER_INSTALLER_VERSION"
+    kind: "file"
+    sourceid: crustGatherVersion
+    # {{ if .scm.enabled }}
+    scmid: default
+    actionid: default
+    # {{ end }}
+    spec:
+      file: ".github/scripts/collect-rancher-logs.sh"
+      matchpattern: 'CRUST_GATHER_INSTALLER_VERSION=".*"'
+      replacepattern: 'CRUST_GATHER_INSTALLER_VERSION="{{ source "crustGatherVersion" }}"'
+
+  crustGatherSha:
+    name: "Update CRUST_GATHER_INSTALLER_SHA256"
+    kind: "file"
+    sourceid: crustGatherSha
+    # {{ if .scm.enabled }}
+    scmid: default
+    actionid: default
+    # {{ end }}
+    spec:
+      file: ".github/scripts/collect-rancher-logs.sh"
+      # Using (?m) for multiline mode to ensure ^ matches the start of lines to not capture the commented-out line
+      matchpattern: '(?m)^CRUST_GATHER_INSTALLER_SHA256=".*"'
+      replacepattern: 'CRUST_GATHER_INSTALLER_SHA256="{{ source "crustGatherSha" }}"'
