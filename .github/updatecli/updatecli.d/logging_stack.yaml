@@ -7,7 +7,7 @@ sources:
     kind: "shell"
     spec:
       command: >
-        curl -sL -H "Authorization: token {{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}"
+        curl -sL -H "Authorization: Bearer {{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}"
         "https://api.github.com/repos/rancherlabs/support-tools/commits?path=collection/rancher/v2.x/logs-collector/rancher2_logs_collector.sh&sha=master&per_page=1"
         | jq -r '.[0].sha'
 

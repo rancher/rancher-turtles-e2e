@@ -1,22 +1,19 @@
 name: "[updatecli] Bump Helm stack"
-pipelineid: "helm_v3_stack_update"
+pipelineid: "helm_stack_update"
 
 sources:
   helmCliVersion:
-    name: "Get latest Helm v3 CLI version"
+    name: "Get latest Helm CLI version"
     kind: "githubrelease"
     spec:
       owner: "helm"
       repository: "helm"
       token: '{{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}'
-      versionfilter:
-        kind: "semver"
-        pattern: "^3"
     transformers:
       - trimprefix: "v"
 
   helmCliSha:
-    name: "Get Helm v3 CLI SHA256"
+    name: "Get Helm CLI SHA256"
     kind: "shell"
     spec:
       # Direct link to the sha256 file Helm provides for each release
