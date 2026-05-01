@@ -4,6 +4,7 @@ import {turtlesNamespace} from '../support/utils';
 
 Cypress.config();
 describe('Post Upgrade', {tags: '@upgrade'}, () => {
+  let chartMuseumRepo = Cypress.expose('chartmuseum_repo')
   let turtlesChartDevVersion = Cypress.expose('turtles_chart_dev_version')
   const timeout = vars.shortTimeout
 
@@ -22,4 +23,9 @@ describe('Post Upgrade', {tags: '@upgrade'}, () => {
     cy.waitForAllRowsInState('Deployed', timeout);
   })
 
+  it("Add turtles-providers GitRepo", () => {
+    cy.task('log', "Adding chartmuseum repo for turtles-providers");
+    expect(chartMuseumRepo, "checking chartmuseum repo").to.not.be.empty;
+    cy.addRepository('chartmuseum-repo', `${chartMuseumRepo}:8080`, 'http', 'none');
+  })
 });

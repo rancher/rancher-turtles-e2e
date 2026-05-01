@@ -40,18 +40,18 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
     cy.contains("Include Prerelease Versions").should('not.have.class', 'bg-disabled');
   })
 
-  let installTurtlesProvidersRepo = function () {
+  let addTurtlesProvidersRepo = function () {
     cy.task('suiteLog', "Adding turtles-providers-chart repo");
     cy.addRepository('turtles-providers-chart', vars.turtlesProvidersOCIRepo, 'oci', 'none')
   }
 
-  let installChartMuseumRepo = function () {
+  let addChartMuseumRepo = function () {
     cy.task('suiteLog', "Adding chartmuseum repo");
     expect(chartMuseumRepo, "checking chartmuseum repo").to.not.be.empty;
     cy.addRepository('chartmuseum-repo', `${chartMuseumRepo}:8080`, 'http', 'none');
   }
 
-  let installTurtlesRepo = function () {
+  let addTurtlesRepo = function () {
     cy.task('suiteLog', "Adding turtles-chart repo");
     cy.addRepository('turtles-chart', 'https://rancher.github.io/turtles/', 'http', 'none');
   }
@@ -59,14 +59,16 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
   if (isRancherManagerVersion(">=2.13")) {
     it("Add turtles-providers GitRepo", () => {
       if (isTurtlesDevChart) {
-        installChartMuseumRepo();
+        addChartMuseumRepo();
       } else {
-        installTurtlesProvidersRepo();
+        addTurtlesProvidersRepo();
       }
 
-      if (isUpgrade) {
+      if (isRancherManagerVersion('2.13') && isUpgrade) {
+        cy.task('log', "Removed chartmuseum-repo & Adding turtles-providers-chart repo");
+        cy.deleteKubernetesResource('local', ['Apps', 'Repositories'], 'chartmuseum-repo');
         // Used in Pre-upgrade: For Upgrade tests; providers will be installed from turtles-providers-chart repo
-        installTurtlesProvidersRepo();
+        addTurtlesProvidersRepo();
         // In Post-upgrade, providers will be installed using chartmuseum repo
       }
     })
@@ -75,15 +77,15 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
   if (isRancherManagerVersion("<=2.12")) {
     it("Add turtles GitRepo", () => {
       if (isTurtlesDevChart) {
-        installChartMuseumRepo();
+        addChartMuseumRepo();
       } else {
-        installTurtlesRepo();
+        addTurtlesRepo();
       }
 
       if (isMigration) {
         // Used in Pre-migration: For Migration test; turtles will be installed from turtles-chart repo.
         // dev=true is only applicable for 2.13 or version test is upgrading to.
-        installTurtlesRepo();
+        addTurtlesRepo();
         // In Post-migration, chartmuseum repo will be used to install providers chart
       }
     })
