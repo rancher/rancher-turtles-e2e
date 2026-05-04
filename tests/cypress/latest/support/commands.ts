@@ -1099,7 +1099,11 @@ Cypress.Commands.add('checkKubernetesResource', (clusterName = 'local', resource
 
     cy.setNamespace(namespace);
     // Sometimes if a resource does not exist in a namespace, the navigation menu won't be visible. So we navigate after a namespace has been set.
-    cy.clickNavMenu(resourcePath);
+    resourcePath.forEach(path => {
+      cy.wait(1000);
+      cy.get('nav').contains(path).click();
+    });
+
 
     cy.typeInFilter(resourceName);
     if (shouldExist) {
