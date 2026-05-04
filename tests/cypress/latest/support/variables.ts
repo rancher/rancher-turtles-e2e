@@ -1,10 +1,4 @@
-import {
-  isRancherManagerVersion,
-  isTurtlesDevChart,
-  isUpgrade,
-  needsProvidersStgChartName,
-  providersChartNeedsStgRegistry
-} from './utils';
+import {isRancherManagerVersion, providersChartNeedsStgRegistry} from './utils';
 
 export const vars = {
   shortTimeout: 600000,
@@ -19,8 +13,7 @@ export const vars = {
   dockerAuthPasswordBase64: btoa(Cypress.expose("docker_auth_password")),
   turtlesProvidersHelmApp: 'rancher-turtles-providers',
   turtlesProvidersOCIRepo: providersChartNeedsStgRegistry() ? Cypress.expose('providers_stg_oci_repo') : Cypress.expose('providers_oci_repo'), // For alpha|rc|head builds, use stgregistry, for released versions, use regular registry.
-  turtlesProvidersChartName: needsProvidersStgChartName() ? 'rancher-turtles-providers' : 'Rancher Turtles Certified Providers', // TODO: Remove this once https://github.com/rancher/rancher/issues/53882 and 53883 is fixed; staging registry is currently broken for everything
-  turtlesProvidersChartSelector: isRancherManagerVersion('2.13') && isUpgrade ? 'item-card-cluster/turtles-providers-chart/rancher-turtles-providers' : isTurtlesDevChart ? 'item-card-cluster/chartmuseum-repo/rancher-turtles-providers' : 'item-card-cluster/turtles-providers-chart/rancher-turtles-providers',
+  turtlesProvidersChartName: 'turtles providers',   // This name is very generic and does not match display name. This is done to avoid frequent failure due to rancher version and turtles providers mismatch on staging registry. Ref: https://github.com/rancher/rancher/issues/53882
   kindVersion: isRancherManagerVersion('2.12') ? 'v1.33.4' : isRancherManagerVersion('2.13') ? 'v1.34.0' : 'v1.35.0',
   k8sVersion: isRancherManagerVersion('2.12') ? 'v1.33.4' : isRancherManagerVersion('2.13') ? 'v1.34.1' : 'v1.35.0',
   rke2Version: isRancherManagerVersion('2.12') ? 'v1.33.4+rke2r1' : isRancherManagerVersion('2.13') ? 'v1.34.1+rke2r1' : 'v1.35.0+rke2r1',

@@ -1,5 +1,11 @@
 import '../support/commands';
-import {capiNamespace, getClusterName, isRancherManagerVersion, turtlesNamespace} from '../support/utils';
+import {
+  capiNamespace,
+  getClusterName,
+  isRancherManagerVersion,
+  isTurtlesDevChart,
+  turtlesNamespace
+} from '../support/utils';
 import {capdResourcesCleanup, capiClusterDeletion} from '../support/cleanup_support';
 import {vars} from '../support/variables';
 
@@ -84,7 +90,7 @@ describe('Switch CAPI Feature Flags', {tags: '@switch'}, () => {
       it('Uninstall Rancher Turtles Providers chart', () => {
         // Uninstall Rancher Turtles Providers chart
         cy.deleteKubernetesResource('local', ['Apps', 'Installed Apps'], vars.turtlesProvidersHelmApp, turtlesNamespace);
-        cy.contains(new RegExp(`"${vars.turtlesProvidersHelmApp}"` + ' uninstalled'), {timeout: timeout}).should('be.visible');
+        cy.contains(new RegExp(`"${vars.turtlesProvidersHelmApp}.*"` + ' uninstalled'), {timeout: timeout}).should('be.visible');
         cy.get('.closer').click();
       });
 
@@ -139,7 +145,7 @@ describe('Switch CAPI Feature Flags', {tags: '@switch'}, () => {
         }
         // Install Rancher Turtles Certified Providers chart
         cy.checkChart('local', 'Install', vars.turtlesProvidersChartName, turtlesNamespace, {
-          version: '0.25',
+          version: !isTurtlesDevChart ? '0.25' : undefined,
           modifyYAMLOperation: providerSelectionFunction
         });
       })

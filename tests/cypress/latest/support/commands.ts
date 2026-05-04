@@ -29,7 +29,8 @@ import {
   isPrimeChannel,
   isRancherManagerVersion,
   isTurtlesDevChart,
-  isTurtlesPrimeBuild
+  isTurtlesPrimeBuild,
+  isUpgrade
 } from './utils';
 import {vars} from './variables'
 
@@ -504,43 +505,47 @@ Cypress.Commands.add('addCloudCredsVMware', (name: string, vsphere_username: str
 });
 
 Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: string, repositoryType: 'oci' | 'http' | 'git', repositoryBranch: string) => {
-  cy.contains('local')
-    .click();
+  cy.burgerMenuOperate('open');
+  cy.contains('local').click();
   cy.clickNavMenu(['Apps', 'Repositories'])
   // Make sure we are in the 'Repositories' screen (test failed here before)
   // Test fails sporadically here, screen stays in pending state forever
   // Ensuring "Loading..." overlay screen is not present.
   cy.contains('Loading...', {timeout: 35000}).should('not.exist');
-  cy.contains('header', 'Repositories')
-    .should('be.visible');
-  cy.contains('Create')
-    .should('be.visible');
+  cy.contains('header', 'Repositories').should('be.visible');
+  cy.contains('Create').should('be.visible');
 
-  cy.clickButton('Create');
-  cy.contains('Repository: Create')
-    .should('be.visible');
-  cy.typeValue('Name', repositoryName);
-  switch (repositoryType) {
-    case "git":
-      cy.contains('Git repository')
-        .click();
-      cy.typeValue('Git Repo URL', repositoryURL);
-      cy.typeValue('Git Branch', repositoryBranch);
-      break;
-    case "oci":
-      cy.contains('OCI Repository').click();
-      cy.typeValue('OCI Repository Host URL', repositoryURL);
-      break;
-    case "http":
-      cy.typeValue('Index URL', repositoryURL);
-      break;
-  }
+  // Check if the repository already exists; if it does not, then add it, otherwise simply refresh it and return
+  cy.typeInFilter(repositoryName);
+  cy.get('.sortable-table').then((row) => {
+    if (row.find('tr.no-results').length > 0) {
+      cy.clickButton('Create');
+      cy.contains('Repository: Create').should('be.visible');
+      cy.typeValue('Name', repositoryName);
+      switch (repositoryType) {
+        case "git":
+          cy.contains('Git repository').click();
+          cy.typeValue('Git Repo URL', repositoryURL);
+          cy.typeValue('Git Branch', repositoryBranch);
+          break;
+        case "oci":
+          cy.contains('OCI Repository').click();
+          cy.typeValue('OCI Repository Host URL', repositoryURL);
+          break;
+        case "http":
+          cy.typeValue('Index URL', repositoryURL);
+          break;
+      }
+      cy.clickButton('Create');
+      cy.wait(1000);
+      cy.typeInFilter(repositoryName);
+    } else {
+      cy.task('suiteLog', `Repository ${repositoryName} already exists; skipping.`);
+    }
+  })
 
-  cy.clickButton('Create');
   // Make sure the repo is active before leaving
   // Always press Refresh button as workaround for https://github.com/rancher/rancher/issues/49671
-  cy.wait(1000);
-  cy.typeInFilter(repositoryName);
   cy.getBySel('sortable-table-0-action-button').click();
   cy.wait(1000);
   // On prime 2.13.0-alpha4 the refresh icon selector didn't change but parent <div> must be clicked
@@ -580,23 +585,14 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
 
   const getChartSelector = () => {
     if (isTurtlesChart) {
-      if (isRancherManagerVersion('>=2.13')) {
-        return isTurtlesDevChart ? '"item-card-cluster/chartmuseum-repo/rancher-turtles"' : '"item-card-cluster/rancher-charts/rancher-turtles"';
-      }
-
-      if (isRancherManagerVersion('2.12')) {
-        return isTurtlesDevChart && !isMigration ? '"item-card-cluster/chartmuseum-repo/rancher-turtles"' : '"item-card-cluster/turtles-chart/rancher-turtles"';
-      }
-
-      return '"select-icon-grid-Rancher Turtles - the Cluster API Extension"';
+      return isRancherManagerVersion('2.12') && isMigration ? 'item-card-cluster/turtles-chart/rancher-turtles' : isTurtlesDevChart ? 'item-card-cluster/chartmuseum-repo/rancher-turtles' : 'item-card-cluster/turtles-chart/rancher-turtles'
     }
 
-    // for >=2.13 we use an external repo to install providers chart, and for 2.12 there is no need to install it.
-    if (isTurtlesProvidersChart && isRancherManagerVersion('>=2.13')) {
-      return `"${vars.turtlesProvidersChartSelector}"`;
+    if (isTurtlesProvidersChart) {
+      return isRancherManagerVersion('2.13') && isUpgrade ? 'item-card-cluster/turtles-providers-chart/rancher-turtles-providers' : isTurtlesDevChart ? 'item-card-cluster/chartmuseum-repo/rancher-turtles-providers' : 'item-card-cluster/turtles-providers-chart/rancher-turtles-providers';
     }
 
-    return 'app-chart-cards-container';
+    return `item-card-cluster/rancher-charts/rancher-${chartName.toLowerCase()}`;
   };
 
   const performOperation = () => {
@@ -617,13 +613,8 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
     cy.getBySel('charts-header-title').should('be.visible');
     cy.typeInFilter(chartName, 'input[data-testid="charts-filter-input"]');
 
-    cy.getBySel(getChartSelector()).within(() => {
-      cy.contains(chartName, {timeout: 10000}).then($el => {
-        cy.wait(500);
-        cy.wrap($el).should('be.visible').click();
-      });
-    });
-    cy.contains(`Charts: ${chartName}`);
+    cy.getBySel(`"${getChartSelector()}"`).should('be.visible', {timeout: 1000}).click();
+    cy.contains('Charts:');
 
     if (options.version) {
       cy.get('body').invoke('text').then((bodyText) => {
@@ -631,10 +622,21 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
           cy.contains('Show More').click();
         }
       });
+
       // Select first of the matching listed version
-      cy.getBySel('chart-versions').first().click();
-      cy.contains(options.version).click();
+      if (isRancherManagerVersion('<=2.12')) {
+        cy.get('div.chart-content__right-bar__section--cVersion').contains(options.version).first().click();
+      } else {
+        cy.getBySel('chart-versions').contains(options.version).first().click();
+      }
       cy.url().should("contain", options.version);
+    } else {
+      // If a version is not provided, this ensures that latest chart version is selected.
+      if (isRancherManagerVersion('<=2.12')) {
+        cy.get('div.chart-content__right-bar__section--cVersion').first().click();
+      } else {
+        cy.getBySel('chart-versions').first().click();
+      }
     }
 
     if (isTurtlesChart && isUpdateOperation) {
@@ -1097,7 +1099,11 @@ Cypress.Commands.add('checkKubernetesResource', (clusterName = 'local', resource
 
     cy.setNamespace(namespace);
     // Sometimes if a resource does not exist in a namespace, the navigation menu won't be visible. So we navigate after a namespace has been set.
-    cy.clickNavMenu(resourcePath);
+    resourcePath.forEach(path => {
+      cy.wait(1000);
+      cy.get('nav').contains(path).click();
+    });
+
 
     cy.typeInFilter(resourceName);
     if (shouldExist) {

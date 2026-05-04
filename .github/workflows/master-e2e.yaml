@@ -317,7 +317,11 @@ jobs:
             echo "SPECS=" >> ${GITHUB_ENV}
           elif [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
             # Required for upgrade tests
-            echo "RANCHER_VERSION=prime/2.13.4" >> ${GITHUB_ENV}
+            echo "RANCHER_VERSION=prime/2.13.5" >> ${GITHUB_ENV}
+            echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> ${GITHUB_ENV}
+          elif [[ "${{ inputs.grep_test_by_tag }}" =~ "@switch" ]]; then
+            # Required for switch tests
+            echo "RANCHER_VERSION=prime/2.13.5" >> ${GITHUB_ENV}
             echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> ${GITHUB_ENV}
           else
             echo "RANCHER_VERSION=${{ inputs.rancher_version }}" >> ${GITHUB_ENV}
@@ -399,7 +403,7 @@ jobs:
 
       # Build providers chart to push to chartmuseum in a later step
       - name: Make Turtles Providers Chart
-        if: ${{ (inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12')) || contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade'))  }}
+        if: ${{ (inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12')) || contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
         run: RELEASE_TAG=v${{ env.TAG }} make build-providers-chart
 
       - name: Clone, build and publish artificial system charts for 2.13 onwards
@@ -542,7 +546,7 @@ jobs:
       - name: Set Rancher Manager Upgrade version
         if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') }}
         run: |
-          echo "RANCHER_VERSION=prime-alpha/2.14.1-alpha3" >> ${GITHUB_ENV}
+          echo "RANCHER_VERSION=prime/2.14.1" >> ${GITHUB_ENV}
       - name: Upgrade Rancher Manager
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:
@@ -750,7 +754,7 @@ jobs:
 
           RUN_NAME="[${{ github.run_number }}] Rancher-${{ inputs.rancher_version }} - **${{ inputs.grep_test_by_tag }}** dev=${{ inputs.turtles_dev_chart }} destroy=${{ inputs.destroy_runner }}"
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          NEW_ROW="| [${RUN_NAME}](${RUN_URL}) | ${STATUS} |"
+          NEW_ROW="| [${RUN_NAME}](${RUN_URL}) | ${STATUS} | |"
 
           # Get current PR body
           gh pr view "$PR_NUMBER" --repo "$REPO" --json body --jq '.body' > /tmp/pr_body.txt
@@ -765,8 +769,8 @@ jobs:
           <!-- e2e-result-start -->
           ### E2E Test Results:
 
-          | Run Name | Run Result |
-          |----------|------------|
+          | Run Name | Run Result | Notes |
+          |----------|------------|-------|
           ${NEW_ROW}
           <!-- e2e-result-end -->
           EOF
