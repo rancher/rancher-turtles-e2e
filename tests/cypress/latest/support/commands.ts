@@ -611,7 +611,11 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
 
     cy.clickNavMenu(['Apps', 'Charts']);
     cy.getBySel('charts-header-title').should('be.visible');
-    cy.typeInFilter(chartName, 'input[data-testid="charts-filter-input"]');
+
+    // turtles providers chart name is very generic and does not match display name.
+    // This is done to avoid frequent failure due to rancher version and turtles providers mismatch on staging registry. Ref: https://github.com/rancher/rancher/issues/53882
+    const chartFilterName = isTurtlesProvidersChart ? 'turtles providers' : chartName
+    cy.typeInFilter(chartFilterName, 'input[data-testid="charts-filter-input"]');
 
     cy.getBySel(`"${getChartSelector()}"`).should('be.visible', {timeout: 1000}).click();
     cy.contains('Charts:');
@@ -653,10 +657,16 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
     // Select namespace if an option is given
     cy.get('div.step__basic').then((step) => {
       const namespaceSelectorTestID = "name-ns-description-namespace"
-      const namespaceRequired = step.find(`div[data-testid=${namespaceSelectorTestID}]`).length
+      const namespaceRequired = step.find(`div[data-testid=${namespaceSelectorTestID}]`).length > 0
       if (namespaceRequired) {
         cy.setNamespace('All Namespaces', 'all_user')
         cy.getBySel(namespaceSelectorTestID).type(namespace + '{enter}');
+      }
+
+      const chartNameSelectorTestID = "NameNsDescriptionNameInput"
+      const nameRequired = step.find(`input[data-testid=${chartNameSelectorTestID}]`).length > 0
+      if (nameRequired) {
+        cy.getBySel(chartNameSelectorTestID).type(chartName);
       }
     });
 
