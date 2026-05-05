@@ -654,7 +654,7 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
     cy.getBySel('btn-chart-install').click();
     cy.contains(operation + ': Step 1');
 
-    // Select namespace if an option is given
+    // Select namespace and name if an option is given
     cy.get('div.step__basic').then((step) => {
       const namespaceSelectorTestID = "name-ns-description-namespace"
       const namespaceRequired = step.find(`div[data-testid=${namespaceSelectorTestID}]`).length > 0
