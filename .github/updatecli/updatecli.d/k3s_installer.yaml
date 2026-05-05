@@ -46,5 +46,5 @@ targets:
     # {{ end }}
     spec:
       file: "tests/e2e/install_test.go"
-      matchpattern: '(k3sInstallerSHA256)(\s*=*\s)".*"'
+      matchpattern: '(k3sInstallerSHA256)(\s*=\s*)".*"'
       replacepattern: '$1$2"{{ source "k3sInstallerSha" }}"'
