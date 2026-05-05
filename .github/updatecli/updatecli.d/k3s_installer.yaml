@@ -11,7 +11,7 @@ sources:
       token: '{{ requiredEnv "UPDATECLI_GITHUB_TOKEN" }}'
       versionfilter:
         kind: "semver"
-        pattern: "^1.35"
+        pattern: ">=1.35.0"
 
   k3sInstallerSha:
     name: "Get SHA256 of k3s installer"
@@ -46,5 +46,5 @@ targets:
     # {{ end }}
     spec:
       file: "tests/e2e/install_test.go"
-      matchpattern: '(k3sInstallerSHA256)(\s*=*\s)".*"'
+      matchpattern: '(k3sInstallerSHA256)(\s*=\s*)".*"'
       replacepattern: '$1$2"{{ source "k3sInstallerSha" }}"'
