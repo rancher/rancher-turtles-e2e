@@ -65,8 +65,6 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
       }
 
       if (isRancherManagerVersion('2.13') && isUpgrade) {
-        cy.task('log', "Removed chartmuseum-repo & Adding turtles-providers-chart repo");
-        cy.deleteKubernetesResource('local', ['Apps', 'Repositories'], 'chartmuseum-repo');
         // Used in Pre-upgrade: For Upgrade tests; providers will be installed from turtles-providers-chart repo
         addTurtlesProvidersRepo();
         // In Post-upgrade, providers will be installed using chartmuseum repo

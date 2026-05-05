@@ -23,9 +23,4 @@ describe('Post Upgrade', {tags: '@upgrade'}, () => {
     cy.waitForAllRowsInState('Deployed', timeout);
   })
 
-  it("Add turtles-providers GitRepo", () => {
-    cy.task('log', "Adding chartmuseum repo for turtles-providers");
-    expect(chartMuseumRepo, "checking chartmuseum repo").to.not.be.empty;
-    cy.addRepository('chartmuseum-repo', `${chartMuseumRepo}:8080`, 'http', 'none');
-  })
 });
