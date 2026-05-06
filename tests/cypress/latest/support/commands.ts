@@ -513,14 +513,14 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
   // Ensuring "Loading..." overlay screen is not present.
   cy.contains('Loading...', {timeout: 35000}).should('not.exist');
   cy.contains('header', 'Repositories').should('be.visible');
-  cy.contains('Create').should('be.visible');
+  cy.getBySel('app-cluster-repo-list').should('be.visible');
 
   // Check if the repository already exists; if it does not, then add it, otherwise simply refresh it and return
   cy.typeInFilter(repositoryName);
   cy.get('.sortable-table').then((row) => {
     if (row.find('tr.no-results').length > 0) {
-      cy.clickButton('Create');
-      cy.contains('Repository: Create').should('be.visible');
+      cy.getBySel('masthead-create').click();
+      cy.contains('Repository:').should('be.visible');
       cy.typeValue('Name', repositoryName);
       switch (repositoryType) {
         case "git":
@@ -536,7 +536,7 @@ Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: st
           cy.typeValue('Index URL', repositoryURL);
           break;
       }
-      cy.clickButton('Create');
+      cy.getBySel('async-btn-display-label').click();
       cy.wait(1000);
       cy.typeInFilter(repositoryName);
     } else {

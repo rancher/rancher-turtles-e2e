@@ -25,7 +25,7 @@ import {
 import {vars} from '../support/variables';
 import {matchAndWaitForProviderReadyStatus} from "../support/commands";
 
-type BuildType = 'prod-v2.13' | 'prod-v2.14' | 'dev-v2.13' | 'dev-v2.14';
+type BuildType = 'prod-v2.13' | 'prod-v2.14' | 'prod-v2.15' | 'dev-v2.13' | 'dev-v2.14' | 'dev-v2.15';
 const buildType = determineBuildType();
 
 function determineBuildType(): BuildType {
@@ -35,11 +35,17 @@ function determineBuildType(): BuildType {
   if (isTurtlesDevChart && isRancherManagerVersion('2.14')) {
     return 'dev-v2.14';
   }
+  if (isTurtlesDevChart && isRancherManagerVersion('2.15')) {
+    return 'dev-v2.15';
+  }
   if (isRancherManagerVersion('2.13')) {
     return 'prod-v2.13';
   }
   if (isRancherManagerVersion('2.14')) {
     return 'prod-v2.14';
+  }
+  if (isRancherManagerVersion('2.15')) {
+    return 'prod-v2.15';
   }
   return undefined as unknown as BuildType; // This should never happen, but it satisfies the type checker
 }
@@ -80,6 +86,16 @@ describe('Enable CAPI Providers', () => {
       google: 'v1.11.1',
       azure: 'v1.22.0'
     },
+    'prod-v2.15': {
+      capi: 'v1.12.2',
+      rke2: 'v0.24.3',
+      kubeadm: 'v1.12.2',
+      fleet: 'v0.14.1',
+      vsphere: 'v1.15.2',
+      amazon: 'v2.10.1',
+      google: 'v1.11.1',
+      azure: 'v1.22.0'
+    },
     'dev-v2.13': {
       capi: 'v1.10.6',
       rke2: 'v0.21.1',
@@ -91,6 +107,16 @@ describe('Enable CAPI Providers', () => {
       azure: 'v1.21.0'
     },
     'dev-v2.14': {
+      capi: 'v1.12.2',
+      rke2: 'v0.24.3',
+      kubeadm: 'v1.12.2',
+      fleet: 'v0.14.1',
+      vsphere: 'v1.15.2',
+      amazon: 'v2.10.1',
+      google: 'v1.11.1',
+      azure: 'v1.22.0'
+    },
+    'dev-v2.15': {
       capi: 'v1.12.2',
       rke2: 'v0.24.3',
       kubeadm: 'v1.12.2',

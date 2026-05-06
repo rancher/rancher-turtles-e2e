@@ -63,4 +63,4 @@ export const isUpgrade = isCypressTag('@upgrade')
 
 export const isTurtlesDevChart = Cypress.expose('turtles_dev_chart')
 
-export const isUseCAAPFSupported = (isRancherManagerVersion('>=2.14.1') || (isRancherManagerVersion('2.14') && isHeadBuild))
+export const isUseCAAPFSupported = (isRancherManagerVersion('>=2.14.1') || (isRancherManagerVersion('>=2.14') && isHeadBuild))
