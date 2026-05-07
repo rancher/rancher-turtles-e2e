@@ -229,7 +229,7 @@ jobs:
       qase_run_id: ${{ steps.qase_run_id.outputs.qase_run_id }}
     env:
       # Rancher versions with embedded turtles
-      RANCHER_RECENT_VERSIONS: (2\.13|2\.14|2\.15)
+      RANCHER_RECENT_VERSIONS: '2\.(13|14|15)'
       # K3S flags to use for installation
       INSTALL_K3S_SKIP_ENABLE: true
       INSTALL_K3S_VERSION: ${{ inputs.upstream_cluster_version }}
