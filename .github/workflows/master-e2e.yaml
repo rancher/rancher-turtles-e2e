@@ -332,7 +332,7 @@ jobs:
         if: ${{ inputs.turtles_dev_chart == true }}
         run: |
           if [[ "${{ env.RANCHER_VERSION }}" =~ $RANCHER_RECENT_VERSIONS ]]; then
-            echo RANCHER_POINT_VERSION="${BASH_REMATCH[1]}" >> ${GITHUB_ENV}
+            echo RANCHER_POINT_VERSION="${BASH_REMATCH[0]}" >> ${GITHUB_ENV}
           fi
           if [[ "${{ env.RANCHER_VERSION }}" =~ 2.12 && "${{ inputs.grep_test_by_tag }}" =~ "@migration" ]]; then
             echo RANCHER_POINT_VERSION="2.13" >> ${GITHUB_ENV}
