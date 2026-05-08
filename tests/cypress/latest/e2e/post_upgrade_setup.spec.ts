@@ -4,7 +4,6 @@ import {turtlesNamespace} from '../support/utils';
 
 Cypress.config();
 describe('Post Upgrade', {tags: '@upgrade'}, () => {
-  let chartMuseumRepo = Cypress.expose('chartmuseum_repo')
   let turtlesChartDevVersion = Cypress.expose('turtles_chart_dev_version')
   const timeout = vars.shortTimeout
 

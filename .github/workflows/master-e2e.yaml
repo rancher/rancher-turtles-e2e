@@ -230,6 +230,7 @@ jobs:
     env:
       # Rancher versions with embedded turtles
       RANCHER_RECENT_VERSIONS: '2\.(13|14|15)'
+      REQUIRES_CUSTOM_CHART: ${{ inputs.turtles_dev_chart == true && !contains(inputs.rancher_version, '2.12') }}
       # K3S flags to use for installation
       INSTALL_K3S_SKIP_ENABLE: true
       INSTALL_K3S_VERSION: ${{ inputs.upstream_cluster_version }}
@@ -405,11 +406,11 @@ jobs:
 
       # Build providers chart to push to chartmuseum in a later step
       - name: Make Turtles Providers Chart
-        if: ${{ (inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12')) || contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
+        if: ${{ env.REQUIRES_CUSTOM_CHART == true }}
         run: RELEASE_TAG=v${{ env.TAG }} make build-providers-chart
 
       - name: Clone, build and publish artificial system charts for 2.13 onwards
-        if: ${{ (inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12')) || contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
+        if: ${{ env.REQUIRES_CUSTOM_CHART == true }}
         run: |
           # Dir outside github workspace must be used for destroy=false persistance
           export RANCHER_CHARTS_REPO_DIR=/tmp/system-charts/charts
@@ -439,7 +440,7 @@ jobs:
           cp ${{ github.workspace }}/out/package/rancher-turtles-${{ env.TAG }}.tgz ${{ runner.temp }}
 
       - name: Copy Turtles Providers chart files
-        if: ${{ (inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12')) || contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
+        if: ${{ env.REQUIRES_CUSTOM_CHART == true }}
         run: cp ${{ github.workspace }}/out/package/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ runner.temp }}
 
       - name: Checkout
@@ -454,7 +455,7 @@ jobs:
         run: |
           cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
       - name: Copy turtles providers chart files for chartmuseum
-        if: ${{ (inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12')) || contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
+        if: ${{ env.REQUIRES_CUSTOM_CHART == true }}
         run: |
           mkdir ${{ github.workspace }}/tests/assets/providers
           cp ${{ runner.temp }}/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets/providers
@@ -556,7 +557,7 @@ jobs:
           KUBECONFIG: /etc/rancher/k3s/k3s.yaml
           PUBLIC_DNS: ${{ needs.create-runner.outputs.public_dns }}
         run: cd tests && make e2e-upgrade-rancher
-      - name: Extract component versions/informations after Rancher Upgrade
+      - name: Extract component versions/information after Rancher Upgrade
         id: upgraded_component
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         run: |
@@ -573,6 +574,7 @@ jobs:
         run: |
           ${{ github.workspace }}/tests/assets/migrate-providers-ownership.sh --adopt docker:capd-system
       - name: Cypress tests - Upgraded Rancher
+        id: upgrade_tests
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:
           RANCHER_VERSION: ${{ env.RANCHER_VERSION }}
@@ -589,7 +591,7 @@ jobs:
           fi
           cd tests && make start-cypress-tests
       - name: Upload Cypress screenshots (after-upgrade)
-        if: ${{ (contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) && failure() }}
+        if: ${{ (contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) && (steps.upgrade_tests.outcome == 'failure') }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: cypress-screenshots-after-upgrade-${{ github.run_number }}
@@ -598,7 +600,7 @@ jobs:
           if-no-files-found: ignore
       - name: Upload Cypress videos (after-upgrade)
         # Test run video is always captured, so this action uses "always()" condition
-        if: ${{ (contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) && always() }}
+        if: ${{ (contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) && (steps.upgrade_tests.outcome != '') }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: cypress-videos-after-upgrade-${{ github.run_number }}
@@ -625,7 +627,7 @@ jobs:
         if: ${{ always() }}
         run: |
           # Add summary
-          echo "## General informations" >> ${GITHUB_STEP_SUMMARY}
+          echo "## General information" >> ${GITHUB_STEP_SUMMARY}
           echo -e "***${{ inputs.test_description }}***\n" >> ${GITHUB_STEP_SUMMARY}
           echo "### Rancher Manager & Turtles Information" >> ${GITHUB_STEP_SUMMARY}
           echo "Rancher Manager Image: ${{ steps.component.outputs.rm_image_version }}" >> ${GITHUB_STEP_SUMMARY}
