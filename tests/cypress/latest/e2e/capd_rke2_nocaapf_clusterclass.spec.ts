@@ -1,7 +1,7 @@
 import '../support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import {isUseCAAPFSupported, skipClusterDeletion, turtlesNamespace} from '../support/utils';
-import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "../support/cleanup_support";
+import {capdResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
 Cypress.config();
@@ -127,11 +127,10 @@ describe('Import CAPD RKE2 (Default CNI & No-Caapf) Class-Cluster using Fleet', 
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
 
-    it('Remove imported CAPD cluster from Rancher Manager', {retries: 1}, () => {
+    it('Remove imported CAPD cluster from Rancher Manager', () => {
       // Delete the imported cluster
       // Ensure that the provisioned CAPI cluster still exists
-      // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
-      importedRancherClusterDeletion(clusterName);
+      importedRancherv3ClusterDeletion(clusterName);
     })
   })
 

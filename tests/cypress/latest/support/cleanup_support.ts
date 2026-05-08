@@ -1,7 +1,16 @@
-export function importedRancherClusterDeletion(clusterName: string) {
-  // Delete the imported cluster from Cluster Management
-  cy.deleteCluster(clusterName);
+import {vars} from '../support/variables';
 
+export const v3ClusterDeleteCommand = (clusterName: string): string => {
+  return `kubectl delete clusters.management.cattle.io -l cluster-api.cattle.io/capi-cluster-owner=${clusterName} -l cluster-api.cattle.io/capi-cluster-owner-ns=${vars.capiClustersNS}`;
+};
+
+export const reImportClusterPatchCommand = (clusterName: string): string => {
+  return `kubectl -n ${vars.capiClustersNS} patch clusters.cluster.x-k8s.io ${clusterName} --type="json" -p='[{"op":"remove","path":"/metadata/annotations/imported"}]'`;
+};
+
+export function importedRancherv3ClusterDeletion(clusterName: string) {
+  // Delete the imported mgmt v3 cluster from Cluster Management using kubectl
+  cy.kubectlExecute(v3ClusterDeleteCommand(clusterName));
 
   // Ensure the cluster is not available on the home page
   cy.goToHome();
@@ -9,6 +18,28 @@ export function importedRancherClusterDeletion(clusterName: string) {
 
   // Ensure that the provisioned cluster/ CAPI resource related to the cluster still exists
   cy.checkCAPIClusterProvisioned(clusterName);
+
+  // Check the annotation is set on CAPI cluster
+  cy.viewCAPIClusterYAML(clusterName);
+  cy.get('.CodeMirror').then((editor) => {
+    // @ts-expect-error known error with CodeMirror
+    const text = editor[0].CodeMirror.getValue();
+    expect(text).to.include("imported: 'true'");
+  });
+}
+
+export function reImportRancherv3Cluster(clusterName: string) {
+  // Re-import the deleted mgmt v3 cluster in Cluster Management using kubectl
+  cy.kubectlExecute(reImportClusterPatchCommand(clusterName));
+
+  // Check child cluster is auto-imported
+  // This is checked by ensuring the cluster is available in navigation menu
+  cy.goToHome();
+  cy.contains(clusterName).should('exist');
+
+  // Check cluster is Active
+  cy.searchCluster(clusterName);
+  cy.contains(new RegExp('Active.*' + clusterName), {timeout: vars.shortTimeout});
 }
 
 export function capiClusterDeletion(clusterName: string, timeout: number, clusterRepoName?: string, extraDeleteSteps: boolean = false) {

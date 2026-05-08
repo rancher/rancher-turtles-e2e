@@ -1,6 +1,6 @@
 import '../support/commands';
 import {getClusterName, isRancherManagerVersion, isAPIv1beta1} from '../support/utils';
-import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "../support/cleanup_support";
+import {capdResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
 Cypress.config();
@@ -147,11 +147,10 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
         cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
 
-      it('Remove imported CAPD cluster from Rancher Manager and Delete the CAPD cluster', {retries: 1}, () => {
+      it('Remove imported CAPD cluster from Rancher Manager and Delete the CAPD cluster', () => {
         // Delete the imported cluster
         // Ensure that the provisioned CAPI cluster still exists
-        // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
-        importedRancherClusterDeletion(clusterName);
+        importedRancherv3ClusterDeletion(clusterName);
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout);
       })

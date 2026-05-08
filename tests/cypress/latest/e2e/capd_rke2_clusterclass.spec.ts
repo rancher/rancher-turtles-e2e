@@ -20,7 +20,7 @@ import {
   turtlesNamespace
 } from '../support/utils';
 import {Question} from '../support/structs';
-import {capdResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "../support/cleanup_support";
+import {capdResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDeletion, reImportRancherv3Cluster} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
 
@@ -142,11 +142,18 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
     );
     }
 
-    it('Remove imported CAPD cluster from Rancher Manager', {retries: 1}, () => {
+    it('Remove imported CAPD cluster from Rancher Manager', () => {
       // Delete the imported cluster
       // Ensure that the provisioned CAPI cluster still exists
-      // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
-      importedRancherClusterDeletion(clusterName);
+      importedRancherv3ClusterDeletion(clusterName);
+    })
+
+    it('Re-import the CAPD cluster and remove from Rancher Manager', () => {
+      reImportRancherv3Cluster(clusterName);
+
+      // Delete the imported cluster
+      // Ensure that the provisioned CAPI cluster still exists
+      importedRancherv3ClusterDeletion(clusterName);
     })
   })
 
