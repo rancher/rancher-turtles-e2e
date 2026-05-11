@@ -92,16 +92,16 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
         cy.checkCAPIClusterActive(clusterName, timeout);
       })
 
-      it('Check the fleet-addon annotation and finalizer is not set on clusters', {retries: 1}, () => {
-        // Check the externally-managed annotation is not set on Rancher management cluster
-        cy.checkExternalFleetAnnotation(clusterName, false);
+      it('Check the fleet-addon annotation and finalizer is set on clusters', () => {
+        // Check the externally-managed annotation is set on Rancher management cluster
+        cy.checkExternalFleetAnnotation(clusterName, true);
 
-        // Check the finalizer is not set on CAPI cluster
+        // Check the finalizer is set on CAPI cluster
         cy.viewCAPIClusterYAML(clusterName);
         cy.get('.CodeMirror').then((editor) => {
           // @ts-expect-error known error with CodeMirror
           const text = editor[0].CodeMirror.getValue();
-          expect(text).not.to.include('fleet.addons.cluster.x-k8s.io');
+          expect(text).to.include('fleet.addons.cluster.x-k8s.io');
         });
       })
 

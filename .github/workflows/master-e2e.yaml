@@ -512,6 +512,7 @@ jobs:
             e2e/capd_rke2_migration_clusterclass.spec.ts
             ${{ env.SPECS }}
             e2e/capd_rke2_upgrade_clusterclass.spec.ts
+            e2e/pre_upgrade_setup.spec.ts
         run: |
           if [ ${{ inputs.turtles_dev_chart }} == true ]; then
             export CHARTMUSEUM_REPO=http://${{ needs.create-runner.outputs.public_dns }}
