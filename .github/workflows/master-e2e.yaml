@@ -230,7 +230,6 @@ jobs:
     env:
       # Rancher versions with embedded turtles
       RANCHER_RECENT_VERSIONS: '2\.(13|14|15)'
-      REQUIRES_CUSTOM_CHART: ${{ inputs.turtles_dev_chart == true && !contains(inputs.rancher_version, '2.12') }}
       # K3S flags to use for installation
       INSTALL_K3S_SKIP_ENABLE: true
       INSTALL_K3S_VERSION: ${{ inputs.upstream_cluster_version }}
