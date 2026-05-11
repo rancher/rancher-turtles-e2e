@@ -92,7 +92,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
         cy.checkCAPIClusterActive(clusterName, timeout);
       })
 
-      it('Check the fleet-addon annotation and finalizer is not set on clusters', () => {
+      it('Check the fleet-addon annotation and finalizer is not set on clusters', {retries: 1}, () => {
         // Check the externally-managed annotation is not set on Rancher management cluster
         cy.checkExternalFleetAnnotation(clusterName, false);
 

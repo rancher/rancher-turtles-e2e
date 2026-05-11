@@ -582,6 +582,7 @@ jobs:
           SPEC: |
             e2e/capd_rke2_migration_clusterclass.spec.ts
             e2e/post_upgrade_setup.spec.ts
+            e2e/providers_setup.spec.ts
             e2e/capd_rke2_upgrade_clusterclass.spec.ts
             ${{ env.COMMON_SPECS }}
         run: |
