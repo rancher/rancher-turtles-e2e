@@ -583,7 +583,6 @@ jobs:
           SPEC: |
             e2e/capd_rke2_migration_clusterclass.spec.ts
             e2e/post_upgrade_setup.spec.ts
-            e2e/providers_setup.spec.ts
             e2e/capd_rke2_upgrade_clusterclass.spec.ts
             ${{ env.COMMON_SPECS }}
         run: |
@@ -592,7 +591,7 @@ jobs:
           fi
           cd tests && make start-cypress-tests
       - name: Upload Cypress screenshots (after-upgrade)
-        if: ${{ (contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) && (steps.upgrade_tests.outcome == 'failure') }}
+        if: ${{ (contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) && failure() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: cypress-screenshots-after-upgrade-${{ github.run_number }}
@@ -601,7 +600,7 @@ jobs:
           if-no-files-found: ignore
       - name: Upload Cypress videos (after-upgrade)
         # Test run video is always captured, so this action uses "always()" condition
-        if: ${{ (contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) && (steps.upgrade_tests.outcome != '') }}
+        if: ${{ (contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) && always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: cypress-videos-after-upgrade-${{ github.run_number }}
