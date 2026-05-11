@@ -1,5 +1,5 @@
 import '../support/commands';
-import {getClusterName, isRancherManagerVersion, isAPIv1beta1} from '../support/utils';
+import {getClusterName, isRancherManagerVersion, isAPIv1beta1, skipClusterDeletion} from '../support/utils';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
@@ -147,27 +147,29 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
         cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
 
-      it('Remove imported CAPD cluster from Rancher Manager and Delete the CAPD cluster', () => {
-        // Delete the imported cluster
-        // Ensure that the provisioned CAPI cluster still exists
-        importedRancherv3ClusterDeletion(clusterName);
-        // Remove CAPI Resources related to the cluster
-        capiClusterDeletion(clusterName, timeout);
-      })
+      if(skipClusterDeletion) {
+        it('Remove imported CAPD cluster from Rancher Manager and Delete the CAPD cluster', () => {
+          // Delete the imported cluster
+          // Ensure that the provisioned CAPI cluster still exists
+          importedRancherv3ClusterDeletion(clusterName);
+          // Remove CAPI Resources related to the cluster
+          capiClusterDeletion(clusterName, timeout);
+        })
 
-      it('Delete the ClusterClass fleet repo and capd resources', () => {
-        // Remove the clusterclass repo
-        cy.removeFleetGitRepo(clusterClassRepoName);
+        it('Delete the ClusterClass fleet repo and capd resources', () => {
+          // Remove the clusterclass repo
+          cy.removeFleetGitRepo(clusterClassRepoName);
 
-        // Cleanup capd resources
-        capdResourcesCleanup();
-      })
+          // Cleanup capd resources
+          capdResourcesCleanup();
+        })
 
-      it('Delete the Pre-upgrade resources', () => {
-        cy.removeFleetGitRepo('helm-ops');
-        cy.deleteKubernetesResource('local', ['Storage', 'ConfigMaps'], 'docker-rke2-lb-config', vars.capiClustersNS);
-        cy.deleteKubernetesResource('local', ['Apps', 'Repositories'], 'turtles-providers-chart');
-      })
+        it('Delete the Pre-upgrade resources', () => {
+          cy.removeFleetGitRepo('helm-ops');
+          cy.deleteKubernetesResource('local', ['Storage', 'ConfigMaps'], 'docker-rke2-lb-config', vars.capiClustersNS);
+          cy.deleteKubernetesResource('local', ['Apps', 'Repositories'], 'turtles-providers-chart');
+        })
+      }
     }
   })
 });
