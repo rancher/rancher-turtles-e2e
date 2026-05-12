@@ -298,11 +298,11 @@ jobs:
           echo "/usr/local/bin/" >> ${GITHUB_PATH}
           echo 'Defaults secure_path="/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin"' | sudo tee /etc/sudoers.d/0-custom_secure_path
       # To be removed if hitting pull ratelimits
-#      - name: Log in to Docker Hub
-#        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
-#        with:
-#          username: ${{ secrets.docker_auth_username }}
-#          password: ${{ secrets.docker_auth_password }}
+      - name: Log in to Docker Hub
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+        with:
+          username: ${{ secrets.docker_auth_username }}
+          password: ${{ secrets.docker_auth_password }}
       - name: Install helm
         run: |
           HELM_VERSION="3.20.2"
