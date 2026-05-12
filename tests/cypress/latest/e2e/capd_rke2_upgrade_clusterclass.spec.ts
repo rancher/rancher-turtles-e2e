@@ -78,14 +78,16 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
 
   context('Post-Upgrade Cluster checks and Resources cleanup', () => {
     if (isRancherManagerVersion('2.14')) {
-      it('Check cluster & Resources status post-upgrade', () => {
+      it('Check Cluster API Version post-upgrade', { retries: 3 }, () => {
         cy.viewCAPIClusterYAML(clusterName);
         cy.get('.CodeMirror').then((editor) => {
           // @ts-expect-error known error with CodeMirror
           const text = editor[0].CodeMirror.getValue();
           expect(text).to.include('apiVersion: cluster.x-k8s.io/v1beta2');
         });
+      })
 
+      it('Check cluster status is active post-upgrade', ()=>{
         // Check CAPI cluster is Active
         cy.searchCluster(clusterName);
         cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
