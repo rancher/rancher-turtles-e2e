@@ -1,7 +1,7 @@
 import '../support/commands';
 
 import {getClusterName, isRancherManagerVersion, skipClusterDeletion} from '../support/utils';
-import {capiClusterDeletion, importedRancherClusterDeletion} from "../support/cleanup_support";
+import {capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
 
@@ -86,11 +86,10 @@ describe('Import CAPG GKE Class-Cluster', {tags: '@full'}, () => {
     );
 
     qase('403',
-      it('Remove imported CAPG cluster from Rancher Manager', {retries: 1}, () => {
+      it('Remove imported CAPG cluster from Rancher Manager',() => {
       // Delete the imported cluster
       // Ensure that the provisioned CAPI cluster still exists
-      // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
-      importedRancherClusterDeletion(clusterName);
+      importedRancherv3ClusterDeletion(clusterName);
     })
     );
   })

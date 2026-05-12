@@ -112,7 +112,7 @@ describe('Enable CAPI Providers', () => {
       kubeadm: 'v1.12.2',
       fleet: 'v0.14.1',
       vsphere: 'v1.15.2',
-      amazon: 'v2.10.1',
+      amazon: 'v2.11.1',
       google: 'v1.11.1',
       azure: 'v1.22.0'
     },
@@ -122,7 +122,7 @@ describe('Enable CAPI Providers', () => {
       kubeadm: 'v1.12.2',
       fleet: 'v0.14.1',
       vsphere: 'v1.15.2',
-      amazon: 'v2.10.1',
+      amazon: 'v2.11.1',
       google: 'v1.11.1',
       azure: 'v1.22.0'
     }

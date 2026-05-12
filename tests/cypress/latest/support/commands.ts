@@ -1372,6 +1372,19 @@ Cypress.Commands.add('checkExternalFleetAnnotation', (clusterName, required = tr
   });
 });
 
+// Command to execute on kubectl shell
+Cypress.Commands.add('kubectlExecute', (command) => {
+  cy.searchCluster('local');
+  cy.getBySel('sortable-table-0-action-button').click();
+  cy.get('i.icon.group-icon.icon-terminal').should('be.visible').click();
+  cy.contains('Connected').should('be.visible');
+  cy.get('.shell-body')
+    .type(command, {parseSpecialCharSequences: false})
+    .type('{enter}');
+  cy.wait(2000);
+  cy.getBySel('wm-tab-close-button').click();
+});
+
 // TODO: Add assertFunc(text: string) param
 Cypress.Commands.add('viewCAPIClusterYAML', (clusterName) => {
   // Check CAPI cluster using its name

@@ -1,6 +1,6 @@
 import '../support/commands';
 import {getClusterName, isAPIv1beta1, skipClusterDeletion} from '../support/utils';
-import {capiClusterDeletion, capzResourcesCleanup, importedRancherClusterDeletion} from "../support/cleanup_support";
+import {capiClusterDeletion, capzResourcesCleanup, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
 Cypress.config();
@@ -77,7 +77,7 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
       // Delete the imported cluster
       // Ensure that the provisioned CAPI cluster still exists
       // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
-      importedRancherClusterDeletion(clusterName);
+      importedRancherv3ClusterDeletion(clusterName);
     })
   })
 

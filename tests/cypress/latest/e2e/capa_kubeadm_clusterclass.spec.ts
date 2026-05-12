@@ -1,6 +1,6 @@
 import '../support/commands';
 import {getClusterName, isAPIv1beta1, isRancherManagerVersion, skipClusterDeletion} from '../support/utils';
-import {capaResourcesCleanup, capiClusterDeletion, importedRancherClusterDeletion} from "../support/cleanup_support";
+import {capaResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
 Cypress.config();
@@ -109,11 +109,10 @@ describe('Import CAPA Kubeadm Class-Cluster', {tags: '@full'}, () => {
       cy.checkCAPIClusterActive(clusterName);
     })
 
-    it('Remove imported CAPA cluster from Rancher Manager', {retries: 1}, () => {
+    it('Remove imported CAPA cluster from Rancher Manager', () => {
       // Delete the imported cluster
       // Ensure that the provisioned CAPI cluster still exists
-      // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
-      importedRancherClusterDeletion(clusterName);
+      importedRancherv3ClusterDeletion(clusterName);
     })
   })
 
