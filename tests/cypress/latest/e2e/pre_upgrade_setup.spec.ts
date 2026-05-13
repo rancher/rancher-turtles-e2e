@@ -1,11 +1,13 @@
 import '../support/commands';
 import {isRancherManagerVersion} from "../support/utils";
 
-if (isRancherManagerVersion('2.13')) {
 Cypress.config();
 describe('Pre Upgrade', {tags: '@upgrade'}, () => {
 
-  beforeEach(() => {
+  beforeEach(function () {
+    if (!isRancherManagerVersion('2.13')){
+      this.skip();
+    }
     cy.login();
     cy.burgerMenuOperate('open');
   });
@@ -24,6 +26,5 @@ describe('Pre Upgrade', {tags: '@upgrade'}, () => {
     });
 
     //   At this point the feature does not really exist, but it should be set before upgrading Rancher Turtles via Rancher Manager upgrade.
-  })
+  });
 });
-}
