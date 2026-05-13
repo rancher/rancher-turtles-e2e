@@ -574,7 +574,6 @@ jobs:
         run: |
           ${{ github.workspace }}/tests/assets/migrate-providers-ownership.sh --adopt docker:capd-system
       - name: Cypress tests - Upgraded Rancher
-        id: upgrade_tests
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:
           RANCHER_VERSION: ${{ env.RANCHER_VERSION }}

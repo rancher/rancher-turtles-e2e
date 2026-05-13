@@ -78,36 +78,21 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
 
   context('Post-Upgrade Cluster checks and Resources cleanup', () => {
     if (isRancherManagerVersion('2.14')) {
-      it('Check Cluster API Version post-upgrade', () => {
-        // Check CAPI cluster APIVersion has been upgraded to v1beta2
-        cy.viewCAPIClusterYAML(clusterName);
-        const expectedAPIVersion = 'apiVersion: cluster.x-k8s.io/v1beta2'
-
-        let checkAPIUpgrade = (retries = 5) => {
-          cy.get('.CodeMirror').then((editor) => {
-            // @ts-expect-error known error with CodeMirror
-            const text = editor[0].CodeMirror.getValue();
-            if (retries > 0) {
-              if (text.includes(expectedAPIVersion)) {
-                return
-              } else {
-                cy.wait(5000);
-                cy.reload();
-                checkAPIUpgrade(retries - 1);
-              }
-            } else {
-              expect(text).to.include(expectedAPIVersion);
-            }
-          })
-        }
-        checkAPIUpgrade();
-      })
-
       it('Check cluster status is active post-upgrade', ()=>{
         // Check CAPI cluster is Active
         cy.searchCluster(clusterName);
         cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
         cy.checkCAPIClusterActive(clusterName, timeout);
+      })
+
+      it('Check Cluster API Version post-upgrade', () => {
+        // Check CAPI cluster APIVersion has been upgraded to v1beta2
+        cy.viewCAPIClusterYAML(clusterName);
+        cy.get('.CodeMirror').then((editor) => {
+          // @ts-expect-error known error with CodeMirror
+          const text = editor[0].CodeMirror.getValue();
+          expect(text).to.include('apiVersion: cluster.x-k8s.io/v1beta2');
+        });
       })
 
       it('Check the fleet-addon annotation and finalizer is set on clusters', () => {
