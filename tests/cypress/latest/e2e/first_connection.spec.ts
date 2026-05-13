@@ -18,7 +18,7 @@ Cypress.config();
 describe('First login on Rancher - @install', {tags: '@install'}, () => {
   const password = 'rancherpassword'
 
-  it('Log in and accept terms and conditions', () => {
+  qase(149, it('Log in and accept terms and conditions', () => {
     // env: {password: password} can not be used here anymore
 
     // Store original Cypress.expose to restore it later
@@ -46,8 +46,9 @@ describe('First login on Rancher - @install', {tags: '@install'}, () => {
       Cypress.expose = originalExpose;
     });
   })
+  );
 
-  it('Change Rancher password', () => {
+  qase(150, it('Change Rancher password', () => {
     // Change default password
     cy.login(Cypress.expose('username'), password);
     cy.getBySel('nav_header_showUserMenu').click();
@@ -60,4 +61,5 @@ describe('First login on Rancher - @install', {tags: '@install'}, () => {
     cy.contains('Error').should('not.exist');
     cy.contains('Generate a random password').should('not.exist');
   })
+  );
 })

@@ -25,11 +25,12 @@ describe('Import CAPV RKE2 Class-Cluster', {tags: '@vsphere'}, () => {
   });
 
   context('[SETUP]', () => {
-    it('Setup the namespace for importing', () => {
+    qase(273, it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
+    );
 
-    it('Create values.yaml Secret', () => {
+    qase(274, it('Create values.yaml Secret', () => {
       let encodedData = ''
       cy.readFile('./fixtures/vsphere/capv-helm-values.yaml').then((data) => {
         // Deploy HA cluster with 3 control plane and 3 worker nodes, instead of default 1+1
@@ -65,9 +66,9 @@ describe('Import CAPV RKE2 Class-Cluster', {tags: '@vsphere'}, () => {
         cy.importYAML(data)
       });
     })
+    );
 
-    // TODO: Create Provider via UI, ref: capi-ui-extension/issues/128
-    it('Create VSphere CAPIProvider & VSphereClusterIdentity', () => {
+    qase(275, it('Create VSphere CAPIProvider & VSphereClusterIdentity', () => {
       if (isRancherManagerVersion('<2.13')) {
         cy.removeCAPIResource('Providers', providerName);
         cy.createCAPIProvider(providerName);
@@ -77,8 +78,9 @@ describe('Import CAPV RKE2 Class-Cluster', {tags: '@vsphere'}, () => {
       const vsphere_password = JSON.stringify(vsphere_secrets_json.vsphere_password).replace(/\"/g, "")
       cy.createVSphereClusterIdentity(vsphere_username, vsphere_password)
     })
+    );
 
-    it('Create Docker Auth Secret', () => {
+    qase(276, it('Create Docker Auth Secret', () => {
       // Prevention for Docker.io rate limiting
       cy.readFile('./fixtures/vsphere/capv-docker-auth-token-secret.yaml').then((data) => {
         const dockerAuthPasswordBase64 = Buffer.from(vsphere_secrets_json.cluster_docker_auth_password).toString('base64')
@@ -87,20 +89,22 @@ describe('Import CAPV RKE2 Class-Cluster', {tags: '@vsphere'}, () => {
         data = data.replace(/replace_cluster_docker_auth_password/, dockerAuthPasswordBase64)
         cy.importYAML(data, vars.capiClustersNS)
       })
-    });
+    })
+    );
 
-    it('Add CAPV RKE2 ClusterClass Fleet Repo and check Applications', () => {
+    qase(277, it('Add CAPV RKE2 ClusterClass Fleet Repo and check Applications', () => {
       cy.addFleetGitRepo(classRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(className);
 
       // Navigate to `local` cluster, More Resources > Fleet > HelmOps and ensure the charts are present.
       cy.checkFleetHelmOps(['vsphere-ccm']);
-    });
+    })
+    );
   })
 
   context('[CLUSTER-IMPORT]', () => {
-    it('Add CAPV class-clusters fleet repo', () => {
+    qase(278, it('Add CAPV class-clusters fleet repo', () => {
       cypressLib.checkNavIcon('cluster-management')
         .should('exist');
 
@@ -110,8 +114,9 @@ describe('Import CAPV RKE2 Class-Cluster', {tags: '@vsphere'}, () => {
       // Check CAPI cluster using its name
       cy.checkCAPICluster(clusterName);
     })
+    );
 
-    it('Auto import child CAPV cluster', () => {
+    qase(279, it('Auto import child CAPV cluster', () => {
       // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
       cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
@@ -132,6 +137,7 @@ describe('Import CAPV RKE2 Class-Cluster', {tags: '@vsphere'}, () => {
       cy.verifyResourceCount(clusterName, ['Nodes'], clusterName, '', 6); // '' means no namespace
       cy.waitForAllRowsInState('Active', 300000);
     })
+    );
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
@@ -201,30 +207,34 @@ describe('Import CAPV RKE2 Class-Cluster', {tags: '@vsphere'}, () => {
       })
     );
 
-    it('Install App on imported cluster', {retries: 1}, () => {
+    qase(280, it('Install App on imported cluster', {retries: 1}, () => {
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
+    );
 
-    it('Remove imported CAPV cluster from Rancher Manager', () => {
+    qase(358, it('Remove imported CAPV cluster from Rancher Manager', () => {
       // Delete the imported cluster
       // Ensure that the provisioned CAPI cluster still exists
       importedRancherv3ClusterDeletion(clusterName);
     })
+    );
   })
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
-      it('Delete the CAPV cluster', {retries: 1}, () => {
+      qase(282, it('Delete the CAPV cluster', {retries: 1}, () => {
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout, clusterRepoName);
       })
+      );
 
-      it('Delete the ClusterClass fleet repo and other resources', () => {
+      qase(283, it('Delete the ClusterClass fleet repo and other resources', () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(classRepoName);
         // Cleanup other resources
         capvResourcesCleanup('rke2')
       })
+      );
     }
   })
 });

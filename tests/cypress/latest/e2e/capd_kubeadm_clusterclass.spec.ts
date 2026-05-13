@@ -34,9 +34,10 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: '@short'}, () => {
 
   context('[SETUP]', () => {
     // To validate namespace auto-import
-    it('Setup the namespace for importing', () => {
+    qase(229, it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Enable');
     })
+    );
 
     qase(92,
       it('Add CAPD Kubeadm ClusterClass using fleet', () => {
@@ -46,14 +47,15 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: '@short'}, () => {
       })
     );
 
-    it('Create Docker Pull Secret', () => {
+    qase(300, it('Create Docker Pull Secret', () => {
       // Prevention for Docker.io rate limiting
       cy.readFile('./fixtures/docker/capd-image-pull-secret.yaml').then((data) => {
         data = data.replace(/replace_docker_registry_config/, dockerRegistryConfigBase64)
         data = data.replace(/replace_cluster_name/g, clusterName)
         cy.importYAML(data, vars.capiClustersNS)
       })
-    });
+    })
+    );
   })
 
   context('[CLUSTER-IMPORT]', () => {
@@ -94,14 +96,15 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: '@short'}, () => {
   context('[CLUSTER-OPERATIONS]', () => {
 
     if (isRancherManagerVersion(">=2.13")) {
-      it("Check if annotation for custom cluster description set custom description the imported Rancher Cluster", () => {
+      qase(372, it("Check if annotation for custom cluster description set custom description the imported Rancher Cluster", () => {
         cy.burgerMenuOperate('close')
         cy.contains(new RegExp('Active.*' + `${clusterName}.*` + "This is a custom description of Rancher Cluster"));
       })
+      );
     }
 
     // Ref: https://github.com/rancher/turtles/issues/1880
-    qase(43,
+    qase([453,455],
       it('Check the fleet-addon annotation and finalizer is set on clusters', () => {
         // Check the externally-managed annotation is set on Rancher management cluster
         cy.checkExternalFleetAnnotation(clusterName);
@@ -142,19 +145,21 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: '@short'}, () => {
       })
     );
 
-    it('Remove imported CAPD cluster from Rancher Manager', () => {
+    qase(301, it('Remove imported CAPD cluster from Rancher Manager', () => {
       // Delete the imported cluster
       // Ensure that the provisioned CAPI cluster still exists
       importedRancherv3ClusterDeletion(clusterName);
     })
+    );
 
-    it('Re-import the CAPD cluster and remove from Rancher Manager', () => {
+    qase(459, it('Re-import the CAPD cluster and remove from Rancher Manager', () => {
       reImportRancherv3Cluster(clusterName);
 
       // Delete the imported cluster
       // Ensure that the provisioned CAPI cluster still exists
       importedRancherv3ClusterDeletion(clusterName);
     })
+    );
   })
 
   context('[TEARDOWN]', () => {

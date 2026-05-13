@@ -26,7 +26,7 @@ const buildType = isTurtlesDevChart && isRancherManagerVersion('2.12') ? 'dev-v2
 
 if (isRancherManagerVersion('2.12') && !isMigration) {
 Cypress.config();
-describe('Enable CAPI Providers', () => {
+describe('Enable CAPI Providers (2.12)', () => {
   // Providers names
   const coreCAPIProvider = 'cluster-api'
   const rke2Provider = 'rke2'
@@ -83,28 +83,32 @@ describe('Enable CAPI Providers', () => {
   });
 
   context('Local providers - @install', {tags: '@install'}, () => {
-    it('Create CAPI Namespaces', () => {
+    qase(492, it('Create CAPI Namespaces', () => {
       cy.createNamespace(capiNamespaces);
     })
+    );
 
     // HelmOps to be used across all specs
-    it('Add Applications fleet repo', () => {
+    qase(493, it('Add Applications fleet repo', () => {
       // Add upstream apps repo
       cy.addFleetGitRepo('helm-ops', vars.turtlesRepoUrl, vars.classBranch, 'examples/applications/', vars.capiClustersNS);
     })
+    );
  
-    it('Verify Core CAPI Provider', () => {
+    qase(494, it('Verify Core CAPI Provider', () => {
       cy.navigateToProviders();
       matchAndWaitForProviderReadyStatus(coreCAPIProvider, 'core', coreCAPIProvider, coreCAPIProviderVersion, capiNamespace);
-    });
+    })
+    );
 
-    it('Verify Fleet addon provider', () => {
+    qase(495, it('Verify Fleet addon provider', () => {
       cy.navigateToProviders();
       matchAndWaitForProviderReadyStatus(fleetProvider, 'addon', fleetProvider, fleetProviderVersion, turtlesNamespace);
-    });
+    })
+    );
 
     providerTypes.forEach(providerType => {
-      it('Create Kubeadm Providers - ' + providerType, () => {
+      qase([496,498], it('Create Kubeadm Providers - ' + providerType, () => {
         // Create CAPI Kubeadm providers
         if (providerType == 'control plane') {
           const namespace = kubeadmProviderNamespaces[1]
@@ -124,8 +128,9 @@ describe('Enable CAPI Providers', () => {
           matchAndWaitForProviderReadyStatus(providerName, providerType, kubeadmProvider, kubeadmProviderVersion, namespace);
         }
       })
+      );
 
-      it('Verify RKE2 Providers - ' + providerType, () => {
+      qase([497,499], it('Verify RKE2 Providers - ' + providerType, () => {
         if (providerType == 'control plane') {
           const namespace = 'rke2-control-plane-system'
           const providerName = rke2Provider + '-' + 'control-plane'
@@ -137,30 +142,35 @@ describe('Enable CAPI Providers', () => {
           cy.navigateToProviders();
           matchAndWaitForProviderReadyStatus(providerName, providerType, rke2Provider, rke2ProviderVersion, namespace);
         }
-      });
+      })
+      );
     })
   })
 
   context('Docker provider', {tags: '@short'}, () => {
     const dockerProviderNamespace = 'capd-system'
-    it('Create Docker CAPIProvider Namespace', () => {
+    qase(500, it('Create Docker CAPIProvider Namespace', () => {
       cy.createNamespace([dockerProviderNamespace]);
     })
+    );
 
-    it('Create CAPD provider', () => {
+    qase(501, it('Create CAPD provider', () => {
       // Create Docker Infrastructure provider
       cy.addInfraProvider('Docker', dockerProviderNamespace);
       matchAndWaitForProviderReadyStatus(dockerProvider, 'infrastructure', dockerProvider, kubeadmProviderVersion, dockerProviderNamespace);
     })
+    );
   })
 
   context('vSphere provider', {tags: '@vsphere'}, () => {
     const vsphereProviderNamespace = 'capv-system'
 
-    it('Create CAPIProviders Namespaces', () => {
+    qase(502, it('Create CAPIProviders Namespaces', () => {
       cy.createNamespace([vsphereProviderNamespace]);
     })
-    it('Create CAPV provider', () => {
+    );
+
+    qase(503, it('Create CAPV provider', () => {
       // Create vsphere Infrastructure provider
       // See capv_rke2_cluster.spec.ts for more details about `vsphere_secrets_json_base64` structure
       const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
@@ -176,16 +186,18 @@ describe('Enable CAPI Providers', () => {
       cy.addInfraProvider('vSphere', vsphereProviderNamespace, vsphereProvider);
       matchAndWaitForProviderReadyStatus(vsphereProvider, 'infrastructure', vsphereProvider, vsphereProviderVersion, vsphereProviderNamespace);
     })
+    );
   })
 
   context('Cloud Providers', {tags: '@full'}, () => {
     const providerType = 'infrastructure'
-    it('Create Cloud CAPIProviders Namespaces', () => {
+    qase(504, it('Create Cloud CAPIProviders Namespaces', () => {
       const cloudProviderNamespaces = ['capa-system', 'capg-system', 'capz-system']
       cy.createNamespace(cloudProviderNamespaces);
     })
+    );
 
-    it('Create CAPA provider', () => {
+    qase(505, it('Create CAPA provider', () => {
       const namespace = 'capa-system'
       // Create AWS Infrastructure provider
       cy.addCloudCredsAWS(amazonProvider, Cypress.expose('aws_access_key'), Cypress.expose('aws_secret_key'));
@@ -193,8 +205,9 @@ describe('Enable CAPI Providers', () => {
       cy.addInfraProvider('Amazon', namespace, amazonProvider);
       matchAndWaitForProviderReadyStatus(amazonProvider, providerType, amazonProvider, amazonProviderVersion, namespace);
     })
+    );
 
-    it('Create CAPG provider', () => {
+    qase(506, it('Create CAPG provider', () => {
       const namespace = 'capg-system'
       // Create GCP Infrastructure provider
       cy.addCloudCredsGCP(googleProvider, Cypress.expose('gcp_credentials'));
@@ -202,13 +215,15 @@ describe('Enable CAPI Providers', () => {
       cy.addInfraProvider('Google Cloud Platform', namespace, googleProvider);
       matchAndWaitForProviderReadyStatus(googleProvider, providerType, googleProvider, googleProviderVersion, namespace);
     })
+    );
 
-    it('Create CAPZ provider', () => {
+    qase(507, it('Create CAPZ provider', () => {
       const namespace = 'capz-system'
       // Create Azure Infrastructure provider
       cy.addInfraProvider('Azure', namespace, azureProvider);
       matchAndWaitForProviderReadyStatus(azureProvider, providerType, azureProvider, azureProviderVersion, namespace);
     })
+    );
   })
 });
 }

@@ -49,7 +49,6 @@ describe('Create CAPD', {tags: '@short'}, () => {
     })
 
     context('[CLUSTER-IMPORT]', () => {
-      qase(44,
         it('Create child CAPD cluster from Clusterclass', () => {
 
           const cluster: Cluster = {
@@ -88,7 +87,6 @@ warn: restricted`,
           cy.searchCluster(clusterName);
           cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
         })
-      );
     })
 
     context('[CLUSTER-OPERATIONS]', () => {

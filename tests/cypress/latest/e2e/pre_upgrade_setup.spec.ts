@@ -2,7 +2,7 @@ import '../support/commands';
 import {isRancherManagerVersion} from "../support/utils";
 
 Cypress.config();
-describe('Pre Upgrade', {tags: '@upgrade'}, () => {
+describe('Pre Rancher Upgrade Setup - @upgrade', {tags: '@upgrade'}, () => {
 
   beforeEach(function () {
     if (!isRancherManagerVersion('2.13')){
@@ -12,7 +12,7 @@ describe('Pre Upgrade', {tags: '@upgrade'}, () => {
     cy.burgerMenuOperate('open');
   });
 
-  it("Enable use-caapf feature gate before Rancher upgrade", () => {
+  qase(509, it("Enable use-caapf feature gate before Rancher upgrade", () => {
     const enableFeatureGate = (text: any) => {
       // to disable the feature flag, simply removing this data won't be enough. The value must be reset to "false".
       text.data["rancher-turtles"] = `{"features": {"use-caapf": {"enabled": "true"}}}`;
@@ -25,6 +25,7 @@ describe('Pre Upgrade', {tags: '@upgrade'}, () => {
       modifyYAMLOperation: enableFeatureGate
     });
 
-    //   At this point the feature does not really exist, but it should be set before upgrading Rancher Turtles via Rancher Manager upgrade.
-  });
+    // At this point the feature does not really exist, but it should be set before upgrading Rancher Turtles via Rancher Manager upgrade.
+  })
+  );
 });

@@ -24,20 +24,22 @@ describe('Import CAPD RKE2 (Default CNI & No-Caapf) Class-Cluster using Fleet', 
   });
 
   context('[SETUP]', () => {
-    it('Create Docker Resources', () => {
+    qase(438, it('Create Docker Resources', () => {
       // Docker rke2 lb-config
       cy.addFleetGitRepo('lb-docker', vars.turtlesRepoUrl, vars.classBranch, 'examples/applications/lb/docker', vars.capiClustersNS);
       cy.burgerMenuOperate('open');
       // Prevention for Docker.io rate limiting
       cy.createDockerAuthSecret();
-    });
+    })
+    );
 
-    it('Setup the namespace for importing', () => {
+    qase(439, it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
+    );
 
     // We install providers chart here because the test runs before providers_setup.spec.ts
-    it('Install turtles-providers-chart for Docker, RKE2', () => {
+    qase(440, it('Install turtles-providers-chart for Docker, RKE2', () => {
       const providerSelectionFunction = (text: any) => {
         // @ts-ignore
         text.providers.infrastructureDocker.enabled = true;
@@ -48,16 +50,18 @@ describe('Import CAPD RKE2 (Default CNI & No-Caapf) Class-Cluster using Fleet', 
       // Install Rancher Turtles Certified Providers chart
       cy.checkChart('local', 'Install', vars.turtlesProvidersChartName, turtlesNamespace, {modifyYAMLOperation: providerSelectionFunction});
     })
+    );
 
-    it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
+    qase(441, it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
       cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(classNamePrefix);
     })
+    );
   })
 
   context('[CLUSTER-IMPORT]', () => {
-    it('Add CAPD cluster fleet repo and get cluster name', () => {
+    qase(442, it('Add CAPD cluster fleet repo and get cluster name', () => {
       cypressLib.checkNavIcon('cluster-management').should('exist');
       cy.addFleetGitRepo(clustersRepoName, vars.repoUrl, vars.branch, path);
 
@@ -69,8 +73,9 @@ describe('Import CAPD RKE2 (Default CNI & No-Caapf) Class-Cluster using Fleet', 
         cy.task('suiteLog',`CAPI Cluster Name: ${clusterName}`);
       });
     })
+    );
 
-    it('Auto import child CAPD cluster', () => {
+    qase(443, it('Auto import child CAPD cluster', () => {
       // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
       cy.checkCAPIClusterProvisioned(clusterName, timeout);
        // Check child cluster is created and auto-imported
@@ -86,10 +91,11 @@ describe('Import CAPD RKE2 (Default CNI & No-Caapf) Class-Cluster using Fleet', 
       // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
       cy.checkCAPIClusterActive(clusterName, timeout);
     })
+    );
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    it('Check RKE2 Default CNI', () => {
+    qase(444, it('Check RKE2 Default CNI', () => {
       cy.contains(clusterName).click();
       cy.accesMenuSelection(['Workloads', 'Pods']);
       cy.setNamespace('All Namespaces', 'all_user');
@@ -97,8 +103,9 @@ describe('Import CAPD RKE2 (Default CNI & No-Caapf) Class-Cluster using Fleet', 
       cy.typeInFilter('calico');
       cy.waitForAllRowsInState('Running', timeout);
     })
+    );
 
-    it('Check if cluster is registered in Fleet only once', () => {
+    qase(445, it('Check if cluster is registered in Fleet only once', () => {
       cypressLib.accesMenu('Continuous Delivery');
       cy.contains('Dashboard').should('be.visible');
       cypressLib.accesMenu('Clusters');
@@ -109,8 +116,9 @@ describe('Import CAPD RKE2 (Default CNI & No-Caapf) Class-Cluster using Fleet', 
       // Make sure there is only one registered cluster in fleet (there should be one table row)
       cy.get('table.sortable-table').find(`tbody tr[data-testid="sortable-table-${rowNumber}-row"]`).should('have.length', 1);
     })
+    );
 
-    it('Check the fleet-addon annotation and finalizer is not set on clusters', () => {
+    qase(454, it('Check the fleet-addon annotation and finalizer is not set on clusters', () => {
       // Check the externally-managed annotation is set on Rancher management cluster
       cy.checkExternalFleetAnnotation(clusterName, false);
 
@@ -122,34 +130,39 @@ describe('Import CAPD RKE2 (Default CNI & No-Caapf) Class-Cluster using Fleet', 
         expect(text).not.to.include('fleet.addons.cluster.x-k8s.io');
       });
     })
+    );
 
-    it('Install App on imported cluster', {retries: 1}, () => {
+    qase(447, it('Install App on imported cluster', {retries: 1}, () => {
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
+    );
 
-    it('Remove imported CAPD cluster from Rancher Manager', () => {
+    qase(448, it('Remove imported CAPD cluster from Rancher Manager', () => {
       // Delete the imported cluster
       // Ensure that the provisioned CAPI cluster still exists
       importedRancherv3ClusterDeletion(clusterName);
     })
+    );
   })
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
-      it('Delete the CAPD cluster', {retries: 1}, () => {
+      qase(449, it('Delete the CAPD cluster', {retries: 1}, () => {
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout, clustersRepoName, true);
       })
+      );
 
-      it('Delete the ClusterClass fleet repo', () => {
+      qase(450, it('Delete the ClusterClass fleet repo', () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
         // Cleanup other resources
         capdResourcesCleanup();
       })
+      );
     }
 
-    it('Delete the provider-charts and other resources', () => {
+    qase(451, it('Delete the provider-charts and other resources', () => {
       // Remove the lb-config
       cy.removeFleetGitRepo('lb-docker');
       cy.deleteKubernetesResource('local', ['Storage', 'ConfigMaps'], 'docker-rke2-lb-config', vars.capiClustersNS);
@@ -159,5 +172,6 @@ describe('Import CAPD RKE2 (Default CNI & No-Caapf) Class-Cluster using Fleet', 
       cy.contains(new RegExp(`"${vars.turtlesProvidersHelmApp}.*"` + ' uninstalled'), {timeout: timeout}).should('be.visible');
       cy.get('.closer').click();
     })
+    );
   })
 });
