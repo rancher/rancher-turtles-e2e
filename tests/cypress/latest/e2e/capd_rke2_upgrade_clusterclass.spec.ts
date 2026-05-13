@@ -78,7 +78,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
 
   context('Post-Upgrade Cluster checks and Resources cleanup', () => {
     if (isRancherManagerVersion('2.14')) {
-      it('Check Cluster API Version post-upgrade', { retries: 3 }, () => {
+      it('Check Cluster API Version post-upgrade', () => {
         // Check CAPI cluster APIVersion has been upgraded to v1beta2
         cy.viewCAPIClusterYAML(clusterName);
         const expectedAPIVersion = 'apiVersion: cluster.x-k8s.io/v1beta2'
@@ -91,7 +91,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
               if (text.includes(expectedAPIVersion)) {
                 return
               } else {
-                cy.wait(2000);
+                cy.wait(5000);
                 cy.reload();
                 checkAPIUpgrade(retries - 1);
               }
