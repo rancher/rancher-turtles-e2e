@@ -1,6 +1,6 @@
 import '../support/commands';
 import {vars} from '../support/variables';
-import {isRancherManagerVersion, isTurtlesDevChart, turtlesNamespace} from '../support/utils';
+import {isTurtlesDevChart, turtlesNamespace} from '../support/utils';
 
 Cypress.config();
 describe('Post Upgrade', {tags: '@upgrade'}, () => {
@@ -12,6 +12,13 @@ describe('Post Upgrade', {tags: '@upgrade'}, () => {
     cy.burgerMenuOperate('open');
   });
 
+  it('Check cluster status is active post-upgrade', ()=>{
+    // Check CAPI cluster is Active
+    const localCluster = 'local'
+    cy.searchCluster(localCluster);
+    cy.contains(new RegExp('Active.*' + localCluster), {timeout: timeout});
+  })
+
   it('Check upgraded Turtles chart', () => {
     cy.exploreCluster('local');
     cy.setNamespace(turtlesNamespace);
@@ -19,9 +26,9 @@ describe('Post Upgrade', {tags: '@upgrade'}, () => {
     cy.typeInFilter('rancher-turtles');
     cy.getBySel('sortable-cell-0-1').should('exist');
     if (isTurtlesDevChart) {
-      cy.contains(turtlesChartDevVersion, {timeout: timeout});
-    } else if (isRancherManagerVersion('2.14')) {
-      cy.contains('0.26', {timeout: timeout});
+      cy.getBySel('sortable-cell-0-3').contains(turtlesChartDevVersion, {timeout: timeout});
+    } else {
+      cy.getBySel('sortable-cell-0-3').contains('0.26', {timeout: timeout});
     }
     cy.waitForAllRowsInState('Deployed', timeout);
   })

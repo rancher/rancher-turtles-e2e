@@ -78,14 +78,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
 
   context('Post-Upgrade Cluster checks and Resources cleanup', () => {
     if (isRancherManagerVersion('2.14')) {
-      it('Check cluster status is active post-upgrade', ()=>{
-        // Check CAPI cluster is Active
-        cy.searchCluster(clusterName);
-        cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
-        cy.checkCAPIClusterActive(clusterName, timeout);
-      })
-
-      it('Check Cluster API Version post-upgrade', () => {
+      it('Check cluster & Resources status post-upgrade', () => {
         // Check CAPI cluster APIVersion has been upgraded to v1beta2
         cy.viewCAPIClusterYAML(clusterName);
         cy.get('.CodeMirror').then((editor) => {
@@ -93,6 +86,11 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
           const text = editor[0].CodeMirror.getValue();
           expect(text).to.include('apiVersion: cluster.x-k8s.io/v1beta2');
         });
+
+        // Check CAPI cluster is Active
+        cy.searchCluster(clusterName);
+        cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
+        cy.checkCAPIClusterActive(clusterName, timeout);
       })
 
       it('Check the fleet-addon annotation and finalizer is set on clusters', () => {
