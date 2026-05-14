@@ -154,7 +154,8 @@ describe('Enable CAPI Providers', () => {
     })
 
     // This feature gate needs to be enabled for >=2.14.1
-    if (isUseCAAPFSupported) {
+    // This feature is set to true(in pre_upgrade_setup.spec.ts) before the rancher upgrade; that's why we skip this step for upgrade test.
+    if (isUseCAAPFSupported && !isUpgrade) {
       it('Enable turtles feature gate: use-caapf', () => {
         const enableFeatureGate = (text: any) => {
           // to disable the feature flag, simply removing this data won't be enough. The value must be reset to "false".

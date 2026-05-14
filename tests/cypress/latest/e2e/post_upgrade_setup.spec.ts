@@ -1,11 +1,9 @@
 import '../support/commands';
 import {vars} from '../support/variables';
-import {turtlesNamespace} from '../support/utils';
+import {isTurtlesDevChart, turtlesNamespace} from '../support/utils';
 
 Cypress.config();
 describe('Post Upgrade', {tags: '@upgrade'}, () => {
-  let chartMuseumRepo = Cypress.expose('chartmuseum_repo')
-  let turtlesChartDevVersion = Cypress.expose('turtles_chart_dev_version')
   const timeout = vars.shortTimeout
 
   beforeEach(() => {
@@ -13,13 +11,22 @@ describe('Post Upgrade', {tags: '@upgrade'}, () => {
     cy.burgerMenuOperate('open');
   });
 
+  it('Check the local cluster status is active post-upgrade', ()=>{
+    // Check local cluster is Active
+    const localCluster = 'local'
+    cy.searchCluster(localCluster);
+    cy.contains(new RegExp('Active.*' + localCluster), {timeout: timeout});
+  })
+
   it('Check upgraded Turtles chart', () => {
     cy.exploreCluster('local');
     cy.setNamespace(turtlesNamespace);
     cy.clickNavMenu(['Apps', 'Installed Apps']);
     cy.typeInFilter('rancher-turtles');
     cy.getBySel('sortable-cell-0-1').should('exist');
-    cy.contains(turtlesChartDevVersion, {timeout: timeout});
+
+    const turtlesChartVersion = isTurtlesDevChart? Cypress.expose('turtles_chart_dev_version'): '0.26'
+    cy.getBySel('sortable-cell-0-3').contains(turtlesChartVersion, {timeout: timeout});
     cy.waitForAllRowsInState('Deployed', timeout);
   })
 

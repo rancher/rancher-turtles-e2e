@@ -1,5 +1,5 @@
 import '../support/commands';
-import {getClusterName, isRancherManagerVersion, isAPIv1beta1} from '../support/utils';
+import {getClusterName, isRancherManagerVersion, isAPIv1beta1, skipClusterDeletion} from '../support/utils';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
@@ -79,6 +79,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
   context('Post-Upgrade Cluster checks and Resources cleanup', () => {
     if (isRancherManagerVersion('2.14')) {
       it('Check cluster & Resources status post-upgrade', () => {
+        // Check CAPI cluster APIVersion has been upgraded to v1beta2
         cy.viewCAPIClusterYAML(clusterName);
         cy.get('.CodeMirror').then((editor) => {
           // @ts-expect-error known error with CodeMirror
@@ -92,16 +93,16 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
         cy.checkCAPIClusterActive(clusterName, timeout);
       })
 
-      it('Check the fleet-addon annotation and finalizer is not set on clusters', () => {
-        // Check the externally-managed annotation is not set on Rancher management cluster
-        cy.checkExternalFleetAnnotation(clusterName, false);
+      it('Check the fleet-addon annotation and finalizer is set on clusters', () => {
+        // Check the externally-managed annotation is set on Rancher management cluster
+        cy.checkExternalFleetAnnotation(clusterName, true);
 
-        // Check the finalizer is not set on CAPI cluster
+        // Check the finalizer is set on CAPI cluster
         cy.viewCAPIClusterYAML(clusterName);
         cy.get('.CodeMirror').then((editor) => {
           // @ts-expect-error known error with CodeMirror
           const text = editor[0].CodeMirror.getValue();
-          expect(text).not.to.include('fleet.addons.cluster.x-k8s.io');
+          expect(text).to.include('fleet.addons.cluster.x-k8s.io');
         });
       })
 
@@ -147,27 +148,28 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
         cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
 
-      it('Remove imported CAPD cluster from Rancher Manager and Delete the CAPD cluster', () => {
-        // Delete the imported cluster
-        // Ensure that the provisioned CAPI cluster still exists
-        importedRancherv3ClusterDeletion(clusterName);
-        // Remove CAPI Resources related to the cluster
-        capiClusterDeletion(clusterName, timeout);
-      })
+      if(skipClusterDeletion) {
+        it('Remove imported CAPD cluster from Rancher Manager and Delete the CAPD cluster', () => {
+          // Delete the imported cluster
+          // Ensure that the provisioned CAPI cluster still exists
+          importedRancherv3ClusterDeletion(clusterName);
+          // Remove CAPI Resources related to the cluster
+          capiClusterDeletion(clusterName, timeout);
+        })
 
-      it('Delete the ClusterClass fleet repo and capd resources', () => {
-        // Remove the clusterclass repo
-        cy.removeFleetGitRepo(clusterClassRepoName);
+        it('Delete the ClusterClass fleet repo and capd resources', () => {
+          // Remove the clusterclass repo
+          cy.removeFleetGitRepo(clusterClassRepoName);
 
-        // Cleanup capd resources
-        capdResourcesCleanup();
-      })
+          // Cleanup capd resources
+          capdResourcesCleanup();
+        })
 
-      it('Delete the Pre-upgrade resources', () => {
-        cy.removeFleetGitRepo('helm-ops');
-        cy.deleteKubernetesResource('local', ['Storage', 'ConfigMaps'], 'docker-rke2-lb-config', vars.capiClustersNS);
-        cy.deleteKubernetesResource('local', ['Apps', 'Repositories'], 'turtles-providers-chart');
-      })
+        it('Delete the Pre-upgrade resources', () => {
+          cy.removeFleetGitRepo('helm-ops');
+          cy.deleteKubernetesResource('local', ['Storage', 'ConfigMaps'], 'docker-rke2-lb-config', vars.capiClustersNS);
+        })
+      }
     }
   })
 });
