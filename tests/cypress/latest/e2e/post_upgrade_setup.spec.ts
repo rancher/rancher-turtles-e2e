@@ -12,7 +12,7 @@ describe('Post Upgrade', {tags: '@upgrade'}, () => {
     cy.burgerMenuOperate('open');
   });
 
-  it('Check cluster status is active post-upgrade', ()=>{
+  it('Check the local cluster status is active post-upgrade', ()=>{
     // Check CAPI cluster is Active
     const localCluster = 'local'
     cy.searchCluster(localCluster);
