@@ -22,20 +22,21 @@ describe('Import CAPA Kubeadm Class-Cluster', {tags: '@full'}, () => {
   });
 
   context('[SETUP]', () => {
-    it('Setup the namespace for importing', () => {
+    qase(314, it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
+    );
 
-    // TODO: Create Provider via UI, ref: capi-ui-extension/issues/128
-    it('Create AWS CAPIProvider & AWSClusterStaticIdentity', () => {
+    qase(342, it('Create AWS CAPIProvider & AWSClusterStaticIdentity', () => {
       if (isRancherManagerVersion('<2.13')) {
         cy.removeCAPIResource('Providers', providerName);
         cy.createCAPIProvider(providerName);
       }
       cy.createAWSClusterStaticIdentity(accessKey, secretKey);
     })
+    );
 
-    qase(129,
+    qase(391,
       it('Add CAPA Kubeadm ClusterClass Fleet Repo and check Applications', () => {
         cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
@@ -48,7 +49,7 @@ describe('Import CAPA Kubeadm Class-Cluster', {tags: '@full'}, () => {
   })
 
   context('[CLUSTER-IMPORT]', () => {
-    qase(124,
+    qase(392,
       it('Import CAPA Kubeadm class-cluster using YAML', () => {
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
@@ -61,7 +62,7 @@ describe('Import CAPA Kubeadm Class-Cluster', {tags: '@full'}, () => {
       })
     );
 
-    qase(125,
+    qase(413,
       it('Auto import child CAPA cluster', () => {
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
         cy.checkCAPIClusterProvisioned(clusterName, timeout);
@@ -84,13 +85,13 @@ describe('Import CAPA Kubeadm Class-Cluster', {tags: '@full'}, () => {
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    qase(126,
+    qase(393,
       it('Install App on imported cluster', {retries: 1}, () => {
         cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
     );
 
-    it("Scale up imported CAPA cluster by patching class-cluster yaml", () => {
+    qase(315, it("Scale up imported CAPA cluster by patching class-cluster yaml", () => {
       cy.readFile(classClusterFileName).then((data) => {
         data = data.replace(/replicas: 2/g, 'replicas: 3')
 
@@ -108,24 +109,26 @@ describe('Import CAPA Kubeadm Class-Cluster', {tags: '@full'}, () => {
       cy.get('.content > .count', {timeout: timeout}).should('have.text', '3');
       cy.checkCAPIClusterActive(clusterName);
     })
+    );
 
-    it('Remove imported CAPA cluster from Rancher Manager', () => {
+    qase(361, it('Remove imported CAPA cluster from Rancher Manager', () => {
       // Delete the imported cluster
       // Ensure that the provisioned CAPI cluster still exists
       importedRancherv3ClusterDeletion(clusterName);
     })
+    );
   })
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
-      qase(127,
+      qase(394,
         it('Delete the CAPA cluster', {retries: 1}, () => {
           // Remove CAPI Resources related to the cluster
           capiClusterDeletion(clusterName, timeout);
         })
       );
 
-      qase(128,
+      qase(395,
         it('Delete the ClusterClass fleet repo and other resources', () => {
           // Remove the clusterclass repo
           cy.removeFleetGitRepo(clusterClassRepoName);

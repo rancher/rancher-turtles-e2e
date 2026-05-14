@@ -23,9 +23,10 @@ describe('Install CAPI extension - @install', {tags: '@install'}, () => {
     cy.burgerMenuOperate('open');
   });
 
-  it('Add capi-ui repo', () => {
+  qase(153, it('Add capi-ui repo', () => {
     cy.addRepository('capi-ui', 'https://rancher.github.io/capi-ui-extension', 'http', 'none')
   })
+  );
 
   qase(3,
     it('Install CAPI extension', () => {

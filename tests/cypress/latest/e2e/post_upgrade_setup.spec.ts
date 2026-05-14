@@ -3,7 +3,7 @@ import {vars} from '../support/variables';
 import {isTurtlesDevChart, turtlesNamespace} from '../support/utils';
 
 Cypress.config();
-describe('Post Upgrade', {tags: '@upgrade'}, () => {
+describe('Post Rancher Upgrade Setup - @upgrade', {tags: '@upgrade'}, () => {
   const timeout = vars.shortTimeout
 
   beforeEach(() => {
@@ -11,14 +11,15 @@ describe('Post Upgrade', {tags: '@upgrade'}, () => {
     cy.burgerMenuOperate('open');
   });
 
-  it('Check the local cluster status is active post-upgrade', ()=>{
+  qase(510, it('Check the local cluster status is active post-upgrade', ()=>{
     // Check local cluster is Active
     const localCluster = 'local'
     cy.searchCluster(localCluster);
     cy.contains(new RegExp('Active.*' + localCluster), {timeout: timeout});
   })
+  );
 
-  it('Check upgraded Turtles chart', () => {
+  qase(511, it('Check upgraded Turtles chart', () => {
     cy.exploreCluster('local');
     cy.setNamespace(turtlesNamespace);
     cy.clickNavMenu(['Apps', 'Installed Apps']);
@@ -29,5 +30,6 @@ describe('Post Upgrade', {tags: '@upgrade'}, () => {
     cy.getBySel('sortable-cell-0-3').contains(turtlesChartVersion, {timeout: timeout});
     cy.waitForAllRowsInState('Deployed', timeout);
   })
+  );
 
 });

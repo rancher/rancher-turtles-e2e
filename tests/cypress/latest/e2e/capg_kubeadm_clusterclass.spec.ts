@@ -19,9 +19,10 @@ describe('Import CAPG Kubeadm Class-Cluster', {tags: '@full'}, () => {
     cy.burgerMenuOperate('open');
   });
   context('[SETUP]', () => {
-    it('Setup the namespace for importing', () => {
+    qase(320, it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
+    );
 
     qase(148,
       it('Add CAPG Kubeadm ClusterClass Fleet Repo and check GCP CCM', () => {
@@ -82,7 +83,7 @@ describe('Import CAPG Kubeadm Class-Cluster', {tags: '@full'}, () => {
       })
     );
 
-    it("Scale up imported CAPG cluster by patching class-cluster yaml", () => {
+    qase(321, it("Scale up imported CAPG cluster by patching class-cluster yaml", () => {
       cy.readFile(classClusterFileName).then((data) => {
         data = data.replace(/replicas: 2/g, 'replicas: 3')
 
@@ -101,12 +102,14 @@ describe('Import CAPG Kubeadm Class-Cluster', {tags: '@full'}, () => {
       cy.get('.content > .count', {timeout: timeout}).should('have.text', '3');
       cy.checkCAPIClusterActive(clusterName);
     })
+    );
 
-    it('Remove imported CAPG cluster from Rancher Manager', () => {
+    qase(363, it('Remove imported CAPG cluster from Rancher Manager', () => {
       // Delete the imported cluster
       // Ensure that the provisioned CAPI cluster still exists
       importedRancherv3ClusterDeletion(clusterName);
     })
+    );
   })
 
   context('[TEARDOWN]', () => {

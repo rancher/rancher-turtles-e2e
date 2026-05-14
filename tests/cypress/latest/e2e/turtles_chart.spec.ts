@@ -26,7 +26,7 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
     cy.burgerMenuOperate('open');
   });
 
-  it("Change helm charts to Include Prerelease Versions", () => {
+  qase(151, it("Change helm charts to Include Prerelease Versions", () => {
     // this test should be run before the turtles repository is added; so that it can fetch the prereleased versions
 
     // toggle the navigation menu to a close
@@ -39,6 +39,7 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
     // check that the prerelease version is selected by ensuring it does not have `bg-disabled` class
     cy.contains("Include Prerelease Versions").should('not.have.class', 'bg-disabled');
   })
+  );
 
   let addTurtlesProvidersRepo = function () {
     cy.task('suiteLog', "Adding turtles-providers-chart repo");
@@ -57,7 +58,7 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
   }
 
   if (isRancherManagerVersion(">=2.13")) {
-    it("Add turtles-providers GitRepo", () => {
+    qase(403, it("Add turtles-providers GitRepo", () => {
       if (isTurtlesDevChart) {
         addChartMuseumRepo();
       } else {
@@ -70,10 +71,11 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
         // In Post-upgrade, providers will be installed using chartmuseum repo
       }
     })
+    );
   }
 
   if (isRancherManagerVersion("<=2.12")) {
-    it("Add turtles GitRepo", () => {
+    qase(404, it("Add turtles GitRepo", () => {
       if (isTurtlesDevChart) {
         addChartMuseumRepo();
       } else {
@@ -87,8 +89,9 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
         // In Post-migration, chartmuseum repo will be used to install providers chart
       }
     })
+    );
 
-    it('Install Turtles chart', {retries: 1}, () => {
+    qase(11, it('Install Turtles chart', {retries: 1}, () => {
       // if turtles dev chart is to be used, ignore the turtles chart version
       if (isTurtlesDevChart) {
         turtlesVersion = ""
@@ -99,5 +102,6 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
       }
       cy.checkChart('local', 'Install', 'Rancher Turtles', turtlesNamespace, {version: turtlesVersion});
     })
+    );
   }
 });

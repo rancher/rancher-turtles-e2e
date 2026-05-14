@@ -22,12 +22,13 @@ describe('Import CAPA EKS Class-Cluster', {tags: '@full'}, () => {
   });
 
   context('[SETUP]', () => {
-    it('Setup the namespace for importing', () => {
+    qase(317, it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
+    );
 
     // TODO: Create Provider via UI, ref: capi-ui-extension/issues/128
-    it('Create AWS CAPIProvider & AWSClusterStaticIdentity', () => {
+    qase(343, it('Create AWS CAPIProvider & AWSClusterStaticIdentity', () => {
       if (isRancherManagerVersion('<2.13')) {
         cy.removeCAPIResource('Providers', providerName);
         cy.createCAPIProvider(providerName);
@@ -35,6 +36,7 @@ describe('Import CAPA EKS Class-Cluster', {tags: '@full'}, () => {
       }
       cy.createAWSClusterStaticIdentity(accessKey, secretKey);
     })
+    );
 
     qase(129,
       it('Add CAPA EKS ClusterClass Fleet Repo', () => {
@@ -87,7 +89,7 @@ describe('Import CAPA EKS Class-Cluster', {tags: '@full'}, () => {
       })
     );
 
-    it("Scale up imported CAPA cluster by patching class-cluster yaml", () => {
+    qase(318, it("Scale up imported CAPA cluster by patching class-cluster yaml", () => {
       cy.readFile(classClusterFileName).then((data) => {
         data = data.replace(/replicas: 2/g, 'replicas: 3')
 
@@ -103,12 +105,14 @@ describe('Import CAPA EKS Class-Cluster', {tags: '@full'}, () => {
       cy.get('.content > .count', {timeout: timeout}).should('have.text', '3');
       cy.checkCAPIClusterActive(clusterName);
     })
+    );
 
-    it('Remove imported CAPA cluster from Rancher Manager', () => {
+    qase(362, it('Remove imported CAPA cluster from Rancher Manager', () => {
       // Delete the imported cluster
       // Ensure that the provisioned CAPI cluster still exists
       importedRancherv3ClusterDeletion(clusterName);
     })
+    );
   })
 
   context('[TEARDOWN]', () => {

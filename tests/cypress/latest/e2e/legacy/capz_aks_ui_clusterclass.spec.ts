@@ -40,14 +40,13 @@ describe('Create CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
     cy.createAzureClusterIdentity(clientID, tenantID, clientSecret);
   })
 
-  qase(84, it('Add CAPZ AKS ClusterClass using fleet', () => {
+  it('Add CAPZ AKS ClusterClass using fleet', () => {
     cy.addFleetGitRepo(clusterClassRepoName, turtlesRepoUrl, 'main', classesPath, 'capi-clusters') // TODO: Change to capi-classes (capi-ui-extension/issues/111)
     // Go to CAPI > ClusterClass to ensure the clusterclass is created
     cy.checkCAPIClusterClass(classNamePrefix);
   })
-  );
 
-  qase(45, it('Create CAPZ AKS from Clusterclass via UI', () => {
+  it('Create CAPZ AKS from Clusterclass via UI', () => {
     // Create cluster from Clusterclass UI
       const cluster: Cluster = {
         className: classNamePrefix,
@@ -78,7 +77,6 @@ describe('Create CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
     cy.searchCluster(clusterName);
     cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
   })
-  );
 
   it('Install App on created cluster', () => {
     // Click on created CAPZ cluster
@@ -89,7 +87,7 @@ describe('Create CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
   })
 
   if (skipClusterDeletion) {
-    qase(89, it('Remove created CAPZ cluster from Rancher Manager and Delete the CAPZ cluster', {retries: 1}, () => {
+    it('Remove created CAPZ cluster from Rancher Manager and Delete the CAPZ cluster', {retries: 1}, () => {
       // Check cluster is not deleted after removal
       cy.deleteCluster(clusterName);
       cy.goToHome();
@@ -101,7 +99,6 @@ describe('Create CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
       // Delete CAPI cluster created via UI
       cy.removeCAPIResource('Clusters', clusterName, timeout);
     })
-    );
 
     it('Delete the CAPZ clusterclasses fleet repo and other resources', () => {
       // Remove the clusterclass repo

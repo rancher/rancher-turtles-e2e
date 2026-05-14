@@ -47,14 +47,16 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
   });
 
   context('[SETUP]', () => {
-    it('Setup the namespace for importing', () => {
+    qase(294, it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
+    );
 
-    it('Create Docker Auth Secret', () => {
+    qase(295, it('Create Docker Auth Secret', () => {
       // Prevention for Docker.io rate limiting
       cy.createDockerAuthSecret();
-    });
+    })
+    );
 
     qase(91,
       it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
@@ -80,7 +82,7 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
       })
     );
 
-    qase(101,
+    qase(298,
       it('Auto import child CAPD cluster', () => {
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
         cy.checkCAPIClusterProvisioned(clusterName, timeout);
@@ -142,19 +144,21 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
     );
     }
 
-    it('Remove imported CAPD cluster from Rancher Manager', () => {
+    qase(356, it('Remove imported CAPD cluster from Rancher Manager', () => {
       // Delete the imported cluster
       // Ensure that the provisioned CAPI cluster still exists
       importedRancherv3ClusterDeletion(clusterName);
     })
+    );
 
-    it('Re-import the CAPD cluster and remove from Rancher Manager', () => {
+    qase(458, it('Re-import the CAPD cluster and remove from Rancher Manager', () => {
       reImportRancherv3Cluster(clusterName);
 
       // Delete the imported cluster
       // Ensure that the provisioned CAPI cluster still exists
       importedRancherv3ClusterDeletion(clusterName);
     })
+    );
   })
 
   context('[TEARDOWN]', () => {

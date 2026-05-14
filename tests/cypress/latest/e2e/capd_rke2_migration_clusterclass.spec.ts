@@ -34,13 +34,14 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
 
   context('Pre-Migration Resources and Cluster creation', () => {
     if (isRancherManagerVersion('2.12')) {
-      it('Create & Setup the namespace for importing', () => {
+      qase(375, it('Create & Setup the namespace for importing', () => {
         cy.createNamespace([vars.capiClustersNS, vars.capiClassesNS, capdProviderNS]);
         cy.burgerMenuOperate('open');
         cy.namespaceAutoImport('Disable');
       })
+      );
 
-      it('Create Docker CAPIProvider & Calico CNI HelmOp', () => {
+      qase(376, it('Create Docker CAPIProvider & Calico CNI HelmOp', () => {
         // Calico CNI HelmOp
         cy.addFleetGitRepo('calico-cni', vars.turtlesRepoUrl, vars.classBranch, 'examples/applications/cni/calico', vars.capiClustersNS)
 
@@ -51,20 +52,23 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
         // Create Docker provider
         cy.createCAPIProvider(capdProviderName);
       })
+      );
 
-      it('Create Docker Auth Secret', () => {
+      qase(377, it('Create Docker Auth Secret', () => {
         // Prevention for Docker.io rate limiting
         cy.createDockerAuthSecret();
-      });
+      })
+      );
 
 
-      it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
+      qase(405, it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
         cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(classNamePrefix);
       })
+      );
 
-      it('Import CAPD RKE2 class-clusters using YAML', () => {
+      qase(378, it('Import CAPD RKE2 class-clusters using YAML', () => {
         cy.readFile('./fixtures/docker/capd-rke2-class-cluster-v1beta1.yaml').then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_rke2_version/g, vars.rke2Version)
@@ -75,8 +79,9 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
         // Check CAPI cluster using its name
         cy.checkCAPICluster(clusterName);
       })
+      );
 
-      it('Auto import child CAPD cluster', () => {
+      qase(406, it('Auto import child CAPD cluster', () => {
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
         cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
@@ -93,8 +98,9 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
         // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
         cy.checkCAPIClusterActive(clusterName, timeout);
       })
+      );
 
-      it('Pre-upgrade steps for migration', () => {
+      qase(379, it('Pre-upgrade steps for migration', () => {
         // Uninstall Rancher Turtles chart
         cy.deleteKubernetesResource('local', ['Apps', 'Installed Apps'], 'rancher-turtles', turtlesNamespace);
         cy.contains(new RegExp('"rancher-turtles" uninstalled'), {timeout: timeout}).should('be.visible');
@@ -109,6 +115,7 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
           cy.patchYamlResource('local', namespace, resourceKind, resourceName, patch);
         })
       })
+      );
     }
   })
 
@@ -116,12 +123,13 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
     // Migration script was ran to adopt provider resources into new Helm release (master-e2e.yaml)
 
     if (isRancherManagerVersion('2.13')) {
-      it('Create Fleet Provider using provider charts', () => {
+      qase(407, it('Create Fleet Provider using provider charts', () => {
         // Install Rancher Turtles Certified Providers chart with default values
         cy.checkChart('local', 'Install', vars.turtlesProvidersChartName, turtlesNamespace);
       })
+      );
 
-      it('Check cluster & Resources status post-migration', () => {
+      qase(408, it('Check cluster & Resources status post-migration', () => {
         // Check Dockerprovider version is auto-upgraded
         cy.checkCAPIProvider(capdProviderName);
         cy.contains(capdProviderVersion);
@@ -140,12 +148,14 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
         cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
         cy.checkCAPIClusterActive(clusterName, timeout);
       })
+      );
 
-      it('Install App on imported cluster', {retries: 1}, () => {
+      qase(409, it('Install App on imported cluster', {retries: 1}, () => {
         cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
+      );
 
-      it("Scale up imported CAPD cluster by patching class-cluster yaml", () => {
+      qase(410, it("Scale up imported CAPD cluster by patching class-cluster yaml", () => {
         cy.readFile('./fixtures/docker/capd-rke2-class-cluster-v1beta1.yaml').then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_rke2_version/g, vars.rke2Version)
@@ -161,16 +171,18 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
         cy.get('.content > .count', {timeout: timeout}).should('have.text', '3');
         cy.checkCAPIClusterActive(clusterName);
       })
+      );
 
-      it('Remove imported CAPD cluster from Rancher Manager and Delete the CAPD cluster', () => {
+      qase(411, it('Remove imported CAPD cluster from Rancher Manager and Delete the CAPD cluster', () => {
         // Delete the imported cluster
         // Ensure that the provisioned CAPI cluster still exists
         importedRancherv3ClusterDeletion(clusterName);
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout);
       })
+      );
 
-      it('Delete the ClusterClass fleet repo and other resources', () => {
+      qase(412, it('Delete the ClusterClass fleet repo and other resources', () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
 
@@ -190,6 +202,7 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
         // Remove namespaces
         cy.deleteNamespace([vars.capiClassesNS, vars.capiClustersNS, capdProviderNS]);
       })
+      );
     }
   })
 });

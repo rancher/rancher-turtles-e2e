@@ -27,13 +27,15 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: '@full'}, () => {
 
 
   context('[SETUP]', () => {
-    it('Setup the namespace for importing', () => {
+    qase(326, it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
+    );
 
-    it('Create AzureClusterIdentity', () => {
+    qase(345, it('Create AzureClusterIdentity', () => {
       cy.createAzureClusterIdentity(clientID, tenantID, clientSecret)
     })
+    );
 
     qase(87, it('Add CAPZ RKE2 ClusterClass Fleet Repo and check Azure CCM', () => {
         cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
@@ -87,7 +89,7 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: '@full'}, () => {
       })
     );
 
-    it("Scale up imported CAPZ cluster by patching class-cluster yaml", () => {
+    qase(327, it("Scale up imported CAPZ cluster by patching class-cluster yaml", () => {
       cy.readFile(classClusterFileName).then((data) => {
         data = data.replace(/replicas: 2/g, 'replicas: 3')
 
@@ -105,12 +107,14 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: '@full'}, () => {
       cy.get('.content > .count', {timeout: timeout}).should('have.text', '3');
       cy.checkCAPIClusterActive(clusterName);
     })
+    );
 
-    it('Remove imported CAPZ cluster from Rancher Manager', () => {
+    qase(365, it('Remove imported CAPZ cluster from Rancher Manager', () => {
       // Delete the imported cluster
       // Ensure that the provisioned CAPI cluster still exists
       importedRancherv3ClusterDeletion(clusterName);
     })
+    );
 
   })
 

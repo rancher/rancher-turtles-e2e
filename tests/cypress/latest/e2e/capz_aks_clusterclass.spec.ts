@@ -22,13 +22,15 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
   });
 
   context('[SETUP]', () => {
-    it('Setup the namespace for importing', () => {
+    qase(323, it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
+    );
 
-    it('Create AzureASOCredential', () => {
+    qase(415, it('Create AzureASOCredential', () => {
       cy.createAzureASOCredential(clientID, tenantID, clientSecret, subscriptionID);
     })
+    );
 
     qase(84, it('Add CAPZ AKS ClusterClass using fleet', () => {
         cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
@@ -73,12 +75,13 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
       })
     );
 
-    it('Remove imported CAPZ cluster from Rancher Manager', {retries: 1}, () => {
+    qase(364, it('Remove imported CAPZ cluster from Rancher Manager', {retries: 1}, () => {
       // Delete the imported cluster
       // Ensure that the provisioned CAPI cluster still exists
       // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
       importedRancherv3ClusterDeletion(clusterName);
     })
+    );
   })
 
   context('[TEARDOWN]', () => {
@@ -89,12 +92,13 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
         })
       );
 
-      it('Delete the ClusterClass fleet repo and other resources', () => {
+      qase(325, it('Delete the ClusterClass fleet repo and other resources', () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
         // Cleanup other resources
         capzResourcesCleanup(true);
       })
+      );
     }
   })
 });
