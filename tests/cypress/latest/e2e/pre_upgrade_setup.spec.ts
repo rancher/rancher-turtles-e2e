@@ -12,7 +12,7 @@ describe('Pre Upgrade', {tags: '@upgrade'}, () => {
     cy.burgerMenuOperate('open');
   });
 
-  it("Enable use-caapf feature gate", () => {
+  it("Enable use-caapf feature gate before Rancher upgrade", () => {
     const enableFeatureGate = (text: any) => {
       // to disable the feature flag, simply removing this data won't be enough. The value must be reset to "false".
       text.data["rancher-turtles"] = `{"features": {"use-caapf": {"enabled": "true"}}}`;
