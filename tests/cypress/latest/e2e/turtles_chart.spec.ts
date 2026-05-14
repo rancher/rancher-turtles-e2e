@@ -84,7 +84,10 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
         // Used in Pre-migration: For Migration test; turtles will be installed from turtles-chart repo.
         // dev=true is only applicable for 2.13 or version test is upgrading to.
         addTurtlesRepo();
-        // In Post-migration, chartmuseum repo will be used to install providers chart
+        // Used in Post-migration: if dev=false turtles-providers-chart repo will be used to install providers chart; else chartmuseum repo will be used
+        if (!isTurtlesDevChart) {
+          addTurtlesProvidersRepo();
+        }
       }
     })
 
