@@ -5,6 +5,7 @@ import {vars} from '../support/variables';
 
 Cypress.config();
 describe('Import CAPA EKS Class-Cluster', {tags: '@full'}, () => {
+  let appVersion: string;
   const timeout = vars.fullTimeout
   const classNamePrefix = 'aws-eks'
   const clusterName = getClusterName(classNamePrefix)
@@ -27,7 +28,6 @@ describe('Import CAPA EKS Class-Cluster', {tags: '@full'}, () => {
     })
     );
 
-    // TODO: Create Provider via UI, ref: capi-ui-extension/issues/128
     qase(343, it('Create AWS CAPIProvider & AWSClusterStaticIdentity', () => {
       if (isRancherManagerVersion('<2.13')) {
         cy.removeCAPIResource('Providers', providerName);
@@ -52,6 +52,7 @@ describe('Import CAPA EKS Class-Cluster', {tags: '@full'}, () => {
       it('Import CAPA EKS class-cluster using YAML', () => {
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
+          data = data.replace(/replace_eksVersion/g, vars.eksVersion)
           cy.importYAML(data, vars.capiClustersNS)
         });
         // Check CAPI cluster using its name
@@ -83,9 +84,14 @@ describe('Import CAPA EKS Class-Cluster', {tags: '@full'}, () => {
   context('[CLUSTER-OPERATIONS]', () => {
     qase(126,
       it('Install App on imported cluster', {retries: 1}, () => {
+        if (isAPIv1beta1) {
+          appVersion = '108.0'
+        } else {
+          appVersion = ''
+        }
         // Chart version 109.0.0 (Rancher 2.14) requires k8s version >=1.33
         // Ref: https://github.com/rancher/turtles/issues/2247
-        cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system', {version: '108.0'});
+        cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system', {version: appVersion});
       })
     );
 
@@ -95,6 +101,7 @@ describe('Import CAPA EKS Class-Cluster', {tags: '@full'}, () => {
 
         // workaround; these values need to be re-replaced before applying the scaling changes
         data = data.replace(/replace_cluster_name/g, clusterName)
+        data = data.replace(/replace_eksVersion/g, vars.eksVersion)
         cy.importYAML(data, vars.capiClustersNS)
       })
 

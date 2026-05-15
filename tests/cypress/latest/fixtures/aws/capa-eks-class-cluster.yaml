@@ -13,7 +13,7 @@ spec:
     classRef:
       name: aws-eks-example
       namespace: capi-classes
-    version: v1.32.0 #https://github.com/rancher/turtles/blob/main/test/e2e/config/operator.yaml#L61
+    version: replace_eksVersion 
     variables:
       - name: region
         value: ap-south-2

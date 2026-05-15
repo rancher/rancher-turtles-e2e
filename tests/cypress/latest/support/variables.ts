@@ -1,4 +1,4 @@
-import {isRancherManagerVersion, providersChartNeedsStgRegistry} from './utils';
+import {isAPIv1beta1, isRancherManagerVersion, providersChartNeedsStgRegistry} from './utils';
 
 export const vars = {
   shortTimeout: 600000,
@@ -14,6 +14,7 @@ export const vars = {
   turtlesProvidersHelmApp: 'rancher-turtles-providers',
   turtlesProvidersOCIRepo: providersChartNeedsStgRegistry() ? Cypress.expose('providers_stg_oci_repo') : Cypress.expose('providers_oci_repo'), // For alpha|rc|head builds, use stgregistry, for released versions, use regular registry.
   turtlesProvidersChartName: 'rancher-turtles-providers',
+  eksVersion: isAPIv1beta1 ? 'v1.32.0' : 'v1.35.0',
   kindVersion: isRancherManagerVersion('2.12') ? 'v1.33.4' : isRancherManagerVersion('2.13') ? 'v1.34.0' : 'v1.35.0',
   k8sVersion: isRancherManagerVersion('2.12') ? 'v1.33.4' : isRancherManagerVersion('2.13') ? 'v1.34.1' : 'v1.35.0',
   rke2Version: isRancherManagerVersion('2.12') ? 'v1.33.4+rke2r1' : isRancherManagerVersion('2.13') ? 'v1.34.1+rke2r1' : 'v1.35.0+rke2r1',
