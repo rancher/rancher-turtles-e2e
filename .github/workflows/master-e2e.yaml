@@ -347,6 +347,8 @@ jobs:
             echo "TURTLES_BRANCH=release-0.24" >> ${GITHUB_ENV}
           elif [[ "${{ env.RANCHER_VERSION }}" =~ 2.13 && ! "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
             echo "TURTLES_BRANCH=release/v0.25" >> ${GITHUB_ENV}
+          elif [[ "${{ env.RANCHER_VERSION }}" =~ 2.14 ]]; then
+            echo "TURTLES_BRANCH=release/v0.26" >> ${GITHUB_ENV}
           elif [[ "${{ inputs.grep_test_by_tag }}" =~ "@migration" ]]; then
             echo "TURTLES_BRANCH=release/v0.25" >> ${GITHUB_ENV}
           elif [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
