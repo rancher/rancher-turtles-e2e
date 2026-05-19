@@ -77,12 +77,12 @@ describe('Enable CAPI Providers', () => {
       azure: 'v1.21.0'
     },
     'prod-v2.14': {
-      capi: 'v1.12.2',
+      capi: 'v1.12.7',
       rke2: 'v0.24.4',
-      kubeadm: 'v1.12.2',
+      kubeadm: 'v1.12.7',
       fleet: 'v0.14.1',
       vsphere: 'v1.15.2',
-      amazon: 'v2.10.1',
+      amazon: 'v2.11.1',
       google: 'v1.11.1',
       azure: 'v1.22.0'
     },
@@ -107,9 +107,9 @@ describe('Enable CAPI Providers', () => {
       azure: 'v1.21.0'
     },
     'dev-v2.14': {
-      capi: 'v1.12.2',
+      capi: 'v1.12.7',
       rke2: 'v0.24.4',
-      kubeadm: 'v1.12.2',
+      kubeadm: 'v1.12.7',
       fleet: 'v0.14.1',
       vsphere: 'v1.15.2',
       amazon: 'v2.11.1',
@@ -117,14 +117,14 @@ describe('Enable CAPI Providers', () => {
       azure: 'v1.22.0'
     },
     'dev-v2.15': {
-      capi: 'v1.12.2',
+      capi: 'v1.13.1',
       rke2: 'v0.24.4',
-      kubeadm: 'v1.12.2',
-      fleet: 'v0.14.1',
-      vsphere: 'v1.15.2',
+      kubeadm: 'v1.13.1',
+      fleet: 'v0.15.0',
+      vsphere: 'v1.16.1',
       amazon: 'v2.11.1',
-      google: 'v1.11.1',
-      azure: 'v1.22.0'
+      google: 'v1.11.2',
+      azure: 'v1.24.0'
     }
   }
 
