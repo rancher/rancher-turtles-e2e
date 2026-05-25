@@ -11,8 +11,9 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
   const classesPath = 'examples/clusterclasses/azure/aks'
   const clusterClassRepoName = "azure-aks-clusterclass"
 
-  const clientID = Cypress.expose("azure_client_id")
   const clientSecret = Cypress.expose("azure_client_secret")
+  const clientSecretBase64 = btoa(Cypress.expose("azure_client_secret"))
+  const clientID = Cypress.expose("azure_client_id")
   const subscriptionID = Cypress.expose("azure_subscription_id")
   const tenantID = Cypress.expose("azure_tenant_id")
 
@@ -27,8 +28,12 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
     })
     );
 
-    qase(415, it('Create AzureASOCredential', () => {
-      cy.createAzureASOCredential(clientID, tenantID, clientSecret, subscriptionID);
+    qase(415, it('Create AzureASOCredential or AzureClusterIdentity', () => {
+      if (isAPIv1beta1) {
+        cy.createAzureClusterIdentity(clientID, tenantID, clientSecretBase64);
+      } else {
+        cy.createAzureASOCredential(clientID, tenantID, clientSecret, subscriptionID);
+      }
     })
     );
 
@@ -46,6 +51,11 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
         const classClusterFileName = isAPIv1beta1 ? './fixtures/azure/capz-aks-class-cluster-v1beta1.yaml' : './fixtures/azure/capz-aks-class-cluster.yaml'
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
+          data = data.replace(/replace_k8sVersion/g, vars.aksVersion)
+
+          if (isAPIv1beta1) {
+            data = data.replace(/replace_subscription_id/g, subscriptionID)
+          }
           cy.importYAML(data, vars.capiClustersNS)
         });
         // Check CAPI cluster using its name
@@ -96,7 +106,12 @@ describe('Import CAPZ AKS Class-Cluster', {tags: '@full'}, () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
         // Cleanup other resources
-        capzResourcesCleanup(true);
+        if (isAPIv1beta1) {
+          capzResourcesCleanup(false);
+        } else {
+          capzResourcesCleanup(true);
+        }
+      
       })
       );
     }
