@@ -33,7 +33,7 @@ import (
 
 const (
 	k3sInstallerFile    = "k3s-install.sh"
-	k3sInstallerVersion = "v1.36.0+k3s1"
+	k3sInstallerVersion = "v1.36.1+k3s1"
 	k3sInstallerURL     = "https://raw.githubusercontent.com/k3s-io/k3s/" + k3sInstallerVersion + "/install.sh"
 	k3sInstallerSHA256  = "46177d4c99440b4c0311b67233823a8e8a2fc09693f6c89af1a7161e152fbfad"
 )
