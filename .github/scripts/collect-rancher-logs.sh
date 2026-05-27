@@ -5,7 +5,7 @@ set -eo pipefail
 # Variables
 
 # Rancher support-tools log collector (pinned by commit + checksum)
-RANCHER_LOG_COLLECTER_COMMIT="51ff3e7ef2b8dba1fde5f523b362d7c9f14b29f3"
+RANCHER_LOG_COLLECTER_COMMIT="7ce7378bced2ff09672329742f395fe34bcebb88"
 RANCHER_LOG_COLLECTER_PATH="collection/rancher/v2.x/logs-collector/rancher2_logs_collector.sh"
 RANCHER_LOG_COLLECTER="https://raw.githubusercontent.com/rancherlabs/support-tools/${RANCHER_LOG_COLLECTER_COMMIT}/${RANCHER_LOG_COLLECTER_PATH}"
 RANCHER_LOG_COLLECTER_SHA256="9cb953c3636737201a4343317fe91d8f7463cf7e69c3ea411d54a8cc5a12d50a"
