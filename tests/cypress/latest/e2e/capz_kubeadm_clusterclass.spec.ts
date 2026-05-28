@@ -1,5 +1,5 @@
 import '../support/commands';
-import {getClusterName, isAPIv1beta1, skipClusterDeletion} from '../support/utils';
+import {getClusterName, isAPIv1beta1, skipClusterDeletion, isRancherManagerVersion} from '../support/utils';
 import {capiClusterDeletion, capzResourcesCleanup, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
@@ -16,9 +16,10 @@ describe('Import CAPZ Kubeadm Class-Cluster', {tags: '@full'}, () => {
   const clientSecret = btoa(Cypress.expose("azure_client_secret"))
   const subscriptionID = Cypress.expose("azure_subscription_id")
   const tenantID = Cypress.expose("azure_tenant_id")
-  const k8sVersion = isAPIv1beta1
-  ? vars.k8sVersion
-  : 'v1.34.3'
+
+  // Azure CCM fails to install when using v1.35
+  const k8sVersion = isRancherManagerVersion('2.14') ? 'v1.34.1'
+    : vars.kubeadmVersion
 
   beforeEach(() => {
     cy.login();

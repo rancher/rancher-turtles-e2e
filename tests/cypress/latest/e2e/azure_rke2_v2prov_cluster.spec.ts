@@ -12,9 +12,7 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
   const clusterName = 'turtles-qa-azure-v2-' + randomstring.generate({length: 4, capitalization: "lowercase"})
   const clusterFileName = isAPIv1beta1 ? './fixtures/azure/azure-rke2-cluster-v1beta1.yaml' : './fixtures/azure/azure-rke2-cluster.yaml'
   const rkeConfigFileName = isAPIv1beta1 ? './fixtures/azure/azure-rke-config-v1beta1.yaml' : './fixtures/azure/azure-rke-config.yaml'
-  const k8sVersion = isAPIv1beta1
-  ? vars.rke2Version
-  : 'v1.35.3+rke2r1'
+  const k8sVersion = vars.v2provRKE2Version
 
   if (isRancherManagerVersion('2.13')) {
     features.push('embedded-cluster-api');

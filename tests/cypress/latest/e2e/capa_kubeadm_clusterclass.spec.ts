@@ -53,7 +53,7 @@ describe('Import CAPA Kubeadm Class-Cluster', {tags: '@full'}, () => {
       it('Import CAPA Kubeadm class-cluster using YAML', () => {
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
-          data = data.replace(/replace_k8sVersion/g, vars.k8sVersion)
+          data = data.replace(/replace_k8sVersion/g, vars.kubeadmVersion)
           data = data.replace(/replace_amiID/g, vars.amiID)
           cy.importYAML(data, vars.capiClustersNS)
         });
@@ -97,7 +97,7 @@ describe('Import CAPA Kubeadm Class-Cluster', {tags: '@full'}, () => {
 
         // workaround; these values need to be re-replaced before applying the scaling changes
         data = data.replace(/replace_cluster_name/g, clusterName)
-        data = data.replace(/replace_k8sVersion/g, vars.k8sVersion)
+        data = data.replace(/replace_k8sVersion/g, vars.kubeadmVersion)
         data = data.replace(/replace_amiID/g, vars.amiID)
         cy.importYAML(data, vars.capiClustersNS)
       })
