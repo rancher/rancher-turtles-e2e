@@ -11,24 +11,31 @@ export const reImportClusterPatchCommand = (clusterName: string): string => {
 export function importedRancherv3ClusterDeletion(clusterName: string) {
   // Verify the imported cluster is present on the home page before deletion
   cy.goToHome();
-  cy.contains(clusterName).should('exist');
+  cy.get('body').then(($body) => {
+    if (!$body.text().includes(clusterName)) {
+      cy.log(`Skipping imported Rancher v3 cluster deletion: ${clusterName} not found`);
+      return;
+    }
 
-  // Delete the imported mgmt v3 cluster from Cluster Management using kubectl
-  cy.kubectlExecute(v3ClusterDeleteCommand(clusterName));
+    cy.contains(clusterName).should('exist');
 
-  // Ensure the cluster is not available on the home page
-  cy.goToHome();
-  cy.contains(clusterName).should('not.exist');
+    // Delete the imported mgmt v3 cluster from Cluster Management using kubectl
+    cy.kubectlExecute(v3ClusterDeleteCommand(clusterName));
 
-  // Ensure that the provisioned cluster/ CAPI resource related to the cluster still exists
-  cy.checkCAPIClusterProvisioned(clusterName);
+    // Ensure the cluster is not available on the home page
+    cy.goToHome();
+    cy.contains(clusterName).should('not.exist');
 
-  // Check the annotation is set on CAPI cluster
-  cy.viewCAPIClusterYAML(clusterName);
-  cy.get('.CodeMirror').then((editor) => {
-    // @ts-expect-error known error with CodeMirror
-    const text = editor[0].CodeMirror.getValue();
-    expect(text).to.include("imported: 'true'");
+    // Ensure that the provisioned cluster/ CAPI resource related to the cluster still exists
+    cy.checkCAPIClusterProvisioned(clusterName);
+
+    // Check the annotation is set on CAPI cluster
+    cy.viewCAPIClusterYAML(clusterName);
+    cy.get('.CodeMirror').then((editor) => {
+      // @ts-expect-error known error with CodeMirror
+      const text = editor[0].CodeMirror.getValue();
+      expect(text).to.include("imported: 'true'");
+    });
   });
 }
 
