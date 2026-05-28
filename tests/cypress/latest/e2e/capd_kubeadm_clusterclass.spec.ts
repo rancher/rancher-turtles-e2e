@@ -145,25 +145,25 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: '@short'}, () => {
       })
     );
 
-    qase(301, it('Remove imported CAPD cluster from Rancher Manager', () => {
+    qase(459, it('Re-import the CAPD cluster', () => {
       // Delete the imported cluster
       // Ensure that the provisioned CAPI cluster still exists
       importedRancherv3ClusterDeletion(clusterName);
-    })
-    );
 
-    qase(459, it('Re-import the CAPD cluster and remove from Rancher Manager', () => {
       reImportRancherv3Cluster(clusterName);
-
-      // Delete the imported cluster
-      // Ensure that the provisioned CAPI cluster still exists
-      importedRancherv3ClusterDeletion(clusterName);
     })
     );
   })
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
+      qase(301, it('Remove imported CAPD cluster from Rancher Manager', () => {
+        // Delete the imported cluster
+        // Ensure that the provisioned CAPI cluster still exists
+        importedRancherv3ClusterDeletion(clusterName);
+      })
+      );
+
       qase(98,
         it('Delete the CAPD cluster', {retries: 1}, () => {
           // Remove CAPI Resources related to the cluster

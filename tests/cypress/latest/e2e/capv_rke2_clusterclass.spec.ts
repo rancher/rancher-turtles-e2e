@@ -211,17 +211,17 @@ describe('Import CAPV RKE2 Class-Cluster', {tags: '@vsphere'}, () => {
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
     );
-
-    qase(358, it('Remove imported CAPV cluster from Rancher Manager', () => {
-      // Delete the imported cluster
-      // Ensure that the provisioned CAPI cluster still exists
-      importedRancherv3ClusterDeletion(clusterName);
-    })
-    );
   })
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
+      qase(358, it('Remove imported CAPV cluster from Rancher Manager', () => {
+        // Delete the imported cluster
+        // Ensure that the provisioned CAPI cluster still exists
+        importedRancherv3ClusterDeletion(clusterName);
+      })
+      );
+
       qase(282, it('Delete the CAPV cluster', {retries: 1}, () => {
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout, clusterRepoName);

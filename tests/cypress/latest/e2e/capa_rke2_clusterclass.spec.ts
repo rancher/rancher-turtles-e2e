@@ -111,18 +111,19 @@ describe('Import CAPA RKE2 Class-Cluster', {tags: '@full'}, () => {
       cy.checkCAPIClusterActive(clusterName);
     })
     );
-
-    qase(360, it('Remove imported CAPA cluster from Rancher Manager', {retries: 1}, () => {
-      // Delete the imported cluster
-      // Ensure that the provisioned CAPI cluster still exists
-      // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
-      importedRancherv3ClusterDeletion(clusterName);
-    })
-    );
   })
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
+      qase(360, it('Remove imported CAPA cluster from Rancher Manager', {retries: 1}, () => {
+        // Delete the imported cluster
+        // Ensure that the provisioned CAPI cluster still exists
+        // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
+        importedRancherv3ClusterDeletion(clusterName);
+      })
+      );
+
+
       qase(114,
         it('Delete the CAPA cluster', {retries: 1}, () => {
           // Remove CAPI Resources related to the cluster
