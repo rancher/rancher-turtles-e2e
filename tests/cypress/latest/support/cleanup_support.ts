@@ -1,7 +1,5 @@
 import {vars} from '../support/variables';
 
-const clusterTableBodySelector = 'table.sortable-table tbody';
-
 export const v3ClusterDeleteCommand = (clusterName: string): string => {
   return `kubectl delete clusters.management.cattle.io -l cluster-api.cattle.io/capi-cluster-owner=${clusterName} -l cluster-api.cattle.io/capi-cluster-owner-ns=${vars.capiClustersNS}`;
 };
@@ -11,6 +9,8 @@ export const reImportClusterPatchCommand = (clusterName: string): string => {
 };
 
 export function importedRancherv3ClusterDeletion(clusterName: string) {
+  const clusterTableBodySelector = 'table.sortable-table tbody';
+
   // Verify the imported cluster is present before deletion
   cy.searchCluster(clusterName);
   cy.get(clusterTableBodySelector).then(($tbody) => {
@@ -18,7 +18,7 @@ export function importedRancherv3ClusterDeletion(clusterName: string) {
       .find('tr')
       .filter((_, row) =>
         Cypress.$(row)
-          .find('a, td, span')
+          .find('a')
           .toArray()
           .some((cell) => Cypress.$(cell).text().trim() === clusterName)
       );
