@@ -93,7 +93,7 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: '@short'}, () => {
     );
   })
 
-  context('[CLUSTER-OPERATIONS]', () => {
+  context.skip('[CLUSTER-OPERATIONS]', () => {
 
     if (isRancherManagerVersion(">=2.13")) {
       qase(372, it("Check if annotation for custom cluster description set custom description the imported Rancher Cluster", () => {

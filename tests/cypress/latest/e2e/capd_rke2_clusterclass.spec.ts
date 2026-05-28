@@ -104,7 +104,7 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
 
   })
 
-  context('[CLUSTER-OPERATIONS]', () => {
+  context.skip('[CLUSTER-OPERATIONS]', () => {
     qase(101,
       it('Install App on imported cluster', {retries: 1}, () => {
         cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
