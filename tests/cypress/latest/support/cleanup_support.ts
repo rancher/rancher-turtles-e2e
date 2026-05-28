@@ -9,6 +9,10 @@ export const reImportClusterPatchCommand = (clusterName: string): string => {
 };
 
 export function importedRancherv3ClusterDeletion(clusterName: string) {
+  // Verify the imported cluster is present on the home page before deletion
+  cy.goToHome();
+  cy.contains(clusterName).should('exist');
+
   // Delete the imported mgmt v3 cluster from Cluster Management using kubectl
   cy.kubectlExecute(v3ClusterDeleteCommand(clusterName));
 
