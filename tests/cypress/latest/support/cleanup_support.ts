@@ -11,8 +11,12 @@ export const reImportClusterPatchCommand = (clusterName: string): string => {
 export function importedRancherv3ClusterDeletion(clusterName: string) {
   // Verify the imported cluster is present before deletion
   cy.searchCluster(clusterName);
-  cy.get('table.sortable-table tbody tr').then(($rows) => {
-    if ($rows.filter('.no-results').length > 0) {
+  cy.get('table.sortable-table tbody').then(($tbody) => {
+    const clusterRows = $tbody
+      .find('tr')
+      .filter((_, row) => Cypress.$(row).text().includes(clusterName));
+
+    if (clusterRows.length === 0) {
       cy.log(`Skipping imported Rancher v3 cluster deletion: ${clusterName} not found`);
       return;
     }
