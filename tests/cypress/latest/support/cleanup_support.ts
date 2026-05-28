@@ -9,15 +9,15 @@ export const reImportClusterPatchCommand = (clusterName: string): string => {
 };
 
 export function importedRancherv3ClusterDeletion(clusterName: string) {
-  // Verify the imported cluster is present on the home page before deletion
-  cy.goToHome();
-  cy.get('body').then(($body) => {
-    if (!$body.text().includes(clusterName)) {
+  // Verify the imported cluster is present before deletion
+  cy.searchCluster(clusterName);
+  cy.get('table.sortable-table tbody tr').then(($rows) => {
+    if ($rows.hasClass('no-results')) {
       cy.log(`Skipping imported Rancher v3 cluster deletion: ${clusterName} not found`);
       return;
     }
 
-    cy.contains(clusterName).should('exist');
+    cy.contains('table.sortable-table tbody tr', clusterName).should('exist');
 
     // Delete the imported mgmt v3 cluster from Cluster Management using kubectl
     cy.kubectlExecute(v3ClusterDeleteCommand(clusterName));
