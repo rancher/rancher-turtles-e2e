@@ -106,17 +106,17 @@ describe('Import CAPZ Kubeadm Class-Cluster', {tags: '@full'}, () => {
       cy.checkCAPIClusterActive(clusterName);
     })
     );
-
-    qase(366, it('Remove imported CAPZ cluster from Rancher Manager', () => {
-      // Delete the imported cluster
-      // Ensure that the provisioned CAPI cluster still exists
-      importedRancherv3ClusterDeletion(clusterName);
-    })
-    );
   })
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
+      qase(366, it('Remove imported CAPZ cluster from Rancher Manager', () => {
+        // Delete the imported cluster
+        // Ensure that the provisioned CAPI cluster still exists
+        importedRancherv3ClusterDeletion(clusterName);
+      })
+      );
+
       qase(336, it('Delete the CAPZ cluster', {retries: 1}, () => {
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout);

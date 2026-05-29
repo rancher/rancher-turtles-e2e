@@ -136,17 +136,17 @@ describe('Import CAPD RKE2 (Default CNI & No-Caapf) Class-Cluster using Fleet', 
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
     );
-
-    qase(448, it('Remove imported CAPD cluster from Rancher Manager', () => {
-      // Delete the imported cluster
-      // Ensure that the provisioned CAPI cluster still exists
-      importedRancherv3ClusterDeletion(clusterName);
-    })
-    );
   })
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
+      qase(448, it('Remove imported CAPD cluster from Rancher Manager', () => {
+        // Delete the imported cluster
+        // Ensure that the provisioned CAPI cluster still exists
+        importedRancherv3ClusterDeletion(clusterName);
+      })
+      );
+
       qase(449, it('Delete the CAPD cluster', {retries: 1}, () => {
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout, clustersRepoName, true);

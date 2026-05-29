@@ -109,18 +109,17 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: '@full'}, () => {
       cy.checkCAPIClusterActive(clusterName);
     })
     );
-
-    qase(365, it('Remove imported CAPZ cluster from Rancher Manager', () => {
-      // Delete the imported cluster
-      // Ensure that the provisioned CAPI cluster still exists
-      importedRancherv3ClusterDeletion(clusterName);
-    })
-    );
-
   })
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
+      qase(365, it('Remove imported CAPZ cluster from Rancher Manager', () => {
+        // Delete the imported cluster
+        // Ensure that the provisioned CAPI cluster still exists
+        importedRancherv3ClusterDeletion(clusterName);
+      })
+      );
+
       qase(82,
         it('Delete the CAPZ cluster', {retries: 1}, () => {
           // Remove CAPI Resources related to the cluster

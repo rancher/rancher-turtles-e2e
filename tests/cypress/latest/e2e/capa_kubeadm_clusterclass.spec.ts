@@ -110,17 +110,17 @@ describe('Import CAPA Kubeadm Class-Cluster', {tags: '@full'}, () => {
       cy.checkCAPIClusterActive(clusterName);
     })
     );
-
-    qase(361, it('Remove imported CAPA cluster from Rancher Manager', () => {
-      // Delete the imported cluster
-      // Ensure that the provisioned CAPI cluster still exists
-      importedRancherv3ClusterDeletion(clusterName);
-    })
-    );
   })
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
+      qase(361, it('Remove imported CAPA cluster from Rancher Manager', () => {
+        // Delete the imported cluster
+        // Ensure that the provisioned CAPI cluster still exists
+        importedRancherv3ClusterDeletion(clusterName);
+      })
+      );
+
       qase(394,
         it('Delete the CAPA cluster', {retries: 1}, () => {
           // Remove CAPI Resources related to the cluster

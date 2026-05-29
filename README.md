@@ -9,15 +9,13 @@ What tests are doing:
 4. Test the Turtles menu, namespaces import features
 5. Perform CAPI setup prerequisites
 6. Create & Import CAPI cluster using fleet by cluster, namespace annotation
-7. Create & Import CAPI cluster using ClusterClass UI
-8. Install App on imported CAPI cluster
-9. Scale the imported CAPI cluster
-10. Remove & Delete the imported CAPI cluster
-11. Migration test from 2.12 to 2.13 to test turtles migration from an external chart(2.12) to system integrated chart(
+7. Install App on imported CAPI cluster
+8. Scale the imported CAPI cluster
+9. Remove & Delete the imported CAPI cluster
+10. Migration test from 2.12 to 2.13 to test turtles migration from an external chart(2.12) to system integrated chart(
     2.13). These tests are only supported with `dev=true` options; `dev=true` is applicable to 2.13.
-12. Upgrade tests from 2.13 to 2.14 to test turtles CAPI upgrade from v1.10 to v1.12. These tests are only supported
-    with `dev=true` options; `dev=true` is applicable to 2.14.
-13. Add Feature Switch test for 2.13 to test switch between `embedded-cluster-api` and `turtles` features switch.
+11. Upgrade tests from 2.13 to 2.14 to test Turtles & CAPI upgrade from v1.10 to v1.12.
+12. Add Feature Switch test for 2.13 to test switch between `embedded-cluster-api` and `turtles` features switch.
 
 ## Running the tests locally
 
