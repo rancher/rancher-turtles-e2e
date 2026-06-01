@@ -280,7 +280,8 @@ jobs:
         e2e/capd_kubeadm_clusterclass.spec.ts
         e2e/capv_rke2_clusterclass.spec.ts
         e2e/capv_kubeadm_clusterclass.spec.ts
-        e2e/capa_kubeadm_clusterclass.spec.ts
+        e2e/capz_rke2_clusterclass.spec.ts
+        e2e/capz_kubeadm_clusterclass.spec.ts
         e2e/capi_features_switch.spec.ts
     steps:
       - name: Add /usr/local/bin into PATH
