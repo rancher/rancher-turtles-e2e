@@ -4,7 +4,7 @@ import {capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Import CAPG Kubeadm Class-Cluster', {tags: '@full'}, () => {
+describe('Import CAPG Kubeadm Class-Cluster', {tags: ['@full', '@capgk']}, () => {
   const timeout = vars.fullTimeout
   const classNamePrefix = 'gcp-kubeadm'
   const clusterName = getClusterName(classNamePrefix)

@@ -147,7 +147,7 @@ describe('Enable CAPI Providers (2.12)', () => {
     })
   })
 
-  context('Docker provider', {tags: '@short'}, () => {
+  context('Docker provider', {tags: ['@short', '@capdk', '@capdr']}, () => {
     const dockerProviderNamespace = 'capd-system'
     qase(500, it('Create Docker CAPIProvider Namespace', () => {
       cy.createNamespace([dockerProviderNamespace]);
@@ -197,7 +197,7 @@ describe('Enable CAPI Providers (2.12)', () => {
     })
     );
 
-    qase(505, it('Create CAPA provider', () => {
+    qase(505, it('Create CAPA provider', {tags: ['@capak', '@capar', '@capaeks']}, () => {
       const namespace = 'capa-system'
       // Create AWS Infrastructure provider
       cy.addCloudCredsAWS(amazonProvider, Cypress.expose('aws_access_key'), Cypress.expose('aws_secret_key'));
@@ -207,7 +207,7 @@ describe('Enable CAPI Providers (2.12)', () => {
     })
     );
 
-    qase(506, it('Create CAPG provider', () => {
+    qase(506, it('Create CAPG provider', {tags: ['@capgk', '@capgke']}, () => {
       const namespace = 'capg-system'
       // Create GCP Infrastructure provider
       cy.addCloudCredsGCP(googleProvider, Cypress.expose('gcp_credentials'));
@@ -217,7 +217,7 @@ describe('Enable CAPI Providers (2.12)', () => {
     })
     );
 
-    qase(507, it('Create CAPZ provider', () => {
+    qase(507, it('Create CAPZ provider', {tags: ['@capzk', '@capzr', 'capzaks']}, () => {
       const namespace = 'capz-system'
       // Create Azure Infrastructure provider
       cy.addInfraProvider('Azure', namespace, azureProvider);
