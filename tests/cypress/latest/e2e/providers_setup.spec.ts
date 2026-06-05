@@ -87,14 +87,14 @@ describe('Enable CAPI Providers', () => {
       azure: 'v1.22.0'
     },
     'prod-v2.15': {
-      capi: 'v1.13.2',
-      rke2: 'v0.25.0',
-      kubeadm: 'v1.13.2',
+      capi: 'v1.13.1',
+      rke2: 'v0.24.4',
+      kubeadm: 'v1.13.1',
       fleet: 'v0.15.0',
       vsphere: 'v1.16.1',
       amazon: 'v2.11.1',
       google: 'v1.11.2',
-      azure: 'v1.23.2'
+      azure: 'v1.24.0'
     },
     'dev-v2.13': {
       capi: 'v1.10.6',
@@ -210,7 +210,7 @@ describe('Enable CAPI Providers', () => {
             text.providers.infrastructureDocker.enableAutomaticUpdate = true;
           }
         // there is no easy way to only install a specific provider when something like `@capgke` is passed, so we enable all the cloud providers
-        if (isCypressTag('@full') || isCypressTag('@capg') || isCypressTag('@capa') || isCypressTag('@capz')) {
+        if (isCypressTag('@full') || isCypressTag('@capg') || isCypressTag('@capa') || isCypressTag('@capz') || isCypressTag('@capd')) {
             // @ts-ignore
             text.providers.infrastructureGCP.enabled = true;
             // @ts-ignore
@@ -361,7 +361,7 @@ describe('Enable CAPI Providers', () => {
     })
     );
 
-    qase(426, it('Verify CAPZ provider', {tags: ['@capzk', '@capzr', '@capzaks']}, () => {
+    qase(426, it('Verify CAPZ provider', {tags: ['@capzk', '@capzr', '@capzaks', '@capdr']}, () => {
       const namespace = 'capz-system'
       // Verify Azure Infrastructure provider
       cy.navigateToProviders();
