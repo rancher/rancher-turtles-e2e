@@ -120,6 +120,11 @@ describe('Import CAPV Kubeadm Class-Cluster', {tags: ['@vsphere', '@capvk']}, ()
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
     );
+
+    it('Check for any errors in Turtles logs', () => {
+      // Check for any errors
+      cy.filterPodErrorLogs('rancher-turtles-controller-manager');
+    })
   })
 
   context('[TEARDOWN]', () => {

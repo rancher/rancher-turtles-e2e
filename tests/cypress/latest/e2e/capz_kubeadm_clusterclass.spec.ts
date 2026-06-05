@@ -106,6 +106,11 @@ describe('Import CAPZ Kubeadm Class-Cluster', {tags: ['@full', '@capzk']}, () =>
       cy.checkCAPIClusterActive(clusterName);
     })
     );
+
+    it('Check for any errors in Turtles logs', () => {
+      // Check for any errors
+      cy.filterPodErrorLogs('rancher-turtles-controller-manager');
+    })
   })
 
   context('[TEARDOWN]', () => {

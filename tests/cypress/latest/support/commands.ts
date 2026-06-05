@@ -1393,6 +1393,30 @@ Cypress.Commands.add('viewCAPIClusterYAML', (clusterName) => {
   cy.contains('View YAML').click();
 });
 
+Cypress.Commands.add('filterPodErrorLogs', (podName) => {
+  cy.exploreCluster('local');
+  cy.accesMenuSelection(['Workloads', 'Pods']);
+  cy.setNamespace('All Namespaces', 'all_user');
+  cy.typeInFilter(podName);
+  cy.getBySel('sortable-table-0-action-button').click();
+  cy.contains('View Logs').click();
+  cy.contains('Connected').should('be.visible');
+  cy.typeInFilter('error', '[aria-label="Search/filter logs"]');
+  cy.get('.logs-container').then(($body) => {
+    const bodyText = String($body.text().trim())
+    if (bodyText.includes('No lines match the current filter.')) {
+      cy.task('log', 'No log entries found for filter: error');
+      return;
+    } else {  
+      [...bodyText.matchAll(/(err="(?:\\"|[^"])+")/g)]
+      .slice(0, 3)
+      .forEach((m) => cy.task('log', `[${podName}]: ${m[1]}`));
+    }
+  });
+  cy.getBySel('wm-tab-close-button').click();
+  cy.namespaceReset();
+});
+
 export function matchAndWaitForProviderReadyStatus(
   providerString: string,
   providerType: string,
