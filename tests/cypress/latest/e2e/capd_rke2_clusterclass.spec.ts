@@ -25,7 +25,7 @@ import {vars} from '../support/variables';
 
 
 Cypress.config();
-describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
+describe('Import CAPD RKE2 Class-Cluster', {tags: '@capdr'}, () => {
   const timeout = vars.shortTimeout
   const classNamePrefix = 'docker-rke2'
   const clusterName = getClusterName(classNamePrefix)
@@ -153,6 +153,13 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
       reImportRancherv3Cluster(clusterName);
     })
     );
+
+    it('Check for any errors in Turtles logs', () => {
+      // Check for any errors
+      cy.filterPodLogs('rancher-turtles-controller-manager', 'error');
+      // Check for any failed operations
+      cy.filterPodLogs('rancher-turtles-controller-manager', 'fail');
+    })
   })
 
   context('[TEARDOWN]', () => {

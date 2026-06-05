@@ -1394,6 +1394,24 @@ Cypress.Commands.add('viewCAPIClusterYAML', (clusterName) => {
   cy.contains('View YAML').click();
 });
 
+Cypress.Commands.add('filterPodLogs', (podName, text, shouldBePresent = false) => {
+  cy.exploreCluster('local');
+  cy.accesMenuSelection(['Workloads', 'Pods']);
+  cy.setNamespace('All Namespaces', 'all_user');
+  cy.typeInFilter(podName);
+  cy.getBySel('sortable-table-0-action-button').click();
+  cy.contains('View Logs').click();
+  cy.contains('Connected').should('be.visible');
+  cy.typeInFilter(text, '[aria-label="Search/filter logs"]');
+  if (!shouldBePresent) {
+    cy.contains('No lines match the current filter.');
+  } else {
+    // Example: config.go:182] "Overridden provider image to use Rancher default registry"
+    cy.contains('] "' + text);
+  }
+  cy.namespaceReset();
+});
+
 export function matchAndWaitForProviderReadyStatus(
   providerString: string,
   providerType: string,
