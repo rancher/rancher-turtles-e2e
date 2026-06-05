@@ -150,7 +150,7 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
       })
       );
 
-      qase(409, it('Install App on imported cluster', {retries: 1}, () => {
+      qase(409, (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
         cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
       );

@@ -1,6 +1,6 @@
 import '../support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import {isUseCAAPFSupported, skipClusterDeletion, turtlesNamespace} from '../support/utils';
+import {isUseCAAPFSupported, skipClusterDeletion, turtlesNamespace, isRancherManagerVersion} from '../support/utils';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
@@ -132,7 +132,7 @@ describe('Import CAPD RKE2 (Default CNI & No-Caapf) Class-Cluster using Fleet', 
     })
     );
 
-    qase(447, it('Install App on imported cluster', {retries: 1}, () => {
+    qase(447, (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
     );

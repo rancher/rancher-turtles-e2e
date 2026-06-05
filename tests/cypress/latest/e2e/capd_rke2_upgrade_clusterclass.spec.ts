@@ -151,7 +151,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
       })
       );
 
-      qase(244, it('Install App on imported cluster', {retries: 1}, () => {
+      qase(244, (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
         cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
       );

@@ -87,7 +87,7 @@ describe('Import CAPA RKE2 Class-Cluster', {tags: '@full'}, () => {
 
   context('[CLUSTER-OPERATIONS]', () => {
     qase(112,
-      it('Install App on imported cluster', {retries: 1}, () => {
+      (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
         cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
     );

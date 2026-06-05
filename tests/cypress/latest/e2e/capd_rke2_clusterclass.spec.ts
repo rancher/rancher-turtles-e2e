@@ -106,7 +106,8 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: '@short'}, () => {
 
   context('[CLUSTER-OPERATIONS]', () => {
     qase(101,
-      it('Install App on imported cluster', {retries: 1}, () => {
+      // TODO: Remove the condition once logging is supported on 2.15
+      (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
         cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
     );

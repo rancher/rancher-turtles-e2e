@@ -1,5 +1,5 @@
 import '../support/commands';
-import {getClusterName, isAPIv1beta1, skipClusterDeletion} from '../support/utils';
+import {getClusterName, isAPIv1beta1, skipClusterDeletion, isRancherManagerVersion} from '../support/utils';
 import {capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
@@ -78,7 +78,7 @@ describe('Import CAPG Kubeadm Class-Cluster', {tags: '@full'}, () => {
 
   context('[CLUSTER-OPERATIONS]', () => {
     qase(145,
-      it('Install App on imported cluster', {retries: 1}, () => {
+      (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
         cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
     );

@@ -13,7 +13,7 @@ limitations under the License.
 
 import '../support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import {isUseCAAPFSupported, skipClusterDeletion} from '../support/utils';
+import {isUseCAAPFSupported, skipClusterDeletion, isRancherManagerVersion} from '../support/utils';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
@@ -102,7 +102,7 @@ describe('Import CAPD RKE2 (Default CNI) Class-Cluster using Fleet', {tags: '@sh
     })
     );
 
-    qase(432, it('Install App on imported cluster', {retries: 1}, () => {
+    qase(432, (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
     );
