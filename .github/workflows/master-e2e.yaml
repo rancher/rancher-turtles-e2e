@@ -66,6 +66,15 @@ on:
       providers_stg_oci_repo:
         description: OCI Staging repo for fetching turtles providers chart on dev and pre-prime builds
         required: true
+      prime_registry:
+        description: Prime registry to fetch images for prime releases
+        required: true
+      stg_prime_registry:
+        description: Staging Prime registry to fetch images for prime pre-releases
+        required: true
+      prime_artifacts_url:
+        description: URL to fetch artifacts list for prime releases
+        required: true
     inputs:
       cert-manager_version:
         description: Version of cert-manager to use
@@ -272,6 +281,10 @@ jobs:
       DOCKER_REGISTRY_CONFIG: ${{ secrets.docker_registry_config }}
       PROVIDERS_OCI_REPO: ${{ secrets.providers_oci_repo }}
       PROVIDERS_STG_OCI_REPO: ${{ secrets.providers_stg_oci_repo }}
+      PRIME_REGISTRY: ${{ secrets.prime_registry }}
+      STG_PRIME_REGISTRY: ${{ secrets.stg_prime_registry }}
+      PRIME_ARTIFACTS_URL: ${{ secrets.prime_artifacts_url }}
+
       # Common specs: @short @vsphere @full
       SPECS: |
         e2e/capd_rke2_nocaapf_clusterclass.spec.ts

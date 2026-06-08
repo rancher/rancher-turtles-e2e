@@ -87,6 +87,9 @@ jobs:
       docker_registry_config: ${{ secrets.DOCKER_REGISTRY_CONFIG }}
       providers_oci_repo: ${{ secrets.PROVIDERS_OCI_REPO }}
       providers_stg_oci_repo: ${{ secrets.PROVIDERS_STG_OCI_REPO }}
+      prime_registry: ${{ secrets.PRIME_REGISTRY }}
+      stg_prime_registry: ${{ secrets.STG_PRIME_REGISTRY }}
+      prime_artifacts_url: ${{ secrets.PRIME_ARTIFACTS_URL }}
     with:
       test_description: "UI - e2e tests with Standard K3s"
       destroy_runner: ${{ github.event_name == 'schedule' && true || inputs.destroy_runner }}
