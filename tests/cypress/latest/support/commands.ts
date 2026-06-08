@@ -1395,6 +1395,11 @@ Cypress.Commands.add('viewCAPIClusterYAML', (clusterName) => {
 });
 
 Cypress.Commands.add('filterPodLogs', (podName, text, shouldBePresent = false) => {
+  const ignoredErrorPatterns = [
+    /pleae apply your chnages to current version and try again/i,
+    /please apply your changes to current version and try again/i,
+  ];
+
   cy.exploreCluster('local');
   cy.accesMenuSelection(['Workloads', 'Pods']);
   cy.setNamespace('All Namespaces', 'all_user');
@@ -1404,7 +1409,15 @@ Cypress.Commands.add('filterPodLogs', (podName, text, shouldBePresent = false) =
   cy.contains('Connected').should('be.visible');
   cy.typeInFilter(text, '[aria-label="Search/filter logs"]');
   if (!shouldBePresent) {
-    cy.contains('No lines match the current filter.');
+    cy.get('body').then(($body) => {
+      const bodyText = $body.text();
+      const hasNoMatches = bodyText.includes('No lines match the current filter.');
+      const hasIgnoredError = text.toLowerCase() === 'error' && ignoredErrorPatterns.some((pattern) => pattern.test(bodyText));
+
+      if (!hasNoMatches && !hasIgnoredError) {
+        throw new Error(`Unexpected log entries found for filter: ${text}`);
+      }
+    });
   } else {
     // Example: config.go:182] "Overridden provider image to use Rancher default registry"
     cy.contains('] "' + text);
