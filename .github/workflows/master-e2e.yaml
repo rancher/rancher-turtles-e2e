@@ -420,11 +420,11 @@ jobs:
 
       # Build providers chart to push to chartmuseum in a later step
       - name: Make Turtles Providers Chart
-        if: ${{ inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12')) }}
+        if: ${{ inputs.turtles_dev_chart == true && (!contains(env.RANCHER_POINT_VERSION, '2.12')) }}
         run: RELEASE_TAG=v${{ env.TAG }} make build-providers-chart
 
       - name: Clone, build and publish artificial system charts for 2.13 onwards
-        if: ${{ inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12')) }}
+        if: ${{ inputs.turtles_dev_chart == true && (!contains(env.RANCHER_POINT_VERSION, '2.12')) }}
         run: |
           # Dir outside github workspace must be used for destroy=false persistance
           export RANCHER_CHARTS_REPO_DIR=/tmp/system-charts/charts
@@ -454,7 +454,7 @@ jobs:
           cp ${{ github.workspace }}/out/package/rancher-turtles-${{ env.TAG }}.tgz ${{ runner.temp }}
 
       - name: Copy Turtles Providers chart files
-        if: ${{ inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12')) }}
+        if: ${{ inputs.turtles_dev_chart == true && (!contains(env.RANCHER_POINT_VERSION, '2.12')) }}
         run: cp ${{ github.workspace }}/out/package/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ runner.temp }}
 
       - name: Checkout
@@ -474,7 +474,7 @@ jobs:
         run: |
           cp ${{ runner.temp }}/rancher-turtles-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets
       - name: Copy turtles providers chart files for chartmuseum
-        if: ${{ inputs.turtles_dev_chart == true && (!contains(env.RANCHER_VERSION, '2.12')) }}
+        if: ${{ inputs.turtles_dev_chart == true && (!contains(env.RANCHER_POINT_VERSION, '2.12')) }}
         run: |
           mkdir ${{ github.workspace }}/tests/assets/providers
           cp ${{ runner.temp }}/rancher-turtles-providers-${{ env.TAG }}.tgz ${{ github.workspace }}/tests/assets/providers
