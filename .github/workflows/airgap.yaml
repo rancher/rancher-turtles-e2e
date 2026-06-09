@@ -1,5 +1,7 @@
 name: "Airgap tests"
-
+run-name: >-
+  ${{ github.event_name == 'workflow_dispatch' &&
+      format('[{1}] Airgap tests on Rancher-`{0}`', inputs.rancher_version, github.run_number) }}
 on:
   workflow_dispatch:
     inputs:
