@@ -49,18 +49,14 @@ Additional tags that are supported:
 | Tag          | Test                                                                                                  |
 |--------------|-------------------------------------------------------------------------------------------------------|
 | `@install`   | Intial test setup (install rancher, rancher turtles, rancher turtles providers and CAPI UI Extension  |
-| `@short`     | CAPD based tests                                                                                      |
+| `@short`     | Docker Provider tests                                                                                 |
 | `@full`      | Cloud Providers (CAPA, CAPG, CAPZ) tests                                                              |
-| `@vsphere`   | Vsphere (CAPV) Provider tests                                                                         |
-| `@capdk`     | CAPD Kubeadm                                                                                          |
-| `@capdr`     | CAPD RKE2                                                                                             |
+| `@vsphere`   | VSphere (CAPV) Provider tests                                                                         |
+| `@capXk`     | Provider X (X=Docker, VSphere, Google, Azure, AWS) & Kubeadm                                          |
+| `@capXr`     | Provider X (X=Docker, VSphere, Google, Azure, AWS) & RKE2                                             |
 | `@capgke`    | CAPG GKE                                                                                              |
-| `@capgk`     | CAPG Kubeadm                                                                                          |
 | `@capaeks`   | CAPA EKS                                                                                              |
-| `@capak`     | CAPA Kubeadm                                                                                          |
-| `@capar`     | CAPA RKE2                                                                                             |
-| `@capzk`     | CAPZ Kubeadm                                                                                          |
-| `@capzr`     | CAPZ RKE2                                                                                             |
+| `@capzaks`   | CAPZ AKS                                                                                              |
 | `@migration` | Migration from 2.12 (Externally-managed Rancher Turtles) to 2.13 (System integration Rancher Turtles) |
 | `@switch`    | (2.13 Only) Switch from Turtles to Embedded-CAPI and back                                             |
 | `@upgrade`   | Upgrade from 2.13 to 2.14                                                                             |

@@ -5,7 +5,7 @@ import {capiClusterDeletion, capvResourcesCleanup, importedRancherv3ClusterDelet
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Import CAPV Kubeadm Class-Cluster', {tags: '@vsphere'}, () => {
+describe('Import CAPV Kubeadm Class-Cluster', {tags: ['@vsphere', '@capvk']}, () => {
   const timeout = vars.fullTimeout
   const clusterRepoName = 'class-clusters-capv-kb'
   const classRepoName = 'vsphere-kb-clusterclass'

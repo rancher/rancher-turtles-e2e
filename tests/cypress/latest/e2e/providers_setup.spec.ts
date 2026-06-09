@@ -228,7 +228,7 @@ describe('Enable CAPI Providers', () => {
             // @ts-ignore
             text.providers.infrastructureAWS.enableAutomaticUpdate = true;
           }
-        if (isCypressTag('@vsphere')) {
+        if (isCypressTag('@vsphere') || isCypressTag('@capv')) {
             // @ts-ignore
             text.providers.infrastructureVSphere.enabled = true;
             // @ts-ignore
@@ -308,7 +308,7 @@ describe('Enable CAPI Providers', () => {
     );
   })
 
-  context('vSphere provider', {tags: '@vsphere'}, () => {
+  context('vSphere provider', {tags: ['@vsphere', '@capvk', '@capvr']}, () => {
     const vsphereProviderNamespace = 'capv-system'
     qase(423, it('Verify CAPV provider', () => {
       // Verify vsphere Infrastructure provider
