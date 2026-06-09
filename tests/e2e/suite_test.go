@@ -15,12 +15,17 @@ limitations under the License.
 package e2e_test
 
 import (
+	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/Masterminds/semver/v3"
+	"github.com/google/go-containerregistry/pkg/authn"
+	"github.com/google/go-containerregistry/pkg/crane"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/rancher-sandbox/ele-testhelpers/kubectl"
@@ -37,6 +42,9 @@ var (
 	rancherHeadVersion  string
 	rancherLogCollector string
 	rancherVersion      string
+	primeRegistry       string
+	stgPrimeRegistry    string
+	primeArtifactsURL   string
 	turtlesDevChart     bool
 	isUpgradeTest       bool
 )
@@ -95,6 +103,24 @@ func isRancherManagerVersion(constraint string) bool {
 	return c.Check(v)
 }
 
+func fetchBytes(url string) []byte {
+	resp, err := http.Get(url)
+	Expect(err).ToNot(HaveOccurred())
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	Expect(err).ToNot(HaveOccurred())
+	return body
+}
+
+func checkOCI(host, repo, tag string) {
+	Expect(tag).ToNot(BeEmpty(), "Version for %s/%s is empty - cannot check OCI registry", host, repo)
+	tag = strings.TrimSpace(tag)
+	ref := fmt.Sprintf("%s/%s:%s", host, repo, tag)
+	_, err := crane.Head(ref, crane.WithAuth(authn.Anonymous))
+	Expect(err).ToNot(HaveOccurred(), "Artifact not found: %s:%s", repo, tag)
+	GinkgoWriter.Printf("✅ Verified OCI: %s:%s\n", repo, tag)
+}
+
 func FailWithReport(message string, callerSkip ...int) {
 	// Ensures the correct line numbers are reported
 	Fail(message, callerSkip[0]+1)
@@ -115,6 +141,9 @@ var _ = BeforeSuite(func() {
 	rancherVersion = os.Getenv("RANCHER_VERSION")
 	turtlesDevChart = os.Getenv("TURTLES_DEV_CHART") == "true"
 	isUpgradeTest = strings.Contains(os.Getenv("GREPTAGS"), "upgrade")
+	primeRegistry = os.Getenv("PRIME_REGISTRY")
+	stgPrimeRegistry = os.Getenv("STG_PRIME_REGISTRY")
+	primeArtifactsURL = os.Getenv("PRIME_ARTIFACTS_URL")
 
 	// Extract Rancher Manager channel/version to install
 	if rancherVersion != "" {

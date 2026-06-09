@@ -51,7 +51,8 @@ export default defineConfig({
           launchOptions.args.push("--no-sandbox");
           launchOptions.args.push("--disable-gl-drawing-for-tests");
           launchOptions.args.push("--disable-gpu");
-          launchOptions.args.push("--js-flags=--max-old-space-size=3500");
+          launchOptions.args.push("--js-flags=--max-old-space-size=8192");
+          launchOptions.args.push("--disable-dev-shm-usage");
         }
         return launchOptions;
       });
