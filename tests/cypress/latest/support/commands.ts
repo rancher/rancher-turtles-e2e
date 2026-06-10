@@ -1225,12 +1225,11 @@ Cypress.Commands.add('verifyResourceCount', (clusterName, resourcePath, resource
 // Container image registry URLs used by CAPI providers
 const PROVIDER_REGISTRIES = {
   K8S_STAGING: 'gcr.io/k8s-staging-cluster-api',
-  SUSE_STG: 'stgregistry.suse.com/rancher',
-  RANCHER_PRIME: 'registry.rancher.com/rancher',
+  RANCHER_STG_PRIME: `${vars.stgPrimeRegistry}/rancher`,
+  RANCHER_PRIME: `${vars.primeRegistry}/rancher`,
   RANCHER_GHCR: 'ghcr.io/rancher',
   RANCHER_CAPI: 'rancher/cluster-api-controller',
   K8S_PROD: 'registry.k8s.io/cluster-api',
-  SUSE_PROD: 'registry.suse.com/rancher',
 } as const;
 
 /**
@@ -1249,7 +1248,7 @@ function getV213PlusRegistry(providerNamespace: string): string {
   // - Prime prerelease channels (prime-alpha, prime-rc)
   // - 2.13 head builds (2.13 alpha/rc community builds already handled above)
   if (usesStgRegistry) {
-    return PROVIDER_REGISTRIES.SUSE_STG;
+    return PROVIDER_REGISTRIES.RANCHER_STG_PRIME;
   }
 
   // Prime builds (dev or channel) use production registry
@@ -1283,7 +1282,7 @@ function getV212Registry(providerNamespace: string): string {
   if (providerNamespace.includes('kubeadm')) {
     return PROVIDER_REGISTRIES.K8S_PROD;
   }
-  return PROVIDER_REGISTRIES.SUSE_PROD;
+  return PROVIDER_REGISTRIES.RANCHER_PRIME; // originally SUSE_PROD
 }
 
 /**

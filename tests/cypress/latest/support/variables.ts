@@ -1,5 +1,9 @@
 import {isAPIv1beta1, isRancherManagerVersion, providersChartNeedsStgRegistry} from './utils';
 
+const primeRegistry = Cypress.expose('prime_registry');
+const stgPrimeRegistry = Cypress.expose('stg_prime_registry');
+const turtlesProvidersRegistry = providersChartNeedsStgRegistry() ? stgPrimeRegistry : primeRegistry;
+
 export const vars = {
   shortTimeout: 600000,
   fullTimeout: 1500000,
@@ -11,8 +15,10 @@ export const vars = {
   turtlesRepoUrl: 'https://github.com/rancher/turtles',
   dockerAuthUsernameBase64: btoa(Cypress.expose("docker_auth_username")),
   dockerAuthPasswordBase64: btoa(Cypress.expose("docker_auth_password")),
+  primeRegistry: primeRegistry,
+  stgPrimeRegistry: stgPrimeRegistry,
   turtlesProvidersHelmApp: 'rancher-turtles-providers',
-  turtlesProvidersOCIRepo: providersChartNeedsStgRegistry() ? Cypress.expose('providers_stg_oci_repo') : Cypress.expose('providers_oci_repo'), // For alpha|rc|head builds, use stgregistry, for released versions, use regular registry.
+  turtlesProvidersOCIRepo: `oci://${turtlesProvidersRegistry}/rancher/charts/rancher-turtles-providers`,
   turtlesProvidersChartName: 'rancher-turtles-providers',
   eksVersion: isAPIv1beta1 ? 'v1.32.0' : 'v1.35.4',
   aksVersion: isRancherManagerVersion('2.12') ? 'v1.33.4' : isRancherManagerVersion('2.13') ? 'v1.34.7' : 'v1.35.4',

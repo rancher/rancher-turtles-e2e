@@ -58,8 +58,8 @@ docker run --init -v $PWD:/workdir -w /workdir \
     -e TURTLES_BRANCH=$TURTLES_BRANCH \
     -e TURTLES_CHART_DEV_VERSION=$TURTLES_CHART_DEV_VERSION \
     -e "CI=$CI" \
-    -e PROVIDERS_OCI_REPO=$PROVIDERS_OCI_REPO \
-    -e PROVIDERS_STG_OCI_REPO=$PROVIDERS_STG_OCI_REPO \
+    -e PRIME_REGISTRY=$PRIME_REGISTRY \
+    -e STG_PRIME_REGISTRY=$STG_PRIME_REGISTRY \
     --add-host host.docker.internal:host-gateway \
     --ipc=host \
     $CYPRESS_DOCKER \
