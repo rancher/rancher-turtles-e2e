@@ -4,7 +4,7 @@ import {capaResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDelet
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Import CAPA Kubeadm Class-Cluster', {tags: '@full'}, () => {
+describe('Import CAPA Kubeadm Class-Cluster', {tags: ['@full', '@capak']}, () => {
   const timeout = vars.fullTimeout
   const classNamePrefix = 'aws-kubeadm'
   const clusterName = getClusterName(classNamePrefix)

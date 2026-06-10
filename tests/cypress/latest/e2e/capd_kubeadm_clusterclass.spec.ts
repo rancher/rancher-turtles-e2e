@@ -17,7 +17,7 @@ import {capiClusterDeletion, importedRancherv3ClusterDeletion, reImportRancherv3
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Import CAPD Kubeadm Class-Cluster', {tags: '@short'}, () => {
+describe('Import CAPD Kubeadm Class-Cluster', {tags: ['@short', '@capdk']}, () => {
   const timeout = vars.shortTimeout
   const classNamePrefix = 'docker-kubeadm'
   const clusterName = getClusterName(classNamePrefix)

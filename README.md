@@ -40,9 +40,27 @@ The Cypress GUI should now be visible.
 ---
 
 # Test structure
-We categorize our tests using tags such as `short`, `full`, `vsphere`, and `install`. 
+We primarily categorize our tests using tags such as `short`, `full`, `vsphere`, and `install`. 
 Tests tagged with `short` are local (docker-based) tests, while those tagged with `vsphere` are specific to vSphere.
 Tests tagged with `full` are cloud provider-based tests. The `install` tag is used for initial setup tests ('install' tag is also to be included in setup tests title).
+
+Additional tags that are supported:
+
+| Tag          | Test                                                                                                  |
+|--------------|-------------------------------------------------------------------------------------------------------|
+| `@install`   | Initial test setup (install rancher, rancher turtles, rancher turtles providers and CAPI UI Extension |
+| `@short`     | Docker Provider tests                                                                                 |
+| `@full`      | Cloud Providers (CAPA, CAPG, CAPZ) tests                                                              |
+| `@vsphere`   | VSphere (CAPV) Provider tests                                                                         |
+| `@capXk`     | Provider X (X=Docker, VSphere, Google, Azure, AWS) & Kubeadm                                          |
+| `@capXr`     | Provider X (X=Docker, VSphere, Google, Azure, AWS) & RKE2                                             |
+| `@capgke`    | CAPG GKE                                                                                              |
+| `@capaeks`   | CAPA EKS                                                                                              |
+| `@capzaks`   | CAPZ AKS                                                                                              |
+| `@migration` | Migration from 2.12 (Externally-managed Rancher Turtles) to 2.13 (System integration Rancher Turtles) |
+| `@switch`    | (2.13 Only) Switch from Turtles to Embedded-CAPI and back                                             |
+| `@upgrade`   | Upgrade from 2.13 to 2.14                                                                             |
+
 
 # Running tests using Cypress grep
 We have implemented tags for more precise selection of tests using a Cypress plugin called [cypress-grep](https://github.com/cypress-io/cypress/tree/develop/npm/grep)

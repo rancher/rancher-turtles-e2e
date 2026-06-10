@@ -203,13 +203,14 @@ describe('Enable CAPI Providers', () => {
         // @ts-ignore
         text.providers.addonFleet.enabled = true;
 
-        if (isCypressTag('@short') || isCypressTag('@upgrade') || isCypressTag('@switch')) {
+        if (isCypressTag('@short') || isCypressTag('@capd') || isCypressTag('@upgrade') || isCypressTag('@switch')) {
             // @ts-ignore
             text.providers.infrastructureDocker.enabled = true;
             // @ts-ignore
             text.providers.infrastructureDocker.enableAutomaticUpdate = true;
           }
-        if (isCypressTag('@full')) {
+        // there is no easy way to only install a specific provider when something like `@capgke` is passed, so we enable all the cloud providers
+        if (isCypressTag('@full') || isCypressTag('@capg') || isCypressTag('@capa') || isCypressTag('@capz')) {
             // @ts-ignore
             text.providers.infrastructureGCP.enabled = true;
             // @ts-ignore
@@ -227,7 +228,7 @@ describe('Enable CAPI Providers', () => {
             // @ts-ignore
             text.providers.infrastructureAWS.enableAutomaticUpdate = true;
           }
-        if (isCypressTag('@vsphere')) {
+        if (isCypressTag('@vsphere') || isCypressTag('@capv')) {
             // @ts-ignore
             text.providers.infrastructureVSphere.enabled = true;
             // @ts-ignore
@@ -297,7 +298,7 @@ describe('Enable CAPI Providers', () => {
     })
   });
 
-  context('Docker provider', {tags: ['@short', '@upgrade', '@switch']}, () => {
+  context('Docker provider', {tags: ['@short', '@capdk', '@capdr', '@upgrade', '@switch']}, () => {
     const dockerProviderNamespace = 'capd-system'
     qase(422, it('Verify CAPD provider', () => {
       // Verify Docker Infrastructure provider
@@ -307,7 +308,7 @@ describe('Enable CAPI Providers', () => {
     );
   })
 
-  context('vSphere provider', {tags: '@vsphere'}, () => {
+  context('vSphere provider', {tags: ['@vsphere', '@capvk', '@capvr']}, () => {
     const vsphereProviderNamespace = 'capv-system'
     qase(423, it('Verify CAPV provider', () => {
       // Verify vsphere Infrastructure provider
@@ -330,7 +331,7 @@ describe('Enable CAPI Providers', () => {
 
   context('Cloud Providers', {tags: '@full'}, () => {
     const providerType = 'infrastructure'
-    qase(424, it('Verify CAPA provider', () => {
+    qase(424, it('Verify CAPA provider', {tags: ['@capak', '@capar', '@capaeks']},() => {
       const namespace = 'capa-system'
       // Verify AWS Infrastructure provider
       cy.addCloudCredsAWS(amazonProvider, Cypress.expose('aws_access_key'), Cypress.expose('aws_secret_key'));
@@ -340,7 +341,7 @@ describe('Enable CAPI Providers', () => {
     })
     );
 
-    qase(425, it('Verify CAPG provider', () => {
+    qase(425, it('Verify CAPG provider', {tags: ['@capgk', '@capgke']}, () => {
       const namespace = 'capg-system'
       // Verify GCP Infrastructure provider
       cy.navigateToProviders();
@@ -360,7 +361,7 @@ describe('Enable CAPI Providers', () => {
     })
     );
 
-    qase(426, it('Verify CAPZ provider', () => {
+    qase(426, it('Verify CAPZ provider', {tags: ['@capzk', '@capzr', '@capzaks']}, () => {
       const namespace = 'capz-system'
       // Verify Azure Infrastructure provider
       cy.navigateToProviders();

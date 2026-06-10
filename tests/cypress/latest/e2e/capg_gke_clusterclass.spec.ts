@@ -6,7 +6,7 @@ import {vars} from '../support/variables';
 
 
 Cypress.config();
-describe('Import CAPG GKE Class-Cluster', {tags: '@full'}, () => {
+describe('Import CAPG GKE Class-Cluster', {tags: ['@full', '@capgke']}, () => {
   const timeout = vars.fullTimeout * 2
   const classNamePrefix = 'gcp-gke'
   const clusterName = getClusterName(classNamePrefix)

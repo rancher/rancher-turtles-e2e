@@ -4,7 +4,7 @@ import {capaResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDelet
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Import CAPA EKS Class-Cluster', {tags: '@full'}, () => {
+describe('Import CAPA EKS Class-Cluster', {tags: ['@full', '@capaeks']}, () => {
   let appVersion: string;
   const timeout = vars.fullTimeout
   const classNamePrefix = 'aws-eks'

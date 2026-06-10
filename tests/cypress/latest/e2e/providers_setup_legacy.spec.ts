@@ -147,7 +147,7 @@ describe('Enable CAPI Providers (2.12)', () => {
     })
   })
 
-  context('Docker provider', {tags: '@short'}, () => {
+  context('Docker provider', {tags: ['@short', '@capdk', '@capdr']}, () => {
     const dockerProviderNamespace = 'capd-system'
     qase(500, it('Create Docker CAPIProvider Namespace', () => {
       cy.createNamespace([dockerProviderNamespace]);
@@ -162,7 +162,7 @@ describe('Enable CAPI Providers (2.12)', () => {
     );
   })
 
-  context('vSphere provider', {tags: '@vsphere'}, () => {
+  context('vSphere provider', {tags: ['@vsphere', '@capvk', '@capvr']}, () => {
     const vsphereProviderNamespace = 'capv-system'
 
     qase(502, it('Create CAPIProviders Namespaces', () => {
@@ -191,14 +191,11 @@ describe('Enable CAPI Providers (2.12)', () => {
 
   context('Cloud Providers', {tags: '@full'}, () => {
     const providerType = 'infrastructure'
-    qase(504, it('Create Cloud CAPIProviders Namespaces', () => {
-      const cloudProviderNamespaces = ['capa-system', 'capg-system', 'capz-system']
-      cy.createNamespace(cloudProviderNamespaces);
-    })
-    );
 
-    qase(505, it('Create CAPA provider', () => {
+    qase(505, it('Create CAPA provider', {tags: ['@capak', '@capar', '@capaeks']}, () => {
       const namespace = 'capa-system'
+      cy.createNamespace([namespace]);
+      cy.burgerMenuOperate('open');
       // Create AWS Infrastructure provider
       cy.addCloudCredsAWS(amazonProvider, Cypress.expose('aws_access_key'), Cypress.expose('aws_secret_key'));
       cy.burgerMenuOperate('open');
@@ -207,8 +204,10 @@ describe('Enable CAPI Providers (2.12)', () => {
     })
     );
 
-    qase(506, it('Create CAPG provider', () => {
+    qase(506, it('Create CAPG provider', {tags: ['@capgk', '@capgke']}, () => {
       const namespace = 'capg-system'
+      cy.createNamespace([namespace]);
+      cy.burgerMenuOperate('open');
       // Create GCP Infrastructure provider
       cy.addCloudCredsGCP(googleProvider, Cypress.expose('gcp_credentials'));
       cy.burgerMenuOperate('open');
@@ -217,8 +216,10 @@ describe('Enable CAPI Providers (2.12)', () => {
     })
     );
 
-    qase(507, it('Create CAPZ provider', () => {
+    qase(507, it('Create CAPZ provider', {tags: ['@capzk', '@capzr', 'capzaks']}, () => {
       const namespace = 'capz-system'
+      cy.createNamespace([namespace]);
+      cy.burgerMenuOperate('open');
       // Create Azure Infrastructure provider
       cy.addInfraProvider('Azure', namespace, azureProvider);
       matchAndWaitForProviderReadyStatus(azureProvider, providerType, azureProvider, azureProviderVersion, namespace);
