@@ -1396,8 +1396,7 @@ Cypress.Commands.add('viewCAPIClusterYAML', (clusterName) => {
 
 Cypress.Commands.add('filterPodLogs', (podName, text, shouldBePresent = false) => {
   const ignoredErrorPatterns = [
-    /pleae apply your chnages to current version and try again/i,
-    /please apply your changes to current version and try again/i,
+    /the object has been modified; please apply your changes to the current version and try again/i,
   ];
 
   cy.exploreCluster('local');
