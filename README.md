@@ -48,7 +48,7 @@ Additional tags that are supported:
 
 | Tag          | Test                                                                                                  |
 |--------------|-------------------------------------------------------------------------------------------------------|
-| `@install`   | Intial test setup (install rancher, rancher turtles, rancher turtles providers and CAPI UI Extension  |
+| `@install`   | Initial test setup (install rancher, rancher turtles, rancher turtles providers and CAPI UI Extension |
 | `@short`     | Docker Provider tests                                                                                 |
 | `@full`      | Cloud Providers (CAPA, CAPG, CAPZ) tests                                                              |
 | `@vsphere`   | VSphere (CAPV) Provider tests                                                                         |

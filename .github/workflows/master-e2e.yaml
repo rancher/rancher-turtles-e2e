@@ -140,7 +140,7 @@ jobs:
       - name: Set Runner
         id: set-runner
         run: |
-            if [[ "${{ inputs.grep_test_by_tag }}" =~ "@vsphere" ]]; then
+            if [[ "${{ inputs.grep_test_by_tag }}" =~ (@vsphere|@capv) ]]; then
               echo "initial-runner=vsphere" >> $GITHUB_OUTPUT
               if [[ "${{ inputs.grep_test_by_tag }}" =~ "@full" || "${{ inputs.grep_test_by_tag }}" =~ "@short" || "${{ inputs.grep_test_by_tag }}" =~ "@migration" ]]; then
                 echo "ERROR: @vsphere tests cannot be combined with @full, @short and @migration"
