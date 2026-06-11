@@ -1395,11 +1395,6 @@ Cypress.Commands.add('viewCAPIClusterYAML', (clusterName) => {
 });
 
 Cypress.Commands.add('filterPodLogs', (podName, text, shouldBePresent = false) => {
-  // Kubernetes optimistic-concurrency conflicts are transient and expected under load; ignore them.
-  const ignoredErrorPatterns = [
-    /the object has been modified; please apply your changes to the (current|latest) version and try again/i,
-  ];
-
   cy.exploreCluster('local');
   cy.accesMenuSelection(['Workloads', 'Pods']);
   cy.setNamespace('All Namespaces', 'all_user');
@@ -1421,19 +1416,15 @@ Cypress.Commands.add('filterPodLogs', (podName, text, shouldBePresent = false) =
         if ($body.text().includes('No lines match the current filter.')) {
           return; // No matching log lines - check passes
         }
-        // Inspect each individual log line so that ignored patterns only excuse the
-        // specific lines they match, not the entire result set.
+        // Log all matched lines and pass.
         cy.get('.xterm-rows > div').then(($rows) => {
-          const nonIgnorableLines: string[] = [];
+          const lines: string[] = [];
           $rows.each((_, row) => {
             const lineText = (row.textContent || '').trim();
-            if (!lineText) return;
-            if (!ignoredErrorPatterns.some((p) => p.test(lineText))) {
-              nonIgnorableLines.push(lineText);
-            }
+            if (lineText) lines.push(lineText);
           });
-          if (nonIgnorableLines.length > 0) {
-            cy.log(`Unexpected log entries found for filter: ${text}\n${nonIgnorableLines.join('\n')}`);
+          if (lines.length > 0) {
+            cy.log(`Log entries found for filter: ${text}\n${lines.join('\n')}`);
           }
         });
       });
