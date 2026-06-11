@@ -1409,27 +1409,34 @@ Cypress.Commands.add('filterPodLogs', (podName, text, shouldBePresent = false) =
   cy.contains('Connected').should('be.visible');
   cy.typeInFilter(text, '[aria-label="Search/filter logs"]');
   if (!shouldBePresent) {
-    cy.get('body').then(($body) => {
-      const bodyText = $body.text();
-      if (bodyText.includes('No lines match the current filter.')) {
-        return; // No matching log lines - check passes
-      }
-      // Inspect each individual log line so that ignored patterns only excuse the
-      // specific lines they match, not the entire result set.
-      cy.get('.xterm-rows > div').then(($rows) => {
-        const nonIgnorableLines: string[] = [];
-        $rows.each((_, row) => {
-          const lineText = (row.textContent || '').trim();
-          if (!lineText) return;
-          if (!ignoredErrorPatterns.some((p) => p.test(lineText))) {
-            nonIgnorableLines.push(lineText);
+    // Wait for the filter to take effect: retry until either the "no match"
+    // message appears or xterm rows are rendered, whichever comes first.
+    cy.get('body')
+      .should(($body) => {
+        const hasNoMatch = $body.text().includes('No lines match the current filter.');
+        const hasRows = $body.find('.xterm-rows > div').length > 0;
+        expect(hasNoMatch || hasRows).to.be.true;
+      })
+      .then(($body) => {
+        if ($body.text().includes('No lines match the current filter.')) {
+          return; // No matching log lines - check passes
+        }
+        // Inspect each individual log line so that ignored patterns only excuse the
+        // specific lines they match, not the entire result set.
+        cy.get('.xterm-rows > div').then(($rows) => {
+          const nonIgnorableLines: string[] = [];
+          $rows.each((_, row) => {
+            const lineText = (row.textContent || '').trim();
+            if (!lineText) return;
+            if (!ignoredErrorPatterns.some((p) => p.test(lineText))) {
+              nonIgnorableLines.push(lineText);
+            }
+          });
+          if (nonIgnorableLines.length > 0) {
+            throw new Error(`Unexpected log entries found for filter: ${text}\n${nonIgnorableLines.join('\n')}`);
           }
         });
-        if (nonIgnorableLines.length > 0) {
-          throw new Error(`Unexpected log entries found for filter: ${text}\n${nonIgnorableLines.join('\n')}`);
-        }
       });
-    });
   } else {
     // Example: config.go:182] "Overridden provider image to use Rancher default registry"
     cy.contains('] "' + text);
