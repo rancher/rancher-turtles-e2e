@@ -1404,37 +1404,22 @@ Cypress.Commands.add('filterPodLogs', (podName, text, shouldBePresent = false) =
   cy.contains('Connected').should('be.visible');
   cy.typeInFilter(text, '[aria-label="Search/filter logs"]');
   if (!shouldBePresent) {
-    // Wait until logs are rendered (or explicitly no matches), then only print.
-    cy.get('body')
-      .should(($body) => {
-        const hasNoMatch = $body.text().includes('No lines match the current filter.');
-        const hasRows = $body.find('.xterm-rows > div').length > 0;
-        expect(hasNoMatch || hasRows).to.be.true;
-      })
-      .then(($body) => {
-        if ($body.text().includes('No lines match the current filter.')) {
-          cy.log(`No log entries found for filter: ${text}`);
-          return;
-        }
-
-        cy.get('.xterm-rows > div').then(($rows) => {
-          const lines: string[] = [];
-          $rows.each((_, row) => {
-            const lineText = (row.textContent || '').trim();
-            if (lineText) lines.push(lineText);
-          });
-          if (lines.length === 0) {
-            cy.log(`No rendered log entries found for filter: ${text}`);
-            return;
+    cy.get('body').then(($body) => {
+      const bodyText = $body.text();
+      if (bodyText.includes('No lines match the current filter.')) {
+        cy.log(`No log entries found for filter: ${text}`);
+        return;
+      }
+      cy.get('.xterm-rows > div').then(($rows) => {
+        $rows.each((_, row) => {
+          const lineText = (row.textContent || '').trim();
+          if (lineText) {
+            cy.log(`[filterPodLogs] ${lineText}`);
+            console.log(`[filterPodLogs] ${lineText}`);
           }
-
-          cy.log(`Log entries found for filter: ${text}`);
-          lines.forEach((line) => {
-            cy.log(line);
-            console.log(`[filterPodLogs] ${line}`);
-          });
         });
       });
+    });
   } else {
     // Example: config.go:182] "Overridden provider image to use Rancher default registry"
     cy.contains('] "' + text);
