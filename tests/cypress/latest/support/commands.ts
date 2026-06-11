@@ -1410,15 +1410,8 @@ Cypress.Commands.add('filterPodLogs', (podName, text, shouldBePresent = false) =
         cy.log(`No log entries found for filter: ${text}`);
         return;
       }
-      cy.get('.xterm-rows > div').then(($rows) => {
-        $rows.each((_, row) => {
-          const lineText = (row.textContent || '').trim();
-          if (lineText) {
-            cy.log(`[filterPodLogs] ${lineText}`);
-            console.log(`[filterPodLogs] ${lineText}`);
-          }
-        });
-      });
+      const uniqueLines = [...new Set(bodyText.split('\n').map((l) => l.trim()).filter(Boolean))];
+      cy.log(`[filterPodLogs] unexpected log entries for filter "${text}": ${uniqueLines.join(' | ')}`);
     });
   } else {
     // Example: config.go:182] "Overridden provider image to use Rancher default registry"
