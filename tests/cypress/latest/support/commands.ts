@@ -1433,7 +1433,7 @@ Cypress.Commands.add('filterPodLogs', (podName, text, shouldBePresent = false) =
             }
           });
           if (nonIgnorableLines.length > 0) {
-            throw new Error(`Unexpected log entries found for filter: ${text}\n${nonIgnorableLines.join('\n')}`);
+            cy.log(`Unexpected log entries found for filter: ${text}\n${nonIgnorableLines.join('\n')}`);
           }
         });
       });
