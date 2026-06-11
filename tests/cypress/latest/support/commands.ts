@@ -1395,8 +1395,9 @@ Cypress.Commands.add('viewCAPIClusterYAML', (clusterName) => {
 });
 
 Cypress.Commands.add('filterPodLogs', (podName, text, shouldBePresent = false) => {
+  // Kubernetes optimistic-concurrency conflicts are transient and expected under load; ignore them.
   const ignoredErrorPatterns = [
-    /the object has been modified; please apply your changes to the current version and try again/i,
+    /the object has been modified; please apply your changes to the (current|latest) version and try again/i,
   ];
 
   cy.exploreCluster('local');
@@ -1410,12 +1411,24 @@ Cypress.Commands.add('filterPodLogs', (podName, text, shouldBePresent = false) =
   if (!shouldBePresent) {
     cy.get('body').then(($body) => {
       const bodyText = $body.text();
-      const hasNoMatches = bodyText.includes('No lines match the current filter.');
-      const hasIgnoredError = text.toLowerCase() === 'error' && ignoredErrorPatterns.some((pattern) => pattern.test(bodyText));
-
-      if (!hasNoMatches && !hasIgnoredError) {
-        throw new Error(`Unexpected log entries found for filter: ${text}`);
+      if (bodyText.includes('No lines match the current filter.')) {
+        return; // No matching log lines - check passes
       }
+      // Inspect each individual log line so that ignored patterns only excuse the
+      // specific lines they match, not the entire result set.
+      cy.get('.xterm-rows > div').then(($rows) => {
+        const nonIgnorableLines: string[] = [];
+        $rows.each((_, row) => {
+          const lineText = (row.textContent || '').trim();
+          if (!lineText) return;
+          if (!ignoredErrorPatterns.some((p) => p.test(lineText))) {
+            nonIgnorableLines.push(lineText);
+          }
+        });
+        if (nonIgnorableLines.length > 0) {
+          throw new Error(`Unexpected log entries found for filter: ${text}\n${nonIgnorableLines.join('\n')}`);
+        }
+      });
     });
   } else {
     // Example: config.go:182] "Overridden provider image to use Rancher default registry"
