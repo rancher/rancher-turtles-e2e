@@ -1404,8 +1404,7 @@ Cypress.Commands.add('filterPodLogs', (podName, text, shouldBePresent = false) =
   cy.contains('Connected').should('be.visible');
   cy.typeInFilter(text, '[aria-label="Search/filter logs"]');
   if (!shouldBePresent) {
-    // Wait for the filter to take effect: retry until either the "no match"
-    // message appears or xterm rows are rendered, whichever comes first.
+    // Wait until logs are rendered (or explicitly no matches), then only print.
     cy.get('body')
       .should(($body) => {
         const hasNoMatch = $body.text().includes('No lines match the current filter.');
@@ -1414,18 +1413,26 @@ Cypress.Commands.add('filterPodLogs', (podName, text, shouldBePresent = false) =
       })
       .then(($body) => {
         if ($body.text().includes('No lines match the current filter.')) {
-          return; // No matching log lines - check passes
+          cy.log(`No log entries found for filter: ${text}`);
+          return;
         }
-        // Log all matched lines and pass.
+
         cy.get('.xterm-rows > div').then(($rows) => {
           const lines: string[] = [];
           $rows.each((_, row) => {
             const lineText = (row.textContent || '').trim();
             if (lineText) lines.push(lineText);
           });
-          if (lines.length > 0) {
-            cy.log(`Log entries found for filter: ${text}\n${lines.join('\n')}`);
+          if (lines.length === 0) {
+            cy.log(`No rendered log entries found for filter: ${text}`);
+            return;
           }
+
+          cy.log(`Log entries found for filter: ${text}`);
+          lines.forEach((line) => {
+            cy.log(line);
+            console.log(`[filterPodLogs] ${line}`);
+          });
         });
       });
   } else {
