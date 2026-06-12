@@ -876,7 +876,7 @@ Cypress.Commands.add('typeInFilter', (text, selector = '.input-sm') => {
     .type(text)
     .should('have.value', text);
 
-  cy.get('table.sortable-table').should('be.visible').focus();
+  cy.get('table.sortable-table').should('be.visible')
 });
 
 // Command to navigate to Home page
