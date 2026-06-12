@@ -869,10 +869,14 @@ Cypress.Commands.add('deleteCluster', (clusterName, timeout = 120000) => {
 // Command to type in Filter input
 Cypress.Commands.add('typeInFilter', (text, selector = '.input-sm') => {
   cy.get(selector)
+    .should('be.visible')
+    .focus()
     .click()
     .clear()
     .type(text)
-    .wait(2000);
+    .should('have.value', text);
+
+  cy.get('table.sortable-table').should('be.visible').focus();
 });
 
 // Command to navigate to Home page
