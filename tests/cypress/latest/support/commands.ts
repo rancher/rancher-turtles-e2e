@@ -1393,6 +1393,34 @@ Cypress.Commands.add('viewCAPIClusterYAML', (clusterName) => {
   cy.contains('View YAML').click();
 });
 
+Cypress.Commands.add('filterPodLogs', (podName, text, shouldBePresent = false) => {
+  cy.exploreCluster('local');
+  cy.accesMenuSelection(['Workloads', 'Pods']);
+  cy.setNamespace('All Namespaces', 'all_user');
+  cy.typeInFilter(podName);
+  cy.getBySel('sortable-table-0-action-button').click();
+  cy.contains('View Logs').click();
+  cy.contains('Connected').should('be.visible');
+  cy.typeInFilter(text, '[aria-label="Search/filter logs"]');
+  if (!shouldBePresent) {
+    cy.get('.logs-container').then(($body) => {
+      const bodyText = String($body.text())
+      if (bodyText.includes('No lines match the current filter.')) {
+        cy.task('log', `No log entries found for filter: ${text}`);
+        return;
+      }
+      bodyText.split('\n')
+        .map((line) => line.trim().split('\n'))
+        .forEach((line) => cy.task('log', `Error logs found: ${line}`));
+    });
+  } else {
+    // Example: config.go:182] "Overridden provider image to use Rancher default registry"
+    cy.contains('] "' + text);
+  }
+  cy.getBySel('wm-tab-close-button').click();
+  cy.namespaceReset();
+});
+
 export function matchAndWaitForProviderReadyStatus(
   providerString: string,
   providerType: string,
