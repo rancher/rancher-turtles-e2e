@@ -94,10 +94,10 @@ func getAsoVersion() string {
 
 var _ = Describe("E2E - Airgap Precheck Tests", Label("airgap"), func() {
 	BeforeEach(func() {
-		// Test is suitable for Prime and rancher >= 2.14 only
+		// Test is suitable for Prime and rancher >= 2.13 only
 		// Although it can be expanded to support community channels where we need basically check only rancher/cluster-api-controller (also in env) and rancher/turtles images
-		if !strings.Contains(rancherChannel, "prime") || isRancherManagerVersion("<2.14") {
-			Skip(fmt.Sprintf("Skipping airgap precheck: requires prime channel and Rancher >= 2.14 (channel=%q, version=%s)", rancherChannel, rancherVersion))
+		if !strings.Contains(rancherChannel, "prime") || isRancherManagerVersion("<2.13") {
+			Skip(fmt.Sprintf("Skipping airgap precheck: requires prime channel and Rancher >= 2.13 (channel=%q, version=%s)", rancherChannel, rancherVersion))
 		}
 	})
 
