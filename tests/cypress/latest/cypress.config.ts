@@ -57,6 +57,9 @@ export default defineConfig({
           launchOptions.args.push("--js-flags=--max-old-space-size=8192");
           launchOptions.args.push("--disable-dev-shm-usage");
         }
+        if (browser.isHeadless) {
+          launchOptions.args.push("--headless=old");
+        }
         return launchOptions;
       });
       require('./plugins/index.ts')(on, config);

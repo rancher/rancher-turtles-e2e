@@ -27,6 +27,7 @@ docker network create \
 # Start Cypress tests with docker - only root or user with uid 1000 is working
 docker run --init -v $PWD:/workdir -w /workdir \
     --user 1000:$(id -g) \
+    -e "NODE_OPTIONS=--max-old-space-size=8192" \
     -e "GREPTAGS=$GREPTAGS" \
     -e CHARTMUSEUM_REPO=$CHARTMUSEUM_REPO \
     -e TURTLES_DEV_CHART=$TURTLES_DEV_CHART \
