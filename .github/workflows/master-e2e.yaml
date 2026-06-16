@@ -253,7 +253,7 @@ jobs:
       TURTLES_CHART_DEV_VERSION: 108.0.0+up99.99.99
       CONTROLLER_IMG: localhost:5000/rancher/turtles
       BROWSER: chrome
-      CYPRESS_DOCKER: 'cypress/included:15.11.0@sha256:3d31c71a3f444c6905a724396ae6fe8c5099133207455fe36d2c6bf38446dc96'
+      CYPRESS_DOCKER: 'cypress/included:15.17.0@sha256:9378699679f7d6ddb63c572866d4f11ec822abacb099345e89f5b86381efd53f'
       # Inputs
       GREPTAGS: ${{ inputs.grep_test_by_tag }}
       SKIP_CLUSTER_DELETE: ${{ inputs.skip_cluster_delete }}
