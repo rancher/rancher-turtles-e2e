@@ -1402,21 +1402,36 @@ Cypress.Commands.add('filterPodLogs', (podName, text, shouldBePresent = false) =
   cy.getBySel('sortable-table-0-action-button').click();
   cy.contains('View Logs').click();
   cy.contains('Connected').should('be.visible');
-  cy.typeInFilter(text, '[aria-label="Search/filter logs"]');
   if (!shouldBePresent) {
-    cy.get('body').then(($body) => {
-      const bodyText = $body.text();
-      if (bodyText.includes('No lines match the current filter.')) {
-        cy.log(`No log entries found for filter: ${text}`);
+    // Use the K8s API to fetch all pod logs so none are missed due to UI virtual scrolling
+    cy.url().then((url) => {
+      const match = url.match(/\/pod\/([^/]+)\/([^/]+)\/logs/);
+      if (!match) {
+        cy.log(`[filterPodLogs] Could not parse pod info from URL: ${url}`);
         return;
       }
-      bodyText
-        .split('\n')
-        .map((line) => line.trim())
-        .filter(Boolean)
-        .forEach((line) => cy.log(`[filterPodLogs] ${line}`));
+      const [, namespace, actualPodName] = match;
+      cy.request({
+        url: `/k8s/clusters/local/api/v1/namespaces/${namespace}/pods/${actualPodName}/log`,
+        qs: { tailLines: 10000 },
+        failOnStatusCode: false,
+      }).then((response) => {
+        if (response.status !== 200) {
+          cy.log(`[filterPodLogs] Failed to fetch pod logs (HTTP ${response.status})`);
+          return;
+        }
+        const matchingLines = (response.body as string)
+          .split('\n')
+          .filter((line: string) => line.toLowerCase().includes(text.toLowerCase()));
+        if (matchingLines.length === 0) {
+          cy.log(`No log entries found for filter: ${text}`);
+        } else {
+          matchingLines.forEach((line: string) => cy.log(`[filterPodLogs] ${line.trim()}`));
+        }
+      });
     });
   } else {
+    cy.typeInFilter(text, '[aria-label="Search/filter logs"]');
     // Example: config.go:182] "Overridden provider image to use Rancher default registry"
     cy.contains('] "' + text);
   }
