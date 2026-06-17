@@ -1355,7 +1355,7 @@ Cypress.Commands.add('createDockerAuthSecret', () => {
 
 Cypress.Commands.add('checkExternalFleetAnnotation', (clusterName, required = true) => {
   cy.searchCluster(clusterName);
-  cy.getBySel('sortable-cell-0-1').click();
+  cy.getBySel('sortable-cell-0-1').find('a').should('be.visible').click();
   cy.getBySel('related').click();
   cy.get('a[href*="management.cattle.io.cluster/c-"]').click();
   const annotation = 'provisioning.cattle.io/externally-managed: \'true\'';
