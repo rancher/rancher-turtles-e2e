@@ -165,7 +165,7 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 			if Label("install").MatchesLabelFilter(GinkgoLabelFilter()) && isUpgradeTest {
 				extraFlags = nil
 			}
-
+			extraFlags = append(extraFlags, "--set", "useBundledSystemChart=false")
 			err := rancher.DeployRancherManager(rancherHostname, rancherChannel, rancherVersion, rancherHeadVersion, "none", "none", extraFlags)
 			Expect(err).To(Not(HaveOccurred()))
 
