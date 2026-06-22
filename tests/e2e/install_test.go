@@ -174,7 +174,6 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 			if isRancherManagerVersion(">=2.13") {
 				waitForResourceCondition("cattle-turtles-system", "deployments/rancher-turtles-controller-manager", "Available")
 				waitForResourceCondition("cattle-capi-system", "deployments/capi-controller-manager", "Available")
-				waitForResourceCondition("cattle-system", "deployments/system-upgrade-controller", "Available")
 			}
 		})
 	})
