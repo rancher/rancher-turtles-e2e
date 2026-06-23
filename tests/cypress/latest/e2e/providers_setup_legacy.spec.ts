@@ -173,7 +173,7 @@ describe('Enable CAPI Providers (2.12)', () => {
     qase(503, it('Create CAPV provider', () => {
       // Create vsphere Infrastructure provider
       // See capv_rke2_cluster.spec.ts for more details about `vsphere_secrets_json_base64` structure
-      const vsphere_secrets_json_base64 = Cypress.env("vsphere_secrets_json_base64")
+      const vsphere_secrets_json_base64 = Cypress.expose("vsphere_secrets_json_base64")
       // Decode the base64 encoded secret and make json object
       const vsphere_secrets_json = JSON.parse(Buffer.from(vsphere_secrets_json_base64, 'base64').toString('utf-8'))
       // Access keys from the json object

@@ -1445,6 +1445,8 @@ export function matchAndWaitForProviderReadyStatus(
       }
       cy.get('td').eq(6).should('contain.text', readyState);      // Phase
     });
-    // Verify provider image
-    cy.verifyCAPIProviderImage(providerNamespace);
+    if (isRancherManagerVersion('>2.12')) {
+      // Verify provider image
+      cy.verifyCAPIProviderImage(providerNamespace);
+    }
 }
