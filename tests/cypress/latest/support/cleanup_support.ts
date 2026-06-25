@@ -18,7 +18,7 @@ export function importedRancherv3ClusterDeletion(clusterName: string) {
     }
 
     // Delete the imported mgmt v3 cluster from Cluster Management using kubectl
-    cy.kubectlExecute(v3ClusterDeleteCommand(clusterName));
+    cy.kubectlExecute([v3ClusterDeleteCommand(clusterName)]);
 
     // Ensure the cluster is not available on the home page
     cy.goToHome();
@@ -39,7 +39,7 @@ export function importedRancherv3ClusterDeletion(clusterName: string) {
 
 export function reImportRancherv3Cluster(clusterName: string) {
   // Re-import the deleted mgmt v3 cluster in Cluster Management using kubectl
-  cy.kubectlExecute(reImportClusterPatchCommand(clusterName));
+  cy.kubectlExecute([reImportClusterPatchCommand(clusterName)]);
 
   // Check child cluster is auto-imported
   // This is checked by ensuring the cluster is available in navigation menu

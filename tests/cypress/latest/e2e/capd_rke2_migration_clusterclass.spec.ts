@@ -103,8 +103,6 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
       qase(379, it('Pre-upgrade steps for migration', () => {
         // Uninstall Rancher Turtles chart
         cy.deleteKubernetesResource('local', ['Apps', 'Installed Apps'], 'rancher-turtles', turtlesNamespace);
-        cy.contains(new RegExp('"rancher-turtles" uninstalled'), {timeout: timeout}).should('be.visible');
-        cy.get('.closer').click();
 
         // Patch CRDs with cattle-turtles-system namespace
         ['capiproviders.turtles-capi.cattle.io', 'clusterctlconfigs.turtles-capi.cattle.io'].forEach((resourceName) => {
@@ -197,7 +195,6 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
 
         // Uninstall Rancher Turtles providers chart
         cy.deleteKubernetesResource('local', ['Apps', 'Installed Apps'], vars.turtlesProvidersHelmApp, turtlesNamespace);
-        cy.get('.closer').click();
 
         // Remove namespaces
         cy.deleteNamespace([vars.capiClassesNS, vars.capiClustersNS, capdProviderNS]);

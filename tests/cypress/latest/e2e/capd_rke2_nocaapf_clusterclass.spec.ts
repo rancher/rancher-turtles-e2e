@@ -1,11 +1,11 @@
 import '../support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import {isUseCAAPFSupported, skipClusterDeletion, turtlesNamespace, isRancherManagerVersion} from '../support/utils';
+import {isUseCAAPFSupported, skipClusterDeletion, isRancherManagerVersion} from '../support/utils';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Import CAPD RKE2 (Default CNI & No-Caapf) Class-Cluster using Fleet', {tags: '@short'}, () => {
+describe('Import CAPD RKE2 (Default CNI & No-Caapf) Class-Cluster using Fleet', {tags: ['@short', '@nocaapf']}, () => {
   let clusterName: string
   const timeout = vars.shortTimeout
   const classNamePrefix = 'docker-rke2'
@@ -35,20 +35,6 @@ describe('Import CAPD RKE2 (Default CNI & No-Caapf) Class-Cluster using Fleet', 
 
     qase(439, it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
-    })
-    );
-
-    // We install providers chart here because the test runs before providers_setup.spec.ts
-    qase(440, it('Install turtles-providers-chart for Docker, RKE2', () => {
-      const providerSelectionFunction = (text: any) => {
-        // @ts-ignore
-        text.providers.infrastructureDocker.enabled = true;
-        // @ts-ignore
-        text.providers.infrastructureDocker.enableAutomaticUpdate = true;
-      }
-
-      // Install Rancher Turtles Certified Providers chart
-      cy.checkChart('local', 'Install', vars.turtlesProvidersChartName, turtlesNamespace, {modifyYAMLOperation: providerSelectionFunction});
     })
     );
 
@@ -119,7 +105,7 @@ describe('Import CAPD RKE2 (Default CNI & No-Caapf) Class-Cluster using Fleet', 
     );
 
     qase(454, it('Check the fleet-addon annotation and finalizer is not set on clusters', () => {
-      // Check the externally-managed annotation is set on Rancher management cluster
+      // Check the externally-managed annotation is not set on Rancher management cluster
       cy.checkExternalFleetAnnotation(clusterName, false);
 
       // Check the finalizer is not set on CAPI cluster
@@ -167,15 +153,10 @@ describe('Import CAPD RKE2 (Default CNI & No-Caapf) Class-Cluster using Fleet', 
       );
     }
 
-    qase(451, it('Delete the provider-charts and other resources', () => {
+    qase(451, it('Delete the docker resources', () => {
       // Remove the lb-config
       cy.removeFleetGitRepo('lb-docker');
       cy.deleteKubernetesResource('local', ['Storage', 'ConfigMaps'], 'docker-rke2-lb-config', vars.capiClustersNS);
-
-      // Uninstall Rancher Turtles Providers chart
-      cy.deleteKubernetesResource('local', ['Apps', 'Installed Apps'], vars.turtlesProvidersHelmApp, turtlesNamespace);
-      cy.contains(new RegExp(`"${vars.turtlesProvidersHelmApp}.*"` + ' uninstalled'), {timeout: timeout}).should('be.visible');
-      cy.get('.closer').click();
     })
     );
   })
