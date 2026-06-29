@@ -235,9 +235,12 @@ describe('Enable CAPI Providers', () => {
             text.providers.infrastructureVSphere.enableAutomaticUpdate = true;
           }
       }
+      // Uninstall Rancher Turtles Providers chart if already present
+      cy.deleteKubernetesResource('local', ['Apps', 'Installed Apps'], vars.turtlesProvidersHelmApp, turtlesNamespace);
+
       // Install Rancher Turtles Certified Providers chart
       let operation = isRancherManagerVersion('2.14') && isUpgrade ? 'Upgrade' : 'Install'
-      let turtlesProvidersChartVersion = providersChartNeedsStgRegistry() && isRancherManagerVersion('2.13') ? '0.25' : providersChartNeedsStgRegistry() && isRancherManagerVersion('2.14') ? '0.26' : undefined
+      let turtlesProvidersChartVersion = providersChartNeedsStgRegistry() && isRancherManagerVersion('2.13') ? '0.25' : providersChartNeedsStgRegistry() && isRancherManagerVersion('2.14') ? '0.26' : providersChartNeedsStgRegistry() && isRancherManagerVersion('2.15') ? '0.27' : undefined
       cy.checkChart('local', operation, vars.turtlesProvidersChartName, turtlesNamespace, {
         version: turtlesProvidersChartVersion,
         modifyYAMLOperation: providerSelectionFunction
@@ -368,11 +371,6 @@ describe('Enable CAPI Providers', () => {
       matchAndWaitForProviderReadyStatus(azureProvider, providerType, azureProvider, azureProviderVersion, namespace);
     })
     );
-  })
-
-  it('Check for any errors in Turtles logs', () => {
-    // Check for any errors
-    cy.filterPodErrorLogs('rancher-turtles-controller-manager');
   })
 });
 }

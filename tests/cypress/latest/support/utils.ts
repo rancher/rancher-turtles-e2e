@@ -64,3 +64,14 @@ export const isUpgrade = isCypressTag('@upgrade')
 export const isTurtlesDevChart = Cypress.expose('turtles_dev_chart')
 
 export const isUseCAAPFSupported = (isRancherManagerVersion('>=2.14.1') || (isRancherManagerVersion('>=2.14') && isHeadBuild))
+
+export const getCAPIClusterKubeconfig = (
+  clusterName: string,
+  namespace: string = 'capi-clusters'
+): string => {
+  return `kubectl get secret -n ${namespace} ${clusterName}-kubeconfig -o jsonpath='{.data.value}' | base64 -d > ${clusterName}.yaml`;
+};
+
+export const applyCalicoCNIManifest = (clusterName: string): string => {
+  return `kubectl --kubeconfig=${clusterName}.yaml apply -f https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/calico.yaml`
+};

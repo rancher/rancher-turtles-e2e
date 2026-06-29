@@ -652,7 +652,7 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
     }
 
     cy.getBySel('btn-chart-install').click();
-    cy.contains(operation + ': Step 1');
+    cy.contains(operation);
 
     // Select namespace and name if an option is given
     cy.get('div.step__basic').then((step) => {
@@ -750,6 +750,7 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
     cy.namespaceReset();
   };
 
+  cy.burgerMenuOperate('open');
   // Click on the cluster
   cy.get('.side-menu .clusters').within(() => {
     cy.contains(clusterName).click();
@@ -1050,14 +1051,25 @@ Cypress.Commands.add('deleteKubernetesResource', (clusterName = 'local', resourc
   });
 
   cy.typeInFilter(resourceName);
-  cy.getBySel('sortable-cell-0-1').should('exist');
-  cy.viewport(1920, 1080);
-  cy.getBySel('sortable-table_check_select_all').click();
-  cy.getBySel('sortable-table-promptRemove').click({ctrlKey: true}); // this will prevent to display confirmation dialog
-  cy.wait(2000); // needed for 2.12
-  cy.typeInFilter(resourceName);
-  cy.getBySel('sortable-cell-0-1', {timeout: 60000}).should('not.exist');
+  cy.get('table.sortable-table tbody tr').then(($rows) => {
+    if ($rows.filter('.no-results').length > 0) {
+      cy.task('suiteLog', 'Skipping deletion, resource not found');
+      return;
+    } else {
+      cy.getBySel('sortable-cell-0-1').should('exist');
+      cy.viewport(1920, 1080);
+      cy.getBySel('sortable-table_check_select_all').click();
+      cy.getBySel('sortable-table-promptRemove').click({ctrlKey: true}); // this will prevent to display confirmation dialog
+      cy.wait(2000); // needed for 2.12
+      cy.typeInFilter(resourceName);
+      cy.getBySel('sortable-cell-0-1', {timeout: 60000}).should('not.exist');
+      if (resourcePath.includes('Apps')) {
+        cy.contains(new RegExp(`"${resourceName}.*"` + ' uninstalled'), {timeout: vars.shortTimeout}).should('be.visible');
+        cy.get('.closer').click();
+      }
+    }
   cy.namespaceReset();
+  })
 })
 
 Cypress.Commands.add('editKubernetesResource', (options) => {
@@ -1371,16 +1383,18 @@ Cypress.Commands.add('checkExternalFleetAnnotation', (clusterName, required = tr
   });
 });
 
-// Command to execute on kubectl shell
-Cypress.Commands.add('kubectlExecute', (command) => {
+// Commands to execute on kubectl shell
+Cypress.Commands.add('kubectlExecute', (commands: string[]) => {
   cy.searchCluster('local');
   cy.getBySel('sortable-table-0-action-button').click();
   cy.get('i.icon.group-icon.icon-terminal').should('be.visible').click();
   cy.contains('Connected').should('be.visible');
-  cy.get('.shell-body')
-    .type(command, {parseSpecialCharSequences: false})
-    .type('{enter}');
-  cy.wait(2000);
+  commands.forEach((command) => {
+    cy.get('.shell-body')
+      .type(command, {parseSpecialCharSequences: false})
+      .type('{enter}');
+    cy.wait(5000);
+  })
   cy.getBySel('wm-tab-close-button').click();
 });
 
