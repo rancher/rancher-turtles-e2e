@@ -15,7 +15,7 @@ describe('Import CAPG GKE Class-Cluster', {tags: ['@full', '@capgke']}, () => {
   const classClusterFileName = './fixtures/gcp/capg-gke-class-cluster.yaml'
 
   const gcpProject = Cypress.expose('gcp_project')
-  const k8sVersion = 'v1.35.3'      // this version is different from GCP Kubeadm version
+  const k8sVersion = 'v1.35.5'      // this version is different from GCP Kubeadm version
 
   beforeEach(function () {
     if (isRancherManagerVersion('<2.14')) {
