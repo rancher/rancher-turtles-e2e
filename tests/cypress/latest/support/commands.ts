@@ -1384,7 +1384,7 @@ Cypress.Commands.add('checkExternalFleetAnnotation', (clusterName, required = tr
 });
 
 // Commands to execute on kubectl shell
-Cypress.Commands.add('kubectlExecute', (commands: string[]) => {
+Cypress.Commands.add('kubectlExecute', (commands: string[], timeout = 3000) => {
   cy.searchCluster('local');
   cy.getBySel('sortable-table-0-action-button').click();
   cy.get('i.icon.group-icon.icon-terminal').should('be.visible').click();
@@ -1393,7 +1393,7 @@ Cypress.Commands.add('kubectlExecute', (commands: string[]) => {
     cy.get('.shell-body')
       .type(command, {parseSpecialCharSequences: false})
       .type('{enter}');
-    cy.wait(5000);
+    cy.wait(timeout);
   })
   cy.getBySel('wm-tab-close-button').click();
 });
@@ -1405,6 +1405,29 @@ Cypress.Commands.add('viewCAPIClusterYAML', (clusterName) => {
   // click the three-dots menu and click View YAML
   cy.getBySel('sortable-table-0-action-button').click();
   cy.contains('View YAML').click();
+});
+
+Cypress.Commands.add('checkCAPIClusterCPInitialized', (clusterName) => {
+  function checkCAPIClusterCP(retries = 20) {
+    cy.get('.CodeMirror-scroll').invoke('text').then((text) => {
+      if (text.replace(/\s+/g, '').includes('controlPlaneInitialized:true')) {
+        return;
+      }
+
+      if (retries <= 0) {
+        cy.contains(text).should('exist');
+        return;
+      }
+      cy.log(`Refreshing... (${retries} retries remaining)`);
+      cy.wait(15000);
+      cy.reload();
+
+      checkCAPIClusterCP(retries - 1);
+    });
+  }
+
+  cy.viewCAPIClusterYAML(clusterName);
+  checkCAPIClusterCP();
 });
 
 Cypress.Commands.add('filterPodErrorLogs', (podName) => {

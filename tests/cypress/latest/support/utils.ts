@@ -69,9 +69,9 @@ export const getCAPIClusterKubeconfig = (
   clusterName: string,
   namespace: string = 'capi-clusters'
 ): string => {
-  return `kubectl get secret -n ${namespace} ${clusterName}-kubeconfig -o jsonpath='{.data.value}' | base64 -d > ${clusterName}.yaml`;
+  return `kubectl get secret -n ${namespace} ${clusterName}-kubeconfig -o jsonpath='{.data.value}' | base64 -d > ${clusterName}-kubeconfig.yaml`;
 };
 
-export const applyCalicoCNIManifest = (clusterName: string): string => {
-  return `kubectl --kubeconfig=${clusterName}.yaml apply -f https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/calico.yaml`
+export const applyYAMLManifest = (clusterName: string, path: string): string => {
+  return `kubectl --kubeconfig=${clusterName}-kubeconfig.yaml apply -f ${path}`
 };
