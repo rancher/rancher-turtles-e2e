@@ -4,7 +4,7 @@ import {capiClusterDeletion, capzResourcesCleanup, importedRancherv3ClusterDelet
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Import CAPZ Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@nocaapf']}, () => {
+describe('Import CAPZ Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@nocaapf', '@capzk-nocaapf']}, () => {
   const timeout = vars.fullTimeout
   const classNamePrefix = 'azure-kubeadm'
   const clusterName = getClusterName(classNamePrefix)
@@ -18,7 +18,7 @@ describe('Import CAPZ Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@noca
   const tenantID = Cypress.expose("azure_tenant_id")
 
   const azureCCMFileName = "cloud-provider-azure.yaml"
-  const azureCCMCmd = ["wget " + vars.azureCCMYaml, "sed -i 's|${CLUSTER_CIDR}|192.168.0.0/16|g' " + azureCCMFileName, applyYAMLManifest(clusterName, azureCCMFileName)] 
+  const azureCCMCmd = [`wget ${vars.azureCCMYaml}`, `sed -i 's|\${CLUSTER_CIDR}|192.168.0.0/16|g' ${azureCCMFileName}`, applyYAMLManifest(clusterName, azureCCMFileName)]
 
   // Azure CCM fails to install when using v1.35
   const k8sVersion = isRancherManagerVersion('2.14') ? 'v1.34.1'

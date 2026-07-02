@@ -13,6 +13,8 @@ describe('Import CAPG Kubeadm Class-Cluster', {tags: ['@full', '@capgk']}, () =>
   const classClusterFileName = isAPIv1beta1 ? './fixtures/gcp/capg-kubeadm-class-cluster-v1beta1.yaml' : './fixtures/gcp/capg-kubeadm-class-cluster.yaml'
 
   const gcpProject = Cypress.expose("gcp_project")
+  const k8sVersion = isRancherManagerVersion('2.14') ? 'v1.34.1'
+  : vars.kubeadmVersion
 
   beforeEach(() => {
     cy.login();
@@ -46,7 +48,7 @@ describe('Import CAPG Kubeadm Class-Cluster', {tags: ['@full', '@capgk']}, () =>
       it('Import CAPG Kubeadm class-cluster using YAML', () => {
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
-          data = data.replace(/replace_k8sVersion/g, vars.kubeadmVersion)
+          data = data.replace(/replace_k8sVersion/g, k8sVersion)
           data = data.replace(/replace_gcpImageId/g, vars.gcpImageId)
           data = data.replace(/replace_gcp_project/g, gcpProject)
           cy.importYAML(data, vars.capiClustersNS)
@@ -89,7 +91,7 @@ describe('Import CAPG Kubeadm Class-Cluster', {tags: ['@full', '@capgk']}, () =>
 
         // workaround; these values need to be re-replaced before applying the scaling changes
         data = data.replace(/replace_cluster_name/g, clusterName)
-        data = data.replace(/replace_k8sVersion/g, vars.kubeadmVersion)
+        data = data.replace(/replace_k8sVersion/g, k8sVersion)
         data = data.replace(/replace_gcpImageId/g, vars.gcpImageId)
         data = data.replace(/replace_gcp_project/g, gcpProject)
         cy.importYAML(data, vars.capiClustersNS)

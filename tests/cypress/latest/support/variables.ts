@@ -32,13 +32,12 @@ export const vars = {
   : 'ami-05402dfd155c256a5', // Private copy of ami-032938cfb36a7f7ce from eu-west-2
   gcpImageId: isRancherManagerVersion('2.12')
   ? 'cluster-api-ubuntu-2404-v1-33-5-1762252437'
-  : isRancherManagerVersion('2.13')
+  : isRancherManagerVersion('2.13') || isRancherManagerVersion('2.14')
   ? 'cluster-api-ubuntu-2404-v1-34-1-1762253907'
-  : isRancherManagerVersion('2.14')
-  ? 'cluster-api-ubuntu-2404-v1-35-0-1770652401'
   : 'cluster-api-ubuntu-2404-v1-36-1-1779178908',
   chartUpdateOperation: isRancherManagerVersion('>=2.13') ? 'Edit' : 'Update',
   azureCCMVersion: '1.36.0',
   calicoCNIYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/calico.yaml',
-  azureCCMYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/cloud-provider-azure.yaml'
+  azureCCMYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/cloud-provider-azure.yaml',
+  gcpCCMYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/cloud-provider-gcp.yaml'
 };
