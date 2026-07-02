@@ -320,7 +320,7 @@ jobs:
         run: |
           if [[ "${{ inputs.grep_test_by_tag }}" =~ "@migration" ]]; then
             # Required for migration tests
-            echo "RANCHER_VERSION=head/2.12" >> ${GITHUB_ENV}
+            echo "RANCHER_VERSION=prime/2.12.11" >> ${GITHUB_ENV}
             echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> ${GITHUB_ENV}
             echo "SPECS=" >> ${GITHUB_ENV}
           elif [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
@@ -558,11 +558,11 @@ jobs:
       - name: Set Rancher Manager Upgrade version
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') }}
         run: |
-          echo "RANCHER_VERSION=head/2.13" >> ${GITHUB_ENV}
+          echo "RANCHER_VERSION=prime/2.13.7" >> ${GITHUB_ENV}
       - name: Set Rancher Manager Upgrade version
         if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') }}
         run: |
-          echo "RANCHER_VERSION=prime-alpha/2.14.3-alpha1" >> ${GITHUB_ENV}
+          echo "RANCHER_VERSION=prime/2.14.3" >> ${GITHUB_ENV}
       - name: Upgrade Rancher Manager
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:
