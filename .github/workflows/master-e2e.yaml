@@ -251,7 +251,7 @@ jobs:
       TURTLES_REPO: rancher/turtles
       TURTLES_BRANCH: main
       TURTLES_CHART_DEV_VERSION: 108.0.0+up99.99.99
-      CONTROLLER_IMG: localhost:5000/$TURTLES_REPO
+      CONTROLLER_IMG: localhost:5000/rancher/turtles
       BROWSER: chrome
       CYPRESS_DOCKER: 'cypress/included:15.11.0@sha256:3d31c71a3f444c6905a724396ae6fe8c5099133207455fe36d2c6bf38446dc96'
       # Inputs

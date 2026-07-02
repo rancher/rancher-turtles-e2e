@@ -170,8 +170,8 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 			Expect(err).To(Not(HaveOccurred()))
 
 			// We have to patch the rancher-config configmap soon enough
-			if turtlesDevChart {
-				By("Patching rancher-config to use local artifical registry and devel turtles image", func() {
+			if turtlesDevChart && isRancherManagerVersion(">=2.13") {
+				By("Patching rancher-config to inject devel turtles image", func() {
 					_, err := kubectl.Run("wait", "--namespace", "cattle-system", "--for=create", "configmap/rancher-config", "--timeout=300s")
 					Expect(err).To(Not(HaveOccurred()))
 					var patch = fmt.Sprintf(`{"data":{"rancher-turtles":"global:\n  cattle:\n    systemDefaultRegistry: \"\"\nimage:\n  repository: %s\n"}}`, controllerImage)
