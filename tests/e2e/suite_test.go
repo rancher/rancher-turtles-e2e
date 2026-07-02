@@ -45,6 +45,7 @@ var (
 	primeRegistry       string
 	stgPrimeRegistry    string
 	primeArtifactsURL   string
+	controllerImage     string
 	turtlesDevChart     bool
 	isUpgradeTest       bool
 )
@@ -144,6 +145,7 @@ var _ = BeforeSuite(func() {
 	primeRegistry = os.Getenv("PRIME_REGISTRY")
 	stgPrimeRegistry = os.Getenv("STG_PRIME_REGISTRY")
 	primeArtifactsURL = os.Getenv("PRIME_ARTIFACTS_URL")
+	controllerImage = os.Getenv("CONTROLLER_IMG")
 
 	// Extract Rancher Manager channel/version to install
 	if rancherVersion != "" {

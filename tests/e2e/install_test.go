@@ -169,12 +169,24 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 			err := rancher.DeployRancherManager(rancherHostname, rancherChannel, rancherVersion, rancherHeadVersion, "none", "none", extraFlags)
 			Expect(err).To(Not(HaveOccurred()))
 
-			waitForResourceCondition("cattle-system", "deployments/rancher-webhook", "Available")
-
-			if isRancherManagerVersion(">=2.13") {
-				waitForResourceCondition("cattle-turtles-system", "deployments/rancher-turtles-controller-manager", "Available")
-				waitForResourceCondition("cattle-capi-system", "deployments/capi-controller-manager", "Available")
+			// We have to patch the rancher-config configmap soon enough
+			if turtlesDevChart {
+				By("Patching rancher-config to use local artifical registry and devel turtles image", func() {
+					_, err := kubectl.Run("wait", "--namespace", "cattle-system", "--for=create", "configmap/rancher-config", "--timeout=300s")
+					Expect(err).To(Not(HaveOccurred()))
+					var patch = fmt.Sprintf(`{"data":{"rancher-turtles":"global:\n  cattle:\n    systemDefaultRegistry: \"\"\nimage:\n  repository: %s\n"}}`, controllerImage)
+					status, err := kubectl.Run("patch", "configmap", "rancher-config", "-n", "cattle-system", "--type", "merge", "-p", patch)
+					Expect(err).To(Not(HaveOccurred()))
+					Expect(status).To(ContainSubstring("patched"))
+				})
 			}
+			By("Waiting for Rancher Manager resources", func() {
+				waitForResourceCondition("cattle-system", "deployments/rancher-webhook", "Available")
+				if isRancherManagerVersion(">=2.13") {
+					waitForResourceCondition("cattle-turtles-system", "deployments/rancher-turtles-controller-manager", "Available")
+					waitForResourceCondition("cattle-capi-system", "deployments/capi-controller-manager", "Available")
+				}
+			})
 		})
 	})
 })
