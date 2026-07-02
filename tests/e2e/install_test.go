@@ -169,9 +169,12 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 			err := rancher.DeployRancherManager(rancherHostname, rancherChannel, rancherVersion, rancherHeadVersion, "none", "none", extraFlags)
 			Expect(err).To(Not(HaveOccurred()))
 
-			// We have to patch the rancher-config configmap soon enough
+			// When rancher-turtles is installed as system-chart the patching is mandatory.
+			// It always uses [sdr/]rancher/turtles image regardless to what is written in chart's values.yaml.
+			// Ref. https://github.com/rancher/rancher/blob/main/pkg/controllers/dashboard/systemcharts/controller.go#L56
+			// We have to patch it soon enough to be recognized by the system-chart controller, otherwise default image is used.
 			if turtlesDevChart && isRancherManagerVersion(">=2.13") {
-				By("Patching rancher-config to inject devel turtles image", func() {
+				By("Patching rancher-config to use devel turtles image", func() {
 					_, err := kubectl.Run("wait", "--namespace", "cattle-system", "--for=create", "configmap/rancher-config", "--timeout=300s")
 					Expect(err).To(Not(HaveOccurred()))
 					var patch = fmt.Sprintf(`{"data":{"rancher-turtles":"global:\n  cattle:\n    systemDefaultRegistry: \"\"\nimage:\n  repository: %s\n"}}`, controllerImage)
