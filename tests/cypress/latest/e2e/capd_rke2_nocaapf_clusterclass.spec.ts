@@ -95,7 +95,7 @@ describe('Import CAPD RKE2 (No-Caapf) Class-Cluster using Fleet', {tags: ['@shor
       cypressLib.accesMenu('Continuous Delivery');
       cy.contains('Dashboard').should('be.visible');
       cypressLib.accesMenu('Clusters');
-      cy.fleetNamespaceToggle('fleet-default');
+      cy.fleetNamespaceToggle(vars.fleetDefaultNS);
       // Verify the cluster is registered and Active
       const rowNumber = 0
       cy.verifyTableRow(rowNumber, 'Active', clusterName);

@@ -11,6 +11,8 @@ export const vars = {
   classBranch: isRancherManagerVersion('2.12') ? 'release-0.24' : isRancherManagerVersion('2.13') ? 'release/v0.25' : isRancherManagerVersion('2.14') ? 'release/v0.26' : Cypress.expose('turtles_branch'),
   capiClustersNS: 'capi-clusters',
   capiClassesNS: 'capi-classes',
+  fleetDefaultNS: 'fleet-default',
+  cattleSystemNS: 'cattle-system',
   repoUrl: 'https://github.com/rancher/rancher-turtles-e2e',
   turtlesRepoUrl: 'https://github.com/rancher/turtles',
   dockerAuthUsernameBase64: btoa(Cypress.expose("docker_auth_username")),
@@ -39,5 +41,6 @@ export const vars = {
   azureCCMVersion: '1.36.0',
   calicoCNIYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/calico.yaml',
   azureCCMYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/cloud-provider-azure.yaml',
-  gcpCCMYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/cloud-provider-gcp.yaml'
+  gcpCCMYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/cloud-provider-gcp.yaml',
+  turtlesProvidersChartVersion: providersChartNeedsStgRegistry() && isRancherManagerVersion('2.13') ? '0.25' : providersChartNeedsStgRegistry() && isRancherManagerVersion('2.14') ? '0.26' : providersChartNeedsStgRegistry() && isRancherManagerVersion('2.15') ? '0.27' : undefined
 };

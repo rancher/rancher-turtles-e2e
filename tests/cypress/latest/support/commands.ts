@@ -30,7 +30,7 @@ import {
   isRancherManagerVersion,
   isTurtlesDevChart,
   isTurtlesPrimeBuild,
-  isUpgrade
+  isUpgrade, turtlesNamespace
 } from './utils';
 import {vars} from './variables'
 
@@ -789,9 +789,7 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
 Cypress.Commands.add('patchYamlResource', (clusterName, namespace, resourceKind, resourceName, patch) => {
   // With support for nested objects, but "isNestedIn" flag must be set to true (the flag will be removed from the YAML)
   // Patch example: const patch = {data: {manifests: {isNestedIn: true, spec: {...}}};
-
-  // Locate the resource and initiate Edit YAML mode
-  cypressLib.accesMenu(clusterName);
+  cy.exploreCluster(clusterName);
   cy.setNamespace(namespace);
   // Open Resource Search modal
   cy.get('.icon-search.icon-lg').click();
@@ -1384,17 +1382,24 @@ Cypress.Commands.add('checkExternalFleetAnnotation', (clusterName, required = tr
 });
 
 // Commands to execute on kubectl shell
-Cypress.Commands.add('kubectlExecute', (commands: string[], timeout = 3000) => {
+Cypress.Commands.add('kubectlExecute', (commands?: string[], commandFunc?: () => void, timeout = 3000) => {
   cy.searchCluster('local');
   cy.getBySel('sortable-table-0-action-button').click();
   cy.get('i.icon.group-icon.icon-terminal').should('be.visible').click();
   cy.contains('Connected').should('be.visible');
-  commands.forEach((command) => {
-    cy.get('.shell-body')
-      .type(command, {parseSpecialCharSequences: false})
-      .type('{enter}');
-    cy.wait(timeout);
-  })
+  if (commands) {
+    commands.forEach((command) => {
+      cy.get('.shell-body')
+        .type(command, {parseSpecialCharSequences: false})
+        .type('{enter}');
+      cy.wait(timeout);
+    })
+  }
+
+  if (commandFunc){
+    commandFunc();
+  }
+
   cy.getBySel('wm-tab-close-button').click();
 });
 
@@ -1485,4 +1490,30 @@ export function matchAndWaitForProviderReadyStatus(
     });
     // Verify provider image
     cy.verifyCAPIProviderImage(providerNamespace);
+}
+
+
+export function setUseCAPIFeatureGate(enabled: boolean, wait: boolean=true) {
+  const resourceKind = 'ConfigMap';
+  const namespace = vars.cattleSystemNS;
+  const patch = {data: {"rancher-turtles": `{"features": {"use-caapf": {"enabled": ${enabled} }}}`}};
+  cy.patchYamlResource('local', namespace, resourceKind, 'rancher-config', patch);
+
+  if(wait){
+    // Ensure the turtles deployment has the feature gate enabled
+    cy.setNamespace(turtlesNamespace)
+    cy.clickNavMenu(["Apps", "Installed Apps"]);
+    cy.typeInFilter('rancher-turtles');
+    // We need to explicitly wait for the turtles controller deployment to restart
+    cy.getBySel('sortable-cell-0-0').contains('Pending-Upgrade', {timeout: 60000});
+    cy.getBySel('sortable-cell-0-0').contains('Deployed', {timeout: 120000});
+    cy.clickNavMenu(["Workloads", "Deployments"]);
+    cy.typeInFilter('rancher-turtles-controller-manager');
+    cy.getBySel('sortable-table-0-action-button').click();
+    cy.get('div.dropdownTarget').contains('Show Configuration').click();
+    cy.getBySel('btn-yaml-tab').click();
+    cy.get('.CodeMirror-code').contains(`use-caapf=${enabled}`);
+    cy.clickButton('Close');
+    cy.namespaceReset();
+  }
 }

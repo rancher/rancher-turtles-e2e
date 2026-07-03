@@ -203,7 +203,7 @@ describe('Enable CAPI Providers', () => {
         // @ts-ignore
         text.providers.addonFleet.enabled = true;
 
-        if (isCypressTag('@short') || isCypressTag('@capd') || isCypressTag('@upgrade') || isCypressTag('@switch')) {
+        if (isCypressTag('@short') || isCypressTag('@capd') || isCypressTag('@upgrade') || isCypressTag('@switch') || isCypressTag('@use-caapf-switch')) {
             // @ts-ignore
             text.providers.infrastructureDocker.enabled = true;
             // @ts-ignore
@@ -240,9 +240,8 @@ describe('Enable CAPI Providers', () => {
 
       // Install Rancher Turtles Certified Providers chart
       let operation = isRancherManagerVersion('2.14') && isUpgrade ? 'Upgrade' : 'Install'
-      let turtlesProvidersChartVersion = providersChartNeedsStgRegistry() && isRancherManagerVersion('2.13') ? '0.25' : providersChartNeedsStgRegistry() && isRancherManagerVersion('2.14') ? '0.26' : providersChartNeedsStgRegistry() && isRancherManagerVersion('2.15') ? '0.27' : undefined
       cy.checkChart('local', operation, vars.turtlesProvidersChartName, turtlesNamespace, {
-        version: turtlesProvidersChartVersion,
+        version: vars.turtlesProvidersChartVersion,
         modifyYAMLOperation: providerSelectionFunction
       });
     })
@@ -301,7 +300,7 @@ describe('Enable CAPI Providers', () => {
     })
   });
 
-  context('Docker provider', {tags: ['@short', '@capdk', '@capdr', '@upgrade', '@switch']}, () => {
+  context('Docker provider', {tags: ['@short', '@capdk', '@capdr', '@upgrade', '@switch', '@use-caapf-switch']}, () => {
     const dockerProviderNamespace = 'capd-system'
     qase(422, it('Verify CAPD provider', () => {
       // Verify Docker Infrastructure provider

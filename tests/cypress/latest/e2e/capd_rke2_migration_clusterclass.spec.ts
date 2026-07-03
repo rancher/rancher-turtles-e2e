@@ -114,7 +114,6 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
           const resourceKind = 'CustomResourceDefinitions';
           const namespace = turtlesNamespace;
           const patch = {metadata: {annotations: {'meta.helm.sh/release-namespace': 'cattle-turtles-system'}}};
-          cy.burgerMenuOperate('open');
           cy.patchYamlResource('local', namespace, resourceKind, resourceName, patch);
         })
       })
