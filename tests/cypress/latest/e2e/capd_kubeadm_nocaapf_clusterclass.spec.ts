@@ -1,10 +1,10 @@
 import '../support/commands';
-import {getClusterName, isUseCAAPFSupported, skipClusterDeletion, turtlesNamespace, isRancherManagerVersion, getCAPIClusterKubeconfig, applyCalicoCNIManifest, providersChartNeedsStgRegistry} from '../support/utils';
+import {getClusterName, isUseCAAPFSupported, skipClusterDeletion, turtlesNamespace, isRancherManagerVersion, getCAPIClusterKubeconfig, applyYAMLManifest, providersChartNeedsStgRegistry} from '../support/utils';
 import {capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Import CAPD Kubeadm (Calico CNI & No-Caapf) Class-Cluster', {tags: ['@short', '@nocaapf']}, () => {
+describe('Import CAPD Kubeadm (No-Caapf) Class-Cluster', {tags: ['@short', '@nocaapf']}, () => {
   const timeout = vars.shortTimeout
   const classNamePrefix = 'docker-kubeadm'
   const clusterName = getClusterName(classNamePrefix)
@@ -33,7 +33,8 @@ describe('Import CAPD Kubeadm (Calico CNI & No-Caapf) Class-Cluster', {tags: ['@
     );
 
     // We install providers chart here because the test runs before providers_setup.spec.ts
-    qase(440, it('Install turtles-providers-chart for Docker, Kubeadm', () => {
+    // TODO: Move providers installation to separate file
+    qase(440, it('Install turtles-providers-chart for all providers', () => {
       const providerSelectionFunction = (text: any) => {
         // @ts-ignore
         text.providers.bootstrapKubeadm.enabled = true;
@@ -49,6 +50,23 @@ describe('Import CAPD Kubeadm (Calico CNI & No-Caapf) Class-Cluster', {tags: ['@
         text.providers.infrastructureDocker.enabled = true;
         // @ts-ignore
         text.providers.infrastructureDocker.enableAutomaticUpdate = true;
+
+        // @ts-ignore
+        text.providers.infrastructureGCP.enabled = true;
+        // @ts-ignore
+        text.providers.infrastructureGCP.enableAutomaticUpdate = true;
+        // @ts-ignore
+        text.providers.infrastructureGCP.variables.GCP_B64ENCODED_CREDENTIALS = '';
+
+        // @ts-ignore
+        text.providers.infrastructureAzure.enabled = true;
+        // @ts-ignore
+        text.providers.infrastructureAzure.enableAutomaticUpdate = true;
+
+        // @ts-ignore
+        text.providers.infrastructureAWS.enabled = true;
+        // @ts-ignore
+        text.providers.infrastructureAWS.enableAutomaticUpdate = true;
       }
 
       let turtlesProvidersChartVersion = providersChartNeedsStgRegistry() && isRancherManagerVersion('2.14') ? '0.26' : providersChartNeedsStgRegistry() && isRancherManagerVersion('2.15') ? '0.27' : undefined
@@ -79,12 +97,15 @@ describe('Import CAPD Kubeadm (Calico CNI & No-Caapf) Class-Cluster', {tags: ['@
 
         // Check CAPI cluster using its name
         cy.checkCAPICluster(clusterName);
+
+        // Check CAPI cluster status
+        cy.checkCAPIClusterCPInitialized(clusterName);
       })
     );
 
     qase(6,
       it('Apply Calico CNI manifest', () => {
-        cy.kubectlExecute([getCAPIClusterKubeconfig(clusterName), applyCalicoCNIManifest(clusterName)]);
+        cy.kubectlExecute([getCAPIClusterKubeconfig(clusterName), applyYAMLManifest(clusterName, vars.calicoCNIYaml)], 5000);
       })
     );
 
