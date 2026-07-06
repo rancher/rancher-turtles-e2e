@@ -86,7 +86,10 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
         // Used in Pre-migration: For Migration test; turtles will be installed from turtles-chart repo.
         // dev=true is only applicable for 2.13 or version test is upgrading to.
         addTurtlesRepo();
-        // In Post-migration, chartmuseum repo will be used to install providers chart
+        // In Post-migration, chartmuseum repo will be used to install providers chart for dev=true and OCI repo for dev=false.
+        if(!isTurtlesDevChart) {
+          addTurtlesProvidersRepo();
+        }
       }
     })
     );
@@ -98,7 +101,7 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
       }
 
       if (isMigration) {
-        turtlesVersion = '0.24.4'
+        turtlesVersion = '0.24.5'
       }
       cy.checkChart('local', 'Install', 'Rancher Turtles', turtlesNamespace, {version: turtlesVersion});
     })

@@ -12,7 +12,12 @@ limitations under the License.
 */
 
 import '../support/commands';
-import {getClusterName, isRancherManagerVersion, turtlesNamespace} from '../support/utils';
+import {
+  getClusterName,
+  isRancherManagerVersion,
+  isTurtlesDevChart,
+  turtlesNamespace
+} from '../support/utils';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
@@ -123,7 +128,8 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
     if (isRancherManagerVersion('2.13')) {
       qase(407, it('Create Fleet Provider using provider charts', () => {
         // Install Rancher Turtles Certified Providers chart with default values
-        cy.checkChart('local', 'Install', vars.turtlesProvidersChartName, turtlesNamespace);
+        let providersChartVersion = isTurtlesDevChart ? undefined : '0.25';
+        cy.checkChart('local', 'Install', vars.turtlesProvidersChartName, turtlesNamespace, {version: providersChartVersion, refreshRepo: true});
       })
       );
 
