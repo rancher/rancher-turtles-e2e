@@ -5,7 +5,7 @@ import {capdResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDelet
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Import CAPD RKE2 (No-Caapf) Class-Cluster using Fleet', {tags: ['@short', '@nocaapf']}, () => {
+describe('Import CAPD RKE2 (No-Caapf) Class-Cluster using Fleet', {tags: ['@short', '@nocaapf', '@capdr-nocaapf']}, () => {
   let clusterName: string
   const timeout = vars.shortTimeout
   const classNamePrefix = 'docker-rke2'

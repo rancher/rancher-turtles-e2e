@@ -1,0 +1,36 @@
+apiVersion: cluster.x-k8s.io/v1beta2
+kind: Cluster
+metadata:
+  labels:
+    owner: turtles-qa
+    cluster-api.cattle.io/rancher-auto-import: "true"
+  name: replace_cluster_name
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks: 
+      - 192.168.0.0/16
+  topology:
+    classRef:
+      name: gcp-kubeadm-example
+      namespace: capi-classes
+    controlPlane:
+      replicas: 3
+    workers:
+      machineDeployments:
+        - class: default-worker
+          name: md-0
+          replicas: 2
+    variables:
+      - name: gcpProject
+        value: replace_gcp_project
+      - name: region
+        value: asia-south2
+      - name: gcpNetworkName
+        value: rancher-turtles-e2e-ci
+      - name: clusterFailureDomains
+        value:
+          - asia-south2-a
+      - name: imageId
+        value: projects/replace_gcp_project/global/images/replace_gcpImageId
+    version: replace_k8sVersion
