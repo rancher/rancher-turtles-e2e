@@ -25,7 +25,7 @@ import {vars} from '../support/variables';
 import {setUseCAPIFeatureGate} from "../support/commands";
 
 Cypress.config();
-describe('Import CAPD Kubeadm Class-Cluster Use-CAAPF Migration', {tags: '@use-caapf-switch'}, () => {
+describe('Import CAPD Kubeadm Class-Cluster Use-CAAPF Migration', {tags: ['@short', '@use-caapf-switch']}, () => {
   const timeout = vars.shortTimeout
   const classNamePrefix = 'docker-kubeadm'
   const clusterName = getClusterName(classNamePrefix)
