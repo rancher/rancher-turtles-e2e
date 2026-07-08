@@ -66,6 +66,7 @@ declare global {
       addInfraProvider(providerType: string, namespace: string, cloudCredentials?: string): Chainable<Element>;
       removeCAPIResource(resourceType: string, resourceName: string, timeout?: number): Chainable<Element>;
       addCloudCredsAWS(name: string, accessKey: string, secretKey: string): Chainable<Element>;
+      deleteCloudCredsAWS(name: string): Chainable<Element>;
       addCloudCredsGCP(name: string, gcpCredentials: string): Chainable<Element>;
       addCloudCredsAzure(name: string, clientID: string, clientSecret: string, subscriptionID: string): Chainable<Element>;
       addCloudCredsVMware(name: string, vsphere_username: string, vsphere_password: string, vsphere_server: string, vsphere_server_port: string): Chainable<Element>;
@@ -80,6 +81,7 @@ declare global {
       exploreCluster(clusterName: string): Chainable<Element>;
       createVSphereClusterIdentity(vsphere_username: string, vsphere_password: string): Chainable<Element>;
       createAWSClusterStaticIdentity(accessKey: string, secretKey: string): Chainable<Element>;
+      checkAWSClusterStaticIdentity(): Chainable<Element>;
       createCAPIProvider(providerName: string): Chainable<Element>;
       checkCAPIProvider(providerName: string): Chainable<Element>;
       verifyCAPIProviderImage(providerNamespace: string): Chainable<Element>;

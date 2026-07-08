@@ -86,9 +86,9 @@ describe('Enable CAPI Providers', () => {
       azure: 'v1.22.0'
     },
     'prod-v2.15': {
-      capi: 'v1.13.2',
+      capi: 'v1.13.3',
       rke2: 'v0.25.0',
-      kubeadm: 'v1.13.2',
+      kubeadm: 'v1.13.3',
       fleet: 'v0.15.0',
       vsphere: 'v1.16.1',
       amazon: 'v2.11.1',
@@ -116,9 +116,9 @@ describe('Enable CAPI Providers', () => {
       azure: 'v1.22.0'
     },
     'dev-v2.15': {
-      capi: 'v1.13.2',
+      capi: 'v1.13.3',
       rke2: 'v0.25.0',
-      kubeadm: 'v1.13.2',
+      kubeadm: 'v1.13.3',
       fleet: 'v0.15.0',
       vsphere: 'v1.16.1',
       amazon: 'v2.11.1',

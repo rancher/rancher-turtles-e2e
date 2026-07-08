@@ -194,12 +194,9 @@ describe('Enable CAPI Providers (2.12)', () => {
 
     qase(505, it('Create CAPA provider', {tags: ['@capak', '@capar', '@capaeks']}, () => {
       const namespace = 'capa-system'
-      cy.createNamespace([namespace]);
-      cy.burgerMenuOperate('open');
-      // Create AWS Infrastructure provider
-      cy.addCloudCredsAWS(amazonProvider, Cypress.expose('aws_access_key'), Cypress.expose('aws_secret_key'));
-      cy.burgerMenuOperate('open');
-      cy.addInfraProvider('Amazon', namespace, amazonProvider);
+      const providerName = 'aws'
+      cy.createCAPIProvider(providerName);
+      cy.checkCAPIProvider(providerName);
       matchAndWaitForProviderReadyStatus(amazonProvider, providerType, amazonProvider, amazonProviderVersion, namespace);
     })
     );

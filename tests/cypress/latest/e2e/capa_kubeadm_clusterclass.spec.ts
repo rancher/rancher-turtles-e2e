@@ -29,8 +29,7 @@ describe('Import CAPA Kubeadm Class-Cluster', {tags: ['@full', '@capak']}, () =>
 
     qase(342, it('Create AWS CAPIProvider & AWSClusterStaticIdentity', () => {
       if (isRancherManagerVersion('<2.13')) {
-        cy.removeCAPIResource('Providers', providerName);
-        cy.createCAPIProvider(providerName);
+        cy.checkCAPIProvider(providerName);
       }
       cy.createAWSClusterStaticIdentity(accessKey, secretKey);
     })
