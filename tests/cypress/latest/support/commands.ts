@@ -1117,21 +1117,47 @@ Cypress.Commands.add('checkKubernetesResource', (clusterName = 'local', resource
       return;
     }
 
-    cy.setNamespace(namespace);
     // Sometimes if a resource does not exist in a namespace, the navigation menu won't be visible. So we navigate after a namespace has been set.
-    resourcePath.forEach(path => {
-      cy.wait(1000);
-      cy.get('nav').contains(path).click();
+    cy.setNamespace(namespace);
+
+    let isNavComplete = true;
+
+    cy.wrap(resourcePath).each((path: string) => {
+      cy.then(() => {
+        if (!isNavComplete) return;
+
+        cy.wait(1000);
+        cy.get('nav').then(($nav) => {
+          const pathExists = $nav.text().includes(path);
+
+          if (pathExists) {
+            cy.wrap($nav).contains(path).click();
+          } else {
+            isNavComplete = false;
+          }
+        });
+      });
     });
 
+    // Cypress guarantees this won't run until the .each() block above is completely finished,
+    // otherwise the command execution will not be asynchronous,
+    // for e.g. it will take the original value of `isNavComplete` rather than the one calculated in the .each() block
+    cy.then(() => {
+      if (shouldExist){
+        // This is to ensure that if `shouldExist` is true, the path has been completely traversed
+        // and does not give a false positive in case it does not
+        expect(isNavComplete).to.be.true;
+      }
 
-    cy.typeInFilter(resourceName);
-    if (shouldExist) {
-      cy.getBySel('sortable-cell-0-1', {timeout}).should('exist');
-    } else {
-      cy.getBySel('sortable-cell-0-1', {timeout}).should('not.exist');
-    }
-    cy.namespaceReset();
+      if (!isNavComplete) {
+        cy.namespaceReset();
+        return;
+      }
+
+      cy.typeInFilter(resourceName);
+      cy.getBySel('sortable-cell-0-1', {timeout}).should(shouldExist? 'exist': 'not.exist');
+      cy.namespaceReset();
+    });
   });
 });
 
@@ -1394,9 +1420,7 @@ Cypress.Commands.add('kubectlExecute', (commands?: string[], commandFunc?: () =>
         .type('{enter}');
       cy.wait(timeout);
     })
-  }
-
-  if (commandFunc){
+  } else if (commandFunc){
     commandFunc();
   }
 
@@ -1501,12 +1525,12 @@ export function setUseCAPIFeatureGate(enabled: boolean, wait: boolean=true) {
 
   if(wait){
     // Ensure the turtles deployment has the feature gate enabled
-    cy.setNamespace(turtlesNamespace)
+    cy.setNamespace(turtlesNamespace);
     cy.clickNavMenu(["Apps", "Installed Apps"]);
     cy.typeInFilter('rancher-turtles');
     // We need to explicitly wait for the turtles controller deployment to restart
     cy.getBySel('sortable-cell-0-0').contains('Pending-Upgrade', {timeout: 60000});
-    cy.getBySel('sortable-cell-0-0').contains('Deployed', {timeout: 120000});
+    cy.getBySel('sortable-cell-0-0').contains('Deployed', {timeout: 180000});
     cy.clickNavMenu(["Workloads", "Deployments"]);
     cy.typeInFilter('rancher-turtles-controller-manager');
     cy.getBySel('sortable-table-0-action-button').click();

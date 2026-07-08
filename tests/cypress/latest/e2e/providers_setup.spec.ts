@@ -19,11 +19,10 @@ import {
   isTurtlesDevChart,
   isUpgrade,
   isUseCAAPFSupported,
-  providersChartNeedsStgRegistry,
   turtlesNamespace,
 } from '../support/utils';
 import {vars} from '../support/variables';
-import {matchAndWaitForProviderReadyStatus} from "../support/commands";
+import {matchAndWaitForProviderReadyStatus, setUseCAPIFeatureGate} from "../support/commands";
 
 type BuildType = 'prod-v2.13' | 'prod-v2.14' | 'prod-v2.15' | 'dev-v2.13' | 'dev-v2.14' | 'dev-v2.15';
 const buildType = determineBuildType();
@@ -158,31 +157,7 @@ describe('Enable CAPI Providers', () => {
     // This feature is set to true(in pre_upgrade_setup.spec.ts) before the rancher upgrade; that's why we skip this step for upgrade test.
     if (isUseCAAPFSupported && !isUpgrade) {
       qase(436, it('Enable turtles feature gate: use-caapf', () => {
-        const enableFeatureGate = (text: any) => {
-          // to disable the feature flag, simply removing this data won't be enough. The value must be reset to "false".
-          text.data["rancher-turtles"] = `{"features": {"use-caapf": {"enabled": "true"}}}`;
-        }
-        cy.editKubernetesResource({
-          name: "rancher-config",
-          clusterName: "local",
-          resourcePath: ["More Resources", "Core", "ConfigMaps"],
-          namespace: "cattle-system",
-          modifyYAMLOperation: enableFeatureGate
-        });
-
-        // Ensure the turtles deployment has the feature gate enabled
-        cy.setNamespace(turtlesNamespace)
-        cy.clickNavMenu(["Workloads", "Deployments"]);
-        cy.typeInFilter('rancher-turtles-controller-manager');
-        // We need to explicitly wait for the turtles controller deployment to restart
-        cy.getBySel('sortable-cell-0-0').contains('In Progress', {timeout: 60000});
-        cy.getBySel('sortable-cell-0-0').contains('Active', {timeout: 30000});
-        cy.getBySel('sortable-table-0-action-button').click();
-        cy.get('div.dropdownTarget').contains('Show Configuration').click();
-        cy.getBySel('btn-yaml-tab').click();
-        cy.get('.CodeMirror-code').contains("use-caapf=true");
-        cy.clickButton('Close');
-        cy.namespaceReset();
+        setUseCAPIFeatureGate(true)
       })
       );
     }

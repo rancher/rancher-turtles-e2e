@@ -167,12 +167,11 @@ describe('Import CAPD Kubeadm Class-Cluster Use-CAAPF Migration', {tags: '@use-c
     })
 
     it('Ensure everything is migrated from capi-clusters to fleet-default',() => {
-      // TODO: Fix this; in capi-clusters ns, resource `Clusters` does not exist at all.
       cy.checkKubernetesResource('local',["More Resources", "Fleet", "Clusters"] , clusterName, false, vars.capiClustersNS);
       cy.checkKubernetesResource('local',["More Resources", "Fleet", "Clusters"] , clusterName, true, vars.fleetDefaultNS);
 
-      cy.checkKubernetesResource('local',["More Resources", "Fleet", "Cluster Groups"] , clusterName, false, vars.capiClustersNS);
-      cy.checkKubernetesResource('local',["More Resources", "Fleet", "Cluster Groups"] , clusterName, true, vars.fleetDefaultNS);
+      cy.checkKubernetesResource('local',["More Resources", "Fleet", "Cluster Groups"] , classNamePrefix, false, vars.capiClustersNS);
+      cy.checkKubernetesResource('local',["More Resources", "Fleet", "Cluster Groups"] , classNamePrefix, true, vars.fleetDefaultNS);
     })
   })
 

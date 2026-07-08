@@ -1,5 +1,6 @@
 import '../support/commands';
 import {isRancherManagerVersion} from "../support/utils";
+import {vars} from "~/support/variables";
 
 Cypress.config();
 describe('Pre Rancher Upgrade Setup - @upgrade', {tags: '@upgrade'}, () => {
@@ -21,7 +22,7 @@ describe('Pre Rancher Upgrade Setup - @upgrade', {tags: '@upgrade'}, () => {
       name: "rancher-config",
       clusterName: "local",
       resourcePath: ["More Resources", "Core", "ConfigMaps"],
-      namespace: "cattle-system",
+      namespace: vars.cattleSystemNS,
       modifyYAMLOperation: enableFeatureGate
     });
 
