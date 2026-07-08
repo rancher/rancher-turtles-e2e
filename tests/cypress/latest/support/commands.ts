@@ -1408,7 +1408,7 @@ Cypress.Commands.add('viewCAPIClusterYAML', (clusterName) => {
 });
 
 Cypress.Commands.add('checkCAPIClusterCPInitialized', (clusterName) => {
-  function checkCAPIClusterCP(retries = 20) {
+  function checkCAPIClusterCP(retries = 40) {
     cy.get('.CodeMirror-scroll').invoke('text').then((text) => {
       if (text.replace(/\s+/g, '').includes('controlPlaneInitialized:true')) {
         return;
@@ -1418,6 +1418,7 @@ Cypress.Commands.add('checkCAPIClusterCPInitialized', (clusterName) => {
         cy.contains(text).should('exist');
         return;
       }
+      // Retry for 10mins
       cy.log(`Refreshing... (${retries} retries remaining)`);
       cy.wait(15000);
       cy.reload();

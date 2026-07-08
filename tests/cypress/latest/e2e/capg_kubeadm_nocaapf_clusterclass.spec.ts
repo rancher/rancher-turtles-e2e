@@ -1,44 +1,61 @@
 import '../support/commands';
-import {getClusterName, isAPIv1beta1, skipClusterDeletion, isRancherManagerVersion} from '../support/utils';
+import {getClusterName, isUseCAAPFSupported, skipClusterDeletion, isRancherManagerVersion, getCAPIClusterKubeconfig, applyYAMLManifest} from '../support/utils';
 import {capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Import CAPG Kubeadm Class-Cluster', {tags: ['@full', '@capgk']}, () => {
+describe('Import CAPG Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@nocaapf', '@capgk-nocaapf']}, () => {
   const timeout = vars.fullTimeout
   const classNamePrefix = 'gcp-kubeadm'
   const clusterName = getClusterName(classNamePrefix)
   const classesPath = 'examples/clusterclasses/gcp/kubeadm'
   const clusterClassRepoName = 'gcp-kubeadm-clusterclass'
-  const classClusterFileName = isAPIv1beta1 ? './fixtures/gcp/capg-kubeadm-class-cluster-v1beta1.yaml' : './fixtures/gcp/capg-kubeadm-class-cluster.yaml'
+  const classClusterFileName = './fixtures/gcp/capg-kubeadm-class-cluster-nocaapf.yaml'
 
+  const googleProvider = 'gcp'
   const gcpProject = Cypress.expose("gcp_project")
   const k8sVersion = isRancherManagerVersion('2.14') ? 'v1.34.1'
   : vars.kubeadmVersion
 
-  beforeEach(() => {
+  const gcpCCMFileName = "cloud-provider-gcp.yaml"
+  const gcpCCMCmd = [`wget ${vars.gcpCCMYaml}`, `sed -i 's|\${CLUSTER_CIDR}|192.168.0.0/16|g' ${gcpCCMFileName}`, applyYAMLManifest(clusterName, gcpCCMFileName)]
+
+  beforeEach(function () {
+    if (!isUseCAAPFSupported) {
+      // This test is only meant for >=2.14.1
+      this.skip();
+    }
     cy.login();
     cy.burgerMenuOperate('open');
   });
+
   context('[SETUP]', () => {
     qase(320, it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
     );
 
+    it('Initialize CAPG provider', () => {
+      // Verify GCP Infrastructure provider
+      cy.navigateToProviders();
+
+      cy.get('tr.main-row').contains('a', googleProvider).closest('tr').within(() => {
+        cy.get('td').eq(7).click();      // Action button
+      })
+      cy.contains('Edit Config').click();
+      cy.contains(`Provider: Google - ${googleProvider}`).should('exist');
+      cy.typeValue('Credential Name', googleProvider);
+      cy.getBySel('text-area-auto-grow').type(Cypress.expose('gcp_credentials'), {log: false});
+      cy.clickButton('Continue');
+      cy.getBySel('cluster-prov-select-credential').contains(googleProvider).should('be.visible');
+      cy.clickButton('Save');
+    })
+
     qase(148,
       it('Add CAPG Kubeadm ClusterClass Fleet Repo and check GCP CCM', () => {
         cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(classNamePrefix);
-
-        // Navigate to `local` cluster, More Resources > Fleet > HelmOps and ensure the charts are present.
-        cy.checkFleetHelmOps(['calico-cni']);
-
-        // Check GCP CCM bundle is available
-        cy.accesMenuSelection(['More Resources', 'Fleet', 'Bundle']);
-        cy.typeInFilter("cloud-controller-manager-gcp");
-        cy.getBySel('sortable-cell-0-1').should('exist');
       })
     );
   })
@@ -55,8 +72,15 @@ describe('Import CAPG Kubeadm Class-Cluster', {tags: ['@full', '@capgk']}, () =>
         });
         // Check CAPI cluster using its name
         cy.checkCAPICluster(clusterName);
+
+        // Check CAPI cluster status
+        cy.checkCAPIClusterCPInitialized(clusterName);
       })
     );
+
+    it('Apply the CNI & CCM manifest', () => {
+      cy.kubectlExecute([getCAPIClusterKubeconfig(clusterName), applyYAMLManifest(clusterName, vars.calicoCNIYaml), gcpCCMCmd[0], gcpCCMCmd[1], gcpCCMCmd[2]], 15000);
+    })
 
     qase(144,
       it('Auto import child CAPG cluster', () => {
