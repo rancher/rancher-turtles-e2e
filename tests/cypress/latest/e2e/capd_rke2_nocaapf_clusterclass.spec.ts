@@ -5,7 +5,7 @@ import {capdResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDelet
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Import CAPD RKE2 (No-Caapf) Class-Cluster using Fleet', {tags: ['@short', '@nocaapf', '@capdr-nocaapf']}, () => {
+describe('Import CAPD RKE2 (No-Caapf) Class-Cluster using Fleet', {tags: ['@short', '@short-nocaapf', '@nocaapf', '@capdr-nocaapf']}, () => {
   let clusterName: string
   const timeout = vars.shortTimeout
   const classNamePrefix = 'docker-rke2'
@@ -25,9 +25,6 @@ describe('Import CAPD RKE2 (No-Caapf) Class-Cluster using Fleet', {tags: ['@shor
 
   context('[SETUP]', () => {
     qase(438, it('Create Docker Resources', () => {
-      // Docker rke2 lb-config
-      cy.addFleetGitRepo('lb-docker', vars.turtlesRepoUrl, vars.classBranch, 'examples/applications/lb/docker', vars.capiClustersNS);
-      cy.burgerMenuOperate('open');
       // Prevention for Docker.io rate limiting
       cy.createDockerAuthSecret();
     })
@@ -152,12 +149,5 @@ describe('Import CAPD RKE2 (No-Caapf) Class-Cluster using Fleet', {tags: ['@shor
       })
       );
     }
-
-    qase(451, it('Delete the docker resources', () => {
-      // Remove the lb-config
-      cy.removeFleetGitRepo('lb-docker');
-      cy.deleteKubernetesResource('local', ['Storage', 'ConfigMaps'], 'docker-rke2-lb-config', vars.capiClustersNS);
-    })
-    );
   })
 });

@@ -4,7 +4,7 @@ import {capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Import CAPD Kubeadm (No-Caapf) Class-Cluster', {tags: ['@short', '@nocaapf', '@capdk-nocaapf']}, () => {
+describe('Import CAPD Kubeadm (No-Caapf) Class-Cluster', {tags: ['@short', '@short-nocaapf', '@nocaapf', '@capdk-nocaapf']}, () => {
   const timeout = vars.shortTimeout
   const classNamePrefix = 'docker-kubeadm'
   const clusterName = getClusterName(classNamePrefix)
@@ -22,11 +22,6 @@ describe('Import CAPD Kubeadm (No-Caapf) Class-Cluster', {tags: ['@short', '@noc
   });
 
   context('[SETUP]', () => {
-    qase(438, it('Create Docker Resources', () => {
-      cy.createNamespace([vars.capiClustersNS]);
-    })
-    );
-
     qase(439, it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })

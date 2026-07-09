@@ -1,6 +1,6 @@
 import '../support/commands';
 import {getClusterName, isAPIv1beta1, skipClusterDeletion, isRancherManagerVersion} from '../support/utils';
-import {capiClusterDeletion, capzResourcesCleanup, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
+import {capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
 Cypress.config();
@@ -123,8 +123,6 @@ describe('Import CAPZ Kubeadm Class-Cluster', {tags: ['@full', '@capzk']}, () =>
       qase(337, it('Delete the ClusterClass fleet repo and other resources', () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
-        // Cleanup other resources
-        capzResourcesCleanup();
       })
       );
     }

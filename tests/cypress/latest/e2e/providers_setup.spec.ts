@@ -13,13 +13,13 @@ limitations under the License.
 
 import '../support/commands';
 import {
-  capiNamespace, determineBuildType,
+  capiNamespace,
   isCypressTag,
-  isRancherManagerVersion,
+  isRancherManagerVersion, isTurtlesDevChart,
   isUpgrade,
   turtlesNamespace,
 } from '../support/utils';
-import {providers, vars} from '../support/variables';
+import {determineBuildType, providers, vars} from '../support/variables';
 import {matchAndWaitForProviderReadyStatus} from "../support/commands";
 
 if (isRancherManagerVersion('>2.12')) {
@@ -51,6 +51,27 @@ describe('Enable CAPI Providers', () => {
     })
     );
 
+    if (!isTurtlesDevChart && isRancherManagerVersion('>=2.14')) {
+      it('Patch the providers chart repository with OCIOptions.downloadAllTags: true', () => {
+        // .spec.OCIOptions.downloadAllTags is useful with staging registry which might contain unsupported versions
+        // and charts might seem broken with missing namespace or chart name.
+        // Enabling this option downloads all the chart versions and ensures only supported versions show up
+        // Doing so makes editing/updating the chart a smoother process.
+        const repositoryName = "turtles-providers-chart";
+        const resourceKind = 'clusterrepos.catalog.cattle.io';
+        const patch = {spec: {OCIOptions: {'downloadAllTags': true}}};
+        cy.patchYamlResource('local', 'default', resourceKind, repositoryName, patch);
+        cy.typeInFilter(repositoryName);
+        // Make sure the repo is active before leaving
+        // Always press Refresh button as workaround for https://github.com/rancher/rancher/issues/49671
+        cy.getBySel('sortable-table-0-action-button').click();
+        cy.wait(1000);
+        cy.get('.icon.group-icon.icon-refresh').parent().click();
+        cy.wait(1000);
+        cy.contains(new RegExp('Active.*' + repositoryName), {timeout: 150000});
+      })
+    }
+
     qase(338, it('Create Providers using Charts', () => {
       const providerSelectionFunction = (text: any) => {
         // @ts-ignore
@@ -62,10 +83,6 @@ describe('Enable CAPI Providers', () => {
         text.providers.controlplaneKubeadm.enabled = true;
         // @ts-ignore
         text.providers.controlplaneKubeadm.enableAutomaticUpdate = true;
-
-        // fleet-addon needs to be explicitly enabled for >=2.14.1.
-        // @ts-ignore
-        text.providers.addonFleet.enabled = true;
 
         if (isCypressTag('@short') || isCypressTag('@capd') || isCypressTag('@upgrade') || isCypressTag('@switch') || isCypressTag('@use-caapf-switch')) {
             // @ts-ignore
@@ -99,11 +116,10 @@ describe('Enable CAPI Providers', () => {
             text.providers.infrastructureVSphere.enableAutomaticUpdate = true;
           }
       }
-      // Uninstall Rancher Turtles Providers chart if already present
-      cy.deleteKubernetesResource('local', ['Apps', 'Installed Apps'], vars.turtlesProvidersHelmApp, turtlesNamespace);
 
       // Install Rancher Turtles Certified Providers chart
       let operation = isRancherManagerVersion('2.14') && isUpgrade ? 'Upgrade' : 'Install'
+      cy.task('suiteLog', `Installing turtles providers chart version ${vars.turtlesProvidersChartVersion}`)
       cy.checkChart('local', operation, vars.turtlesProvidersChartName, turtlesNamespace, {
         version: vars.turtlesProvidersChartVersion,
         modifyYAMLOperation: providerSelectionFunction
@@ -158,7 +174,7 @@ describe('Enable CAPI Providers', () => {
     })
   });
 
-  context('Docker provider', {tags: ['@short', '@capdk', '@capdr', '@upgrade', '@switch', '@use-caapf-switch']}, () => {
+  context('Docker provider', {tags: ['@short', '@short-nocaapf', '@nocaapf', '@capdk', '@capdr', '@upgrade', '@switch', '@use-caapf-switch', '@capdk-nocaapf', '@capdr-nocaapf']}, () => {
     const dockerProviderNamespace = 'capd-system'
     qase(422, it('Verify CAPD provider', () => {
       // Verify Docker Infrastructure provider
@@ -189,9 +205,9 @@ describe('Enable CAPI Providers', () => {
     );
   })
 
-  context('Cloud Providers', {tags: '@full'}, () => {
+  context('Cloud Providers', {tags: ['@full', '@full-nocaapf', '@nocaapf']}, () => {
     const providerType = 'infrastructure'
-    qase(424, it('Verify CAPA provider', {tags: ['@capak', '@capar', '@capaeks']},() => {
+    qase(424, it('Verify CAPA provider', {tags: ['@capak', '@capar', '@capaeks', '@capar-nocaapf', '@capaeks-nocaapf']},() => {
       const namespace = 'capa-system'
       // Verify AWS Infrastructure provider
       cy.addCloudCredsAWS(providers.amazonProvider, Cypress.expose('aws_access_key'), Cypress.expose('aws_secret_key'));
@@ -201,7 +217,7 @@ describe('Enable CAPI Providers', () => {
     })
     );
 
-    qase(425, it('Verify CAPG provider', {tags: ['@capgk', '@capgke']}, () => {
+    qase(425, it('Verify CAPG provider', {tags: ['@capgk', '@capgke', '@capgk-nocaapf', '@capgke-nocaapf']}, () => {
       const namespace = 'capg-system'
       // Verify GCP Infrastructure provider
       cy.navigateToProviders();
@@ -221,7 +237,7 @@ describe('Enable CAPI Providers', () => {
     })
     );
 
-    context('CAPZ Setup', {tags: ['@capzk', '@capzr', '@capzaks']}, ()=>{
+    context('CAPZ Setup', {tags: ['@capzk', '@capzr', '@capzaks', '@capzk-nocaapf','@capzr-nocaapf', '@capzaks-nocaapf']}, ()=>{
       qase(426,
         it('Verify CAPZ provider', () => {
           const namespace = 'capz-system'

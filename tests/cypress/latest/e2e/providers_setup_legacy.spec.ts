@@ -16,61 +16,26 @@ import {
   capiNamespace,
   isMigration,
   isRancherManagerVersion,
-  isTurtlesDevChart,
   turtlesNamespace
 } from '../support/utils';
-import {vars} from '../support/variables';
+import {determineBuildType, providers, vars} from '../support/variables';
 import {matchAndWaitForProviderReadyStatus} from "../support/commands";
 
-const buildType = isTurtlesDevChart && isRancherManagerVersion('2.12') ? 'dev-v2.12' : 'prod';
+const buildType = determineBuildType();
 
 if (isRancherManagerVersion('2.12') && !isMigration) {
 Cypress.config();
 describe('Enable CAPI Providers (2.12)', () => {
-  // Providers names
-  const coreCAPIProvider = 'cluster-api'
-  const rke2Provider = 'rke2'
-  const kubeadmProvider = 'kubeadm'
-  const dockerProvider = 'docker'
-  const amazonProvider = 'aws'
-  const googleProvider = 'gcp'
-  const azureProvider = 'azure'
-  const fleetProvider = 'fleet'
-  const vsphereProvider = 'vsphere'
-
-  // Expected provider versions
-  const providerVersions = {
-    prod: {
-      capi: 'v1.10.5',
-      rke2: 'v0.20.1',
-      kubeadm: 'v1.10.5',
-      fleet: 'v0.11.0',
-      vsphere: 'v1.13.1',
-      amazon: 'v2.9.1',
-      google: 'v1.10.0',
-      azure: 'v1.21.0'
-    },
-    'dev-v2.12': {
-      capi: 'v1.10.5',
-      rke2: 'v0.20.1',
-      kubeadm: 'v1.10.5',
-      fleet: 'v0.11.0',
-      vsphere: 'v1.13.1',
-      amazon: 'v2.9.1',
-      google: 'v1.10.0',
-      azure: 'v1.21.0'
-    }
-  }
 
   // Assign the provider versions based on the chart type
-  const coreCAPIProviderVersion = providerVersions[buildType].capi;
-  const rke2ProviderVersion = providerVersions[buildType].rke2;
-  const kubeadmProviderVersion = providerVersions[buildType].kubeadm
-  const fleetProviderVersion = providerVersions[buildType].fleet
-  const vsphereProviderVersion = providerVersions[buildType].vsphere
-  const amazonProviderVersion = providerVersions[buildType].amazon
-  const googleProviderVersion = providerVersions[buildType].google
-  const azureProviderVersion = providerVersions[buildType].azure
+  const coreCAPIProviderVersion = providers.version[buildType].capi;
+  const rke2ProviderVersion = providers.version[buildType].rke2;
+  const kubeadmProviderVersion = providers.version[buildType].kubeadm
+  const fleetProviderVersion = providers.version[buildType].fleet
+  const vsphereProviderVersion = providers.version[buildType].vsphere
+  const amazonProviderVersion = providers.version[buildType].amazon
+  const googleProviderVersion = providers.version[buildType].google
+  const azureProviderVersion = providers.version[buildType].azure
 
   const kubeadmBaseURL = 'https://github.com/kubernetes-sigs/cluster-api/releases/'
   const providerTypes = ['bootstrap', 'control plane']
@@ -97,13 +62,13 @@ describe('Enable CAPI Providers (2.12)', () => {
  
     qase(494, it('Verify Core CAPI Provider', () => {
       cy.navigateToProviders();
-      matchAndWaitForProviderReadyStatus(coreCAPIProvider, 'core', coreCAPIProvider, coreCAPIProviderVersion, capiNamespace);
+      matchAndWaitForProviderReadyStatus(providers.coreCAPIProvider, 'core', providers.coreCAPIProvider, coreCAPIProviderVersion, capiNamespace);
     })
     );
 
     qase(495, it('Verify Fleet addon provider', () => {
       cy.navigateToProviders();
-      matchAndWaitForProviderReadyStatus(fleetProvider, 'addon', fleetProvider, fleetProviderVersion, turtlesNamespace);
+      matchAndWaitForProviderReadyStatus(providers.fleetProvider, 'addon', providers.fleetProvider, fleetProviderVersion, turtlesNamespace);
     })
     );
 
@@ -112,20 +77,20 @@ describe('Enable CAPI Providers (2.12)', () => {
         // Create CAPI Kubeadm providers
         if (providerType == 'control plane') {
           const namespace = kubeadmProviderNamespaces[1]
-          const providerName = kubeadmProvider + '-' + 'control-plane'
+          const providerName = providers.kubeadmProvider + '-' + 'control-plane'
           cy.createNamespace([namespace]);
           // https://github.com/kubernetes-sigs/cluster-api/releases/v1.10.6/control-plane-components.yaml
           const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + 'control-plane' + '-components.yaml'
-          cy.addCustomProvider(providerName, 'capi-kubeadm-control-plane-system', kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
-          matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', kubeadmProvider, kubeadmProviderVersion, namespace);
+          cy.addCustomProvider(providerName, 'capi-kubeadm-control-plane-system', providers.kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
+          matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', providers.kubeadmProvider, kubeadmProviderVersion, namespace);
         } else {
           const namespace = kubeadmProviderNamespaces[0]
-          const providerName = kubeadmProvider + '-' + providerType
+          const providerName = providers.kubeadmProvider + '-' + providerType
           cy.createNamespace([namespace]);
           // https://github.com/kubernetes-sigs/cluster-api/releases/v1.10.6/bootstrap-components.yaml
           const providerURL = kubeadmBaseURL + kubeadmProviderVersion + '/' + providerType + '-components.yaml'
-          cy.addCustomProvider(providerName, 'capi-kubeadm-bootstrap-system', kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
-          matchAndWaitForProviderReadyStatus(providerName, providerType, kubeadmProvider, kubeadmProviderVersion, namespace);
+          cy.addCustomProvider(providerName, 'capi-kubeadm-bootstrap-system', providers.kubeadmProvider, providerType, kubeadmProviderVersion, providerURL);
+          matchAndWaitForProviderReadyStatus(providerName, providerType, providers.kubeadmProvider, kubeadmProviderVersion, namespace);
         }
       })
       );
@@ -133,14 +98,14 @@ describe('Enable CAPI Providers (2.12)', () => {
       qase([497,499], it('Verify RKE2 Providers - ' + providerType, () => {
         if (providerType == 'control plane') {
           const namespace = 'rke2-control-plane-system'
-          const providerName = rke2Provider + '-' + 'control-plane'
+          const providerName = providers.rke2Provider + '-' + 'control-plane'
           cy.navigateToProviders();
-          matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', rke2Provider, rke2ProviderVersion, namespace);
+          matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', providers.rke2Provider, rke2ProviderVersion, namespace);
          } else {
           const namespace = 'rke2-bootstrap-system'
-          const providerName = rke2Provider + '-' + providerType
+          const providerName = providers.rke2Provider + '-' + providerType
           cy.navigateToProviders();
-          matchAndWaitForProviderReadyStatus(providerName, providerType, rke2Provider, rke2ProviderVersion, namespace);
+          matchAndWaitForProviderReadyStatus(providerName, providerType, providers.rke2Provider, rke2ProviderVersion, namespace);
         }
       })
       );
@@ -157,7 +122,7 @@ describe('Enable CAPI Providers (2.12)', () => {
     qase(501, it('Create CAPD provider', () => {
       // Create Docker Infrastructure provider
       cy.addInfraProvider('Docker', dockerProviderNamespace);
-      matchAndWaitForProviderReadyStatus(dockerProvider, 'infrastructure', dockerProvider, kubeadmProviderVersion, dockerProviderNamespace);
+      matchAndWaitForProviderReadyStatus(providers.dockerProvider, 'infrastructure', providers.dockerProvider, kubeadmProviderVersion, dockerProviderNamespace);
     })
     );
   })
@@ -181,10 +146,10 @@ describe('Enable CAPI Providers (2.12)', () => {
       const vspherePassword = vsphere_secrets_json.vsphere_password;
       const vsphereServer = vsphere_secrets_json.vsphere_server;
       const vspherePort = '443';
-      cy.addCloudCredsVMware(vsphereProvider, vsphereUsername, vspherePassword, vsphereServer, vspherePort);
+      cy.addCloudCredsVMware(providers.vsphereProvider, vsphereUsername, vspherePassword, vsphereServer, vspherePort);
       cy.burgerMenuOperate('open');
-      cy.addInfraProvider('vSphere', vsphereProviderNamespace, vsphereProvider);
-      matchAndWaitForProviderReadyStatus(vsphereProvider, 'infrastructure', vsphereProvider, vsphereProviderVersion, vsphereProviderNamespace);
+      cy.addInfraProvider('vSphere', vsphereProviderNamespace, providers.vsphereProvider);
+      matchAndWaitForProviderReadyStatus(providers.vsphereProvider, 'infrastructure', providers.vsphereProvider, vsphereProviderVersion, vsphereProviderNamespace);
     })
     );
   })
@@ -197,7 +162,7 @@ describe('Enable CAPI Providers (2.12)', () => {
       const providerName = 'aws'
       cy.createCAPIProvider(providerName);
       cy.checkCAPIProvider(providerName);
-      matchAndWaitForProviderReadyStatus(amazonProvider, providerType, amazonProvider, amazonProviderVersion, namespace);
+      matchAndWaitForProviderReadyStatus(providers.amazonProvider, providerType, providers.amazonProvider, amazonProviderVersion, namespace);
     })
     );
 
@@ -206,10 +171,10 @@ describe('Enable CAPI Providers (2.12)', () => {
       cy.createNamespace([namespace]);
       cy.burgerMenuOperate('open');
       // Create GCP Infrastructure provider
-      cy.addCloudCredsGCP(googleProvider, Cypress.expose('gcp_credentials'));
+      cy.addCloudCredsGCP(providers.googleProvider, Cypress.expose('gcp_credentials'));
       cy.burgerMenuOperate('open');
-      cy.addInfraProvider('Google Cloud Platform', namespace, googleProvider);
-      matchAndWaitForProviderReadyStatus(googleProvider, providerType, googleProvider, googleProviderVersion, namespace);
+      cy.addInfraProvider('Google Cloud Platform', namespace, providers.googleProvider);
+      matchAndWaitForProviderReadyStatus(providers.googleProvider, providerType, providers.googleProvider, googleProviderVersion, namespace);
     })
     );
 
@@ -220,8 +185,8 @@ describe('Enable CAPI Providers (2.12)', () => {
           cy.createNamespace([namespace]);
           cy.burgerMenuOperate('open');
           // Create Azure Infrastructure provider
-          cy.addInfraProvider('Azure', namespace, azureProvider);
-          matchAndWaitForProviderReadyStatus(azureProvider, providerType, azureProvider, azureProviderVersion, namespace);
+          cy.addInfraProvider('Azure', namespace, providers.azureProvider);
+          matchAndWaitForProviderReadyStatus(providers.azureProvider, providerType, providers.azureProvider, azureProviderVersion, namespace);
         })
       );
 

@@ -73,11 +73,13 @@ export function capiClusterDeletion(clusterName: string, timeout: number, cluste
   }
 }
 
+const capiClustersNS = 'capi-clusters'
+
 export function capzResourcesCleanup(aso: boolean = false) {
   if (aso) {
-    cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'aso-credential-secret', vars.capiClustersNS)
+    cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'aso-credential-secret', capiClustersNS)
   } else {
-    cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', vars.capiClustersNS)
+    cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AzureClusterIdentities'], 'cluster-identity', capiClustersNS)
     cy.deleteKubernetesResource('local', ['More Resources', 'Core', 'Secrets'], 'cluster-identity', 'capz-system')
   }
 }
@@ -93,10 +95,10 @@ export function capvResourcesCleanup(provider: 'kubeadm' | 'rke2') {
   cy.deleteKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'VSphereClusterIdentities'], 'cluster-identity');
   cy.deleteKubernetesResource('local', ['Storage', 'Secrets'], "capv-helm-values", 'capv-system')
   if (provider === 'rke2') {
-    cy.deleteKubernetesResource('local', ['Storage', 'Secrets'], "capv-docker-token", vars.capiClustersNS)
+    cy.deleteKubernetesResource('local', ['Storage', 'Secrets'], "capv-docker-token", capiClustersNS)
   }
 }
 
 export function capdResourcesCleanup() {
-  cy.deleteKubernetesResource('local', ['Storage', 'Secrets'], 'capd-docker-token', vars.capiClustersNS)
+  cy.deleteKubernetesResource('local', ['Storage', 'Secrets'], 'capd-docker-token', capiClustersNS)
 }

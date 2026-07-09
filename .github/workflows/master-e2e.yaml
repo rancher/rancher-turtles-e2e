@@ -334,11 +334,11 @@ jobs:
             echo "SPECS=" >> ${GITHUB_ENV}
           elif [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
             # Required for upgrade tests
-            echo "RANCHER_VERSION=prime/2.13.5" >> ${GITHUB_ENV}
+            echo "RANCHER_VERSION=prime/2.13.7" >> ${GITHUB_ENV}
             echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> ${GITHUB_ENV}
           elif [[ "${{ inputs.grep_test_by_tag }}" =~ "@switch" ]]; then
             # Required for switch tests
-            echo "RANCHER_VERSION=prime/2.13.5" >> ${GITHUB_ENV}
+            echo "RANCHER_VERSION=prime/2.13.7" >> ${GITHUB_ENV}
             echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> ${GITHUB_ENV}
           else
             echo "RANCHER_VERSION=${{ inputs.rancher_version }}" >> ${GITHUB_ENV}
@@ -566,7 +566,7 @@ jobs:
       - name: Set Rancher Manager Upgrade version
         if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') }}
         run: |
-          echo "RANCHER_VERSION=prime/2.14.3" >> ${GITHUB_ENV}
+          echo "RANCHER_VERSION=prime-alpha/2.14.4-alpha3" >> ${GITHUB_ENV}
       - name: Upgrade Rancher Manager
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:

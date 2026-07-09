@@ -4,7 +4,7 @@ import {capaResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDelet
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Import CAPA RKE2 (No-Caapf) Class-Cluster', {tags: ['@full', '@nocaapf', '@capar-nocaapf']}, () => {
+describe('Import CAPA RKE2 (No-Caapf) Class-Cluster', {tags: ['@full', '@full-nocaapf', '@nocaapf', '@capar-nocaapf']}, () => {
   let ccID: string;
   const timeout = vars.fullTimeout
   const classNamePrefix = 'aws-rke2'
@@ -28,9 +28,7 @@ describe('Import CAPA RKE2 (No-Caapf) Class-Cluster', {tags: ['@full', '@nocaapf
     })
     );
 
-    it('Add Cloud credentials & Get Cloud credential ID', () => {
-      cy.addCloudCredsAWS(providerName, Cypress.expose('aws_access_key'), Cypress.expose('aws_secret_key'));
-      cy.burgerMenuOperate('open');
+    it('Get Cloud credential ID', () => {
       cy.accesMenuSelection(['Cluster Management', 'Cloud Credentials']);
       cy.getBySel('sortable-table-list-container').should('be.visible');
       cy.typeInFilter(providerName);
@@ -164,7 +162,6 @@ describe('Import CAPA RKE2 (No-Caapf) Class-Cluster', {tags: ['@full', '@nocaapf
           cy.removeFleetGitRepo(clusterClassRepoName);
           // Cleanup other resources
           capaResourcesCleanup();
-          cy.deleteCloudCredsAWS(providerName);
         })
       );
     }
