@@ -1408,6 +1408,7 @@ Cypress.Commands.add('checkExternalFleetAnnotation', (clusterName, required = tr
 });
 
 // Commands to execute on kubectl shell
+// TODO (pvala): Modify this function to use `exit` command and wait for `Disconnected` to be visible to determine when to exit
 Cypress.Commands.add('kubectlExecute', (commands?: string[], commandFunc?: () => void, timeout = 3000) => {
   cy.searchCluster('local');
   cy.getBySel('sortable-table-0-action-button').click();
@@ -1517,7 +1518,7 @@ export function matchAndWaitForProviderReadyStatus(
 }
 
 
-export function setUseCAPIFeatureGate(enabled: boolean, wait: boolean=true) {
+export function setUseCAAPFFeatureGate(enabled: boolean, wait: boolean=true) {
   const resourceKind = 'ConfigMap';
   const namespace = vars.cattleSystemNS;
   const patch = {data: {"rancher-turtles": `{"features": {"use-caapf": {"enabled": ${enabled} }}}`}};

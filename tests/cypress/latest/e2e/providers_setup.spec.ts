@@ -22,7 +22,7 @@ import {
   turtlesNamespace,
 } from '../support/utils';
 import {vars} from '../support/variables';
-import {matchAndWaitForProviderReadyStatus, setUseCAPIFeatureGate} from "../support/commands";
+import {matchAndWaitForProviderReadyStatus, setUseCAAPFFeatureGate} from "../support/commands";
 
 type BuildType = 'prod-v2.13' | 'prod-v2.14' | 'prod-v2.15' | 'dev-v2.13' | 'dev-v2.14' | 'dev-v2.15';
 const buildType = determineBuildType();
@@ -157,7 +157,7 @@ describe('Enable CAPI Providers', () => {
     // This feature is set to true(in pre_upgrade_setup.spec.ts) before the rancher upgrade; that's why we skip this step for upgrade test.
     if (isUseCAAPFSupported && !isUpgrade) {
       qase(436, it('Enable turtles feature gate: use-caapf', () => {
-        setUseCAPIFeatureGate(true)
+        setUseCAAPFFeatureGate(true)
       })
       );
     }
