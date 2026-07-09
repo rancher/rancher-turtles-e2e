@@ -15,7 +15,7 @@ limitations under the License.
 
 import '../support/commands';
 import {
-  getClusterName,
+  getClusterName, isTurtlesDevChart,
   isUseCAAPFSupported,
   skipClusterDeletion,
   turtlesNamespace
@@ -129,7 +129,7 @@ describe('Import CAPD Kubeadm Class-Cluster for Use-CAAPF Migration', {tags: ['@
     }))
 
     qase(595, it('Disable fleet-addon provider', () => {
-      const repositoryName = "turtles-providers-chart"
+      const repositoryName = isTurtlesDevChart? "chartmuseum-repo": "turtles-providers-chart";
       const resourceKind = 'clusterrepos.catalog.cattle.io';
       const namespace = turtlesNamespace;
       const patch = {spec: {OCIOptions: {'downloadAllTags': true}}};
@@ -142,7 +142,7 @@ describe('Import CAPD Kubeadm Class-Cluster for Use-CAAPF Migration', {tags: ['@
       cy.wait(1000);
       cy.get('.icon.group-icon.icon-refresh').parent().click();
       cy.wait(1000);
-      cy.contains(new RegExp('Active.*' + 'turtles-providers-chart'), {timeout: 150000});
+      cy.contains(new RegExp('Active.*' + repositoryName), {timeout: 150000});
 
       const providerSelectionFunction = (text: any) => {
         // @ts-ignore
