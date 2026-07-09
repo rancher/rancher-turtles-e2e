@@ -35,22 +35,6 @@ describe('Import CAPG Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@noca
     })
     );
 
-    it('Initialize CAPG provider', () => {
-      // Verify GCP Infrastructure provider
-      cy.navigateToProviders();
-
-      cy.get('tr.main-row').contains('a', googleProvider).closest('tr').within(() => {
-        cy.get('td').eq(7).click();      // Action button
-      })
-      cy.contains('Edit Config').click();
-      cy.contains(`Provider: Google - ${googleProvider}`).should('exist');
-      cy.typeValue('Credential Name', googleProvider);
-      cy.getBySel('text-area-auto-grow').type(Cypress.expose('gcp_credentials'), {log: false});
-      cy.clickButton('Continue');
-      cy.getBySel('cluster-prov-select-credential').contains(googleProvider).should('be.visible');
-      cy.clickButton('Save');
-    })
-
     qase(148,
       it('Add CAPG Kubeadm ClusterClass Fleet Repo and check GCP CCM', () => {
         cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)

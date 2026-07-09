@@ -279,6 +279,8 @@ jobs:
 
       # Common specs: @short @vsphere @full
       SPECS: |
+        e2e/providers_setup_legacy.spec.ts
+        e2e/providers_setup.spec.ts
         e2e/capd_kubeadm_nocaapf_clusterclass.spec.ts
         e2e/capd_rke2_nocaapf_clusterclass.spec.ts
         e2e/capa_eks_nocaapf_clusterclass.spec.ts
@@ -288,8 +290,7 @@ jobs:
         e2e/capz_rke2_nocaapf_clusterclass.spec.ts
         e2e/capg_kubeadm_nocaapf_clusterclass.spec.ts
         e2e/capg_gke_nocaapf_clusterclass.spec.ts
-        e2e/providers_setup_legacy.spec.ts
-        e2e/providers_setup.spec.ts
+        e2e/fleet_addon_provider_setup.spec.ts
         e2e/capd_rke2_clusterclass.spec.ts
         e2e/capd_rke2_fleet_clusterclass.spec.ts
         e2e/capd_kubeadm_clusterclass.spec.ts

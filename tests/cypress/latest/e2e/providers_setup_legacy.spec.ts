@@ -213,15 +213,29 @@ describe('Enable CAPI Providers (2.12)', () => {
     })
     );
 
-    qase(507, it('Create CAPZ provider', {tags: ['@capzk', '@capzr', 'capzaks']}, () => {
-      const namespace = 'capz-system'
-      cy.createNamespace([namespace]);
-      cy.burgerMenuOperate('open');
-      // Create Azure Infrastructure provider
-      cy.addInfraProvider('Azure', namespace, azureProvider);
-      matchAndWaitForProviderReadyStatus(azureProvider, providerType, azureProvider, azureProviderVersion, namespace);
+    context('CAPZ Setup', {tags: ['@capzk', '@capzr', '@capzaks']}, ()=>{
+
+      qase(507, it('Create CAPZ provider', () => {
+          const namespace = 'capz-system'
+          cy.createNamespace([namespace]);
+          cy.burgerMenuOperate('open');
+          // Create Azure Infrastructure provider
+          cy.addInfraProvider('Azure', namespace, azureProvider);
+          matchAndWaitForProviderReadyStatus(azureProvider, providerType, azureProvider, azureProviderVersion, namespace);
+        })
+      );
+
+      qase(345,
+        it('Create AzureClusterIdentity', () => {
+          const clientID = Cypress.expose("azure_client_id")
+          const clientSecret = btoa(Cypress.expose("azure_client_secret"))
+          const tenantID = Cypress.expose("azure_tenant_id")
+
+          cy.createAzureClusterIdentity(clientID, tenantID, clientSecret)
+        })
+      );
     })
-    );
+
   })
 });
 }

@@ -36,11 +36,6 @@ describe('Import CAPZ RKE2 (No-Caapf) Class-Cluster', {tags: ['@full', '@nocaapf
     })
     );
 
-    qase(345, it('Create AzureClusterIdentity', () => {
-      cy.createAzureClusterIdentity(clientID, tenantID, clientSecret)
-    })
-    );
-
     qase(87, it('Add CAPZ RKE2 ClusterClass Fleet Repo', () => {
         cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created

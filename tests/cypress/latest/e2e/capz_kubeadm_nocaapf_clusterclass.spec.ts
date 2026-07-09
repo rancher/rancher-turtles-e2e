@@ -12,10 +12,7 @@ describe('Import CAPZ Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@noca
   const clusterClassRepoName = "azure-kubeadm-clusterclass"
   const classClusterFileName = './fixtures/azure/capz-kubeadm-class-cluster-nocaapf.yaml'
 
-  const clientID = Cypress.expose("azure_client_id")
-  const clientSecret = btoa(Cypress.expose("azure_client_secret"))
   const subscriptionID = Cypress.expose("azure_subscription_id")
-  const tenantID = Cypress.expose("azure_tenant_id")
 
   const azureCCMFileName = "cloud-provider-azure.yaml"
   const azureCCMCmd = [`wget ${vars.azureCCMYaml}`, `sed -i 's|\${CLUSTER_CIDR}|192.168.0.0/16|g' ${azureCCMFileName}`, applyYAMLManifest(clusterName, azureCCMFileName)]
@@ -36,11 +33,6 @@ describe('Import CAPZ Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@noca
   context('[SETUP]', () => {
     qase(329, it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
-    })
-    );
-
-    qase(346, it('Create AzureClusterIdentity', () => {
-      cy.createAzureClusterIdentity(clientID, tenantID, clientSecret)
     })
     );
 

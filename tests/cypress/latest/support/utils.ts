@@ -75,3 +75,28 @@ export const getCAPIClusterKubeconfig = (
 export const applyYAMLManifest = (clusterName: string, path: string): string => {
   return `kubectl --kubeconfig=${clusterName}-kubeconfig.yaml apply -f ${path}`
 };
+
+
+type BuildType = 'prod-v2.13' | 'prod-v2.14' | 'prod-v2.15' | 'dev-v2.13' | 'dev-v2.14' | 'dev-v2.15';
+
+export function determineBuildType(): BuildType {
+  if (isTurtlesDevChart && isRancherManagerVersion('2.13')) {
+    return 'dev-v2.13';
+  }
+  if (isTurtlesDevChart && isRancherManagerVersion('2.14')) {
+    return 'dev-v2.14';
+  }
+  if (isTurtlesDevChart && isRancherManagerVersion('2.15')) {
+    return 'dev-v2.15';
+  }
+  if (isRancherManagerVersion('2.13')) {
+    return 'prod-v2.13';
+  }
+  if (isRancherManagerVersion('2.14')) {
+    return 'prod-v2.14';
+  }
+  if (isRancherManagerVersion('2.15')) {
+    return 'prod-v2.15';
+  }
+  return undefined as unknown as BuildType; // This should never happen, but it satisfies the type checker
+}

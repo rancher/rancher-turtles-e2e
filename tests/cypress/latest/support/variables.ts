@@ -44,3 +44,78 @@ export const vars = {
   gcpCCMYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/cloud-provider-gcp.yaml',
   turtlesProvidersChartVersion: providersChartNeedsStgRegistry() && isRancherManagerVersion('2.13') ? '0.25' : providersChartNeedsStgRegistry() && isRancherManagerVersion('2.14') ? '0.26' : providersChartNeedsStgRegistry() && isRancherManagerVersion('2.15') ? '0.27' : undefined
 };
+
+
+export const providers = {
+  version: {
+    'prod-v2.13': {
+      capi: 'v1.10.6',
+      rke2: 'v0.21.1',
+      kubeadm: 'v1.10.6',
+      fleet: 'v0.12.0',
+      vsphere: 'v1.13.1',
+      amazon: 'v2.9.1',
+      google: 'v1.10.0',
+      azure: 'v1.21.0'
+    },
+    'prod-v2.14': {
+      capi: 'v1.12.7',
+      rke2: 'v0.24.4',
+      kubeadm: 'v1.12.7',
+      fleet: 'v0.14.1',
+      vsphere: 'v1.15.2',
+      amazon: 'v2.11.1',
+      google: 'v1.11.1',
+      azure: 'v1.22.0'
+    },
+    'prod-v2.15': {
+      capi: 'v1.13.3',
+      rke2: 'v0.25.0',
+      kubeadm: 'v1.13.3',
+      fleet: 'v0.15.0',
+      vsphere: 'v1.16.1',
+      amazon: 'v2.11.1',
+      google: 'v1.11.2',
+      azure: 'v1.23.2'
+    },
+    'dev-v2.13': {
+      capi: 'v1.10.6',
+      rke2: 'v0.21.1',
+      kubeadm: 'v1.10.6',
+      fleet: 'v0.12.0',
+      vsphere: 'v1.13.1',
+      amazon: 'v2.9.1',
+      google: 'v1.10.0',
+      azure: 'v1.21.0'
+    },
+    'dev-v2.14': {
+      capi: 'v1.12.7',
+      rke2: 'v0.24.4',
+      kubeadm: 'v1.12.7',
+      fleet: 'v0.14.1',
+      vsphere: 'v1.15.2',
+      amazon: 'v2.11.1',
+      google: 'v1.11.1',
+      azure: 'v1.22.0'
+    },
+    'dev-v2.15': {
+      capi: 'v1.13.3',
+      rke2: 'v0.25.0',
+      kubeadm: 'v1.13.3',
+      fleet: 'v0.15.0',
+      vsphere: 'v1.16.1',
+      amazon: 'v2.11.1',
+      google: 'v1.11.2',
+      azure: 'v1.23.2'
+    }
+  },
+  coreCAPIProvider : 'cluster-api',
+  rke2Provider : 'rke2',
+  kubeadmProvider : 'kubeadm',
+  dockerProvider : 'docker',
+  amazonProvider : 'aws',
+  googleProvider : 'gcp',
+  azureProvider : 'azure',
+  fleetProvider : 'fleet',
+  vsphereProvider : 'vsphere'
+}
