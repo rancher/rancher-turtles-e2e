@@ -30,7 +30,7 @@ import {
   isRancherManagerVersion,
   isTurtlesDevChart,
   isTurtlesPrimeBuild,
-  isUpgrade
+  isUpgrade, turtlesNamespace
 } from './utils';
 import {vars} from './variables'
 
@@ -789,9 +789,7 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
 Cypress.Commands.add('patchYamlResource', (clusterName, namespace, resourceKind, resourceName, patch) => {
   // With support for nested objects, but "isNestedIn" flag must be set to true (the flag will be removed from the YAML)
   // Patch example: const patch = {data: {manifests: {isNestedIn: true, spec: {...}}};
-
-  // Locate the resource and initiate Edit YAML mode
-  cypressLib.accesMenu(clusterName);
+  cy.exploreCluster(clusterName);
   cy.setNamespace(namespace);
   // Open Resource Search modal
   cy.get('.icon-search.icon-lg').click();
@@ -1119,21 +1117,47 @@ Cypress.Commands.add('checkKubernetesResource', (clusterName = 'local', resource
       return;
     }
 
-    cy.setNamespace(namespace);
     // Sometimes if a resource does not exist in a namespace, the navigation menu won't be visible. So we navigate after a namespace has been set.
-    resourcePath.forEach(path => {
-      cy.wait(1000);
-      cy.get('nav').contains(path).click();
+    cy.setNamespace(namespace);
+
+    let isNavComplete = true;
+
+    cy.wrap(resourcePath).each((path: string) => {
+      cy.then(() => {
+        if (!isNavComplete) return;
+
+        cy.wait(1000);
+        cy.get('nav').then(($nav) => {
+          const pathExists = $nav.text().includes(path);
+
+          if (pathExists) {
+            cy.wrap($nav).contains(path).click();
+          } else {
+            isNavComplete = false;
+          }
+        });
+      });
     });
 
+    // Cypress guarantees this won't run until the .each() block above is completely finished,
+    // otherwise the command execution will not be asynchronous,
+    // for e.g. it will take the original value of `isNavComplete` rather than the one calculated in the .each() block
+    cy.then(() => {
+      if (shouldExist){
+        // This is to ensure that if `shouldExist` is true, the path has been completely traversed
+        // and does not give a false positive in case it does not
+        expect(isNavComplete).to.be.true;
+      }
 
-    cy.typeInFilter(resourceName);
-    if (shouldExist) {
-      cy.getBySel('sortable-cell-0-1', {timeout}).should('exist');
-    } else {
-      cy.getBySel('sortable-cell-0-1', {timeout}).should('not.exist');
-    }
-    cy.namespaceReset();
+      if (!isNavComplete) {
+        cy.namespaceReset();
+        return;
+      }
+
+      cy.typeInFilter(resourceName);
+      cy.getBySel('sortable-cell-0-1', {timeout}).should(shouldExist? 'exist': 'not.exist');
+      cy.namespaceReset();
+    });
   });
 });
 
@@ -1384,17 +1408,23 @@ Cypress.Commands.add('checkExternalFleetAnnotation', (clusterName, required = tr
 });
 
 // Commands to execute on kubectl shell
-Cypress.Commands.add('kubectlExecute', (commands: string[], timeout = 3000) => {
+// TODO (pvala): Modify this function to use `exit` command and wait for `Disconnected` to be visible to determine when to exit
+Cypress.Commands.add('kubectlExecute', (commands?: string[], commandFunc?: () => void, timeout = 3000) => {
   cy.searchCluster('local');
   cy.getBySel('sortable-table-0-action-button').click();
   cy.get('i.icon.group-icon.icon-terminal').should('be.visible').click();
   cy.contains('Connected').should('be.visible');
-  commands.forEach((command) => {
-    cy.get('.shell-body')
-      .type(command, {parseSpecialCharSequences: false})
-      .type('{enter}');
-    cy.wait(timeout);
-  })
+  if (commands) {
+    commands.forEach((command) => {
+      cy.get('.shell-body')
+        .type(command, {parseSpecialCharSequences: false})
+        .type('{enter}');
+      cy.wait(timeout);
+    })
+  } else if (commandFunc){
+    commandFunc();
+  }
+
   cy.getBySel('wm-tab-close-button').click();
 });
 
@@ -1485,4 +1515,30 @@ export function matchAndWaitForProviderReadyStatus(
     });
     // Verify provider image
     cy.verifyCAPIProviderImage(providerNamespace);
+}
+
+
+export function setUseCAAPFFeatureGate(enabled: boolean, wait: boolean=true) {
+  const resourceKind = 'ConfigMap';
+  const namespace = vars.cattleSystemNS;
+  const patch = {data: {"rancher-turtles": `{"features": {"use-caapf": {"enabled": ${enabled} }}}`}};
+  cy.patchYamlResource('local', namespace, resourceKind, 'rancher-config', patch);
+
+  if(wait){
+    // Ensure the turtles deployment has the feature gate enabled
+    cy.setNamespace(turtlesNamespace);
+    cy.clickNavMenu(["Apps", "Installed Apps"]);
+    cy.typeInFilter('rancher-turtles');
+    // We need to explicitly wait for the turtles controller deployment to restart
+    cy.getBySel('sortable-cell-0-0').contains('Pending-Upgrade', {timeout: 60000});
+    cy.getBySel('sortable-cell-0-0').contains('Deployed', {timeout: 180000});
+    cy.clickNavMenu(["Workloads", "Deployments"]);
+    cy.typeInFilter('rancher-turtles-controller-manager');
+    cy.getBySel('sortable-table-0-action-button').click();
+    cy.get('div.dropdownTarget').contains('Show Configuration').click();
+    cy.getBySel('btn-yaml-tab').click();
+    cy.get('.CodeMirror-code').contains(`use-caapf=${enabled}`);
+    cy.clickButton('Close');
+    cy.namespaceReset();
+  }
 }

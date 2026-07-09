@@ -88,7 +88,7 @@ declare global {
       checkExternalFleetAnnotation(clustername: string, required?: boolean): Chainable<Element>;
       viewCAPIClusterYAML(clustername: string): Chainable<Element>;
       checkCAPIClusterCPInitialized(clustername: string): Chainable<Element>;
-      kubectlExecute(commands: string[], timeout?: number): Chainable<Element>;
+      kubectlExecute(commands?: string[], commandFunc?: () => void, timeout?: number): Chainable<Element>;
       filterPodErrorLogs(podName: string): Chainable<Element>;
       // Functions declared in capz_support.js
       createAzureClusterIdentity(clientID: string, tenantID: string, clientSecret: string): Chainable<Element>;
