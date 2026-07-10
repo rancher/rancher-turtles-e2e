@@ -69,7 +69,7 @@ describe('Import CAPZ Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@noca
     );
 
     it('Apply the CNI & CCM manifest', () => {
-      cy.kubectlExecute([getCAPIClusterKubeconfig(clusterName), applyYAMLManifest(clusterName, vars.calicoCNIYaml), azureCCMCmd[0], azureCCMCmd[1], azureCCMCmd[2]], undefined, 15000);
+      cy.kubectlExecute([getCAPIClusterKubeconfig(clusterName), applyYAMLManifest(clusterName, vars.calicoCNIYaml), azureCCMCmd[0], azureCCMCmd[1], azureCCMCmd[2]]);
     })
 
     qase(332, it('Auto import child CAPZ Kubeadm cluster', () => {

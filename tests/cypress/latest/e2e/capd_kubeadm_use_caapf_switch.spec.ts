@@ -32,7 +32,9 @@ describe('Import CAPD Kubeadm Class-Cluster for Use-CAAPF Migration', {tags: ['@
   const classesPath = 'examples/clusterclasses/docker/kubeadm'
   const clusterClassRepoName = 'docker-kb-clusterclass'
   const classClusterFileName = "./fixtures/docker/capd-kubeadm-class-cluster.yaml"
-
+  let migrationCMD = (phase: 'pre'|'post'): string[] => {
+    return ["curl -sSfLO https://raw.githubusercontent.com/rancher/turtles/main/scripts/migrate-caapf.sh", "chmod +x migrate-caapf.sh", `DRY_RUN=false ./migrate-caapf.sh ${phase}`]
+  }
   const dockerRegistryConfigBase64 = btoa(Cypress.expose('docker_registry_config'))
 
   beforeEach(function () {
@@ -106,13 +108,7 @@ describe('Import CAPD Kubeadm Class-Cluster for Use-CAAPF Migration', {tags: ['@
 
   context('[Pre Migration Steps]', ()=> {
     qase(592, it('Download the migration script and run pre-phase on the local cluster', () => {
-      let preMigrationScript = function () {
-        cy.get('.shell-body')
-          .type("curl -sSfLO https://raw.githubusercontent.com/rancher/turtles/main/scripts/migrate-caapf.sh && chmod +x migrate-caapf.sh && DRY_RUN=false ./migrate-caapf.sh pre && exit", {parseSpecialCharSequences: false}).type('{enter}');
-        cy.contains('Disconnected').should('be.visible');
-      }
-      cy.kubectlExecute(undefined, preMigrationScript);
-
+      cy.kubectlExecute(migrationCMD('pre'));
     }))
 
     qase(593, it('Set .helm.force=true for Calico CNI Helm Op', () => {
@@ -160,13 +156,7 @@ describe('Import CAPD Kubeadm Class-Cluster for Use-CAAPF Migration', {tags: ['@
 
   context('[Post Migration Steps]', ()=>{
     qase(596, it('Download the migration script and run post-phase', ()=>{
-      let postMigrationScript = function (){
-        cy.get('.shell-body')
-          .type("curl -sSfLO https://raw.githubusercontent.com/rancher/turtles/main/scripts/migrate-caapf.sh && chmod +x migrate-caapf.sh && DRY_RUN=false ./migrate-caapf.sh post && exit", {parseSpecialCharSequences: false})
-          .type('{enter}');
-        cy.contains('Disconnected', {timeout: timeout}).should('be.visible');
-      }
-      cy.kubectlExecute(undefined, postMigrationScript);
+      cy.kubectlExecute(migrationCMD('post'), timeout);
     }));
 
     qase(597, it('Ensure everything is migrated from capi-clusters to fleet-default',() => {
