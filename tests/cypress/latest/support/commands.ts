@@ -1541,7 +1541,7 @@ export function matchAndWaitForProviderReadyStatus(
 export function setUseCAAPFFeatureGate(enabled: boolean, wait: boolean=true) {
   const resourceKind = 'ConfigMap';
   const namespace = vars.cattleSystemNS;
-  const patch = {data: {"rancher-turtles": `{isNestedIn: true, "features": {"use-caapf": {"enabled": ${enabled} }}}`}};
+  const patch = {data: {"rancher-turtles": {isNestedIn: true, "features": {"use-caapf": {"enabled": String(enabled)}}}}};
   cy.patchYamlResource('local', namespace, resourceKind, 'rancher-config', patch);
 
   if(wait){
