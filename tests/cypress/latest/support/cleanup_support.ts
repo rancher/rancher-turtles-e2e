@@ -1,14 +1,14 @@
 import {vars} from '../support/variables';
 
-export const v3ClusterDeleteCommand = (clusterName: string): string => {
-  return `kubectl delete clusters.management.cattle.io -l cluster-api.cattle.io/capi-cluster-owner=${clusterName} -l cluster-api.cattle.io/capi-cluster-owner-ns=${vars.capiClustersNS}`;
+export const v3ClusterDeleteCommand = (clusterName: string, namespace: string = vars.capiClustersNS): string => {
+  return `kubectl delete clusters.management.cattle.io -l cluster-api.cattle.io/capi-cluster-owner=${clusterName} -l cluster-api.cattle.io/capi-cluster-owner-ns=${namespace}`;
 };
 
 export const reImportClusterPatchCommand = (clusterName: string): string => {
   return `kubectl -n ${vars.capiClustersNS} patch clusters.cluster.x-k8s.io ${clusterName} --type="json" -p='[{"op":"remove","path":"/metadata/annotations/imported"}]'`;
 };
 
-export function importedRancherv3ClusterDeletion(clusterName: string) {
+export function importedRancherv3ClusterDeletion(clusterName: string, namespace: string = vars.capiClustersNS) {
   // Verify the imported cluster is present before deletion
   cy.searchCluster(clusterName);
   cy.get('table.sortable-table tbody tr').then(($rows) => {
@@ -18,7 +18,7 @@ export function importedRancherv3ClusterDeletion(clusterName: string) {
     }
 
     // Delete the imported mgmt v3 cluster from Cluster Management using kubectl
-    cy.kubectlExecute([v3ClusterDeleteCommand(clusterName)]);
+    cy.kubectlExecute([v3ClusterDeleteCommand(clusterName, namespace)]);
 
     // Ensure the cluster is not available on the home page
     cy.goToHome();

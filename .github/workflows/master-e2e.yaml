@@ -281,6 +281,7 @@ jobs:
       SPECS: |
         e2e/capd_kubeadm_nocaapf_clusterclass.spec.ts
         e2e/capd_rke2_nocaapf_clusterclass.spec.ts
+        e2e/capa_rke2_nocaapf_clusterclass.spec.ts
         e2e/capz_kubeadm_nocaapf_clusterclass.spec.ts
         e2e/capz_rke2_nocaapf_clusterclass.spec.ts
         e2e/capg_kubeadm_nocaapf_clusterclass.spec.ts

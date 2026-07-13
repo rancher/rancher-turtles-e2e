@@ -460,6 +460,17 @@ Cypress.Commands.add('addCloudCredsAWS', (name, accessKey, secretKey) => {
   cy.contains(name).should('be.visible');
 });
 
+Cypress.Commands.add('deleteCloudCredsAWS', (name) => {
+  cy.burgerMenuOperate('open');
+  cy.accesMenuSelection(['Cluster Management', 'Cloud Credentials']);
+  cy.contains('API Key').should('be.visible');
+  cy.getBySel('sortable-table-list-container').should('be.visible');
+  cy.typeInFilter(name);
+  cy.viewport(1920, 1080);
+  cy.getBySel('sortable-table_check_select_all').click();
+  cy.getBySel('sortable-table-promptRemove').click({ctrlKey: true});
+});
+
 // Command to add GCP Cloud Credentials
 Cypress.Commands.add('addCloudCredsGCP', (name, gcpCredentials) => {
   cy.accesMenuSelection(['Cluster Management', 'Cloud Credentials']);
@@ -1187,6 +1198,20 @@ Cypress.Commands.add('createAWSClusterStaticIdentity', (accessKey, secretKey) =>
     data = data.replace(/replace_access_key_id/g, accessKey)
     data = data.replace(/replace_secret_access_key/g, secretKey)
     cy.importYAML(data)
+  });
+});
+
+// Check AWSClusterStaticIdentity
+Cypress.Commands.add('checkAWSClusterStaticIdentity', () => {
+  cy.burgerMenuOperate('open');
+  cy.accesMenuSelection(['Cluster Management', 'Cloud Credentials']);
+  cy.getBySel('sortable-table-list-container').should('be.visible');
+  cy.typeInFilter('aws');
+  // Get the CC id
+  cy.getBySel('sortable-cell-0-0').then(($cell) => {
+    const ccID = $cell.text();
+    cy.task('suiteLog', `Cloud credential ID: ${ccID}`);
+    cy.checkKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AWSClusterStaticIdentities'], ccID, true, 'capa-system');
   });
 });
 

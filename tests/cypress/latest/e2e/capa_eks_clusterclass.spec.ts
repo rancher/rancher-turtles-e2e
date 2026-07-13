@@ -30,8 +30,6 @@ describe('Import CAPA EKS Class-Cluster', {tags: ['@full', '@capaeks']}, () => {
 
     qase(343, it('Create AWS CAPIProvider & AWSClusterStaticIdentity', () => {
       if (isRancherManagerVersion('<2.13')) {
-        cy.removeCAPIResource('Providers', providerName);
-        cy.createCAPIProvider(providerName);
         cy.checkCAPIProvider(providerName);
       }
       cy.createAWSClusterStaticIdentity(accessKey, secretKey);

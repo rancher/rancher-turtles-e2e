@@ -7,6 +7,7 @@ metadata:
     csi: aws-ebs-csi-driver
     cluster-api.cattle.io/rancher-auto-import: "true"
   name: replace_cluster_name
+  namespace: fleet-default
 spec:
   clusterNetwork:
     pods:
@@ -32,7 +33,7 @@ spec:
     - name: cni
       value: none
     - name: awsClusterIdentityName
-      value: cluster-identity
+      value: replace_identity_name
     version: replace_rke2_version
     workers:
       machineDeployments:
