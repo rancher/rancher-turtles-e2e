@@ -49,7 +49,7 @@
     "@types/randomstring": "^1.3.0",
     "@typescript-eslint/eslint-plugin": "^8.61.1",
     "@typescript-eslint/parser": "^8.61.1",
-    "cypress": "^15.17.0",
+    "cypress": "15.17.0",
     "cypress-qase-reporter": "^3.6.4",
     "eslint-plugin-cypress": "^6.4.1"
   },
