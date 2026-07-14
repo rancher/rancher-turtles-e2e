@@ -1,25 +1,25 @@
 import '../support/commands';
-
-import {getClusterName, isRancherManagerVersion, skipClusterDeletion} from '../support/utils';
-import {capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
+import {getClusterName, isUseCAAPFSupported, skipClusterDeletion, isRancherManagerVersion} from '../support/utils';
+import {capiClusterDeletion, capzResourcesCleanup, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
-
 Cypress.config();
-describe('Import CAPG GKE Class-Cluster', {tags: ['@full', '@capgke']}, () => {
-  const timeout = vars.fullTimeout * 2
-  const classNamePrefix = 'gcp-gke'
+describe('Import CAPZ AKS (No-Caapf) Class-Cluster', {tags: ['@full', '@nocaapf', '@capzaks-nocaapf']}, () => {
+  const timeout = vars.fullTimeout
+  const classNamePrefix = 'azure-aks'
   const clusterName = getClusterName(classNamePrefix)
-  const classesPath = 'examples/clusterclasses/gcp/gke'
-  const clusterClassRepoName = 'gcp-gke-example'
-  const classClusterFileName = './fixtures/gcp/capg-gke-class-cluster.yaml'
+  const classesPath = 'examples/clusterclasses/azure/aks'
+  const clusterClassRepoName = "azure-aks-clusterclass"
+  const classClusterFileName = './fixtures/azure/capz-aks-class-cluster.yaml'
 
-  const gcpProject = Cypress.expose('gcp_project')
-  const k8sVersion = 'v1.35.5'      // this version is different from GCP Kubeadm version
+  const clientSecret = Cypress.expose("azure_client_secret")
+  const clientID = Cypress.expose("azure_client_id")
+  const subscriptionID = Cypress.expose("azure_subscription_id")
+  const tenantID = Cypress.expose("azure_tenant_id")
 
   beforeEach(function () {
-    if (isRancherManagerVersion('<2.14')) {
-      // This test will only work in CAPG 1.11, i.e. Rancher >= 2.14, Turtles >= 0.26
+    if (!isUseCAAPFSupported) {
+      // This test is only meant for >=2.14.1
       this.skip();
     }
     cy.login();
@@ -27,14 +27,17 @@ describe('Import CAPG GKE Class-Cluster', {tags: ['@full', '@capgke']}, () => {
   });
 
   context('[SETUP]', () => {
-    qase(396,
-      it('Setup the namespace for importing', () => {
-        cy.namespaceAutoImport('Disable');
-      })
+    qase(323, it('Setup the namespace for importing', () => {
+      cy.namespaceAutoImport('Disable');
+    })
     );
 
-    qase(397,
-      it('Add CAPG GKE ClusterClass Fleet Repo', () => {
+    qase(415, it('Create AzureASOCredential', () => {
+      cy.createAzureASOCredential(clientID, tenantID, clientSecret, subscriptionID);
+    })
+    );
+
+    qase(84, it('Add CAPZ AKS ClusterClass using fleet', () => {
         cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(classNamePrefix);
@@ -43,12 +46,11 @@ describe('Import CAPG GKE Class-Cluster', {tags: ['@full', '@capgke']}, () => {
   })
 
   context('[CLUSTER-IMPORT]', () => {
-    qase(398,
-      it('Import CAPG GKE class-cluster using YAML', () => {
+    qase(55,
+      it('Import CAPZ AKS class-cluster using YAML', () => {
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
-          data = data.replace(/replace_k8sVersion/g, k8sVersion)
-          data = data.replace(/replace_gcp_project/g, gcpProject)
+          data = data.replace(/replace_k8sVersion/g, vars.aksVersion)
           cy.importYAML(data, vars.capiClustersNS)
         });
         // Check CAPI cluster using its name
@@ -56,8 +58,7 @@ describe('Import CAPG GKE Class-Cluster', {tags: ['@full', '@capgke']}, () => {
       })
     );
 
-    qase(399,
-      it('Auto import child CAPG cluster', () => {
+    qase(56, it('Auto import child CAPZ AKS cluster', () => {
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
         cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
@@ -69,18 +70,12 @@ describe('Import CAPG GKE Class-Cluster', {tags: ['@full', '@capgke']}, () => {
         // Check cluster is Active
         cy.searchCluster(clusterName);
         cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
-        // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-        // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
-        cy.checkCAPIClusterActive(clusterName, timeout, true);
       })
     );
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    qase(400,
-      (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
-      // Install Chart
-      // We install Logging chart instead of Monitoring, since this is relatively lightweight.
+    qase(57, (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
     );
@@ -93,26 +88,25 @@ describe('Import CAPG GKE Class-Cluster', {tags: ['@full', '@capgke']}, () => {
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
-      qase(414,
-        it('Remove imported CAPG cluster from Rancher Manager',() => {
+      qase(364, it('Remove imported CAPZ cluster from Rancher Manager', {retries: 1}, () => {
         // Delete the imported cluster
         // Ensure that the provisioned CAPI cluster still exists
         importedRancherv3ClusterDeletion(clusterName);
       })
       );
 
-      qase(401,
-        it('Delete the CAPG cluster', {retries: 1}, () => {
+      qase(60, it('Delete the CAPZ cluster', () => {
           // Remove CAPI Resources related to the cluster
           capiClusterDeletion(clusterName, timeout);
         })
       );
 
-      qase(402,
-        it('Delete the ClusterClass fleet repo', () => {
+      qase(325, it('Delete the ClusterClass fleet repo and other resources', () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
-        })
+        // Cleanup other resources
+        capzResourcesCleanup(true);      
+      })
       );
     }
   })

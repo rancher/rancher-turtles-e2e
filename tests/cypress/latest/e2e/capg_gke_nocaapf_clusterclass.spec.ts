@@ -1,12 +1,11 @@
 import '../support/commands';
-
-import {getClusterName, isRancherManagerVersion, skipClusterDeletion} from '../support/utils';
+import {getClusterName, isUseCAAPFSupported, isRancherManagerVersion, skipClusterDeletion} from '../support/utils';
 import {capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
 
 Cypress.config();
-describe('Import CAPG GKE Class-Cluster', {tags: ['@full', '@capgke']}, () => {
+describe('Import CAPG GKE (No-Caapf) Class-Cluster', {tags: ['@full', '@nocaapf', '@capgke-nocaapf']}, () => {
   const timeout = vars.fullTimeout * 2
   const classNamePrefix = 'gcp-gke'
   const clusterName = getClusterName(classNamePrefix)
@@ -18,8 +17,8 @@ describe('Import CAPG GKE Class-Cluster', {tags: ['@full', '@capgke']}, () => {
   const k8sVersion = 'v1.35.5'      // this version is different from GCP Kubeadm version
 
   beforeEach(function () {
-    if (isRancherManagerVersion('<2.14')) {
-      // This test will only work in CAPG 1.11, i.e. Rancher >= 2.14, Turtles >= 0.26
+    if (!isUseCAAPFSupported) {
+      // This test is only meant for >=2.14.1
       this.skip();
     }
     cy.login();
