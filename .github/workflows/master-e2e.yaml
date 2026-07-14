@@ -462,11 +462,6 @@ jobs:
         with:
           cache: false
           go-version-file: tests/go.mod
-      # until kindest/node:v1.36.1 is available upstream
-      - name: Create kind node-image
-        if: ${{ contains(env.RANCHER_VERSION, '2.15') }}
-        run: |
-          cd tests && make kind-node-image
       - name: Copy turtles chart files for chartmuseum
         if: ${{ inputs.turtles_dev_chart == true }}
         run: |
