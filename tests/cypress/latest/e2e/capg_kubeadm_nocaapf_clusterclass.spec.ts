@@ -79,7 +79,7 @@ describe('Import CAPG Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@noca
     );
 
     it('Apply the CNI & CCM manifest', () => {
-      cy.kubectlExecute([getCAPIClusterKubeconfig(clusterName), applyYAMLManifest(clusterName, vars.calicoCNIYaml), gcpCCMCmd[0], gcpCCMCmd[1], gcpCCMCmd[2]], 15000);
+      cy.kubectlExecute([getCAPIClusterKubeconfig(clusterName), applyYAMLManifest(clusterName, vars.calicoCNIYaml), gcpCCMCmd[0], gcpCCMCmd[1], gcpCCMCmd[2]]);
     })
 
     qase(144,

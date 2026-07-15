@@ -105,7 +105,7 @@ describe('Import CAPD Kubeadm (No-Caapf) Class-Cluster', {tags: ['@install', '@s
 
     qase(6,
       it('Apply Calico CNI manifest', () => {
-        cy.kubectlExecute([getCAPIClusterKubeconfig(clusterName), applyYAMLManifest(clusterName, vars.calicoCNIYaml)], undefined, 5000);
+        cy.kubectlExecute([getCAPIClusterKubeconfig(clusterName), applyYAMLManifest(clusterName, vars.calicoCNIYaml)]);
       })
     );
 

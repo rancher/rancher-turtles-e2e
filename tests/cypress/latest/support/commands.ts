@@ -1433,23 +1433,19 @@ Cypress.Commands.add('checkExternalFleetAnnotation', (clusterName, required = tr
 });
 
 // Commands to execute on kubectl shell
-// TODO (pvala): Modify this function to use `exit` command and wait for `Disconnected` to be visible to determine when to exit
-Cypress.Commands.add('kubectlExecute', (commands?: string[], commandFunc?: () => void, timeout = 3000) => {
+Cypress.Commands.add('kubectlExecute', (commands: string[], timeout = 60000) => {
   cy.searchCluster('local');
   cy.getBySel('sortable-table-0-action-button').click();
   cy.get('i.icon.group-icon.icon-terminal').should('be.visible').click();
   cy.contains('Connected').should('be.visible');
-  if (commands) {
-    commands.forEach((command) => {
-      cy.get('.shell-body')
-        .type(command, {parseSpecialCharSequences: false})
-        .type('{enter}');
-      cy.wait(timeout);
-    })
-  } else if (commandFunc){
-    commandFunc();
-  }
-
+  // Append all the commands with && so that if one command fails, subsequent commands do not run;
+  // Also append `; exit` command to the list so that once all the commands run (regardless of their result),
+  // it will exit the terminal, and we can wait for `Disconnected` to appear before closing the shell.
+  let command = `${commands.join(' && ')}; exit`;
+  cy.get('.shell-body')
+    .type(command, {parseSpecialCharSequences: false})
+    .type('{enter}');
+  cy.contains('Disconnected', {timeout: timeout}).should('be.visible');
   cy.getBySel('wm-tab-close-button').click();
 });
 
