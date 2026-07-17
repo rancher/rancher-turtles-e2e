@@ -108,7 +108,7 @@ describe('Enable CAPI Providers', () => {
             text.providers.infrastructureAWS.enableAutomaticUpdate = true;
           }
         // TODO: Add isCypressTag('@nocaapf') when vsphere nocaapf is implemented
-        if (isCypressTag('@vsphere') || isCypressTag('@capv')) {
+        if (isCypressTag('@vsphere') || isCypressTag('@vsphere-nocaapf') || isCypressTag('@capv')) {
             // @ts-ignore
             text.providers.infrastructureVSphere.enabled = true;
             // @ts-ignore

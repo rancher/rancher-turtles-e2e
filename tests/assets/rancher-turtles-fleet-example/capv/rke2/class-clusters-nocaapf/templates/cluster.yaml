@@ -1,0 +1,189 @@
+apiVersion: cluster.x-k8s.io/v1beta2
+kind: Cluster
+metadata:
+  name: {{ .Values.cluster.name }}
+  namespace: {{ .Values.cluster.namespace }}
+  labels:
+    cluster-api.cattle.io/rancher-auto-import: "true"
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+      - 192.168.0.0/16
+  topology:
+    classRef:
+      name: vsphere-rke2-example
+      namespace: capi-classes
+    version: {{ .Values.cluster.rke2_version }}
+    controlPlane:
+      replicas: {{ .Values.cluster.control_plane_machine_count }}
+    workers:
+      machineDeployments:
+      - class: vsphere-rke2-example-worker
+        name: md-0
+        replicas: {{ .Values.cluster.worker_machine_count }}
+    variables:
+    - name: vSphereClusterIdentityName
+      value: cluster-identity
+    - name: vSphereTLSThumbprint
+      value: {{ .Values.vsphere.tls_thumbprint }}
+    - name: vSphereDataCenter
+      value: {{ .Values.vsphere.datacenter }}
+    - name: vSphereDataStore
+      value: {{ .Values.vsphere.datastore }}
+    - name: vSphereFolder
+      value: {{ .Values.vsphere.folder }}
+    - name: vSphereNetwork
+      value: {{ .Values.vsphere.network }}
+    - name: vSphereResourcePool
+      value: {{ .Values.vsphere.resource_pool }}
+    - name: vSphereServer
+      value: {{ .Values.vsphere.server }}
+    - name: vSphereTemplate
+      value: {{ .Values.vsphere.rke2_template }}
+    - name: controlPlaneIpAddr
+      value: {{ .Values.cluster.control_plane_endpoint_ip }}
+    - name: controlPlanePort
+      value: 6443
+    - name: kubeVIPInterface
+      value: eth0
+    - name: productKey
+      value: {{ .Values.cluster.product_key | quote }}
+    - name: dockerAuthSecret
+      value: {{ .Values.cluster.docker_auth_token_secret_name }}
+---
+### CPI CONFIG ###
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloud-provider-vsphere
+  namespace: {{ .Values.cluster.namespace }}
+data:
+  cloud-provider-vsphere.yaml: |-
+    apiVersion: helm.cattle.io/v1
+    kind: HelmChart
+    metadata:
+      name: vsphere-ccm
+      namespace: kube-system
+    spec:
+      repo: https://rke2-charts.rancher.io
+      chart: rancher-vsphere-cpi
+      bootstrap: true
+      targetNamespace: kube-system
+      version: "1.14.000"
+      valuesContent: |-
+        vCenter:
+          host: {{ .Values.vsphere.server | quote }}
+          datacenters: {{ .Values.vsphere.datacenter | quote }}
+          credentialsSecret:
+            generate: false
+            name: cloud-provider-vsphere-credentials
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cloud-provider-vsphere-credentials
+  namespace: {{ .Values.cluster.namespace }}
+type: addons.cluster.x-k8s.io/resource-set
+stringData:
+  cloud-provider-vsphere-credentials.yaml: |-
+    apiVersion: v1
+    kind: Secret
+    type: Opaque
+    metadata:
+      name: cloud-provider-vsphere-credentials
+      namespace: kube-system
+    stringData:
+      {{ .Values.vsphere.server }}.username: {{ .Values.vsphere.username | quote }}
+      {{ .Values.vsphere.server }}.password: {{ .Values.vsphere.password | quote }}
+---
+apiVersion: addons.cluster.x-k8s.io/v1beta2
+kind: ClusterResourceSet
+metadata:
+  name: cloud-provider-vsphere
+  namespace: {{ .Values.cluster.namespace }}
+spec:
+  strategy: Reconcile
+  clusterSelector:
+    matchLabels:
+      cluster.x-k8s.io/cluster-name: {{ .Values.cluster.name }}
+  resources:
+    - name: cloud-provider-vsphere
+      kind: ConfigMap
+    - name: cloud-provider-vsphere-credentials
+      kind: Secret
+### /CPI CONFIG ###
+---
+### CSI CONFIG ###
+apiVersion: v1
+kind: Secret
+metadata:
+  name: csi-vsphere-config
+  namespace: {{ .Values.cluster.namespace }}
+type: addons.cluster.x-k8s.io/resource-set
+stringData:
+  csi-vsphere-config.yaml: |-
+    apiVersion: v1
+    kind: Secret
+    type: Opaque
+    metadata:
+      name: vsphere-config-secret
+      namespace: vmware-system-csi
+    stringData:
+      csi-vsphere.conf: |+
+        [Global]
+        thumbprint = {{ .Values.vsphere.tls_thumbprint | quote }}
+
+        [VirtualCenter {{ .Values.vsphere.server | quote }}]
+        user = {{ .Values.vsphere.username | quote }}
+        password = {{ .Values.vsphere.password | quote }}
+        datacenters = {{ .Values.vsphere.datacenter | quote }}
+
+        [Network]
+        public-network = {{ .Values.vsphere.network | quote }}
+
+        [Labels]
+        region = ""
+        zone = ""
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: csi-vsphere
+  namespace: {{ .Values.cluster.namespace }}
+data:
+  csi-vsphere.yaml: |-
+    apiVersion: helm.cattle.io/v1
+    kind: HelmChart
+    metadata:
+      name: vsphere-csi
+      namespace: kube-system
+    spec:
+      repo: https://rke2-charts.rancher.io
+      chart: rancher-vsphere-csi
+      bootstrap: true
+      targetNamespace: vmware-system-csi
+      createNamespace: true
+      version: "3.7.0-rancher100"
+      valuesContent: |-
+        vCenter:
+          configSecret:
+            generate: false
+            name: vsphere-config-secret
+---
+apiVersion: addons.cluster.x-k8s.io/v1beta2
+kind: ClusterResourceSet
+metadata:
+  name: csi-vsphere
+  namespace: {{ .Values.cluster.namespace }}
+spec:
+  strategy: Reconcile
+  clusterSelector:
+    matchLabels:
+      cluster.x-k8s.io/cluster-name: {{ .Values.cluster.name }}
+  resources:
+    - name: csi-vsphere
+      kind: ConfigMap
+    - name: csi-vsphere-config
+      kind: Secret
+###/ CSI CONFIG ###

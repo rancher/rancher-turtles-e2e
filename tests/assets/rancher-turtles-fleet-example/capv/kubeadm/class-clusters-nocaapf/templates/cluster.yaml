@@ -1,0 +1,148 @@
+apiVersion: cluster.x-k8s.io/v1beta2
+kind: Cluster
+metadata:
+  name: {{ .Values.cluster.name }}
+  namespace: {{ .Values.cluster.namespace }}
+  labels:
+    cluster-api.cattle.io/rancher-auto-import: "true"
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+      - 192.168.0.0/16
+  topology:
+    classRef:
+      name: vsphere-kubeadm-example
+      namespace: capi-classes
+    version: {{ .Values.cluster.version }}
+    controlPlane:
+      replicas: {{ .Values.cluster.control_plane_machine_count }}
+    workers:
+      machineDeployments:
+      - class: vsphere-kubeadm-example-worker
+        name: md-0
+        replicas: {{ .Values.cluster.worker_machine_count }}
+    variables:
+    - name: vSphereClusterIdentityName
+      value: cluster-identity
+    - name: sshKey
+      value: {{ .Values.vsphere.ssh_authorized_key }}
+    - name: vSphereTLSThumbprint
+      value: {{ .Values.vsphere.tls_thumbprint }}
+    - name: vSphereDataCenter
+      value: {{ .Values.vsphere.datacenter }}
+    - name: vSphereDataStore
+      value: {{ .Values.vsphere.datastore }}
+    - name: vSphereFolder
+      value: {{ .Values.vsphere.folder }}
+    - name: vSphereNetwork
+      value: {{ .Values.vsphere.network }}
+    - name: vSphereResourcePool
+      value: {{ .Values.vsphere.resource_pool }}
+    - name: vSphereServer
+      value: {{ .Values.vsphere.server }}
+    - name: vSphereTemplate
+      value: {{ .Values.vsphere.kubeadm_template }}
+    - name: controlPlaneIpAddr
+      value: {{ .Values.cluster.control_plane_endpoint_ip }}
+    - name: controlPlanePort
+      value: 6443
+    - name: kubeVIPInterface
+      value: eth0
+---
+apiVersion: addons.cluster.x-k8s.io/v1beta2
+kind: ClusterResourceSet
+metadata:
+  labels:
+    cluster.x-k8s.io/cluster-name: {{ .Values.cluster.name }}
+  name: {{ .Values.cluster.name }}-crs-0
+  namespace: {{ .Values.cluster.namespace }}
+spec:
+  strategy: Reconcile
+  clusterSelector:
+    matchLabels:
+      cluster.x-k8s.io/cluster-name: {{ .Values.cluster.name }}
+  resources:
+  - kind: ConfigMap
+    name: vsphere-cloud-config
+  - kind: Secret
+    name: vsphere-config-secret
+  - kind: Secret
+    name: cloud-provider-vsphere-credentials
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vsphere-config-secret
+  namespace: {{ .Values.cluster.namespace }}
+type: addons.cluster.x-k8s.io/resource-set
+stringData:
+  data: |-
+    apiVersion: v1
+    kind: Secret
+    type: Opaque
+    metadata:
+      name: vsphere-config-secret
+      namespace: vmware-system-csi
+    stringData:
+      csi-vsphere.conf: |+
+        [Global]
+        thumbprint = {{ .Values.vsphere.tls_thumbprint | quote }}
+
+        [VirtualCenter {{ .Values.vsphere.server | quote }}]
+        user = {{ .Values.vsphere.username | quote }}
+        password = {{ .Values.vsphere.password | quote }}
+        datacenters = {{ .Values.vsphere.datacenter | quote }}
+
+        [Network]
+        public-network = {{ .Values.vsphere.network | quote }}
+
+        [Labels]
+        region = ""
+        zone = ""
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cloud-provider-vsphere-credentials
+  namespace: {{ .Values.cluster.namespace }}
+stringData:
+  data: |-
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      labels:
+        component: cloud-controller-manager
+        vsphere-cpi-infra: secret
+      name: cloud-provider-vsphere-credentials
+      namespace: kube-system
+    stringData:
+        {{ .Values.vsphere.server }}.password: {{ .Values.vsphere.password | quote }}
+        {{ .Values.vsphere.server }}.username: {{ .Values.vsphere.username | quote }}
+    type: Opaque
+type: addons.cluster.x-k8s.io/resource-set
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vsphere-cloud-config
+  namespace: {{ .Values.cluster.namespace }}
+data:
+  vsphere-cloud-config: |-
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: cloud-config
+      namespace: kube-system
+    data:
+      vsphere.conf: |
+        global:
+          port: 443
+          secretName: cloud-provider-vsphere-credentials
+          secretNamespace: kube-system
+          thumbprint: {{ .Values.vsphere.tls_thumbprint }}
+        vcenter:
+          {{ .Values.vsphere.server }}:
+            datacenters:
+            - {{ .Values.vsphere.datacenter }}
+            server: {{ .Values.vsphere.server }}
