@@ -319,7 +319,7 @@ jobs:
           password: ${{ secrets.docker_auth_password }}
       - name: Install helm
         run: |
-          HELM_VERSION="3.21.2"
+          HELM_VERSION="3.21.3"
           HELM_SHA256="0a745198de24545d0055cd8414bc8d2ba10363ef5f5d38369ea1b399671cc083"
           curl -sk https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz -o helm.tar.gz
           echo "${HELM_SHA256}  helm.tar.gz" | sha256sum -c -
