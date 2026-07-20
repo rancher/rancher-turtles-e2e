@@ -15,7 +15,7 @@ import '../support/commands';
 import {
   isRancherManagerVersion,
   isUpgrade,
-  isUseCAAPFSupported,
+  isUseCAAPFSupported, skipFleetAddOnInstallation,
   turtlesNamespace,
 } from '../support/utils';
 import {determineBuildType, providers, vars} from '../support/variables';
@@ -27,6 +27,11 @@ describe('Enable use-caapf feature gate and install fleet-addon provider', {tags
   beforeEach(function (){
     if (isRancherManagerVersion('2.12')){
       cy.task('suiteLog', 'Skipping test on Rancher 2.12...');
+      this.skip();
+    }
+
+    if (skipFleetAddOnInstallation) {
+      cy.task('suiteLog', 'SKIP_FLEET_ADDON_INSTALLATION=true; Skipping fleet-addon provider installation...');
       this.skip();
     }
 

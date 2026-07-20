@@ -47,6 +47,10 @@ on:
         description: Skip CAPI cluster and fleet repo deletion tests
         default: false
         type: boolean
+      skip_fleet_addon_installation:
+        description: Skip fleet addon installation tests; useful while debugging only NoCAAPF tests
+        default: false
+        type: boolean
       qase_report:
         description: Report to QASE
         default: false
@@ -100,3 +104,4 @@ jobs:
       runner_template: ${{ inputs.runner_template || 'rancher-turtles-e2e-ci-spot-20260622165944418700000001' }}
       cluster_name_suffix: ${{ inputs.cluster_name_suffix || github.run_number }}
       grep_test_by_tag: ${{ inputs.grep_test_by_tag || (github.event.schedule == '0 3 * * *' && '@install @short') || (github.event.schedule == '0 4 * * *' && '@install @vsphere') || (github.event.schedule == '0 5 * * 6' && '@install @full') || (github.event.schedule == '0 3 * * 6' && '@install @migration @short') || (github.event.schedule == '0 5 * * 0' && '@install @upgrade') }}
+      skip_fleet_addon_installation: ${{ inputs.skip_fleet_addon_installation || (github.event_name == 'schedule' && false) }}

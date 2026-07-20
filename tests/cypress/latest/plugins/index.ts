@@ -45,6 +45,7 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   config.expose.cluster_name_suffix = process.env.CLUSTER_NAME_SUFFIX || clusterNameSuffixDefault;
   config.expose.prime_registry = process.env.PRIME_REGISTRY;
   config.expose.stg_prime_registry = process.env.STG_PRIME_REGISTRY;
+  config.expose.skip_fleet_addon_installation = process.env.SKIP_FLEET_ADDON_INSTALLATION == "true";
 
   // Secrets
   config.expose.password = process.env.RANCHER_PASSWORD;

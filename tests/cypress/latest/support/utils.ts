@@ -65,6 +65,8 @@ export const isTurtlesDevChart = Cypress.expose('turtles_dev_chart')
 
 export const isUseCAAPFSupported = (isRancherManagerVersion('>=2.14.1') || (isRancherManagerVersion('>=2.14') && isHeadBuild))
 
+export const skipFleetAddOnInstallation = Cypress.expose('skip_fleet_addon_installation')
+
 export const getCAPIClusterKubeconfig = (
   clusterName: string,
   namespace: string = 'capi-clusters'

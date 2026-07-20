@@ -124,6 +124,10 @@ on:
       target_build_type:
         description: Build type for turtles_dev_chart (prime|community)
         type: string
+      skip_fleet_addon_installation:
+        description: Skip Fleet Addon provider installation
+        type: boolean
+        default: false
 
 jobs:
   determine-runner:
@@ -260,6 +264,7 @@ jobs:
       CLUSTER_NAME_SUFFIX: ${{ inputs.cluster_name_suffix }}
       BUILD_TYPE: ${{ inputs.target_build_type }}
       TURTLES_DEV_CHART: ${{ inputs.turtles_dev_chart }}
+      SKIP_FLEET_ADDON_INSTALLATION: ${{ inputs.skip_fleet_addon_installation }}
       # Secrets
       AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
