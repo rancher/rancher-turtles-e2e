@@ -69,7 +69,7 @@ func componentManifestImages() []imageRef {
 		{"rancher/cluster-api-aws-controller-components", vAws},
 		{"rancher/cluster-api-azure-controller-components", vAzure},
 		{"rancher/cluster-api-gcp-controller-components", vGcp},
-		{"rancher/cluster-api-provider-rke2-components", vRke2},
+		// {"rancher/cluster-api-provider-rke2-components", vRke2}, // rke2 components in version 0.21.1 for 2.13.x is not released - known issue
 		{"rancher/cluster-api-vsphere-controller-components", vVsphere},
 	}
 }
