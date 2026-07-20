@@ -52,7 +52,7 @@ Cypress.Commands.add('namespaceAutoImport', (mode) => {
     .should('be.visible');
 
   // Select capi-clusters namespace
-  cy.setNamespace('capi-clusters');
+  cy.setNamespace(vars.capiClustersNS);
   cy.setAutoImport(mode);
   cy.namespaceReset();
 });
@@ -1537,7 +1537,6 @@ export function matchAndWaitForProviderReadyStatus(
     // Verify provider image
     cy.verifyCAPIProviderImage(providerNamespace);
 }
-
 
 export function setUseCAAPFFeatureGate(enabled: boolean, wait: boolean=true) {
   const resourceKind = 'ConfigMap';

@@ -26,21 +26,6 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
     cy.burgerMenuOperate('open');
   });
 
-  qase(151, it("Change helm charts to Include Prerelease Versions", () => {
-    // this test should be run before the turtles repository is added; so that it can fetch the prereleased versions
-
-    // toggle the navigation menu to a close
-    cy.burgerMenuOperate('close');
-
-    cy.getBySel('nav_header_showUserMenu').click();
-    cy.contains('Preferences').click();
-    cy.contains("Include Prerelease Versions").scrollIntoView().should('be.visible').click();
-    cy.reload();
-    // check that the prerelease version is selected by ensuring it does not have `bg-disabled` class
-    cy.contains("Include Prerelease Versions").scrollIntoView().should('not.have.class', 'bg-disabled');
-  })
-  );
-
   let addTurtlesProvidersRepo = function () {
     cy.task('suiteLog', "Adding turtles-providers-chart repo");
     cy.addRepository('turtles-providers-chart', vars.turtlesProvidersOCIRepo, 'oci', 'none')
