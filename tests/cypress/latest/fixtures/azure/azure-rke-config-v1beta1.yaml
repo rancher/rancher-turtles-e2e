@@ -15,7 +15,7 @@ environment: AzurePublicCloud
 faultDomainCount: "3"
 image: canonical:UbuntuServer:18.04-LTS:latest
 location: centralindia
-managedDisks: false
+managedDisks: true
 noPublicIp: false
 nsg: rancher-managed-BZhXsqxh
 resourceGroup: replace_cluster_name
