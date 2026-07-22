@@ -24,17 +24,21 @@ import {matchAndWaitForProviderReadyStatus, setUseCAAPFFeatureGate} from "../sup
 
 Cypress.config();
 describe('Enable use-caapf feature gate and install fleet-addon provider', {tags: '@install'}, () => {
-  beforeEach(function (){
+  before(function () {
     if (isRancherManagerVersion('2.12')){
-      cy.task('suiteLog', 'Skipping test on Rancher 2.12...');
-      this.skip();
+      return cy.task('suiteLog', 'Skipping test on Rancher 2.12...').then(()=>{
+        this.skip();
+      })
     }
 
     if (skipFleetAddOnInstallation) {
-      cy.task('suiteLog', 'SKIP_FLEET_ADDON_INSTALLATION=true; Skipping fleet-addon provider installation...');
-      this.skip();
+      return cy.task('suiteLog', 'SKIP_FLEET_ADDON_INSTALLATION=true; Skipping fleet-addon provider installation...').then(()=>{
+        this.skip();
+      })
     }
+  })
 
+  beforeEach(function (){
     cy.login();
     cy.burgerMenuOperate('open');
   })

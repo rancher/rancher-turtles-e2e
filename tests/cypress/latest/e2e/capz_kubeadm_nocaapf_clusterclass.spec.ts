@@ -1,5 +1,11 @@
 import '../support/commands';
-import {getClusterName, isUseCAAPFSupported, skipClusterDeletion, isRancherManagerVersion, getCAPIClusterKubeconfig, applyYAMLManifest} from '../support/utils';
+import {
+  getClusterName,
+  skipClusterDeletion,
+  isRancherManagerVersion,
+  getCAPIClusterKubeconfig,
+  applyYAMLManifest
+} from '../support/utils';
 import {capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
@@ -21,11 +27,15 @@ describe('Import CAPZ Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@full
   const k8sVersion = isRancherManagerVersion('2.14') ? 'v1.34.1'
     : vars.kubeadmVersion
 
-  beforeEach(function () {
-    if (!isUseCAAPFSupported) {
-      // This test is only meant for >=2.14.1
-      this.skip();
+  before(function () {
+    if (isRancherManagerVersion('<2.15')) {
+      return cy.task('suiteLog', "NoCAAPF is unsupported on Rancher Version <2.15; skipping...").then(() => {
+        this.skip();
+      })
     }
+  })
+
+  beforeEach(function () {
     cy.login();
     cy.burgerMenuOperate('open');
   });

@@ -53,10 +53,8 @@ describe('Enable CAPI Providers', () => {
 
     if (!isTurtlesDevChart && isRancherManagerVersion('>=2.14')) {
       it('Patch the providers chart repository with OCIOptions.downloadAllTags: true', () => {
-        // .spec.OCIOptions.downloadAllTags is useful with staging registry which might contain unsupported versions
-        // and charts might seem broken with missing namespace or chart name.
         // Enabling this option downloads all the chart versions and ensures only supported versions show up
-        // Doing so makes editing/updating the chart a smoother process.
+        // Doing so makes updating the chart a smoother process.
         const repositoryName = "turtles-providers-chart";
         const resourceKind = 'clusterrepos.catalog.cattle.io';
         const patch = {spec: {OCIOptions: {'downloadAllTags': true}}};
@@ -84,14 +82,14 @@ describe('Enable CAPI Providers', () => {
         // @ts-ignore
         text.providers.controlplaneKubeadm.enableAutomaticUpdate = true;
 
-        if (isCypressTag('@short') || isCypressTag('@capd') || isCypressTag('@upgrade') || isCypressTag('@switch') || isCypressTag('@use-caapf-switch')) {
+        if (isCypressTag('@short') || isCypressTag('@nocaapf') || isCypressTag('@capd') || isCypressTag('@upgrade') || isCypressTag('@switch') || isCypressTag('@use-caapf-switch')) {
             // @ts-ignore
             text.providers.infrastructureDocker.enabled = true;
             // @ts-ignore
             text.providers.infrastructureDocker.enableAutomaticUpdate = true;
           }
         // there is no easy way to only install a specific provider when something like `@capgke` is passed, so we enable all the cloud providers
-        if (isCypressTag('@full') || isCypressTag('@capg') || isCypressTag('@capa') || isCypressTag('@capz')) {
+        if (isCypressTag('@full') || isCypressTag('@nocaapf') || isCypressTag('@capg') || isCypressTag('@capa') || isCypressTag('@capz')) {
             // @ts-ignore
             text.providers.infrastructureGCP.enabled = true;
             // @ts-ignore
@@ -109,6 +107,7 @@ describe('Enable CAPI Providers', () => {
             // @ts-ignore
             text.providers.infrastructureAWS.enableAutomaticUpdate = true;
           }
+        // TODO: Add isCypressTag('@nocaapf') when vsphere nocaapf is implemented
         if (isCypressTag('@vsphere') || isCypressTag('@capv')) {
             // @ts-ignore
             text.providers.infrastructureVSphere.enabled = true;
@@ -184,6 +183,7 @@ describe('Enable CAPI Providers', () => {
     );
   })
 
+  // TODO: Add isCypressTag('@nocaapf') when vsphere nocaapf is implemented
   context('vSphere provider', {tags: ['@vsphere', '@capvk', '@capvr']}, () => {
     const vsphereProviderNamespace = 'capv-system'
     qase(423, it('Verify CAPV provider', () => {

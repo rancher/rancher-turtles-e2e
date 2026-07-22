@@ -1,6 +1,6 @@
 import '../support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import {isUseCAAPFSupported, skipClusterDeletion, isRancherManagerVersion} from '../support/utils';
+import {skipClusterDeletion, isRancherManagerVersion} from '../support/utils';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
@@ -14,11 +14,15 @@ describe('Import CAPD RKE2 (No-Caapf) Class-Cluster using Fleet', {tags: ['@shor
   const clustersRepoName = 'docker-rke2-class-clusters'
   const clusterClassRepoName = "docker-rke2-clusterclass"
 
-  beforeEach(function () {
-    if (!isUseCAAPFSupported) {
-      // This test is only meant for >=2.14.1
-      this.skip();
+  before(function () {
+    if (isRancherManagerVersion('<2.15')) {
+      return cy.task('suiteLog', "NoCAAPF is unsupported on Rancher Version <2.15; skipping...").then(() => {
+        this.skip();
+      })
     }
+  })
+
+  beforeEach(function () {
     cy.login();
     cy.burgerMenuOperate('open');
   });

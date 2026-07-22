@@ -53,12 +53,14 @@ export const vars = {
       return '0.25';
     }
 
-    if (!isTurtlesDevChart) {
+    if (!isTurtlesDevChart && providersChartNeedsStgRegistry()) {
       if (isRancherManagerVersion('2.13')) return '0.25';
       if (isRancherManagerVersion('2.14')) return '0.26';
       if (isRancherManagerVersion('2.15')) return '0.27';
     }
-
+    // for stable releases, only supported versions will be listed, so we do not need to return/select a specific
+    // versions; selecting a version is only necessary for alpha/rc/head builds where we use staging registry that
+    // consists of unsupported versions
     return undefined;
   })()
 };
@@ -176,13 +178,13 @@ export const providers = {
       azure: 'v1.23.2'
     }
   },
-  coreCAPIProvider : 'cluster-api',
-  rke2Provider : 'rke2',
-  kubeadmProvider : 'kubeadm',
-  dockerProvider : 'docker',
-  amazonProvider : 'aws',
-  googleProvider : 'gcp',
-  azureProvider : 'azure',
-  fleetProvider : 'fleet',
-  vsphereProvider : 'vsphere'
+  coreCAPIProvider: 'cluster-api',
+  rke2Provider: 'rke2',
+  kubeadmProvider: 'kubeadm',
+  dockerProvider: 'docker',
+  amazonProvider: 'aws',
+  googleProvider: 'gcp',
+  azureProvider: 'azure',
+  fleetProvider: 'fleet',
+  vsphereProvider: 'vsphere'
 }

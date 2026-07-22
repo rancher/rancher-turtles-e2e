@@ -1,5 +1,5 @@
 import '../support/commands';
-import {getClusterName, isUseCAAPFSupported, isRancherManagerVersion, skipClusterDeletion} from '../support/utils';
+import {getClusterName, isRancherManagerVersion, skipClusterDeletion} from '../support/utils';
 import {capaResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
@@ -15,11 +15,15 @@ describe('Import CAPA EKS (No-Caapf) Class-Cluster', {tags: ['@full', '@nocaapf'
   const accessKey = Cypress.expose('aws_access_key')
   const secretKey = Cypress.expose('aws_secret_key')
 
-  beforeEach(function () {
-    if (!isUseCAAPFSupported) {
-      // This test is only meant for >=2.14.1
-      this.skip();
+  before(function () {
+    if (isRancherManagerVersion('<2.15')) {
+      return cy.task('suiteLog', "NoCAAPF is unsupported on Rancher Version <2.15; skipping...").then(() => {
+        this.skip();
+      })
     }
+  })
+
+  beforeEach(function () {
     cy.login();
     cy.burgerMenuOperate('open');
   });

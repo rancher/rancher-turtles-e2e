@@ -17,6 +17,14 @@ describe('Import CAPA RKE2 (No-Caapf) Class-Cluster', {tags: ['@full', '@full-no
   const accessKey = Cypress.expose('aws_access_key')
   const secretKey = Cypress.expose('aws_secret_key')
 
+  before(function () {
+    if (isRancherManagerVersion('<2.15')) {
+      return cy.task('suiteLog', "NoCAAPF is unsupported on Rancher Version <2.15; skipping...").then(() => {
+        this.skip();
+      })
+    }
+  })
+
   beforeEach(() => {
     cy.login();
     cy.burgerMenuOperate('open');

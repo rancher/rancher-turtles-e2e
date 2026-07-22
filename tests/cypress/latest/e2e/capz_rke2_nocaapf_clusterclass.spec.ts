@@ -18,11 +18,15 @@ describe('Import CAPZ RKE2 (No-Caapf) Class-Cluster', {tags: ['@full', '@full-no
   const k8sVersion = isRancherManagerVersion('2.14') ? 'v1.34.1+rke2r1'
   : vars.rke2Version
 
-  beforeEach(function () {
+  before(function () {
     if (isRancherManagerVersion('<2.15')) {
-      // This test will only work on Rancher >= 2.15, Turtles >= 0.27
-      this.skip();
+      return cy.task('suiteLog', "NoCAAPF is unsupported on Rancher Version <2.15; skipping...").then(() => {
+        this.skip();
+      })
     }
+  })
+
+  beforeEach(function () {
     cy.login();
     cy.burgerMenuOperate('open');
   });
