@@ -22,7 +22,6 @@ import {
 import {determineBuildType, providers, vars} from '../support/variables';
 import {matchAndWaitForProviderReadyStatus} from "../support/commands";
 
-if (isRancherManagerVersion('>2.12')) {
 Cypress.config();
 describe('Enable CAPI Providers', () => {
   // Assign the provider versions based on the chart type
@@ -37,6 +36,14 @@ describe('Enable CAPI Providers', () => {
 
   const providerTypes = ['bootstrap', 'control plane']
   const kubeadmProviderNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system']
+
+  before(function () {
+    if (isRancherManagerVersion('2.12')) {
+      return cy.task('suiteLog', 'Skipping for 2.12 Rancher versions').then(() => {
+        this.skip();
+      })
+    }
+  })
 
   beforeEach(() => {
     cy.login();
@@ -258,4 +265,3 @@ describe('Enable CAPI Providers', () => {
     })
   })
 });
-}

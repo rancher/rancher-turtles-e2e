@@ -23,7 +23,6 @@ import {matchAndWaitForProviderReadyStatus} from "../support/commands";
 
 const buildType = determineBuildType();
 
-if (isRancherManagerVersion('2.12') && !isMigration) {
 Cypress.config();
 describe('Enable CAPI Providers (2.12)', () => {
 
@@ -42,6 +41,13 @@ describe('Enable CAPI Providers (2.12)', () => {
   const capiNamespaces = [vars.capiClustersNS, vars.capiClassesNS]
   const kubeadmProviderNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system']
 
+  before(function () {
+    if (isRancherManagerVersion('>2.13') || isMigration) {
+      return cy.task('suiteLog', 'Skipping for Rancher version >2.13 or Migration test').then(() => {
+        this.skip();
+      })
+    }
+  })
   beforeEach(() => {
     cy.login();
     cy.burgerMenuOperate('open');
@@ -203,4 +209,3 @@ describe('Enable CAPI Providers (2.12)', () => {
 
   })
 });
-}
