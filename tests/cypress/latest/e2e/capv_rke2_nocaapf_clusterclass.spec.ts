@@ -108,7 +108,7 @@ describe('Import CAPV RKE2 (No-Caapf) Class-Cluster', {tags: ['@vsphere', '@vsph
         .should('exist');
 
       // Add CAPV fleet repository
-      cy.addFleetGitRepo(clusterRepoName, vars.repoUrl, 'vsphere-nocaapf', path);
+      cy.addFleetGitRepo(clusterRepoName, vars.repoUrl, vars.branch, path);
 
       // Check CAPI cluster using its name
       cy.checkCAPICluster(clusterName);
