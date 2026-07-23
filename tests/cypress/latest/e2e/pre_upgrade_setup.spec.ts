@@ -1,5 +1,4 @@
 import '../support/commands';
-import {setUseCAAPFFeatureGate} from "../support/commands";
 import {isRancherManagerVersion} from "../support/utils";
 import {setUseCAAPFFeatureGate} from "../support/commands";
 
