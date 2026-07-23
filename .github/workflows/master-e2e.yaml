@@ -407,20 +407,6 @@ jobs:
       - name: Make Turtles chart
         if: ${{ inputs.turtles_dev_chart == true }}
         run: |
-          # THIS IF BLOCK FUNCTIONALITY HAS BEEN MOVED TO install_test.go - WE HAVE TO ADAPT THE CONDITION THERE
-          # if [[ "${{ env.RANCHER_VERSION }}" =~ head.*/(2\.13) || "${{ env.RANCHER_VERSION }}" =~ prime.*/$RANCHER_RECENT_VERSIONS || "${{ inputs.grep_test_by_tag }}" =~ "@migration" || "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
-          #   # Inject custom image into turtles chart deployment.yaml without using the system_default_registry prefix
-          #   # This is needed on Pre-Prime & Prime, and 2.13 because the local registry is not accessible via system_default_registry
-          #   # Sed command uses range from `if` to `end` to replace templating by actual image
-          #   sed -i "/{{- if (contains \"sha256:\" .Values.image.tag) }}/,/{{- end}}/c\\        image: localhost:5000/rancher/turtles:v${{ env.TAG }}" \
-          #     charts/rancher-turtles/templates/deployment.yaml
-          #   # Verify the patch worked
-          #   if ! grep -q "image: localhost:5000/rancher/turtles:v${{ env.TAG }}" charts/rancher-turtles/templates/deployment.yaml; then
-          #     echo "ERROR: Failed to patch deployment.yaml with custom turtles image"
-          #     exit 1
-          #   fi
-          # fi
-
           TARGET_BUILD=${{ env.BUILD_TYPE }} TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} make e2e-image-build
           RELEASE_TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} CONTROLLER_IMAGE_VERSION=v${{ env.TAG }} make build-chart # verify-gen
           docker run -d -p 5000:5000 --name registry registry:2

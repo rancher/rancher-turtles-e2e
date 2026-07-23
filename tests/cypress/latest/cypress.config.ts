@@ -51,7 +51,6 @@ export default defineConfig({
 
         if (["chrome", "edge"].includes(browser.name)) {
           launchOptions.args.push("--no-sandbox");
-          // launchOptions.args.push("--disable-gl-drawing-for-tests");
           launchOptions.args.push("--disable-gpu");
           launchOptions.args.push("--use-gl=swiftshader"); // Forces software rendering safely
           launchOptions.args.push("--js-flags=--max-old-space-size=8192");
