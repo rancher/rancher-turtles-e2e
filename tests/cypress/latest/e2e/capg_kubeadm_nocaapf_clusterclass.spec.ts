@@ -1,10 +1,16 @@
 import '../support/commands';
-import {getClusterName, isUseCAAPFSupported, skipClusterDeletion, isRancherManagerVersion, getCAPIClusterKubeconfig, applyYAMLManifest} from '../support/utils';
+import {
+  getClusterName,
+  skipClusterDeletion,
+  isRancherManagerVersion,
+  getCAPIClusterKubeconfig,
+  applyYAMLManifest
+} from '../support/utils';
 import {capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Import CAPG Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@nocaapf', '@capgk-nocaapf']}, () => {
+describe('Import CAPG Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@full-nocaapf', '@nocaapf', '@capgk-nocaapf']}, () => {
   const timeout = vars.fullTimeout
   const classNamePrefix = 'gcp-kubeadm'
   const clusterName = getClusterName(classNamePrefix)
@@ -20,11 +26,15 @@ describe('Import CAPG Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@noca
   const gcpCCMFileName = "cloud-provider-gcp.yaml"
   const gcpCCMCmd = [`wget ${vars.gcpCCMYaml}`, `sed -i 's|\${CLUSTER_CIDR}|192.168.0.0/16|g' ${gcpCCMFileName}`, applyYAMLManifest(clusterName, gcpCCMFileName)]
 
-  beforeEach(function () {
-    if (!isUseCAAPFSupported) {
-      // This test is only meant for >=2.14.1
-      this.skip();
+  before(function () {
+    if (isRancherManagerVersion('<2.15')) {
+      return cy.task('suiteLog', "NoCAAPF is unsupported on Rancher Version <2.15; skipping...").then(() => {
+        this.skip();
+      })
     }
+  })
+
+  beforeEach(function () {
     cy.login();
     cy.burgerMenuOperate('open');
   });
@@ -34,22 +44,6 @@ describe('Import CAPG Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@noca
       cy.namespaceAutoImport('Disable');
     })
     );
-
-    it('Initialize CAPG provider', () => {
-      // Verify GCP Infrastructure provider
-      cy.navigateToProviders();
-
-      cy.get('tr.main-row').contains('a', googleProvider).closest('tr').within(() => {
-        cy.get('td').eq(7).click();      // Action button
-      })
-      cy.contains('Edit Config').click();
-      cy.contains(`Provider: Google - ${googleProvider}`).should('exist');
-      cy.typeValue('Credential Name', googleProvider);
-      cy.getBySel('text-area-auto-grow').type(Cypress.expose('gcp_credentials'), {log: false});
-      cy.clickButton('Continue');
-      cy.getBySel('cluster-prov-select-credential').contains(googleProvider).should('be.visible');
-      cy.clickButton('Save');
-    })
 
     qase(148,
       it('Add CAPG Kubeadm ClusterClass Fleet Repo and check GCP CCM', () => {

@@ -125,27 +125,11 @@ describe('Import CAPD Kubeadm Class-Cluster for Use-CAAPF Migration', {tags: ['@
     }))
 
     qase(595, it('Disable fleet-addon provider', () => {
-      const repositoryName = isTurtlesDevChart? "chartmuseum-repo": "turtles-providers-chart";
-      const resourceKind = 'clusterrepos.catalog.cattle.io';
-      const namespace = turtlesNamespace;
-      const patch = {spec: {OCIOptions: {'downloadAllTags': true}}};
-      cy.patchYamlResource('local', namespace, resourceKind, repositoryName, patch);
-
-      cy.typeInFilter(repositoryName);
-      // Make sure the repo is active before leaving
-      // Always press Refresh button as workaround for https://github.com/rancher/rancher/issues/49671
-      cy.getBySel('sortable-table-0-action-button').click();
-      cy.wait(1000);
-      cy.get('.icon.group-icon.icon-refresh').parent().click();
-      cy.wait(1000);
-      cy.contains(new RegExp('Active.*' + repositoryName), {timeout: 150000});
-
       const providerSelectionFunction = (text: any) => {
         // @ts-ignore
         text.providers.addonFleet.enabled = false;
       }
 
-      cy.burgerMenuOperate('open');
       // Update Rancher Turtles Certified Providers chart to disable the fleet addon provider
       cy.checkChart('local', vars.chartUpdateOperation, vars.turtlesProvidersChartName, turtlesNamespace, {
         modifyYAMLOperation: providerSelectionFunction,

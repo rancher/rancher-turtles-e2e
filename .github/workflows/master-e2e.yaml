@@ -124,6 +124,10 @@ on:
       target_build_type:
         description: Build type for turtles_dev_chart (prime|community)
         type: string
+      skip_fleet_addon_installation:
+        description: Skip Fleet Addon provider installation
+        type: boolean
+        default: false
 
 jobs:
   determine-runner:
@@ -260,6 +264,7 @@ jobs:
       CLUSTER_NAME_SUFFIX: ${{ inputs.cluster_name_suffix }}
       BUILD_TYPE: ${{ inputs.target_build_type }}
       TURTLES_DEV_CHART: ${{ inputs.turtles_dev_chart }}
+      SKIP_FLEET_ADDON_INSTALLATION: ${{ inputs.skip_fleet_addon_installation }}
       # Secrets
       AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
@@ -279,6 +284,8 @@ jobs:
 
       # Common specs: @short @vsphere @full
       SPECS: |
+        e2e/providers_setup_legacy.spec.ts
+        e2e/providers_setup.spec.ts
         e2e/capd_kubeadm_nocaapf_clusterclass.spec.ts
         e2e/capd_rke2_nocaapf_clusterclass.spec.ts
         e2e/capa_eks_nocaapf_clusterclass.spec.ts
@@ -288,8 +295,7 @@ jobs:
         e2e/capz_rke2_nocaapf_clusterclass.spec.ts
         e2e/capg_kubeadm_nocaapf_clusterclass.spec.ts
         e2e/capg_gke_nocaapf_clusterclass.spec.ts
-        e2e/providers_setup_legacy.spec.ts
-        e2e/providers_setup.spec.ts
+        e2e/fleet_addon_provider_setup.spec.ts
         e2e/capd_rke2_clusterclass.spec.ts
         e2e/capd_rke2_fleet_clusterclass.spec.ts
         e2e/capd_kubeadm_clusterclass.spec.ts
@@ -333,11 +339,11 @@ jobs:
             echo "SPECS=" >> ${GITHUB_ENV}
           elif [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
             # Required for upgrade tests
-            echo "RANCHER_VERSION=prime/2.13.5" >> ${GITHUB_ENV}
+            echo "RANCHER_VERSION=prime/2.13.7" >> ${GITHUB_ENV}
             echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> ${GITHUB_ENV}
           elif [[ "${{ inputs.grep_test_by_tag }}" =~ "@switch" ]]; then
             # Required for switch tests
-            echo "RANCHER_VERSION=prime/2.13.5" >> ${GITHUB_ENV}
+            echo "RANCHER_VERSION=prime/2.13.7" >> ${GITHUB_ENV}
             echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> ${GITHUB_ENV}
           else
             echo "RANCHER_VERSION=${{ inputs.rancher_version }}" >> ${GITHUB_ENV}
@@ -565,7 +571,7 @@ jobs:
       - name: Set Rancher Manager Upgrade version
         if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') }}
         run: |
-          echo "RANCHER_VERSION=prime/2.14.3" >> ${GITHUB_ENV}
+          echo "RANCHER_VERSION=prime-alpha/2.14.4-alpha5" >> ${GITHUB_ENV}
       - name: Upgrade Rancher Manager
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:

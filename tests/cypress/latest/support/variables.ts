@@ -1,4 +1,9 @@
-import {isAPIv1beta1, isRancherManagerVersion, providersChartNeedsStgRegistry} from './utils';
+import {
+  isAPIv1beta1,
+  isRancherManagerVersion,
+  isTurtlesDevChart, isUpgrade,
+  providersChartNeedsStgRegistry
+} from './utils';
 
 const primeRegistry = Cypress.expose('prime_registry');
 const stgPrimeRegistry = Cypress.expose('stg_prime_registry');
@@ -42,5 +47,144 @@ export const vars = {
   calicoCNIYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/calico.yaml',
   azureCCMYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/cloud-provider-azure.yaml',
   gcpCCMYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/cloud-provider-gcp.yaml',
-  turtlesProvidersChartVersion: providersChartNeedsStgRegistry() && isRancherManagerVersion('2.13') ? '0.25' : providersChartNeedsStgRegistry() && isRancherManagerVersion('2.14') ? '0.26' : providersChartNeedsStgRegistry() && isRancherManagerVersion('2.15') ? '0.27' : undefined
+  turtlesProvidersChartVersion: (() => {
+    if (isUpgrade && isRancherManagerVersion('2.13')) {
+      // for upgrade tests, 2.13 will always be dev=false; dev=true is only applicable to 2.14
+      return '0.25';
+    }
+
+    if (!isTurtlesDevChart && providersChartNeedsStgRegistry()) {
+      if (isRancherManagerVersion('2.13')) return '0.25';
+      if (isRancherManagerVersion('2.14')) return '0.26';
+      if (isRancherManagerVersion('2.15')) return '0.27';
+    }
+    // for stable releases, only supported versions will be listed, so we do not need to return/select a specific
+    // versions; selecting a version is only necessary for alpha/rc/head builds where we use staging registry that
+    // consists of unsupported versions
+    return undefined;
+  })()
 };
+
+type BuildType = 'prod-v2.12' | 'prod-v2.13' | 'prod-v2.14' | 'prod-v2.15' | 'dev-v2.12' | 'dev-v2.13' | 'dev-v2.14' | 'dev-v2.15';
+
+export function determineBuildType(): BuildType {
+  if (isTurtlesDevChart && isRancherManagerVersion('2.12')){
+    return 'dev-v2.12';
+  }
+  if (isTurtlesDevChart && isRancherManagerVersion('2.13')) {
+    return 'dev-v2.13';
+  }
+  if (isTurtlesDevChart && isRancherManagerVersion('2.14')) {
+    return 'dev-v2.14';
+  }
+  if (isTurtlesDevChart && isRancherManagerVersion('2.15')) {
+    return 'dev-v2.15';
+  }
+  if(isRancherManagerVersion('2.12')){
+    return 'prod-v2.12';
+  }
+  if (isRancherManagerVersion('2.13')) {
+    return 'prod-v2.13';
+  }
+  if (isRancherManagerVersion('2.14')) {
+    return 'prod-v2.14';
+  }
+  if (isRancherManagerVersion('2.15')) {
+    return 'prod-v2.15';
+  }
+  return undefined as unknown as BuildType; // This should never happen, but it satisfies the type checker
+}
+
+export const providers = {
+  version: {
+    'prod-v2.12': {
+      capi: 'v1.10.5',
+      rke2: 'v0.20.1',
+      kubeadm: 'v1.10.5',
+      fleet: 'v0.11.0',
+      vsphere: 'v1.13.1',
+      amazon: 'v2.9.1',
+      google: 'v1.10.0',
+      azure: 'v1.21.0'
+    },
+    'prod-v2.13': {
+      capi: 'v1.10.6',
+      rke2: 'v0.21.1',
+      kubeadm: 'v1.10.6',
+      fleet: 'v0.12.0',
+      vsphere: 'v1.13.1',
+      amazon: 'v2.9.1',
+      google: 'v1.10.0',
+      azure: 'v1.21.0'
+    },
+    'prod-v2.14': {
+      capi: 'v1.12.7',
+      rke2: 'v0.24.4',
+      kubeadm: 'v1.12.7',
+      fleet: 'v0.14.1',
+      vsphere: 'v1.15.2',
+      amazon: 'v2.11.1',
+      google: 'v1.11.1',
+      azure: 'v1.22.0'
+    },
+    'prod-v2.15': {
+      capi: 'v1.13.3',
+      rke2: 'v0.25.0',
+      kubeadm: 'v1.13.3',
+      fleet: 'v0.15.0',
+      vsphere: 'v1.16.1',
+      amazon: 'v2.11.1',
+      google: 'v1.11.2',
+      azure: 'v1.23.2'
+    },
+    'dev-v2.12': {
+      capi: 'v1.10.5',
+      rke2: 'v0.20.1',
+      kubeadm: 'v1.10.5',
+      fleet: 'v0.11.0',
+      vsphere: 'v1.13.1',
+      amazon: 'v2.9.1',
+      google: 'v1.10.0',
+      azure: 'v1.21.0'
+    },
+    'dev-v2.13': {
+      capi: 'v1.10.6',
+      rke2: 'v0.21.1',
+      kubeadm: 'v1.10.6',
+      fleet: 'v0.12.0',
+      vsphere: 'v1.13.1',
+      amazon: 'v2.9.1',
+      google: 'v1.10.0',
+      azure: 'v1.21.0'
+    },
+    'dev-v2.14': {
+      capi: 'v1.12.7',
+      rke2: 'v0.24.4',
+      kubeadm: 'v1.12.7',
+      fleet: 'v0.14.1',
+      vsphere: 'v1.15.2',
+      amazon: 'v2.11.1',
+      google: 'v1.11.1',
+      azure: 'v1.22.0'
+    },
+    'dev-v2.15': {
+      capi: 'v1.13.3',
+      rke2: 'v0.25.0',
+      kubeadm: 'v1.13.3',
+      fleet: 'v0.15.0',
+      vsphere: 'v1.16.1',
+      amazon: 'v2.11.1',
+      google: 'v1.11.2',
+      azure: 'v1.23.2'
+    }
+  },
+  coreCAPIProvider: 'cluster-api',
+  rke2Provider: 'rke2',
+  kubeadmProvider: 'kubeadm',
+  dockerProvider: 'docker',
+  amazonProvider: 'aws',
+  googleProvider: 'gcp',
+  azureProvider: 'azure',
+  fleetProvider: 'fleet',
+  vsphereProvider: 'vsphere'
+}

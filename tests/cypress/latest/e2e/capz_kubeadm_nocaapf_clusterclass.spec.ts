@@ -1,10 +1,16 @@
 import '../support/commands';
-import {getClusterName, isUseCAAPFSupported, skipClusterDeletion, isRancherManagerVersion, getCAPIClusterKubeconfig, applyYAMLManifest} from '../support/utils';
-import {capiClusterDeletion, capzResourcesCleanup, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
+import {
+  getClusterName,
+  skipClusterDeletion,
+  isRancherManagerVersion,
+  getCAPIClusterKubeconfig,
+  applyYAMLManifest
+} from '../support/utils';
+import {capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Import CAPZ Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@nocaapf', '@capzk-nocaapf']}, () => {
+describe('Import CAPZ Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@full-nocaapf', '@nocaapf', '@capzk-nocaapf']}, () => {
   const timeout = vars.fullTimeout
   const classNamePrefix = 'azure-kubeadm'
   const clusterName = getClusterName(classNamePrefix)
@@ -12,10 +18,7 @@ describe('Import CAPZ Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@noca
   const clusterClassRepoName = "azure-kubeadm-clusterclass"
   const classClusterFileName = './fixtures/azure/capz-kubeadm-class-cluster-nocaapf.yaml'
 
-  const clientID = Cypress.expose("azure_client_id")
-  const clientSecret = btoa(Cypress.expose("azure_client_secret"))
   const subscriptionID = Cypress.expose("azure_subscription_id")
-  const tenantID = Cypress.expose("azure_tenant_id")
 
   const azureCCMFileName = "cloud-provider-azure.yaml"
   const azureCCMCmd = [`wget ${vars.azureCCMYaml}`, `sed -i 's|\${CLUSTER_CIDR}|192.168.0.0/16|g' ${azureCCMFileName}`, applyYAMLManifest(clusterName, azureCCMFileName)]
@@ -24,11 +27,15 @@ describe('Import CAPZ Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@noca
   const k8sVersion = isRancherManagerVersion('2.14') ? 'v1.34.1'
     : vars.kubeadmVersion
 
-  beforeEach(function () {
-    if (!isUseCAAPFSupported) {
-      // This test is only meant for >=2.14.1
-      this.skip();
+  before(function () {
+    if (isRancherManagerVersion('<2.15')) {
+      return cy.task('suiteLog', "NoCAAPF is unsupported on Rancher Version <2.15; skipping...").then(() => {
+        this.skip();
+      })
     }
+  })
+
+  beforeEach(function () {
     cy.login();
     cy.burgerMenuOperate('open');
   });
@@ -36,11 +43,6 @@ describe('Import CAPZ Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@noca
   context('[SETUP]', () => {
     qase(329, it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
-    })
-    );
-
-    qase(346, it('Create AzureClusterIdentity', () => {
-      cy.createAzureClusterIdentity(clientID, tenantID, clientSecret)
     })
     );
 
@@ -142,8 +144,6 @@ describe('Import CAPZ Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@noca
       qase(337, it('Delete the ClusterClass fleet repo and other resources', () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
-        // Cleanup other resources
-        capzResourcesCleanup();
       })
       );
     }

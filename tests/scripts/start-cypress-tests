@@ -60,6 +60,7 @@ docker run --init -v $PWD:/workdir -w /workdir \
     -e "CI=$CI" \
     -e PRIME_REGISTRY=$PRIME_REGISTRY \
     -e STG_PRIME_REGISTRY=$STG_PRIME_REGISTRY \
+    -e SKIP_FLEET_ADDON_INSTALLATION=$SKIP_FLEET_ADDON_INSTALLATION \
     --add-host host.docker.internal:host-gateway \
     --ipc=host \
     $CYPRESS_DOCKER \

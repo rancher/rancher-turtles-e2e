@@ -1,10 +1,10 @@
 import '../support/commands';
 import {getClusterName, skipClusterDeletion, isRancherManagerVersion} from '../support/utils';
-import {capiClusterDeletion, capzResourcesCleanup, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
+import {capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Import CAPZ RKE2 (No-Caapf) Class-Cluster', {tags: ['@full', '@nocaapf', '@capzr-nocaapf']}, () => {
+describe('Import CAPZ RKE2 (No-Caapf) Class-Cluster', {tags: ['@full', '@full-nocaapf', '@nocaapf', '@capzr-nocaapf']}, () => {
   const timeout = vars.fullTimeout
   const classNamePrefix = 'azure-rke2'
   const clusterName = getClusterName(classNamePrefix)
@@ -12,20 +12,21 @@ describe('Import CAPZ RKE2 (No-Caapf) Class-Cluster', {tags: ['@full', '@nocaapf
   const clusterClassRepoName = classNamePrefix + '-clusterclass'
   const classClusterFileName = './fixtures/azure/capz-rke2-class-cluster-nocaapf.yaml'
 
-  const clientID = Cypress.expose("azure_client_id")
-  const clientSecret = btoa(Cypress.expose("azure_client_secret"))
   const subscriptionID = Cypress.expose("azure_subscription_id")
-  const tenantID = Cypress.expose("azure_tenant_id")
 
   // Azure CCM fails to install when using v1.35
   const k8sVersion = isRancherManagerVersion('2.14') ? 'v1.34.1+rke2r1'
   : vars.rke2Version
 
-  beforeEach(function () {
+  before(function () {
     if (isRancherManagerVersion('<2.15')) {
-      // This test will only work on Rancher >= 2.15, Turtles >= 0.27
-      this.skip();
+      return cy.task('suiteLog', "NoCAAPF is unsupported on Rancher Version <2.15; skipping...").then(() => {
+        this.skip();
+      })
     }
+  })
+
+  beforeEach(function () {
     cy.login();
     cy.burgerMenuOperate('open');
   });
@@ -33,11 +34,6 @@ describe('Import CAPZ RKE2 (No-Caapf) Class-Cluster', {tags: ['@full', '@nocaapf
   context('[SETUP]', () => {
     qase(326, it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
-    })
-    );
-
-    qase(345, it('Create AzureClusterIdentity', () => {
-      cy.createAzureClusterIdentity(clientID, tenantID, clientSecret)
     })
     );
 
@@ -137,8 +133,6 @@ describe('Import CAPZ RKE2 (No-Caapf) Class-Cluster', {tags: ['@full', '@nocaapf
       qase(83, it('Delete the ClusterClass fleet repo and other resources', () => {
           // Remove the clusterclass repo
           cy.removeFleetGitRepo(clusterClassRepoName);
-          // Cleanup other resources
-          capzResourcesCleanup();
         })
       );
     }

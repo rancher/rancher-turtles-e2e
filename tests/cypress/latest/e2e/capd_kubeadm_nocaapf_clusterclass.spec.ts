@@ -1,10 +1,16 @@
 import '../support/commands';
-import {getClusterName, isUseCAAPFSupported, skipClusterDeletion, turtlesNamespace, isRancherManagerVersion, getCAPIClusterKubeconfig, applyYAMLManifest, providersChartNeedsStgRegistry} from '../support/utils';
+import {
+  getClusterName,
+  skipClusterDeletion,
+  isRancherManagerVersion,
+  getCAPIClusterKubeconfig,
+  applyYAMLManifest
+} from '../support/utils';
 import {capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Import CAPD Kubeadm (No-Caapf) Class-Cluster', {tags: ['@install', '@short', '@nocaapf', '@capdk-nocaapf']}, () => {
+describe('Import CAPD Kubeadm (No-Caapf) Class-Cluster', {tags: ['@short', '@short-nocaapf', '@nocaapf', '@capdk-nocaapf']}, () => {
   const timeout = vars.shortTimeout
   const classNamePrefix = 'docker-kubeadm'
   const clusterName = getClusterName(classNamePrefix)
@@ -12,69 +18,22 @@ describe('Import CAPD Kubeadm (No-Caapf) Class-Cluster', {tags: ['@install', '@s
   const clusterClassRepoName = "docker-kb-clusterclass"
   const classClusterFileName = "./fixtures/docker/capd-kubeadm-class-cluster-nocaapf.yaml"
 
-  beforeEach(function () {
-    if (!isUseCAAPFSupported) {
-      // This test is only meant for >=2.14.1
-      this.skip();
+  before(function () {
+    if (isRancherManagerVersion('<2.15')) {
+      return cy.task('suiteLog', "NoCAAPF is unsupported on Rancher Version <2.15; skipping...").then(() => {
+        this.skip();
+      })
     }
+  })
+
+  beforeEach(function () {
     cy.login();
     cy.burgerMenuOperate('open');
   });
 
   context('[SETUP]', () => {
-    qase(438, it('Create Docker Resources', () => {
-      cy.createNamespace([vars.capiClustersNS]);
-    })
-    );
-
     qase(439, it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
-    })
-    );
-
-    // We install providers chart here because the test runs before providers_setup.spec.ts
-    // TODO: Move providers installation to separate file
-    qase(440, it('Install turtles-providers-chart for all providers', () => {
-      const providerSelectionFunction = (text: any) => {
-        // @ts-ignore
-        text.providers.bootstrapKubeadm.enabled = true;
-        // @ts-ignore
-        text.providers.bootstrapKubeadm.enableAutomaticUpdate = true;
-
-        // @ts-ignore
-        text.providers.controlplaneKubeadm.enabled = true;
-        // @ts-ignore
-        text.providers.controlplaneKubeadm.enableAutomaticUpdate = true;
-
-        // @ts-ignore
-        text.providers.infrastructureDocker.enabled = true;
-        // @ts-ignore
-        text.providers.infrastructureDocker.enableAutomaticUpdate = true;
-
-        // @ts-ignore
-        text.providers.infrastructureGCP.enabled = true;
-        // @ts-ignore
-        text.providers.infrastructureGCP.enableAutomaticUpdate = true;
-        // @ts-ignore
-        text.providers.infrastructureGCP.variables.GCP_B64ENCODED_CREDENTIALS = '';
-
-        // @ts-ignore
-        text.providers.infrastructureAzure.enabled = true;
-        // @ts-ignore
-        text.providers.infrastructureAzure.enableAutomaticUpdate = true;
-
-        // @ts-ignore
-        text.providers.infrastructureAWS.enabled = true;
-        // @ts-ignore
-        text.providers.infrastructureAWS.enableAutomaticUpdate = true;
-      }
-
-      let turtlesProvidersChartVersion = providersChartNeedsStgRegistry() && isRancherManagerVersion('2.14') ? '0.26' : providersChartNeedsStgRegistry() && isRancherManagerVersion('2.15') ? '0.27' : undefined
-      // Install Rancher Turtles Certified Providers chart
-      cy.checkChart('local', 'Install', vars.turtlesProvidersChartName, turtlesNamespace, {
-        version: turtlesProvidersChartVersion,
-        modifyYAMLOperation: providerSelectionFunction
-      });
     })
     );
 

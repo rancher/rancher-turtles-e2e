@@ -12,7 +12,6 @@ describe('Import CAPZ AKS Class-Cluster', {tags: ['@full', '@capzaks']}, () => {
   const clusterClassRepoName = "azure-aks-clusterclass"
 
   const clientSecret = Cypress.expose("azure_client_secret")
-  const clientSecretBase64 = btoa(Cypress.expose("azure_client_secret"))
   const clientID = Cypress.expose("azure_client_id")
   const subscriptionID = Cypress.expose("azure_subscription_id")
   const tenantID = Cypress.expose("azure_tenant_id")
@@ -28,14 +27,12 @@ describe('Import CAPZ AKS Class-Cluster', {tags: ['@full', '@capzaks']}, () => {
     })
     );
 
-    qase(415, it('Create AzureASOCredential or AzureClusterIdentity', () => {
-      if (isAPIv1beta1) {
-        cy.createAzureClusterIdentity(clientID, tenantID, clientSecretBase64);
-      } else {
-        cy.createAzureASOCredential(clientID, tenantID, clientSecret, subscriptionID);
-      }
-    })
-    );
+    if (!isAPIv1beta1) {
+      qase(415, it('Create AzureASOCredential', () => {
+          cy.createAzureASOCredential(clientID, tenantID, clientSecret, subscriptionID);
+      })
+      );
+    }
 
     qase(84, it('Add CAPZ AKS ClusterClass using fleet', () => {
         cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
@@ -110,9 +107,7 @@ describe('Import CAPZ AKS Class-Cluster', {tags: ['@full', '@capzaks']}, () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
         // Cleanup other resources
-        if (isAPIv1beta1) {
-          capzResourcesCleanup(false);
-        } else {
+        if (!isAPIv1beta1) {
           capzResourcesCleanup(true);
         }
       

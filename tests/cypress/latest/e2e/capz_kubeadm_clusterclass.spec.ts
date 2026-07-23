@@ -1,6 +1,6 @@
 import '../support/commands';
 import {getClusterName, isAPIv1beta1, skipClusterDeletion, isRancherManagerVersion} from '../support/utils';
-import {capiClusterDeletion, capzResourcesCleanup, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
+import {capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
 Cypress.config();
@@ -12,10 +12,7 @@ describe('Import CAPZ Kubeadm Class-Cluster', {tags: ['@full', '@capzk']}, () =>
   const clusterClassRepoName = "azure-kubeadm-clusterclass"
   const classClusterFileName = isAPIv1beta1 ? './fixtures/azure/capz-kubeadm-class-cluster-v1beta1.yaml' : './fixtures/azure/capz-kubeadm-class-cluster.yaml'
 
-  const clientID = Cypress.expose("azure_client_id")
-  const clientSecret = btoa(Cypress.expose("azure_client_secret"))
   const subscriptionID = Cypress.expose("azure_subscription_id")
-  const tenantID = Cypress.expose("azure_tenant_id")
 
   // Azure CCM fails to install when using v1.35
   const k8sVersion = isRancherManagerVersion('2.14') ? 'v1.34.1'
@@ -29,11 +26,6 @@ describe('Import CAPZ Kubeadm Class-Cluster', {tags: ['@full', '@capzk']}, () =>
   context('[SETUP]', () => {
     qase(329, it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
-    })
-    );
-
-    qase(346, it('Create AzureClusterIdentity', () => {
-      cy.createAzureClusterIdentity(clientID, tenantID, clientSecret)
     })
     );
 
@@ -131,8 +123,6 @@ describe('Import CAPZ Kubeadm Class-Cluster', {tags: ['@full', '@capzk']}, () =>
       qase(337, it('Delete the ClusterClass fleet repo and other resources', () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
-        // Cleanup other resources
-        capzResourcesCleanup();
       })
       );
     }
