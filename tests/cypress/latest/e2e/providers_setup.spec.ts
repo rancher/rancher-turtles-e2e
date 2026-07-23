@@ -107,7 +107,7 @@ describe('Enable CAPI Providers', () => {
             // @ts-ignore
             text.providers.infrastructureAWS.enableAutomaticUpdate = true;
           }
-        // TODO: Add isCypressTag('@nocaapf') when vsphere nocaapf is implemented
+
         if (isCypressTag('@vsphere') || isCypressTag('@capv')) {
             // @ts-ignore
             text.providers.infrastructureVSphere.enabled = true;
@@ -183,8 +183,7 @@ describe('Enable CAPI Providers', () => {
     );
   })
 
-  // TODO: Add isCypressTag('@nocaapf') when vsphere nocaapf is implemented
-  context('vSphere provider', {tags: ['@vsphere', '@capvk', '@capvr']}, () => {
+  context('vSphere provider', {tags: ['@vsphere', '@vsphere-nocaapf', '@capvk', '@capvk-nocaapf', '@capvr', '@capvr-nocaapf']}, () => {
     const vsphereProviderNamespace = 'capv-system'
     qase(423, it('Verify CAPV provider', () => {
       // Verify vsphere Infrastructure provider
