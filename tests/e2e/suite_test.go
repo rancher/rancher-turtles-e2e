@@ -141,7 +141,7 @@ var _ = BeforeSuite(func() {
 	rancherLogCollector = os.Getenv("RANCHER_LOG_COLLECTOR")
 	rancherVersion = os.Getenv("RANCHER_VERSION")
 	turtlesDevChart = os.Getenv("TURTLES_DEV_CHART") == "true"
-	isUpgradeTest = strings.Contains(os.Getenv("GREPTAGS"), "upgrade")
+	isUpgradeTest = strings.Contains(os.Getenv("GREPTAGS"), "upgrade") || strings.Contains(os.Getenv("GREPTAGS"), "migration")
 	primeRegistry = os.Getenv("PRIME_REGISTRY")
 	stgPrimeRegistry = os.Getenv("STG_PRIME_REGISTRY")
 	primeArtifactsURL = os.Getenv("PRIME_ARTIFACTS_URL")
