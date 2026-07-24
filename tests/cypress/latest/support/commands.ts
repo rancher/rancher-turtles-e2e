@@ -1343,7 +1343,7 @@ function getV212Registry(providerNamespace: string): string {
   if (providerNamespace.includes('kubeadm')) {
     return PROVIDER_REGISTRIES.K8S_PROD;
   }
-  return PROVIDER_REGISTRIES.RANCHER_PRIME; // originally SUSE_PROD
+  return PROVIDER_REGISTRIES.RANCHER_PRIME.replace(/\.rancher/g, ".suse"); // originally SUSE_PROD
 }
 
 /**
