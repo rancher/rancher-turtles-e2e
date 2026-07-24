@@ -354,8 +354,7 @@ jobs:
           fi
           if [[ "${{ env.RANCHER_VERSION }}" =~ 2.12 && "${{ inputs.grep_test_by_tag }}" =~ "@migration" ]]; then
             echo RANCHER_POINT_VERSION="2.13" >> ${GITHUB_ENV}
-          fi
-          if [[ "${{ env.RANCHER_VERSION }}" =~ 2.12 ]]; then
+          elif [[ "${{ env.RANCHER_VERSION }}" =~ 2.12 ]]; then
             echo RANCHER_POINT_VERSION="2.12" >> ${GITHUB_ENV}
           fi
           if [[ "${{ env.RANCHER_VERSION }}" =~ 2.13 && "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
