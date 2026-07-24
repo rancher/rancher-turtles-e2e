@@ -1416,7 +1416,7 @@ Cypress.Commands.add('createDockerAuthSecret', () => {
 
 Cypress.Commands.add('checkExternalFleetAnnotation', (clusterName, required = true) => {
   cy.searchCluster(clusterName);
-  cy.getBySel('sortable-cell-0-1').click();
+  cy.getBySel('sortable-cell-0-1').find('a').should('be.visible').click();
   cy.getBySel('related').click();
   cy.get('a[href*="management.cattle.io.cluster/c-"]').click();
   const annotation = 'provisioning.cattle.io/externally-managed: \'true\'';
@@ -1496,7 +1496,7 @@ Cypress.Commands.add('filterPodErrorLogs', (podName) => {
     if (bodyText.includes('No lines match the current filter.')) {
       cy.task('log', 'No log entries found for filter: error');
       return;
-    } else {  
+    } else {
       [...bodyText.matchAll(/(err="(?:\\"|[^"])+")/g)]
       .slice(0, 3)
       .forEach((m) => cy.task('log', `[${podName}]: ${m[1]}`));
@@ -1541,7 +1541,7 @@ export function matchAndWaitForProviderReadyStatus(
 export function setUseCAAPFFeatureGate(enabled: boolean, wait: boolean=true) {
   const resourceKind = 'ConfigMap';
   const namespace = vars.cattleSystemNS;
-  const patch = {data: {"rancher-turtles": `{"features": {"use-caapf": {"enabled": ${enabled} }}}`}};
+  const patch = {data: {"rancher-turtles": {isNestedIn: true, "features": {"use-caapf": {"enabled": Boolean(enabled)}}}}};
   cy.patchYamlResource('local', namespace, resourceKind, 'rancher-config', patch);
 
   if(wait){

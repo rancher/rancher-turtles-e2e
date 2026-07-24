@@ -169,12 +169,37 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 			err := rancher.DeployRancherManager(rancherHostname, rancherChannel, rancherVersion, rancherHeadVersion, "none", "none", extraFlags)
 			Expect(err).To(Not(HaveOccurred()))
 
-			waitForResourceCondition("cattle-system", "deployments/rancher-webhook", "Available")
+			// For dev build when rancher-turtles is installed as system-chart following patching is mandatory
+			// It always uses [sdr/]rancher/turtles image regardless of what is written in chart's values.yaml.
+			// Ref. https://github.com/rancher/rancher/blob/main/pkg/controllers/dashboard/systemcharts/controller.go#L56
+			// We have to patch it soon enough to be recognized by the system-chart controller, otherwise default image is used.
 
-			if isRancherManagerVersion(">=2.13") {
-				waitForResourceCondition("cattle-turtles-system", "deployments/rancher-turtles-controller-manager", "Available")
-				waitForResourceCondition("cattle-capi-system", "deployments/capi-controller-manager", "Available")
+			isInstallPass := Label("install").MatchesLabelFilter(GinkgoLabelFilter())
+			isUpgradePass := Label("upgrade").MatchesLabelFilter(GinkgoLabelFilter()) // covers @upgrade as well as @migration test
+
+			shouldPatch := turtlesDevChart &&
+				isRancherManagerVersion(">=2.13") &&
+				((isInstallPass && !isUpgradeTest) || isUpgradePass) // patch either during @install (if it's not upgrade/migration test) or during @upgrade/@migration pass
+
+			if shouldPatch {
+				By("Patching rancher-config to use devel turtles image", func() {
+					Expect(controllerImage).To(Not(BeEmpty()), "CONTROLLER_IMG must be set when TURTLES_DEV_CHART=true")
+					_, err := kubectl.Run("wait", "--namespace", "cattle-system", "--for=create", "configmap/rancher-config", "--timeout=300s")
+					Expect(err).To(Not(HaveOccurred()))
+					var patch = fmt.Sprintf(`{"data":{"rancher-turtles":"global:\n  cattle:\n    systemDefaultRegistry: \"\"\nimage:\n  repository: \"%s\"\n"}}`, controllerImage)
+					status, err := kubectl.Run("patch", "configmap", "rancher-config", "-n", "cattle-system", "--type", "merge", "-p", patch)
+					Expect(err).To(Not(HaveOccurred()))
+					Expect(status).To(ContainSubstring("patched"))
+				})
 			}
+
+			By("Waiting for Rancher Manager resources", func() {
+				waitForResourceCondition("cattle-system", "deployments/rancher-webhook", "Available")
+				if isRancherManagerVersion(">=2.13") {
+					waitForResourceCondition("cattle-turtles-system", "deployments/rancher-turtles-controller-manager", "Available")
+					waitForResourceCondition("cattle-capi-system", "deployments/capi-controller-manager", "Available")
+				}
+			})
 		})
 	})
 })
