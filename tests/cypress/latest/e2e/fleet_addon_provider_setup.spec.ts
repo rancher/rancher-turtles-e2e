@@ -18,7 +18,7 @@ import {
   isUseCAAPFSupported, skipFleetAddOnInstallation,
   turtlesNamespace,
 } from '../support/utils';
-import {determineBuildType, providers, vars} from '../support/variables';
+import {providers, vars} from '../support/variables';
 import {matchAndWaitForProviderReadyStatus, setUseCAAPFFeatureGate} from "../support/commands";
 
 
@@ -71,11 +71,8 @@ describe('Enable use-caapf feature gate and install fleet-addon provider', {tags
 
   qase(368,
     it('Verify Fleet addon provider', () => {
-      const buildType = determineBuildType();
-      const fleetProviderVersion = providers.version[buildType].fleet
-
       cy.navigateToProviders();
-      matchAndWaitForProviderReadyStatus(providers.fleetProvider, 'addon', providers.fleetProvider, fleetProviderVersion, 'fleet-addon-system');
+      matchAndWaitForProviderReadyStatus(providers.fleetProvider, 'addon', providers.fleetProvider, providers.fleetProviderVersion, 'fleet-addon-system');
     })
   );
 

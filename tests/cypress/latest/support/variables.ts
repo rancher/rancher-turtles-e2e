@@ -94,7 +94,8 @@ const buildType = ((): BuildType => {
   if (isRancherManagerVersion('2.15')) {
     return 'prod-v2.15';
   }
-  return undefined as unknown as BuildType; // This should never happen, but it satisfies the type checker
+  // This should never happen
+  throw new Error('Unable to determine BuildType from Rancher Manager version and chart settings');
 })()
 
 const buildTypeVersionMap = {

@@ -29,8 +29,8 @@ describe('Enable CAPI Providers (2.12)', () => {
   const kubeadmProviderNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system']
 
   before(function () {
-    if (isRancherManagerVersion('>2.13') || isMigration) {
-      return cy.task('suiteLog', 'Skipping for Rancher version >2.13 or Migration test').then(() => {
+    if (!isRancherManagerVersion('2.12') || isMigration) {
+      return cy.task('suiteLog', 'Skipping for Rancher version != 2.12 or Migration test').then(() => {
         this.skip();
       })
     }
