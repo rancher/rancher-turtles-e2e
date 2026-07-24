@@ -19,7 +19,6 @@ import {isMigration, isRancherManagerVersion, isTurtlesDevChart, isUpgrade, turt
 Cypress.config();
 describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
   let chartMuseumRepo = Cypress.expose('chartmuseum_repo')
-  let turtlesVersion = Cypress.expose('turtles_chart_version')
 
   beforeEach(() => {
     cy.login();
@@ -61,7 +60,7 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
     );
   }
 
-  if (isRancherManagerVersion("<=2.12")) {
+  if (isRancherManagerVersion("2.12")) {
     qase(404, it("Add turtles GitRepo", () => {
       if (isTurtlesDevChart) {
         addChartMuseumRepo();
@@ -82,16 +81,8 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
     );
 
     qase(11, it('Install Turtles chart', {retries: 1}, () => {
-      // if turtles dev chart is to be used, ignore the turtles chart version
-      if (isTurtlesDevChart) {
-        turtlesVersion = ""
-      }
-
-      if (isMigration) {
-        turtlesVersion = '0.24.5'
-      }
-      cy.checkChart('local', 'Install', 'Rancher Turtles', turtlesNamespace, {version: turtlesVersion});
-    })
+        cy.checkChart('local', 'Install', 'Rancher Turtles', turtlesNamespace, {version: isMigration ? '0.24.5' : undefined});
+      })
     );
   }
 });

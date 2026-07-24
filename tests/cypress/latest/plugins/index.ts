@@ -31,7 +31,6 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   config.expose.cache_session = process.env.CACHE_SESSION || false;
   config.expose.chartmuseum_repo = process.env.CHARTMUSEUM_REPO || '';
   config.expose.turtles_dev_chart = process.env.TURTLES_DEV_CHART == "true";
-  config.expose.turtles_chart_version = process.env.TURTLES_CHART_VERSION;
   config.expose.turtles_build_type = process.env.BUILD_TYPE || "prime";
   config.expose.cluster = process.env.CLUSTER_NAME;
   config.expose.k8s_version = process.env.K8S_VERSION_TO_PROVISION;

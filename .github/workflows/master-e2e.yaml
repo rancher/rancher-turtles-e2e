@@ -112,9 +112,6 @@ on:
         required: true
         type: string
         default: '@install @short @full'
-      turtles_chart_version:
-        description: Turtles Chart Version; only to be used when dev chart is set to false; default - latest stable version
-        type: string
       skip_cluster_delete:
         description: Skip CAPI cluster and fleet repo deletion tests
         type: boolean
@@ -259,7 +256,6 @@ jobs:
       CYPRESS_DOCKER: 'cypress/included:15.11.0@sha256:3d31c71a3f444c6905a724396ae6fe8c5099133207455fe36d2c6bf38446dc96'
       # Inputs
       GREPTAGS: ${{ inputs.grep_test_by_tag }}
-      TURTLES_CHART_VERSION: ${{ inputs.turtles_chart_version }}
       SKIP_CLUSTER_DELETE: ${{ inputs.skip_cluster_delete }}
       CLUSTER_NAME_SUFFIX: ${{ inputs.cluster_name_suffix }}
       BUILD_TYPE: ${{ inputs.target_build_type }}
@@ -358,6 +354,8 @@ jobs:
           fi
           if [[ "${{ env.RANCHER_VERSION }}" =~ 2.12 && "${{ inputs.grep_test_by_tag }}" =~ "@migration" ]]; then
             echo RANCHER_POINT_VERSION="2.13" >> ${GITHUB_ENV}
+          elif [[ "${{ env.RANCHER_VERSION }}" =~ 2.12 ]]; then
+            echo RANCHER_POINT_VERSION="2.12" >> ${GITHUB_ENV}
           fi
           if [[ "${{ env.RANCHER_VERSION }}" =~ 2.13 && "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
             echo RANCHER_POINT_VERSION="2.14" >> ${GITHUB_ENV}

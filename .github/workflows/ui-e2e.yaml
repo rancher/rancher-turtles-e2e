@@ -20,9 +20,6 @@ on:
         description: Rancher Manager channel/<version|head_version>[/head_version] to use for installation
         default: head/2.14
         type: string
-      turtles_chart_version:
-        description: Rancher Turtles chart version to test (eg. 0.24.3 | 108.0.0+up0.25.0)
-        type: string
       grep_test_by_tag:
         description: Test tags. For multiple selection separate with spaces (Available options - @install [@migration @upgrade @short @full | @vsphere]). Keep always @install
         required: true
@@ -99,7 +96,6 @@ jobs:
       qase_report: ${{ inputs.qase_report == true || (github.event_name == 'schedule' && true) }}
       turtles_dev_chart: ${{ inputs.turtles_dev_chart == true || (github.event_name == 'schedule' && true) }}
       target_build_type: ${{ inputs.target_build_type || 'prime' }}
-      turtles_chart_version: ${{ inputs.turtles_chart_version }}
       skip_cluster_delete: ${{ inputs.skip_cluster_delete || (github.event_name == 'schedule' && false) }}
       runner_template: ${{ inputs.runner_template || 'rancher-turtles-e2e-ci-spot-20260622165944418700000001' }}
       cluster_name_suffix: ${{ inputs.cluster_name_suffix || github.run_number }}
