@@ -37,10 +37,15 @@ describe('Import CAPD Kubeadm Class-Cluster for Use-CAAPF Migration', {tags: ['@
   }
   const dockerRegistryConfigBase64 = btoa(Cypress.expose('docker_registry_config'))
 
-  beforeEach(function () {
-    if(!isUseCAAPFSupported){
-      this.skip();
+  before(function () {
+    if (!isUseCAAPFSupported) {
+      return cy.task('suiteLog', "use-caapf feature gate is not supported on this Rancher version").then(() => {
+        this.skip();
+      })
     }
+  })
+
+  beforeEach(function () {
     cy.login();
     cy.burgerMenuOperate('open');
   });

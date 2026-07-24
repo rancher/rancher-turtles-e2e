@@ -69,7 +69,7 @@ export const vars = {
 
 type BuildType = 'prod-v2.12' | 'prod-v2.13' | 'prod-v2.14' | 'prod-v2.15' | 'dev-v2.12' | 'dev-v2.13' | 'dev-v2.14' | 'dev-v2.15';
 
-export function determineBuildType(): BuildType {
+const buildType = ((): BuildType => {
   if (isTurtlesDevChart && isRancherManagerVersion('2.12')){
     return 'dev-v2.12';
   }
@@ -94,92 +94,94 @@ export function determineBuildType(): BuildType {
   if (isRancherManagerVersion('2.15')) {
     return 'prod-v2.15';
   }
-  return undefined as unknown as BuildType; // This should never happen, but it satisfies the type checker
+  // This should never happen
+  throw new Error('Unable to determine BuildType from Rancher Manager version and chart settings');
+})()
+
+const buildTypeVersionMap = {
+  'prod-v2.12': {
+    capi: 'v1.10.5',
+    rke2: 'v0.20.1',
+    kubeadm: 'v1.10.5',
+    fleet: 'v0.11.0',
+    vsphere: 'v1.13.1',
+    amazon: 'v2.9.1',
+    google: 'v1.10.0',
+    azure: 'v1.21.0'
+  },
+  'prod-v2.13': {
+    capi: 'v1.10.6',
+    rke2: 'v0.21.1',
+    kubeadm: 'v1.10.6',
+    fleet: 'v0.12.0',
+    vsphere: 'v1.13.1',
+    amazon: 'v2.9.1',
+    google: 'v1.10.0',
+    azure: 'v1.21.0'
+  },
+  'prod-v2.14': {
+    capi: 'v1.12.7',
+    rke2: 'v0.24.4',
+    kubeadm: 'v1.12.7',
+    fleet: 'v0.14.1',
+    vsphere: 'v1.15.2',
+    amazon: 'v2.11.1',
+    google: 'v1.11.1',
+    azure: 'v1.22.0'
+  },
+  'prod-v2.15': {
+    capi: 'v1.13.3',
+    rke2: 'v0.25.0',
+    kubeadm: 'v1.13.3',
+    fleet: 'v0.15.0',
+    vsphere: 'v1.16.1',
+    amazon: 'v2.11.1',
+    google: 'v1.11.2',
+    azure: 'v1.23.2'
+  },
+  'dev-v2.12': {
+    capi: 'v1.10.5',
+    rke2: 'v0.20.1',
+    kubeadm: 'v1.10.5',
+    fleet: 'v0.11.0',
+    vsphere: 'v1.13.1',
+    amazon: 'v2.9.1',
+    google: 'v1.10.0',
+    azure: 'v1.21.0'
+  },
+  'dev-v2.13': {
+    capi: 'v1.10.6',
+    rke2: 'v0.21.1',
+    kubeadm: 'v1.10.6',
+    fleet: 'v0.12.0',
+    vsphere: 'v1.13.1',
+    amazon: 'v2.9.1',
+    google: 'v1.10.0',
+    azure: 'v1.21.0'
+  },
+  'dev-v2.14': {
+    capi: 'v1.12.7',
+    rke2: 'v0.24.4',
+    kubeadm: 'v1.12.7',
+    fleet: 'v0.14.1',
+    vsphere: 'v1.15.2',
+    amazon: 'v2.11.1',
+    google: 'v1.11.1',
+    azure: 'v1.22.0'
+  },
+  'dev-v2.15': {
+    capi: 'v1.13.3',
+    rke2: 'v0.25.0',
+    kubeadm: 'v1.13.3',
+    fleet: 'v0.15.0',
+    vsphere: 'v1.16.1',
+    amazon: 'v2.11.1',
+    google: 'v1.11.2',
+    azure: 'v1.23.2'
+  }
 }
 
 export const providers = {
-  version: {
-    'prod-v2.12': {
-      capi: 'v1.10.5',
-      rke2: 'v0.20.1',
-      kubeadm: 'v1.10.5',
-      fleet: 'v0.11.0',
-      vsphere: 'v1.13.1',
-      amazon: 'v2.9.1',
-      google: 'v1.10.0',
-      azure: 'v1.21.0'
-    },
-    'prod-v2.13': {
-      capi: 'v1.10.6',
-      rke2: 'v0.21.1',
-      kubeadm: 'v1.10.6',
-      fleet: 'v0.12.0',
-      vsphere: 'v1.13.1',
-      amazon: 'v2.9.1',
-      google: 'v1.10.0',
-      azure: 'v1.21.0'
-    },
-    'prod-v2.14': {
-      capi: 'v1.12.7',
-      rke2: 'v0.24.4',
-      kubeadm: 'v1.12.7',
-      fleet: 'v0.14.1',
-      vsphere: 'v1.15.2',
-      amazon: 'v2.11.1',
-      google: 'v1.11.1',
-      azure: 'v1.22.0'
-    },
-    'prod-v2.15': {
-      capi: 'v1.13.3',
-      rke2: 'v0.25.0',
-      kubeadm: 'v1.13.3',
-      fleet: 'v0.15.0',
-      vsphere: 'v1.16.1',
-      amazon: 'v2.11.1',
-      google: 'v1.11.2',
-      azure: 'v1.23.2'
-    },
-    'dev-v2.12': {
-      capi: 'v1.10.5',
-      rke2: 'v0.20.1',
-      kubeadm: 'v1.10.5',
-      fleet: 'v0.11.0',
-      vsphere: 'v1.13.1',
-      amazon: 'v2.9.1',
-      google: 'v1.10.0',
-      azure: 'v1.21.0'
-    },
-    'dev-v2.13': {
-      capi: 'v1.10.6',
-      rke2: 'v0.21.1',
-      kubeadm: 'v1.10.6',
-      fleet: 'v0.12.0',
-      vsphere: 'v1.13.1',
-      amazon: 'v2.9.1',
-      google: 'v1.10.0',
-      azure: 'v1.21.0'
-    },
-    'dev-v2.14': {
-      capi: 'v1.12.7',
-      rke2: 'v0.24.4',
-      kubeadm: 'v1.12.7',
-      fleet: 'v0.14.1',
-      vsphere: 'v1.15.2',
-      amazon: 'v2.11.1',
-      google: 'v1.11.1',
-      azure: 'v1.22.0'
-    },
-    'dev-v2.15': {
-      capi: 'v1.13.3',
-      rke2: 'v0.25.0',
-      kubeadm: 'v1.13.3',
-      fleet: 'v0.15.0',
-      vsphere: 'v1.16.1',
-      amazon: 'v2.11.1',
-      google: 'v1.11.2',
-      azure: 'v1.23.2'
-    }
-  },
   coreCAPIProvider: 'cluster-api',
   rke2Provider: 'rke2',
   kubeadmProvider: 'kubeadm',
@@ -188,5 +190,13 @@ export const providers = {
   googleProvider: 'gcp',
   azureProvider: 'azure',
   fleetProvider: 'fleet',
-  vsphereProvider: 'vsphere'
+  vsphereProvider: 'vsphere',
+  coreCAPIProviderVersion: buildTypeVersionMap[buildType].capi,
+  rke2ProviderVersion: buildTypeVersionMap[buildType].rke2,
+  kubeadmProviderVersion: buildTypeVersionMap[buildType].kubeadm,
+  fleetProviderVersion: buildTypeVersionMap[buildType].fleet,
+  vsphereProviderVersion: buildTypeVersionMap[buildType].vsphere,
+  amazonProviderVersion: buildTypeVersionMap[buildType].amazon,
+  googleProviderVersion: buildTypeVersionMap[buildType].google,
+  azureProviderVersion: buildTypeVersionMap[buildType].azure
 }
