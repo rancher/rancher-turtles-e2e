@@ -158,14 +158,15 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 						"--set-string", fmt.Sprintf("extraEnv[%d].value=%s", idx, e.value),
 					)
 				}
-				// Log the extra flags
-				GinkgoWriter.Write([]byte(strings.Join(extraFlags, " ") + "\n"))
 			}
 
 			// Skip when upgrade
 			if Label("install").MatchesLabelFilter(GinkgoLabelFilter()) && isUpgradeTest {
 				extraFlags = nil
 			}
+
+			// Log the extra flags
+			GinkgoWriter.Write([]byte(strings.Join(extraFlags, " ") + "\n"))
 
 			err := rancher.DeployRancherManager(rancherHostname, rancherChannel, rancherVersion, rancherHeadVersion, "none", "none", extraFlags)
 			Expect(err).To(Not(HaveOccurred()))
