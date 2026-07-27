@@ -17,6 +17,7 @@ package e2e_test
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -186,8 +187,29 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 					Expect(controllerImage).To(Not(BeEmpty()), "CONTROLLER_IMG must be set when TURTLES_DEV_CHART=true")
 					_, err := kubectl.Run("wait", "--namespace", "cattle-system", "--for=create", "configmap/rancher-config", "--timeout=300s")
 					Expect(err).To(Not(HaveOccurred()))
-					var patch = fmt.Sprintf(`{"data":{"rancher-turtles":"global:\n  cattle:\n    systemDefaultRegistry: \"\"\nimage:\n  repository: \"%s\"\n"}}`, controllerImage)
-					status, err := kubectl.Run("patch", "configmap", "rancher-config", "-n", "cattle-system", "--type", "merge", "-p", patch)
+
+					// We need to keep existing data in place if present, this is important for @upgrade tests where we might have set caapf in earlier steps
+					existingData, err := kubectl.Run("get", "configmap", "rancher-config", "-n", "cattle-system", "-o", "jsonpath={.data.rancher-turtles}")
+					Expect(err).To(Not(HaveOccurred()))
+
+					newData := fmt.Sprintf("global:\n  cattle:\n    systemDefaultRegistry: \"\"\nimage:\n  repository: \"%s\"\n", controllerImage)
+					var combinedData string
+					if existingData != "" {
+						combinedData = existingData + "\n" + newData
+					} else {
+						combinedData = newData
+					}
+
+					patchStructure := map[string]interface{}{
+						"data": map[string]string{
+							"rancher-turtles": combinedData,
+						},
+					}
+
+					patchBytes, err := json.Marshal(patchStructure)
+					Expect(err).To(Not(HaveOccurred()))
+
+					status, err := kubectl.Run("patch", "configmap", "rancher-config", "-n", "cattle-system", "--type", "merge", "-p", string(patchBytes))
 					Expect(err).To(Not(HaveOccurred()))
 					Expect(status).To(ContainSubstring("patched"))
 				})
