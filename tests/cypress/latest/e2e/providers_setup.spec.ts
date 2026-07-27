@@ -203,7 +203,7 @@ describe('Enable CAPI Providers', () => {
 
   context('Cloud Providers', {tags: ['@full', '@full-nocaapf', '@nocaapf']}, () => {
     const providerType = 'infrastructure'
-    qase(424, it('Verify CAPA provider', {tags: ['@capak', '@capar', '@capaeks', '@capar-nocaapf', '@capaeks-nocaapf']},() => {
+    qase(424, it('Verify CAPA provider', {tags: ['@capak', '@capar', '@capaeks', '@capar-nocaapf', '@capak-nocaapf', '@capaeks-nocaapf']},() => {
       const namespace = 'capa-system'
       // Verify AWS Infrastructure provider
       cy.addCloudCredsAWS(providers.amazonProvider, Cypress.expose('aws_access_key'), Cypress.expose('aws_secret_key'));

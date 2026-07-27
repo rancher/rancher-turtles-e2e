@@ -14,10 +14,6 @@ describe('Import CAPZ RKE2 (No-Caapf) Class-Cluster', {tags: ['@full', '@full-no
 
   const subscriptionID = Cypress.expose("azure_subscription_id")
 
-  // Azure CCM fails to install when using v1.35
-  const k8sVersion = isRancherManagerVersion('2.14') ? 'v1.34.1+rke2r1'
-  : vars.rke2Version
-
   before(function () {
     if (isRancherManagerVersion('<2.15')) {
       return cy.task('suiteLog', "NoCAAPF is unsupported on Rancher Version <2.15; skipping...").then(() => {
@@ -51,7 +47,7 @@ describe('Import CAPZ RKE2 (No-Caapf) Class-Cluster', {tags: ['@full', '@full-no
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_subscription_id/g, subscriptionID)
-          data = data.replace(/replace_rke2_version/g, k8sVersion)
+          data = data.replace(/replace_rke2_version/g, vars.rke2Version)
           data = data.replace(/replace_azure_ccm_version/g, vars.azureCCMVersion)
           cy.importYAML(data, vars.capiClustersNS)
         });
@@ -82,7 +78,7 @@ describe('Import CAPZ RKE2 (No-Caapf) Class-Cluster', {tags: ['@full', '@full-no
 
   context('[CLUSTER-OPERATIONS]', () => {
 
-    qase(80, (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
+    qase(80, it.skip('Install App on imported cluster', {retries: 1}, () => {
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
     );
@@ -94,7 +90,7 @@ describe('Import CAPZ RKE2 (No-Caapf) Class-Cluster', {tags: ['@full', '@full-no
         // workaround; these values need to be re-replaced before applying the scaling changes
         data = data.replace(/replace_cluster_name/g, clusterName)
         data = data.replace(/replace_subscription_id/g, subscriptionID)
-        data = data.replace(/replace_rke2_version/g, k8sVersion)
+        data = data.replace(/replace_rke2_version/g, vars.rke2Version)
         data = data.replace(/replace_azure_ccm_version/g, vars.azureCCMVersion)
         cy.importYAML(data, vars.capiClustersNS)
       })

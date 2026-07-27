@@ -45,6 +45,8 @@ export const vars = {
   chartUpdateOperation: isRancherManagerVersion('>=2.13') ? 'Edit' : 'Update',
   azureCCMVersion: '1.36.0',
   calicoCNIYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/calico.yaml',
+  awsCCMYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/cloud-provider-aws.yaml',
+  awsCSIYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/csi-aws-ebs.yaml',
   azureCCMYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/cloud-provider-azure.yaml',
   gcpCCMYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/cloud-provider-gcp.yaml',
   vSphereCCMYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/cloud-provider-vsphere.yaml',
