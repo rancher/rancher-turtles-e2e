@@ -13,28 +13,21 @@ limitations under the License.
 */
 
 import '../support/commands';
-import {vars} from '../support/variables';
-import {isMigration, isRancherManagerVersion, isTurtlesDevChart, isUpgrade, turtlesNamespace} from '../support/utils';
+import {
+  isMigration, isRancherManagerVersion, isTurtlesDevChart, isUpgrade,
+  turtlesNamespace,
+} from '../support/utils';
+import {addChartMuseumRepo, addTurtlesProvidersRepo} from "../support/commands";
+
 
 Cypress.config();
 describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
-  let chartMuseumRepo = Cypress.expose('chartmuseum_repo')
 
   beforeEach(() => {
     cy.login();
     cy.burgerMenuOperate('open');
   });
 
-  let addTurtlesProvidersRepo = function () {
-    cy.task('suiteLog', "Adding turtles-providers-chart repo");
-    cy.addRepository('turtles-providers-chart', vars.turtlesProvidersOCIRepo, 'oci', 'none')
-  }
-
-  let addChartMuseumRepo = function () {
-    cy.task('suiteLog', "Adding chartmuseum repo");
-    expect(chartMuseumRepo, "checking chartmuseum repo").to.not.be.empty;
-    cy.addRepository('chartmuseum-repo', `${chartMuseumRepo}:8080`, 'http', 'none');
-  }
 
   let addTurtlesRepo = function () {
     cy.task('suiteLog', "Adding turtles-chart repo");
@@ -43,19 +36,14 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
 
   if (isRancherManagerVersion(">=2.13")) {
     qase(403, it("Add turtles-providers GitRepo", () => {
-      if (isTurtlesDevChart) {
-        addChartMuseumRepo();
-      } else {
-        addTurtlesProvidersRepo();
-      }
-
-      if (isRancherManagerVersion('2.13') && isUpgrade) {
-        // Used in Pre-upgrade: For Upgrade tests; providers will be installed from turtles-providers-chart repo
-        // TODO(pvala): this needs to be fixed, the chart repository added depends on the current rancher version rather than the upgrade rancher version.
-        // For e.g. if rancher version is prime/2.13.7 and upgrade version is prime-alpha/2.14.4-alpha3, it will add regular registry instead of staging registry
-        addTurtlesProvidersRepo();
-        // In Post-upgrade, providers will be installed using chartmuseum repo
-      }
+        // For upgrade tests 2.13 > 2.14, dev=true is only applicable to the target version
+        if (isRancherManagerVersion('2.13') && isUpgrade) {
+          addTurtlesProvidersRepo();
+        } else if (isTurtlesDevChart) {
+          addChartMuseumRepo();
+        } else {
+          addTurtlesProvidersRepo();
+        }
     })
     );
   }

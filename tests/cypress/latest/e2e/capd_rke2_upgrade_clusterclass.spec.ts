@@ -1,5 +1,12 @@
 import '../support/commands';
-import {getClusterName, isRancherManagerVersion, isAPIv1beta1, skipClusterDeletion} from '../support/utils';
+import {
+  getClusterName,
+  isRancherManagerVersion,
+  isAPIv1beta1,
+  skipClusterDeletion,
+  isTurtlesDevChart
+} from '../support/utils';
+import {addChartMuseumRepo, addTurtlesProvidersRepo} from "../support/commands";
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
@@ -180,6 +187,16 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
           cy.deleteKubernetesResource('local', ['Storage', 'ConfigMaps'], 'docker-rke2-lb-config', vars.capiClustersNS);
         })
         );
+
+        it("Prepare turtles chart repo for post-upgrade test runs", () => {
+          // this test ensures providers chart repository added matches the current rancher version
+          cy.deleteKubernetesResource('local', ["Apps", "Repositories"], vars.providersChartRepoName);
+          if (isTurtlesDevChart) {
+            addChartMuseumRepo();
+          } else {
+            addTurtlesProvidersRepo();
+          }
+        })
       }
     }
   })

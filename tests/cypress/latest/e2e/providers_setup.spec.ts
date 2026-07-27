@@ -52,7 +52,7 @@ describe('Enable CAPI Providers', () => {
       qase(716, it('Patch the providers chart repository with OCIOptions.downloadAllTags: true', () => {
         // Enabling this option downloads all the chart versions and ensures only supported versions show up
         // Doing so makes updating the chart a smoother process.
-        const repositoryName = "turtles-providers-chart";
+        const repositoryName = vars.providersChartRepoName;
         const resourceKind = 'clusterrepos.catalog.cattle.io';
         const patch = {spec: {OCIOptions: {'downloadAllTags': true}}};
         cy.patchYamlResource('local', 'default', resourceKind, repositoryName, patch);

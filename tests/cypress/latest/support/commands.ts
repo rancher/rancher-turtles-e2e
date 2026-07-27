@@ -596,11 +596,11 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
 
   const getChartSelector = () => {
     if (isTurtlesChart) {
-      return isRancherManagerVersion('2.12') && isMigration ? 'item-card-cluster/turtles-chart/rancher-turtles' : isTurtlesDevChart ? 'item-card-cluster/chartmuseum-repo/rancher-turtles' : 'item-card-cluster/turtles-chart/rancher-turtles'
+      return isRancherManagerVersion('2.12') && isMigration ? 'item-card-cluster/turtles-chart/rancher-turtles' : isTurtlesDevChart ? `item-card-cluster/${vars.chartMuseumRepoName}/rancher-turtles` : 'item-card-cluster/turtles-chart/rancher-turtles'
     }
 
     if (isTurtlesProvidersChart) {
-      return isRancherManagerVersion('2.13') && isUpgrade ? 'item-card-cluster/turtles-providers-chart/rancher-turtles-providers' : isTurtlesDevChart ? 'item-card-cluster/chartmuseum-repo/rancher-turtles-providers' : 'item-card-cluster/turtles-providers-chart/rancher-turtles-providers';
+      return isRancherManagerVersion('2.13') && isUpgrade ? `item-card-cluster/${vars.providersChartRepoName}/rancher-turtles-providers` : isTurtlesDevChart ? `item-card-cluster/${vars.chartMuseumRepoName}/rancher-turtles-providers` : `item-card-cluster/${vars.providersChartRepoName}/rancher-turtles-providers`;
     }
 
     return `item-card-cluster/rancher-charts/rancher-${chartName.toLowerCase()}`;
@@ -1072,7 +1072,7 @@ Cypress.Commands.add('deleteKubernetesResource', (clusterName = 'local', resourc
       cy.wait(2000); // needed for 2.12
       cy.typeInFilter(resourceName);
       cy.getBySel('sortable-cell-0-1', {timeout: 60000}).should('not.exist');
-      if (resourcePath.includes('Apps')) {
+      if (resourcePath.includes("Installed Apps")) {
         cy.contains(new RegExp(`"${resourceName}.*"` + ' uninstalled'), {timeout: vars.shortTimeout}).should('be.visible');
         cy.get('.closer').click();
       }
@@ -1561,4 +1561,16 @@ export function setUseCAAPFFeatureGate(enabled: boolean, wait: boolean=true) {
     cy.clickButton('Close');
     cy.namespaceReset();
   }
+}
+
+export function addTurtlesProvidersRepo() {
+  cy.task('suiteLog', `Adding ${vars.providersChartRepoName} repo`);
+  cy.addRepository(vars.providersChartRepoName, vars.turtlesProvidersOCIRepo, 'oci', 'none');
+}
+
+export function addChartMuseumRepo() {
+  let chartMuseumRepo = Cypress.expose('chartmuseum_repo')
+  cy.task('suiteLog', `Adding ${vars.chartMuseumRepoName} repo`);
+  expect(chartMuseumRepo, "checking chartmuseum repo").to.not.be.empty;
+  cy.addRepository(vars.chartMuseumRepoName, `${chartMuseumRepo}:8080`, 'http', 'none');
 }
