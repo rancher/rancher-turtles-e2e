@@ -183,7 +183,7 @@ describe('Enable CAPI Providers (2.12)', () => {
         })
       );
 
-      qase(345,
+      qase(714,
         it('Create AzureClusterIdentity', () => {
           const clientID = Cypress.expose("azure_client_id")
           const clientSecret = btoa(Cypress.expose("azure_client_secret"))

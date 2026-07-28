@@ -32,12 +32,12 @@ describe('Import CAPV Kubeadm (No-Caapf) Class-Cluster', {tags: ['@vsphere', '@v
   });
 
   context('[SETUP]', () => {
-    qase(284, it('Setup the namespace for importing', () => {
+    qase(701, it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
     );
 
-    qase(285, it('Create values.yaml Secret', () => {
+    qase(702, it('Create values.yaml Secret', () => {
       let encodedData = ''
       cy.readFile('./fixtures/vsphere/capv-helm-values.yaml').then((data) => {
         data = data.replace(/replace_vsphere_server/g, JSON.stringify(vsphere_secrets_json.vsphere_server))
@@ -67,14 +67,14 @@ describe('Import CAPV Kubeadm (No-Caapf) Class-Cluster', {tags: ['@vsphere', '@v
     })
     );
 
-    qase(286, it('Create VSphereClusterIdentity', () => {
+    qase(703, it('Create VSphereClusterIdentity', () => {
       const vsphere_username = JSON.stringify(vsphere_secrets_json.vsphere_username).replace(/\"/g, "")
       const vsphere_password = JSON.stringify(vsphere_secrets_json.vsphere_password).replace(/\"/g, "")
       cy.createVSphereClusterIdentity(vsphere_username, vsphere_password)
     })
     );
 
-    qase(287, it('Add CAPV Kubeadm ClusterClass Fleet Repo', () => {
+    qase(704, it('Add CAPV Kubeadm ClusterClass Fleet Repo', () => {
       cy.addFleetGitRepo(classRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(className);
@@ -83,7 +83,7 @@ describe('Import CAPV Kubeadm (No-Caapf) Class-Cluster', {tags: ['@vsphere', '@v
   })
 
   context('[CLUSTER-IMPORT]', () => {
-    qase(288, it('Add CAPV class-clusters fleet repo', () => {
+    qase(705, it('Add CAPV class-clusters fleet repo', () => {
       cypressLib.checkNavIcon('cluster-management')
         .should('exist');
 
@@ -98,11 +98,12 @@ describe('Import CAPV Kubeadm (No-Caapf) Class-Cluster', {tags: ['@vsphere', '@v
     })
     );
 
-    it('Apply the CNI, CCM & CSI manifest', () => {
+    qase(706, it('Apply the CNI, CCM & CSI manifest', () => {
       cy.kubectlExecute([getCAPIClusterKubeconfig(clusterName), applyYAMLManifest(clusterName, vars.calicoCNIYaml), applyYAMLManifest(clusterName, vars.vSphereCCMYaml), applyYAMLManifest(clusterName, vars.vSphereCSIYaml)]);
     })
+    );
 
-    qase(289, it('Auto import child CAPV cluster', () => {
+    qase(707, it('Auto import child CAPV cluster', () => {
       // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
       cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
@@ -123,33 +124,34 @@ describe('Import CAPV Kubeadm (No-Caapf) Class-Cluster', {tags: ['@vsphere', '@v
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    qase(290, it.skip('Install App on imported cluster', {retries: 1}, () => {
+    qase(708, it.skip('Install App on imported cluster', {retries: 1}, () => {
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
     );
 
-    it('Check for any errors in Turtles logs', () => {
+    qase(709, it('Check for any errors in Turtles logs', () => {
       // Check for any errors
       cy.filterPodErrorLogs('rancher-turtles-controller-manager');
     })
+    );
   })
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
-      qase(359, it('Remove imported CAPV cluster from Rancher Manager', () => {
+      qase(710, it('Remove imported CAPV cluster from Rancher Manager', () => {
         // Delete the imported cluster
         // Ensure that the provisioned CAPI cluster still exists
         importedRancherv3ClusterDeletion(clusterName);
       })
       );
 
-      qase(292, it('Delete the CAPV cluster', {retries: 1}, () => {
+      qase(711, it('Delete the CAPV cluster', {retries: 1}, () => {
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout, clusterRepoName);
       })
       );
 
-      qase(293, it('Delete the ClusterClass fleet repo and other resources', () => {
+      qase(712, it('Delete the ClusterClass fleet repo and other resources', () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(classRepoName);
         // Cleanup other resources
