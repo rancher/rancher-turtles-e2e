@@ -185,17 +185,17 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 			err := rancher.DeployRancherManager(rancherHostname, rancherChannel, rancherVersion, rancherHeadVersion, "none", "none", extraFlags)
 			Expect(err).To(Not(HaveOccurred()))
 
-			// For dev build when rancher-turtles is installed as system-chart following patching is mandatory
-			// It always uses [sdr/]rancher/turtles image regardless of what is written in chart's values.yaml.
+			// Post-install/upgrade patching for dev build when rancher-turtles is installed as system-chart.
+			// Turtles chart in Rancher always uses [sdr/]rancher/turtles image regardless of what is written in chart's values.yaml.
 			// Ref. https://github.com/rancher/rancher/blob/main/pkg/controllers/dashboard/systemcharts/controller.go#L56
-			// We have to patch it soon enough to be recognized by the system-chart controller, otherwise default image is used.
+			// Must be patched before the system-chart controller starts.
 
 			isInstallPass := Label("install").MatchesLabelFilter(GinkgoLabelFilter())
-			isUpgradePass := Label("upgrade").MatchesLabelFilter(GinkgoLabelFilter()) // covers @upgrade as well as @migration test
+			isUpgradePass := Label("upgrade").MatchesLabelFilter(GinkgoLabelFilter()) // @upgrade and @migration
 
 			shouldPatch := turtlesDevChart &&
 				isRancherManagerVersion(">=2.13") &&
-				((isInstallPass && !isUpgradeTest) || isUpgradePass) // patch either during @install (if it's not upgrade/migration test) or during @upgrade/@migration pass
+				((isInstallPass && !isUpgradeTest) || isUpgradePass) // patch during install or upgrade/migration passes
 
 			if shouldPatch {
 				By("Patching rancher-config to use devel turtles image", func() {
@@ -205,10 +205,10 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 
 					// Parse existing YAML to preserve all fields (features, etc.)
 					config := &RancherTurtlesConfig{}
-					if existingRancherTurtlesConfig, err := kubectl.Run("get", "configmap", "rancher-config", "-n", "cattle-system", "-o", "jsonpath={.data['rancher-turtles']}"); err == nil && existingRancherTurtlesConfig != "" {
+					existingRancherTurtlesConfig, err := kubectl.Run("get", "configmap", "rancher-config", "-n", "cattle-system", "-o", "jsonpath={.data['rancher-turtles']}")
+					Expect(err).To(Not(HaveOccurred()))
+					if existingRancherTurtlesConfig != "" {
 						err := yaml.Unmarshal([]byte(existingRancherTurtlesConfig), config)
-						Expect(err).To(Not(HaveOccurred()))
-					} else {
 						Expect(err).To(Not(HaveOccurred()))
 					}
 
@@ -216,7 +216,7 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 					config.Global.Cattle.SystemDefaultRegistry = ""
 					config.Image.Repository = controllerImage
 
-					// Marshal back to clean YAML (idempotent, no duplication)
+					// Make YAML from the updated config structure
 					combinedRancherTurtlesConfig, err := yaml.Marshal(config)
 					Expect(err).To(Not(HaveOccurred()))
 
@@ -226,7 +226,7 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 						},
 					}
 
-					// Marshal the patch structure to JSON for kubectl patch command (it is JSON with YAML string inside)
+					// Make JSON for kubectl patch command (JSON with YAML string inside)
 					patchBytes, err := json.Marshal(patch)
 					Expect(err).To(Not(HaveOccurred()))
 
