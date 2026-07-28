@@ -205,8 +205,8 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 
 					// Parse existing YAML to preserve all fields (features, etc.)
 					config := &RancherTurtlesConfig{}
-					if existingDataStr, err := kubectl.Run("get", "configmap", "rancher-config", "-n", "cattle-system", "-o", "jsonpath={.data['rancher-turtles']}"); err == nil && existingDataStr != "" {
-						err := yaml.Unmarshal([]byte(existingDataStr), config)
+					if existingRancherTurtlesConfig, err := kubectl.Run("get", "configmap", "rancher-config", "-n", "cattle-system", "-o", "jsonpath={.data['rancher-turtles']}"); err == nil && existingRancherTurtlesConfig != "" {
+						err := yaml.Unmarshal([]byte(existingRancherTurtlesConfig), config)
 						Expect(err).To(Not(HaveOccurred()))
 					} else {
 						Expect(err).To(Not(HaveOccurred()))
@@ -217,19 +217,20 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 					config.Image.Repository = controllerImage
 
 					// Marshal back to clean YAML (idempotent, no duplication)
-					combinedDataBytes, err := yaml.Marshal(config)
+					combinedRancherTurtlesConfig, err := yaml.Marshal(config)
 					Expect(err).To(Not(HaveOccurred()))
 
-					patchStructure := map[string]interface{}{
+					patch := map[string]interface{}{
 						"data": map[string]string{
-							"rancher-turtles": string(combinedDataBytes),
+							"rancher-turtles": string(combinedRancherTurtlesConfig),
 						},
 					}
 
-					patchBytes, err := json.Marshal(patchStructure)
+					// Marshal the patch structure to JSON for kubectl patch command (it is JSON with YAML string inside)
+					patchBytes, err := json.Marshal(patch)
 					Expect(err).To(Not(HaveOccurred()))
 
-					GinkgoWriter.Write([]byte(string(patchBytes) + "\n"))
+					GinkgoWriter.Printf("%s\n", patchBytes)
 
 					status, err := kubectl.Run("patch", "configmap", "rancher-config", "-n", "cattle-system", "--type", "merge", "-p", string(patchBytes))
 					Expect(err).To(Not(HaveOccurred()))
