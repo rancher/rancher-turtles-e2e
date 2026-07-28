@@ -1,29 +1,19 @@
 import '../support/commands';
-import {
-  getClusterName,
-  skipClusterDeletion,
-  isRancherManagerVersion,
-  getCAPIClusterKubeconfig,
-  applyYAMLManifest
-} from '../support/utils';
-import {capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
+import {getClusterName, isRancherManagerVersion, skipClusterDeletion, getCAPIClusterKubeconfig, applyYAMLManifest} from '../support/utils';
+import {capaResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Import CAPG Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@full-nocaapf', '@nocaapf', '@capgk-nocaapf']}, () => {
+describe('Import CAPA Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@full-nocaapf', '@nocaapf', '@capak-nocaapf']}, () => {
   const timeout = vars.fullTimeout
-  const classNamePrefix = 'gcp-kubeadm'
+  const classNamePrefix = 'aws-kubeadm'
   const clusterName = getClusterName(classNamePrefix)
-  const classesPath = 'examples/clusterclasses/gcp/kubeadm'
-  const clusterClassRepoName = 'gcp-kubeadm-clusterclass'
-  const classClusterFileName = './fixtures/gcp/capg-kubeadm-class-cluster-nocaapf.yaml'
+  const classesPath = 'examples/clusterclasses/aws/kubeadm'
+  const clusterClassRepoName = 'aws-kb-clusterclass'
+  const classClusterFileName = './fixtures/aws/capa-kubeadm-class-cluster-nocaapf.yaml'
 
-  const gcpProject = Cypress.expose("gcp_project")
-  const k8sVersion = isRancherManagerVersion('2.14') ? 'v1.34.1'
-  : vars.kubeadmVersion
-
-  const gcpCCMFileName = "cloud-provider-gcp.yaml"
-  const gcpCCMCmd = [`wget ${vars.gcpCCMYaml}`, `sed -i 's|\${CLUSTER_CIDR}|192.168.0.0/16|g' ${gcpCCMFileName}`, applyYAMLManifest(clusterName, gcpCCMFileName)]
+  const accessKey = Cypress.expose('aws_access_key')
+  const secretKey = Cypress.expose('aws_secret_key')
 
   before(function () {
     if (isRancherManagerVersion('<2.15')) {
@@ -33,19 +23,24 @@ describe('Import CAPG Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@full
     }
   })
 
-  beforeEach(function () {
+  beforeEach(() => {
     cy.login();
     cy.burgerMenuOperate('open');
   });
 
   context('[SETUP]', () => {
-    qase(320, it('Setup the namespace for importing', () => {
+    qase(314, it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
     );
 
-    qase(148,
-      it('Add CAPG Kubeadm ClusterClass Fleet Repo and check GCP CCM', () => {
+    qase(342, it('Create AWSClusterStaticIdentity', () => {
+      cy.createAWSClusterStaticIdentity(accessKey, secretKey);
+    })
+    );
+
+    qase(391,
+      it('Add CAPA Kubeadm ClusterClass Fleet Repo and check Applications', () => {
         cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(classNamePrefix);
@@ -54,13 +49,12 @@ describe('Import CAPG Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@full
   })
 
   context('[CLUSTER-IMPORT]', () => {
-    qase(143,
-      it('Import CAPG Kubeadm class-cluster using YAML', () => {
+    qase(392,
+      it('Import CAPA Kubeadm class-cluster using YAML', () => {
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
-          data = data.replace(/replace_k8sVersion/g, k8sVersion)
-          data = data.replace(/replace_gcpImageId/g, vars.gcpImageId)
-          data = data.replace(/replace_gcp_project/g, gcpProject)
+          data = data.replace(/replace_k8sVersion/g, vars.kubeadmVersion)
+          data = data.replace(/replace_amiID/g, vars.amiID)
           cy.importYAML(data, vars.capiClustersNS)
         });
         // Check CAPI cluster using its name
@@ -71,46 +65,47 @@ describe('Import CAPG Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@full
       })
     );
 
-    it('Apply the CNI & CCM manifest', () => {
-      cy.kubectlExecute([getCAPIClusterKubeconfig(clusterName), applyYAMLManifest(clusterName, vars.calicoCNIYaml), gcpCCMCmd[0], gcpCCMCmd[1], gcpCCMCmd[2]]);
+    it('Apply the CNI, CCM & CSI manifest', () => {
+      cy.kubectlExecute([getCAPIClusterKubeconfig(clusterName), applyYAMLManifest(clusterName, vars.calicoCNIYaml), applyYAMLManifest(clusterName, vars.awsCCMYaml), applyYAMLManifest(clusterName, vars.awsCSIYaml)]);
     })
 
-    qase(144,
-      it('Auto import child CAPG cluster', () => {
+    qase(413,
+      it('Auto import child CAPA cluster', () => {
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
         cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
         // Check child cluster is created and auto-imported
         // This is checked by ensuring the cluster is available in navigation menu
         cy.goToHome();
-        cy.contains(clusterName, {timeout: timeout}).should('exist');
+        cy.contains(clusterName).should('exist');
 
         // Check cluster is Active
         cy.searchCluster(clusterName);
         cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
+
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
         // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
         cy.checkCAPIClusterActive(clusterName, timeout);
       })
     );
+
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    qase(145,
+    qase(393,
       it.skip('Install App on imported cluster', {retries: 1}, () => {
         cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
     );
 
-    qase(321, it("Scale up imported CAPG cluster by patching class-cluster yaml", () => {
+    qase(315, it("Scale up imported CAPA cluster by patching class-cluster yaml", () => {
       cy.readFile(classClusterFileName).then((data) => {
         data = data.replace(/replicas: 2/g, 'replicas: 3')
 
         // workaround; these values need to be re-replaced before applying the scaling changes
         data = data.replace(/replace_cluster_name/g, clusterName)
-        data = data.replace(/replace_k8sVersion/g, k8sVersion)
-        data = data.replace(/replace_gcpImageId/g, vars.gcpImageId)
-        data = data.replace(/replace_gcp_project/g, gcpProject)
+        data = data.replace(/replace_k8sVersion/g, vars.kubeadmVersion)
+        data = data.replace(/replace_amiID/g, vars.amiID)
         cy.importYAML(data, vars.capiClustersNS)
       })
 
@@ -131,24 +126,26 @@ describe('Import CAPG Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@full
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
-      qase(363, it('Remove imported CAPG cluster from Rancher Manager', () => {
+      qase(361, it('Remove imported CAPA cluster from Rancher Manager', () => {
         // Delete the imported cluster
         // Ensure that the provisioned CAPI cluster still exists
         importedRancherv3ClusterDeletion(clusterName);
       })
       );
 
-      qase(146,
-        it('Delete the CAPG cluster', {retries: 1}, () => {
+      qase(394,
+        it('Delete the CAPA cluster', {retries: 1}, () => {
           // Remove CAPI Resources related to the cluster
           capiClusterDeletion(clusterName, timeout);
         })
       );
 
-      qase(147,
-        it('Delete the ClusterClass fleet repo', () => {
+      qase(395,
+        it('Delete the ClusterClass fleet repo and other resources', () => {
           // Remove the clusterclass repo
           cy.removeFleetGitRepo(clusterClassRepoName);
+          // Cleanup other resources
+          capaResourcesCleanup();
         })
       );
     }

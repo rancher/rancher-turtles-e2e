@@ -23,10 +23,6 @@ describe('Import CAPZ Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@full
   const azureCCMFileName = "cloud-provider-azure.yaml"
   const azureCCMCmd = [`wget ${vars.azureCCMYaml}`, `sed -i 's|\${CLUSTER_CIDR}|192.168.0.0/16|g' ${azureCCMFileName}`, applyYAMLManifest(clusterName, azureCCMFileName)]
 
-  // Azure CCM fails to install when using v1.35
-  const k8sVersion = isRancherManagerVersion('2.14') ? 'v1.34.1'
-    : vars.kubeadmVersion
-
   before(function () {
     if (isRancherManagerVersion('<2.15')) {
       return cy.task('suiteLog', "NoCAAPF is unsupported on Rancher Version <2.15; skipping...").then(() => {
@@ -58,7 +54,7 @@ describe('Import CAPZ Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@full
     qase(331, it('Import CAPZ Kubeadm class-cluster using YAML', () => {
       cy.readFile(classClusterFileName).then((data) => {
         data = data.replace(/replace_cluster_name/g, clusterName)
-        data = data.replace(/replace_k8sVersion/g, k8sVersion)
+        data = data.replace(/replace_k8sVersion/g, vars.kubeadmVersion)
         data = data.replace(/replace_subscription_id/g, subscriptionID)
         cy.importYAML(data, vars.capiClustersNS)
       });
@@ -95,7 +91,7 @@ describe('Import CAPZ Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@full
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    qase(333, (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
+    qase(333, it.skip('Install App on imported cluster', {retries: 1}, () => {
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
     );
@@ -106,7 +102,7 @@ describe('Import CAPZ Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@full
 
         // workaround; these values need to be re-replaced before applying the scaling changes
         data = data.replace(/replace_cluster_name/g, clusterName)
-        data = data.replace(/replace_k8sVersion/g, k8sVersion)
+        data = data.replace(/replace_k8sVersion/g, vars.kubeadmVersion)
         data = data.replace(/replace_subscription_id/g, subscriptionID)
         cy.importYAML(data, vars.capiClustersNS)
       })

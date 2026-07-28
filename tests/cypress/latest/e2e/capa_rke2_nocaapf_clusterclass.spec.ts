@@ -47,15 +47,8 @@ describe('Import CAPA RKE2 (No-Caapf) Class-Cluster', {tags: ['@full', '@full-no
       });
     })
 
-    it('Create AWS CAPIProvider & AWSClusterStaticIdentity', () => {
-      if (isRancherManagerVersion('<2.13')) {
-        cy.checkCAPIProvider(providerName);
-      }
-      if (isRancherManagerVersion('<2.15')) {
-        cy.createAWSClusterStaticIdentity(accessKey, secretKey);
-      } else {
-        cy.checkAWSClusterStaticIdentity();
-      }
+    it('Check AWSClusterStaticIdentity', () => {
+      cy.checkAWSClusterStaticIdentity();
     })
 
     qase(116,
@@ -136,7 +129,7 @@ describe('Import CAPA RKE2 (No-Caapf) Class-Cluster', {tags: ['@full', '@full-no
     );
 
     qase(112,
-      (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
+      it.skip('Install App on imported cluster', {retries: 1}, () => {
         cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
     );
