@@ -30,6 +30,7 @@ import (
 	"github.com/rancher-sandbox/ele-testhelpers/kubectl"
 	"github.com/rancher-sandbox/ele-testhelpers/rancher"
 	"github.com/rancher-sandbox/ele-testhelpers/tools"
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -52,6 +53,19 @@ func sha256File(filePath string) (string, error) {
 	}
 
 	return hex.EncodeToString(h.Sum(nil)), nil
+}
+
+type RancherTurtlesConfig struct {
+	Global struct {
+		Cattle struct {
+			SystemDefaultRegistry string `yaml:"systemDefaultRegistry"`
+		} `yaml:"cattle"`
+	} `yaml:"global"`
+	Image struct {
+		Repository string `yaml:"repository"`
+	} `yaml:"image"`
+	// Preserve any other fields from existing data (e.g., features)
+	Extra map[string]interface{} `yaml:",inline"`
 }
 
 func waitForResourceCondition(ns, resource, condition string) {
@@ -189,21 +203,26 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 					_, err := kubectl.Run("wait", "--namespace", "cattle-system", "--for=create", "configmap/rancher-config", "--timeout=300s")
 					Expect(err).To(Not(HaveOccurred()))
 
-					// We need to keep existing data in place if present, this is important for @upgrade tests where we might have set caapf in earlier steps
-					existingData, err := kubectl.Run("get", "configmap", "rancher-config", "-n", "cattle-system", "-o", "jsonpath={.data['rancher-turtles']}")
-					Expect(err).To(Not(HaveOccurred()))
-
-					newData := fmt.Sprintf("global:\n  cattle:\n    systemDefaultRegistry: \"\"\nimage:\n  repository: \"%s\"\n", controllerImage)
-					var combinedData string
-					if existingData != "" {
-						combinedData = existingData + "\n" + newData
+					// Parse existing YAML to preserve all fields (features, etc.)
+					config := &RancherTurtlesConfig{}
+					if existingDataStr, err := kubectl.Run("get", "configmap", "rancher-config", "-n", "cattle-system", "-o", "jsonpath={.data['rancher-turtles']}"); err == nil && existingDataStr != "" {
+						err := yaml.Unmarshal([]byte(existingDataStr), config)
+						Expect(err).To(Not(HaveOccurred()))
 					} else {
-						combinedData = newData
+						Expect(err).To(Not(HaveOccurred()))
 					}
+
+					// Update only the fields we control
+					config.Global.Cattle.SystemDefaultRegistry = ""
+					config.Image.Repository = controllerImage
+
+					// Marshal back to clean YAML (idempotent, no duplication)
+					combinedDataBytes, err := yaml.Marshal(config)
+					Expect(err).To(Not(HaveOccurred()))
 
 					patchStructure := map[string]interface{}{
 						"data": map[string]string{
-							"rancher-turtles": combinedData,
+							"rancher-turtles": string(combinedDataBytes),
 						},
 					}
 
