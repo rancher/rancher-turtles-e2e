@@ -190,7 +190,7 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 					Expect(err).To(Not(HaveOccurred()))
 
 					// We need to keep existing data in place if present, this is important for @upgrade tests where we might have set caapf in earlier steps
-					existingData, err := kubectl.Run("get", "configmap", "rancher-config", "-n", "cattle-system", "-o", "jsonpath={.data.rancher-turtles}")
+					existingData, err := kubectl.Run("get", "configmap", "rancher-config", "-n", "cattle-system", "-o", "jsonpath={.data['rancher-turtles']}")
 					Expect(err).To(Not(HaveOccurred()))
 
 					newData := fmt.Sprintf("global:\n  cattle:\n    systemDefaultRegistry: \"\"\nimage:\n  repository: \"%s\"\n", controllerImage)
@@ -209,6 +209,8 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 
 					patchBytes, err := json.Marshal(patchStructure)
 					Expect(err).To(Not(HaveOccurred()))
+
+					GinkgoWriter.Write([]byte(string(patchBytes) + "\n"))
 
 					status, err := kubectl.Run("patch", "configmap", "rancher-config", "-n", "cattle-system", "--type", "merge", "-p", string(patchBytes))
 					Expect(err).To(Not(HaveOccurred()))
