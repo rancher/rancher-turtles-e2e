@@ -188,7 +188,7 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 			// Post-install/upgrade patching for dev build when rancher-turtles is installed as system-chart.
 			// Turtles chart in Rancher always uses [sdr/]rancher/turtles image regardless of what is written in chart's values.yaml.
 			// Ref. https://github.com/rancher/rancher/blob/main/pkg/controllers/dashboard/systemcharts/controller.go#L56
-			// Must be patched before the system-chart controller starts.
+			// Patch as early as possible so the system-chart controller reconciles with the desired image.
 
 			isInstallPass := Label("install").MatchesLabelFilter(GinkgoLabelFilter())
 			isUpgradePass := Label("upgrade").MatchesLabelFilter(GinkgoLabelFilter()) // @upgrade and @migration
