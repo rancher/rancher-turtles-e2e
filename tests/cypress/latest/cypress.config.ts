@@ -8,6 +8,8 @@ const qaseAPIToken = process.env.QASE_API_TOKEN
 export default defineConfig({
   defaultCommandTimeout: 30000,
   video: true,
+  viewportWidth: 1920,
+  viewportHeight: 1080,
   allowCypressEnv: false,
   experimentalMemoryManagement: true,
   reporter: 'cypress-multi-reporters',
@@ -49,8 +51,8 @@ export default defineConfig({
 
         if (["chrome", "edge"].includes(browser.name)) {
           launchOptions.args.push("--no-sandbox");
-          launchOptions.args.push("--disable-gl-drawing-for-tests");
           launchOptions.args.push("--disable-gpu");
+          launchOptions.args.push("--use-gl=swiftshader"); // Forces software rendering safely
           launchOptions.args.push("--js-flags=--max-old-space-size=8192");
           launchOptions.args.push("--disable-dev-shm-usage");
         }
@@ -60,7 +62,7 @@ export default defineConfig({
       require('cypress-qase-reporter/plugin')(on, config);
       require('cypress-qase-reporter/metadata')(on);
       on('after:spec', async (spec, results) => {
-        await afterSpecHook(spec, config);
+        return await afterSpecHook(spec, config);
       });
       on('before:spec', () => {
         // Writes QASE_TESTOPS_RUN_ID to a file before running each spec

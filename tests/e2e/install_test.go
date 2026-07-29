@@ -17,6 +17,7 @@ package e2e_test
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -29,6 +30,7 @@ import (
 	"github.com/rancher-sandbox/ele-testhelpers/kubectl"
 	"github.com/rancher-sandbox/ele-testhelpers/rancher"
 	"github.com/rancher-sandbox/ele-testhelpers/tools"
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -51,6 +53,19 @@ func sha256File(filePath string) (string, error) {
 	}
 
 	return hex.EncodeToString(h.Sum(nil)), nil
+}
+
+type RancherTurtlesConfig struct {
+	Global struct {
+		Cattle struct {
+			SystemDefaultRegistry string `yaml:"systemDefaultRegistry"`
+		} `yaml:"cattle"`
+	} `yaml:"global"`
+	Image struct {
+		Repository string `yaml:"repository"`
+	} `yaml:"image"`
+	// Preserve any other fields from existing data (e.g., features)
+	Extra map[string]interface{} `yaml:",inline"`
 }
 
 func waitForResourceCondition(ns, resource, condition string) {
@@ -157,8 +172,6 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 						"--set-string", fmt.Sprintf("extraEnv[%d].value=%s", idx, e.value),
 					)
 				}
-				// Log the extra flags
-				GinkgoWriter.Write([]byte(strings.Join(extraFlags, " ") + "\n"))
 			}
 
 			// Skip when upgrade
@@ -166,15 +179,72 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 				extraFlags = nil
 			}
 
+			// Log the extra flags
+			GinkgoWriter.Write([]byte(strings.Join(extraFlags, " ") + "\n"))
+
 			err := rancher.DeployRancherManager(rancherHostname, rancherChannel, rancherVersion, rancherHeadVersion, "none", "none", extraFlags)
 			Expect(err).To(Not(HaveOccurred()))
 
-			waitForResourceCondition("cattle-system", "deployments/rancher-webhook", "Available")
+			// Post-install/upgrade patching for dev build when rancher-turtles is installed as system-chart.
+			// Turtles chart in Rancher always uses [sdr/]rancher/turtles image regardless of what is written in chart's values.yaml.
+			// Ref. https://github.com/rancher/rancher/blob/main/pkg/controllers/dashboard/systemcharts/controller.go#L56
+			// Patch as early as possible so the system-chart controller reconciles with the desired image.
 
-			if isRancherManagerVersion(">=2.13") {
-				waitForResourceCondition("cattle-turtles-system", "deployments/rancher-turtles-controller-manager", "Available")
-				waitForResourceCondition("cattle-capi-system", "deployments/capi-controller-manager", "Available")
+			isInstallPass := Label("install").MatchesLabelFilter(GinkgoLabelFilter())
+			isUpgradePass := Label("upgrade").MatchesLabelFilter(GinkgoLabelFilter()) // @upgrade and @migration
+
+			shouldPatch := turtlesDevChart &&
+				isRancherManagerVersion(">=2.13") &&
+				((isInstallPass && !isUpgradeTest) || isUpgradePass) // patch during install or upgrade/migration passes
+
+			if shouldPatch {
+				By("Patching rancher-config to use devel turtles image", func() {
+					Expect(controllerImage).To(Not(BeEmpty()), "CONTROLLER_IMG must be set when TURTLES_DEV_CHART=true")
+					_, err := kubectl.Run("wait", "--namespace", "cattle-system", "--for=create", "configmap/rancher-config", "--timeout=300s")
+					Expect(err).To(Not(HaveOccurred()))
+
+					// Parse existing YAML to preserve all fields (features, etc.)
+					config := &RancherTurtlesConfig{}
+					existingRancherTurtlesConfig, err := kubectl.Run("get", "configmap", "rancher-config", "-n", "cattle-system", "-o", "jsonpath={.data['rancher-turtles']}")
+					Expect(err).To(Not(HaveOccurred()))
+					if existingRancherTurtlesConfig != "" {
+						err := yaml.Unmarshal([]byte(existingRancherTurtlesConfig), config)
+						Expect(err).To(Not(HaveOccurred()))
+					}
+
+					// Update only the fields we control
+					config.Global.Cattle.SystemDefaultRegistry = ""
+					config.Image.Repository = controllerImage
+
+					// Make YAML from the updated config structure
+					combinedRancherTurtlesConfig, err := yaml.Marshal(config)
+					Expect(err).To(Not(HaveOccurred()))
+
+					patch := map[string]interface{}{
+						"data": map[string]string{
+							"rancher-turtles": string(combinedRancherTurtlesConfig),
+						},
+					}
+
+					// Make JSON for kubectl patch command (JSON with YAML string inside)
+					patchBytes, err := json.Marshal(patch)
+					Expect(err).To(Not(HaveOccurred()))
+
+					GinkgoWriter.Printf("%s\n", patchBytes)
+
+					status, err := kubectl.Run("patch", "configmap", "rancher-config", "-n", "cattle-system", "--type", "merge", "-p", string(patchBytes))
+					Expect(err).To(Not(HaveOccurred()))
+					Expect(status).To(ContainSubstring("patched"))
+				})
 			}
+
+			By("Waiting for Rancher Manager resources", func() {
+				waitForResourceCondition("cattle-system", "deployments/rancher-webhook", "Available")
+				if isRancherManagerVersion(">=2.13") {
+					waitForResourceCondition("cattle-turtles-system", "deployments/rancher-turtles-controller-manager", "Available")
+					waitForResourceCondition("cattle-capi-system", "deployments/capi-controller-manager", "Available")
+				}
+			})
 		})
 	})
 })

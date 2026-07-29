@@ -100,7 +100,7 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
           cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
 
           // Check provisioning status
-          cy.getBySel('sortable-cell-0-1').click();
+          cy.getBySel('sortable-cell-0-1').find('a').should('be.visible').click();
           cy.getBySel('log').click();
           cy.contains('[INFO ] provisioning done');
 
