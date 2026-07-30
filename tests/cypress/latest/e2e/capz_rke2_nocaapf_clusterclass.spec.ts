@@ -34,7 +34,7 @@ describe('Import CAPZ RKE2 (No-Caapf) Class-Cluster', {tags: ['@full', '@full-no
     );
     
     qase(619, it('Add CAPZ RKE2 ClusterClass Fleet Repo', () => {
-      cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
+      cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.noCaapfClassBranch, classesPath, vars.capiClassesNS)
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(classNamePrefix);
     })

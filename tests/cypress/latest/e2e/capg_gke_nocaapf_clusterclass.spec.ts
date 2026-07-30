@@ -36,7 +36,7 @@ describe('Import CAPG GKE (No-Caapf) Class-Cluster', {tags: ['@full', '@nocaapf'
     );
 
     qase(676, it('Add CAPG GKE ClusterClass Fleet Repo', () => {
-      cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
+      cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.noCaapfClassBranch, classesPath, vars.capiClassesNS)
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(classNamePrefix);
     })

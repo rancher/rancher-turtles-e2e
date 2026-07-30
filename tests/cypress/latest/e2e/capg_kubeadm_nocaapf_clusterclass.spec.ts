@@ -42,7 +42,7 @@ describe('Import CAPG Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@full
     );
 
     qase(737, it('Add CAPG Kubeadm ClusterClass Fleet Repo', () => {
-      cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
+      cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.noCaapfClassBranch, classesPath, vars.capiClassesNS)
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(classNamePrefix);
     })
