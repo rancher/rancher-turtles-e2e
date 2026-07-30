@@ -37,18 +37,18 @@ describe('Import CAPD RKE2 (Default CNI) Class-Cluster using Fleet', {tags: '@sh
   });
 
   context('[SETUP]', () => {
-    qase(427, it('Setup the namespace for importing', () => {
+    qase(738, it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
     );
 
-    qase(428, it('Create Docker Auth Secret', () => {
+    qase(739, it('Create Docker Auth Secret', () => {
       // Prevention for Docker.io rate limiting
       cy.createDockerAuthSecret();
     })
     );
 
-    qase(429, it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
+    qase(740, it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
       cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(classNamePrefix);
@@ -57,7 +57,7 @@ describe('Import CAPD RKE2 (Default CNI) Class-Cluster using Fleet', {tags: '@sh
   })
 
   context('[CLUSTER-IMPORT]', () => {
-    qase(430, it('Add CAPD cluster fleet repo and get cluster name', () => {
+    qase(741, it('Add CAPD cluster fleet repo and get cluster name', () => {
       cypressLib.checkNavIcon('cluster-management').should('exist');
       cy.addFleetGitRepo(clustersRepoName, vars.repoUrl, vars.branch, path);
 
@@ -71,7 +71,7 @@ describe('Import CAPD RKE2 (Default CNI) Class-Cluster using Fleet', {tags: '@sh
     })
     );
 
-    qase(437, it('Auto import child CAPD cluster', () => {
+    qase(742, it('Auto import child CAPD cluster', () => {
       // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
       cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
@@ -92,7 +92,7 @@ describe('Import CAPD RKE2 (Default CNI) Class-Cluster using Fleet', {tags: '@sh
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    qase(452, it('Check RKE2 Default CNI', () => {
+    qase(743, it('Check RKE2 Default CNI', () => {
       cy.contains(clusterName).click();
       cy.accesMenuSelection(['Workloads', 'Pods']);
       cy.setNamespace('All Namespaces', 'all_user');
@@ -102,7 +102,7 @@ describe('Import CAPD RKE2 (Default CNI) Class-Cluster using Fleet', {tags: '@sh
     })
     );
 
-    qase(432, (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
+    qase(744, (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
     );
@@ -110,20 +110,20 @@ describe('Import CAPD RKE2 (Default CNI) Class-Cluster using Fleet', {tags: '@sh
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
-      qase(433, it('Remove imported CAPD cluster from Rancher Manager', () => {
+      qase(745, it('Remove imported CAPD cluster from Rancher Manager', () => {
         // Delete the imported cluster
         // Ensure that the provisioned CAPI cluster still exists
         importedRancherv3ClusterDeletion(clusterName);
       })
       );
 
-      qase(434, it('Delete the CAPD cluster', {retries: 1}, () => {
+      qase(746, it('Delete the CAPD cluster', {retries: 1}, () => {
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout, clustersRepoName, true);
       })
       );
 
-      qase(435, it('Delete the ClusterClass fleet repo', () => {
+      qase(747, it('Delete the ClusterClass fleet repo', () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
         // Cleanup other resources

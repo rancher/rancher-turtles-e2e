@@ -49,7 +49,7 @@ describe('Enable CAPI Providers', () => {
     );
 
     if (!isTurtlesDevChart && isRancherManagerVersion('>=2.14')) {
-      it('Patch the providers chart repository with OCIOptions.downloadAllTags: true', () => {
+      qase(716, it('Patch the providers chart repository with OCIOptions.downloadAllTags: true', () => {
         // Enabling this option downloads all the chart versions and ensures only supported versions show up
         // Doing so makes updating the chart a smoother process.
         const repositoryName = "turtles-providers-chart";
@@ -65,6 +65,7 @@ describe('Enable CAPI Providers', () => {
         cy.wait(1000);
         cy.contains(new RegExp('Active.*' + repositoryName), {timeout: 150000});
       })
+      );
     }
 
     qase(338, it('Create Providers using Charts', () => {
@@ -243,7 +244,7 @@ describe('Enable CAPI Providers', () => {
         })
       );
 
-      qase(345,
+      qase(685,
         it('Create AzureClusterIdentity', () => {
           const clientID = Cypress.expose("azure_client_id")
           const clientSecret = btoa(Cypress.expose("azure_client_secret"))

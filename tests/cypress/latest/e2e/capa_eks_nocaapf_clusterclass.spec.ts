@@ -29,67 +29,63 @@ describe('Import CAPA EKS (No-Caapf) Class-Cluster', {tags: ['@full', '@nocaapf'
   });
 
   context('[SETUP]', () => {
-    qase(317, it('Setup the namespace for importing', () => {
+    qase(640, it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
     );
 
-    qase(343, it('Create AWSClusterStaticIdentity', () => {
+    qase(641, it('Create AWSClusterStaticIdentity', () => {
       cy.createAWSClusterStaticIdentity(accessKey, secretKey);
     })
     );
 
-    qase(129,
-      it('Add CAPA EKS ClusterClass Fleet Repo', () => {
-        cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
-        // Go to CAPI > ClusterClass to ensure the clusterclass is created
-        cy.checkCAPIClusterClass(classNamePrefix);
-      })
+    qase(642, it('Add CAPA EKS ClusterClass Fleet Repo', () => {
+      cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
+      // Go to CAPI > ClusterClass to ensure the clusterclass is created
+      cy.checkCAPIClusterClass(classNamePrefix);
+    })
     );
   })
 
   context('[CLUSTER-IMPORT]', () => {
-    qase(124,
-      it('Import CAPA EKS class-cluster using YAML', () => {
-        cy.readFile(classClusterFileName).then((data) => {
-          data = data.replace(/replace_cluster_name/g, clusterName)
-          data = data.replace(/replace_eksVersion/g, vars.eksVersion)
-          cy.importYAML(data, vars.capiClustersNS)
-        });
-        // Check CAPI cluster using its name
-        cy.checkCAPICluster(clusterName);
-      })
+    qase(643, it('Import CAPA EKS class-cluster using YAML', () => {
+      cy.readFile(classClusterFileName).then((data) => {
+        data = data.replace(/replace_cluster_name/g, clusterName)
+        data = data.replace(/replace_eksVersion/g, vars.eksVersion)
+        cy.importYAML(data, vars.capiClustersNS)
+      });
+      // Check CAPI cluster using its name
+      cy.checkCAPICluster(clusterName);
+    })
     );
 
-    qase(125,
-      it('Auto import child CAPA cluster', () => {
-        // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-        cy.checkCAPIClusterProvisioned(clusterName, timeout);
+    qase(644, it('Auto import child CAPA cluster', () => {
+      // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+      cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
-        // Check child cluster is created and auto-imported
-        // This is checked by ensuring the cluster is available in navigation menu
-        cy.goToHome();
-        cy.contains(clusterName).should('exist');
+      // Check child cluster is created and auto-imported
+      // This is checked by ensuring the cluster is available in navigation menu
+      cy.goToHome();
+      cy.contains(clusterName).should('exist');
 
-        // Check cluster is Active
-        cy.searchCluster(clusterName);
-        cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
+      // Check cluster is Active
+      cy.searchCluster(clusterName);
+      cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
 
-        // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
-        // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
-        cy.checkCAPIClusterActive(clusterName, timeout);
-      })
+      // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+      // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
+      cy.checkCAPIClusterActive(clusterName, timeout);
+    })
     );
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    qase(126,
-      it.skip('Install App on imported cluster', {retries: 1}, () => {
-        cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
-      })
+    qase(645, it.skip('Install App on imported cluster', {retries: 1}, () => {
+      cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
+    })
     );
 
-    qase(318, it("Scale up imported CAPA cluster by patching class-cluster yaml", () => {
+    qase(646, it("Scale up imported CAPA cluster by patching class-cluster yaml", () => {
       cy.readFile(classClusterFileName).then((data) => {
         data = data.replace(/replicas: 2/g, 'replicas: 3')
 
@@ -108,35 +104,34 @@ describe('Import CAPA EKS (No-Caapf) Class-Cluster', {tags: ['@full', '@nocaapf'
     })
     );
 
-    it('Check for any errors in Turtles logs', () => {
+    qase(647, it('Check for any errors in Turtles logs', () => {
       // Check for any errors
       cy.filterPodErrorLogs('rancher-turtles-controller-manager');
     })
+    );
   })
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
-      qase(362, it('Remove imported CAPA cluster from Rancher Manager', () => {
+      qase(648, it('Remove imported CAPA cluster from Rancher Manager', () => {
         // Delete the imported cluster
         // Ensure that the provisioned CAPI cluster still exists
         importedRancherv3ClusterDeletion(clusterName);
       })
       );
 
-      qase(127,
-        it('Delete the CAPA cluster', {retries: 1}, () => {
-          // Remove CAPI Resources related to the cluster
-          capiClusterDeletion(clusterName, timeout);
-        })
+      qase(649, it('Delete the CAPA cluster', {retries: 1}, () => {
+        // Remove CAPI Resources related to the cluster
+        capiClusterDeletion(clusterName, timeout);
+      })
       );
 
-      qase(128,
-        it('Delete the ClusterClass fleet repo and other resources', () => {
-          // Remove the clusterclass repo
-          cy.removeFleetGitRepo(clusterClassRepoName);
-          // Cleanup other resources
-          capaResourcesCleanup();
-        })
+      qase(650, it('Delete the ClusterClass fleet repo and other resources', () => {
+        // Remove the clusterclass repo
+        cy.removeFleetGitRepo(clusterClassRepoName);
+        // Cleanup other resources
+        capaResourcesCleanup();
+      })
       );
     }
   })

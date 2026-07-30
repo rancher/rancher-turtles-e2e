@@ -32,12 +32,12 @@ describe('Import CAPV RKE2 (No-Caapf) Class-Cluster', {tags: ['@vsphere', '@vsph
   });
 
   context('[SETUP]', () => {
-    qase(273, it('Setup the namespace for importing', () => {
+    qase(689, it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
     })
     );
 
-    qase(274, it('Create values.yaml Secret', () => {
+    qase(690, it('Create values.yaml Secret', () => {
       let encodedData = ''
       cy.readFile('./fixtures/vsphere/capv-helm-values.yaml').then((data) => {
         // Deploy HA cluster with 3 control plane and 3 worker nodes, instead of default 1+1
@@ -75,14 +75,14 @@ describe('Import CAPV RKE2 (No-Caapf) Class-Cluster', {tags: ['@vsphere', '@vsph
     })
     );
 
-    qase(275, it('Create VSphereClusterIdentity', () => {
+    qase(691, it('Create VSphereClusterIdentity', () => {
       const vsphere_username = JSON.stringify(vsphere_secrets_json.vsphere_username).replace(/\"/g, "")
       const vsphere_password = JSON.stringify(vsphere_secrets_json.vsphere_password).replace(/\"/g, "")
       cy.createVSphereClusterIdentity(vsphere_username, vsphere_password)
     })
     );
 
-    qase(276, it('Create Docker Auth Secret', () => {
+    qase(692, it('Create Docker Auth Secret', () => {
       // Prevention for Docker.io rate limiting
       cy.readFile('./fixtures/vsphere/capv-docker-auth-token-secret.yaml').then((data) => {
         const dockerAuthPasswordBase64 = Buffer.from(vsphere_secrets_json.cluster_docker_auth_password).toString('base64')
@@ -94,7 +94,7 @@ describe('Import CAPV RKE2 (No-Caapf) Class-Cluster', {tags: ['@vsphere', '@vsph
     })
     );
 
-    qase(277, it('Add CAPV RKE2 ClusterClass Fleet Repo and check Applications', () => {
+    qase(734, it('Add CAPV RKE2 ClusterClass Fleet Repo', () => {
       cy.addFleetGitRepo(classRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(className);
@@ -103,7 +103,7 @@ describe('Import CAPV RKE2 (No-Caapf) Class-Cluster', {tags: ['@vsphere', '@vsph
   })
 
   context('[CLUSTER-IMPORT]', () => {
-    qase(278, it('Add CAPV class-clusters fleet repo', () => {
+    qase(694, it('Add CAPV class-clusters fleet repo', () => {
       cypressLib.checkNavIcon('cluster-management')
         .should('exist');
 
@@ -115,7 +115,7 @@ describe('Import CAPV RKE2 (No-Caapf) Class-Cluster', {tags: ['@vsphere', '@vsph
     })
     );
 
-    qase(279, it('Auto import child CAPV cluster', () => {
+    qase(695, it('Auto import child CAPV cluster', () => {
       // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
       cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
@@ -140,33 +140,34 @@ describe('Import CAPV RKE2 (No-Caapf) Class-Cluster', {tags: ['@vsphere', '@vsph
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    qase(280, it.skip('Install App on imported cluster', {retries: 1}, () => {
+    qase(696, it.skip('Install App on imported cluster', {retries: 1}, () => {
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
     );
 
-    it('Check for any errors in Turtles logs', () => {
+    qase(697, it('Check for any errors in Turtles logs', () => {
       // Check for any errors
       cy.filterPodErrorLogs('rancher-turtles-controller-manager');
     })
+    );
   })
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
-      qase(358, it('Remove imported CAPV cluster from Rancher Manager', () => {
+      qase(698, it('Remove imported CAPV cluster from Rancher Manager', () => {
         // Delete the imported cluster
         // Ensure that the provisioned CAPI cluster still exists
         importedRancherv3ClusterDeletion(clusterName);
       })
       );
 
-      qase(282, it('Delete the CAPV cluster', {retries: 1}, () => {
+      qase(699, it('Delete the CAPV cluster', {retries: 1}, () => {
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout, clusterRepoName);
       })
       );
 
-      qase(283, it('Delete the ClusterClass fleet repo and other resources', () => {
+      qase(700, it('Delete the ClusterClass fleet repo and other resources', () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(classRepoName);
         // Cleanup other resources
