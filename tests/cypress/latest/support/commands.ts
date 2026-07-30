@@ -1565,12 +1565,12 @@ export function setUseCAAPFFeatureGate(enabled: boolean, wait: boolean=true) {
 
 export function addTurtlesProvidersRepo() {
   cy.task('suiteLog', `Adding ${vars.providersChartRepoName} repo`);
-  cy.addRepository(vars.providersChartRepoName, vars.turtlesProvidersOCIRepo, 'oci', 'none');
+  return cy.addRepository(vars.providersChartRepoName, vars.turtlesProvidersOCIRepo, 'oci', 'none');
 }
 
 export function addChartMuseumRepo() {
   let chartMuseumRepo = Cypress.expose('chartmuseum_repo')
   cy.task('suiteLog', `Adding ${vars.chartMuseumRepoName} repo`);
   expect(chartMuseumRepo, "checking chartmuseum repo").to.not.be.empty;
-  cy.addRepository(vars.chartMuseumRepoName, `${chartMuseumRepo}:8080`, 'http', 'none');
+  return cy.addRepository(vars.chartMuseumRepoName, `${chartMuseumRepo}:8080`, 'http', 'none');
 }
