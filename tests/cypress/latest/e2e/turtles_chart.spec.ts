@@ -13,15 +13,19 @@ limitations under the License.
 */
 
 import '../support/commands';
-import {
-  isMigration, isRancherManagerVersion, isTurtlesDevChart, isUpgrade,
-  turtlesNamespace,
-} from '../support/utils';
-import {addChartMuseumRepo, addTurtlesProvidersRepo} from "../support/commands";
+import {isMigration, isRancherManagerVersion, isTurtlesDevChart, turtlesNamespace,} from '../support/utils';
+import {addChartMuseumRepo} from "../support/commands";
 
 
 Cypress.config();
 describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
+  before(function () {
+    if (!isRancherManagerVersion('2.12')) {
+      cy.task('suiteLog', "Skipping for Rancher Version != 2.12").then(() => {
+        return this.skip();
+      })
+    }
+  })
 
   beforeEach(() => {
     cy.login();
@@ -34,43 +38,22 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
     cy.addRepository('turtles-chart', 'https://rancher.github.io/turtles/', 'http', 'none');
   }
 
-  if (isRancherManagerVersion(">=2.13")) {
-    qase(403, it("Add turtles-providers GitRepo", () => {
-        // For upgrade tests 2.13 > 2.14, dev=true is only applicable to the target version
-        if (isRancherManagerVersion('2.13') && isUpgrade) {
-          addTurtlesProvidersRepo();
-        } else if (isTurtlesDevChart) {
-          addChartMuseumRepo();
-        } else {
-          addTurtlesProvidersRepo();
-        }
-    })
-    );
-  }
-
-  if (isRancherManagerVersion("2.12")) {
-    qase(404, it("Add turtles GitRepo", () => {
-      if (isTurtlesDevChart) {
+  qase(404,
+    it("Add turtles GitRepo", () => {
+      if (isMigration) {
+        // Used in Pre-migration: For Migration test; turtles will be installed from turtles-chart repo.
+        // dev=true is only applicable for 2.13
+        addTurtlesRepo();
+      } else if (isTurtlesDevChart) {
         addChartMuseumRepo();
       } else {
         addTurtlesRepo();
       }
-
-      if (isMigration) {
-        // Used in Pre-migration: For Migration test; turtles will be installed from turtles-chart repo.
-        // dev=true is only applicable for 2.13 or version test is upgrading to.
-        addTurtlesRepo();
-        // In Post-migration, chartmuseum repo will be used to install providers chart for dev=true and OCI repo for dev=false.
-        if(!isTurtlesDevChart) {
-          addTurtlesProvidersRepo();
-        }
-      }
     })
-    );
+  );
 
-    qase(11, it('Install Turtles chart', {retries: 1}, () => {
-        cy.checkChart('local', 'Install', 'Rancher Turtles', turtlesNamespace, {version: isMigration ? '0.24.5' : undefined});
-      })
-    );
-  }
+  qase(11, it('Install Turtles chart', {retries: 1}, () => {
+      cy.checkChart('local', 'Install', 'Rancher Turtles', turtlesNamespace, {version: isMigration ? '0.24.5' : undefined});
+    })
+  );
 });

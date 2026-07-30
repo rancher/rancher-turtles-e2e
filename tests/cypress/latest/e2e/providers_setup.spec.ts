@@ -20,7 +20,7 @@ import {
   turtlesNamespace,
 } from '../support/utils';
 import {providers, vars} from '../support/variables';
-import {matchAndWaitForProviderReadyStatus} from "../support/commands";
+import {addChartMuseumRepo, matchAndWaitForProviderReadyStatus} from "../support/commands";
 
 Cypress.config();
 describe('Enable CAPI Providers', () => {
@@ -39,6 +39,35 @@ describe('Enable CAPI Providers', () => {
     cy.login();
     cy.burgerMenuOperate('open');
   });
+
+  context('Setup providers chart repository', {tags: ['@install']}, () => {
+
+    function addTurtlesProvidersRepo() {
+      cy.task('suiteLog', `Adding ${vars.providersChartRepoName} repo`);
+      return cy.addRepository(vars.providersChartRepoName, vars.turtlesProvidersOCIRepo, 'oci', 'none');
+    }
+
+    qase(403, it("Add turtles-providers GitRepo", () => {
+      // For upgrade tests 2.13 > 2.14, dev=true is only applicable to the target version
+      if (isUpgrade) {
+        if (isRancherManagerVersion('2.13')) {
+          addTurtlesProvidersRepo();
+          return
+        }
+        if (isRancherManagerVersion('2.14')) {
+          // Ensure that correct providers chart repo is used post-upgrade by deleting the repo that was added in
+          // pre-upgrade
+          cy.task('suiteLog', "Removing providers chart repo added in pre-upgrade");
+          cy.deleteKubernetesResource('local', ["Apps", "Repositories"], vars.providersChartRepoName);
+        }
+      }
+      if (isTurtlesDevChart) {
+        addChartMuseumRepo();
+      } else {
+        addTurtlesProvidersRepo();
+      }
+    }));
+  })
 
   context('Local providers - @install', {tags: '@install'}, () => {
     // HelmOps to be used across all specs
