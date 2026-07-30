@@ -47,7 +47,7 @@ describe('Enable CAPI Providers', () => {
       return cy.addRepository(vars.providersChartRepoName, vars.turtlesProvidersOCIRepo, 'oci', 'none');
     }
 
-    qase(403, it("Add turtles-providers GitRepo", () => {
+    qase(403, it("Add Rancher Turtles Providers Chart GitRepo", () => {
       // For upgrade tests 2.13 > 2.14, dev=true is only applicable to the target version
       if (isUpgrade) {
         if (isRancherManagerVersion('2.13')) {

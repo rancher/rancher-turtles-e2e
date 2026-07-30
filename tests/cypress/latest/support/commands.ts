@@ -596,11 +596,11 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
 
   const getChartSelector = () => {
     if (isTurtlesChart) {
-      return isRancherManagerVersion('2.12') && isMigration ? 'item-card-cluster/turtles-chart/rancher-turtles' : isTurtlesDevChart ? `item-card-cluster/${vars.chartMuseumRepoName}/rancher-turtles` : 'item-card-cluster/turtles-chart/rancher-turtles'
+      return (!isTurtlesDevChart || (isRancherManagerVersion('2.12') && isMigration)) ? 'item-card-cluster/turtles-chart/rancher-turtles' : `item-card-cluster/${vars.chartMuseumRepoName}/rancher-turtles`;
     }
 
     if (isTurtlesProvidersChart) {
-      return isRancherManagerVersion('2.13') && isUpgrade ? `item-card-cluster/${vars.providersChartRepoName}/rancher-turtles-providers` : isTurtlesDevChart ? `item-card-cluster/${vars.chartMuseumRepoName}/rancher-turtles-providers` : `item-card-cluster/${vars.providersChartRepoName}/rancher-turtles-providers`;
+      return (!isTurtlesDevChart || (isRancherManagerVersion('2.13') && isUpgrade)) ? `item-card-cluster/${vars.providersChartRepoName}/rancher-turtles-providers` : `item-card-cluster/${vars.chartMuseumRepoName}/rancher-turtles-providers`;
     }
 
     return `item-card-cluster/rancher-charts/rancher-${chartName.toLowerCase()}`;

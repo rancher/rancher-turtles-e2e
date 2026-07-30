@@ -40,14 +40,12 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
 
   qase(404,
     it("Add turtles GitRepo", () => {
-      if (isMigration) {
+      if (isMigration || !isTurtlesDevChart) {
         // Used in Pre-migration: For Migration test; turtles will be installed from turtles-chart repo.
         // dev=true is only applicable for 2.13
         addTurtlesRepo();
-      } else if (isTurtlesDevChart) {
-        addChartMuseumRepo();
       } else {
-        addTurtlesRepo();
+        addChartMuseumRepo();
       }
     })
   );
