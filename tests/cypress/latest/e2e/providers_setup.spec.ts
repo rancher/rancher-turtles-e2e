@@ -20,7 +20,7 @@ import {
   turtlesNamespace,
 } from '../support/utils';
 import {providers, vars} from '../support/variables';
-import {matchAndWaitForProviderReadyStatus} from "../support/commands";
+import {addChartMuseumRepo, addTurtlesProvidersRepo, matchAndWaitForProviderReadyStatus} from "../support/commands";
 
 Cypress.config();
 describe('Enable CAPI Providers', () => {
@@ -40,6 +40,30 @@ describe('Enable CAPI Providers', () => {
     cy.burgerMenuOperate('open');
   });
 
+  context('Setup providers chart repository', {tags: ['@install']}, () => {
+
+    qase(403, it("Add Rancher Turtles Providers Chart GitRepo", () => {
+      // For upgrade tests 2.13 > 2.14, dev=true is only applicable to the target version
+      if (isUpgrade) {
+        if (isRancherManagerVersion('2.13')) {
+          addTurtlesProvidersRepo();
+          return
+        }
+        if (isRancherManagerVersion('2.14')) {
+          // Ensure that correct providers chart repo is used post-upgrade by deleting the repo that was added in
+          // pre-upgrade
+          cy.task('suiteLog', "Removing providers chart repo added in pre-upgrade");
+          cy.deleteKubernetesResource('local', ["Apps", "Repositories"], vars.providersChartRepoName);
+        }
+      }
+      if (isTurtlesDevChart) {
+        addChartMuseumRepo();
+      } else {
+        addTurtlesProvidersRepo();
+      }
+    }));
+  })
+
   context('Local providers - @install', {tags: '@install'}, () => {
     // HelmOps to be used across all specs
     qase(90, it('Add Applications fleet repo', () => {
@@ -52,7 +76,7 @@ describe('Enable CAPI Providers', () => {
       qase(716, it('Patch the providers chart repository with OCIOptions.downloadAllTags: true', () => {
         // Enabling this option downloads all the chart versions and ensures only supported versions show up
         // Doing so makes updating the chart a smoother process.
-        const repositoryName = "turtles-providers-chart";
+        const repositoryName = vars.providersChartRepoName;
         const resourceKind = 'clusterrepos.catalog.cattle.io';
         const patch = {spec: {OCIOptions: {'downloadAllTags': true}}};
         cy.patchYamlResource('local', 'default', resourceKind, repositoryName, patch);
