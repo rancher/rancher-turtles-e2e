@@ -517,7 +517,7 @@ jobs:
           RANCHER_PASSWORD: ${{ secrets.rancher_password }}
           SPEC: |
             e2e/first_connection.spec.ts
-            e2e/turtles_chart.spec.ts
+            e2e/turtles_chart_legacy.spec.ts
             e2e/turtles_ui_extension.spec.ts
             e2e/menu.spec.ts
             e2e/capd_rke2_migration_clusterclass.spec.ts
