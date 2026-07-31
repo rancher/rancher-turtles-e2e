@@ -14,7 +14,7 @@ limitations under the License.
 
 import '../support/commands';
 import {isMigration, isRancherManagerVersion, isTurtlesDevChart, turtlesNamespace,} from '../support/utils';
-import {addChartMuseumRepo} from "../support/commands";
+import {addChartMuseumRepo, addTurtlesProvidersRepo} from "../support/commands";
 
 
 Cypress.config();
@@ -40,12 +40,21 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
 
   qase(404,
     it("Add turtles GitRepo", () => {
-      if (isMigration || !isTurtlesDevChart) {
-        // Used in Pre-migration: For Migration test; turtles will be installed from turtles-chart repo.
-        // dev=true is only applicable for 2.13
-        addTurtlesRepo();
-      } else {
+      if (isTurtlesDevChart) {
         addChartMuseumRepo();
+      } else {
+        addTurtlesRepo();
+      }
+
+      if (isMigration) {
+        // Used in Pre-migration: For Migration test; turtles will be installed from turtles-chart repo.
+        // dev=true is only applicable for 2.13 or version test is migrating to.
+        addTurtlesRepo();
+        // In Post-migration, chartmuseum repo will be used to install providers chart for dev=true and OCI repo for
+        // dev=false.
+        if (!isTurtlesDevChart) {
+          addTurtlesProvidersRepo();
+        }
       }
     })
   );

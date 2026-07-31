@@ -20,7 +20,7 @@ import {
   turtlesNamespace,
 } from '../support/utils';
 import {providers, vars} from '../support/variables';
-import {addChartMuseumRepo, matchAndWaitForProviderReadyStatus} from "../support/commands";
+import {addChartMuseumRepo, addTurtlesProvidersRepo, matchAndWaitForProviderReadyStatus} from "../support/commands";
 
 Cypress.config();
 describe('Enable CAPI Providers', () => {
@@ -41,11 +41,6 @@ describe('Enable CAPI Providers', () => {
   });
 
   context('Setup providers chart repository', {tags: ['@install']}, () => {
-
-    function addTurtlesProvidersRepo() {
-      cy.task('suiteLog', `Adding ${vars.providersChartRepoName} repo`);
-      return cy.addRepository(vars.providersChartRepoName, vars.turtlesProvidersOCIRepo, 'oci', 'none');
-    }
 
     qase(403, it("Add Rancher Turtles Providers Chart GitRepo", () => {
       // For upgrade tests 2.13 > 2.14, dev=true is only applicable to the target version
