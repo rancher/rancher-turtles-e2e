@@ -520,8 +520,8 @@ jobs:
             e2e/turtles_chart_legacy.spec.ts
             e2e/turtles_ui_extension.spec.ts
             e2e/menu.spec.ts
-            e2e/capd_rke2_migration_clusterclass.spec.ts
             ${{ env.SPECS }}
+            e2e/capd_rke2_migration_clusterclass.spec.ts
             e2e/capd_rke2_upgrade_clusterclass.spec.ts
             e2e/pre_upgrade_setup.spec.ts
         run: |
@@ -553,14 +553,36 @@ jobs:
             QASE_TESTOPS_RUN_ID=$(cat tests/cypress/latest/QASE_TESTOPS_RUN_ID.txt)
             echo "qase_run_id=${QASE_TESTOPS_RUN_ID}" >> ${GITHUB_OUTPUT}
           fi
-      - name: Set Rancher Manager Upgrade version
+      - name: Set Rancher Manager version for Migration
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') }}
         run: |
-          echo "RANCHER_VERSION=head/2.13" >> ${GITHUB_ENV}
-      - name: Set Rancher Manager Upgrade version
+          # Check if Rancher Version input is equal to nightly run version
+          if [[ "${{ inputs.rancher_version }}" != "head/2.15" ]]; then
+            # Check if Rancher Version input is valid for migration
+            if [[ "${{ inputs.rancher_version }}" != *"2.13"* ]]; then
+              echo "ERROR: Migration is only allowed to 2.13 Rancher Version"
+              exit 1
+            else
+              echo "RANCHER_VERSION=${{ inputs.rancher_version }}" >> ${GITHUB_ENV}
+            fi
+          else
+            echo "RANCHER_VERSION=head/2.13" >> ${GITHUB_ENV}
+          fi
+      - name: Set Rancher Manager version for Upgrade
         if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') }}
         run: |
-          echo "RANCHER_VERSION=prime-alpha/2.14.4-alpha7" >> ${GITHUB_ENV}
+          # Check if Rancher Version input is equal to nightly run version
+          if [[ "${{ inputs.rancher_version }}" != "head/2.15" ]]; then
+            # Check if Rancher Version input is valid for upgrade
+            if [[ "${{ inputs.rancher_version }}" != *"2.14"* ]]; then
+              echo "ERROR: Upgrade is only allowed to 2.14 Rancher Version"
+              exit 1
+            else
+              echo "RANCHER_VERSION=${{ inputs.rancher_version }}" >> ${GITHUB_ENV}
+            fi
+          else
+            echo "RANCHER_VERSION=prime/2.14.4" >> ${GITHUB_ENV}
+          fi
       - name: Upgrade Rancher Manager
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:
@@ -593,8 +615,8 @@ jobs:
           SPEC: |
             e2e/capd_rke2_migration_clusterclass.spec.ts
             e2e/post_upgrade_setup.spec.ts
-            e2e/capd_rke2_upgrade_clusterclass.spec.ts
             ${{ env.COMMON_SPECS }}
+            e2e/capd_rke2_upgrade_clusterclass.spec.ts
         run: |
           if [ ${{ inputs.turtles_dev_chart }} == true ]; then
             export CHARTMUSEUM_REPO=http://${{ needs.create-runner.outputs.public_dns }}

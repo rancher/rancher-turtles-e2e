@@ -104,12 +104,11 @@ describe('Enable CAPI Providers', () => {
         // @ts-ignore
         text.providers.controlplaneKubeadm.enableAutomaticUpdate = true;
 
-        if (isCypressTag('@short') || isCypressTag('@nocaapf') || isCypressTag('@capd') || isCypressTag('@upgrade') || isCypressTag('@switch') || isCypressTag('@use-caapf-switch')) {
-            // @ts-ignore
-            text.providers.infrastructureDocker.enabled = true;
-            // @ts-ignore
-            text.providers.infrastructureDocker.enableAutomaticUpdate = true;
-          }
+        // @ts-ignore
+        text.providers.infrastructureDocker.enabled = true;
+        // @ts-ignore
+        text.providers.infrastructureDocker.enableAutomaticUpdate = true;
+
         // there is no easy way to only install a specific provider when something like `@capgke` is passed, so we enable all the cloud providers
         if (isCypressTag('@full') || isCypressTag('@nocaapf') || isCypressTag('@capg') || isCypressTag('@capa') || isCypressTag('@capz')) {
             // @ts-ignore

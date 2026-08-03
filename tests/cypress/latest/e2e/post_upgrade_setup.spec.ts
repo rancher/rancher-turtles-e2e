@@ -1,6 +1,6 @@
 import '../support/commands';
 import {vars} from '../support/variables';
-import {isTurtlesDevChart, turtlesNamespace} from '../support/utils';
+import {isTurtlesDevChart, turtlesNamespace, skipClusterDeletion} from '../support/utils';
 
 Cypress.config();
 describe('Post Rancher Upgrade Setup - @upgrade', {tags: '@upgrade'}, () => {
@@ -32,4 +32,9 @@ describe('Post Rancher Upgrade Setup - @upgrade', {tags: '@upgrade'}, () => {
   })
   );
 
+  qase(419, it('Delete the Pre-upgrade resources', () => {
+    cy.removeFleetGitRepo('helm-ops');
+    cy.deleteKubernetesResource('local', ['Storage', 'ConfigMaps'], 'docker-rke2-lb-config', vars.capiClustersNS);
+  })
+  );
 });

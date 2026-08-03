@@ -174,12 +174,6 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
           capdResourcesCleanup();
         })
         );
-
-        qase(419, it('Delete the Pre-upgrade resources', () => {
-          cy.removeFleetGitRepo('helm-ops');
-          cy.deleteKubernetesResource('local', ['Storage', 'ConfigMaps'], 'docker-rke2-lb-config', vars.capiClustersNS);
-        })
-        );
       }
     }
   })
