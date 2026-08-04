@@ -1,6 +1,6 @@
 import '../support/commands';
 import {vars} from '../support/variables';
-import {isTurtlesDevChart, turtlesNamespace, skipClusterDeletion} from '../support/utils';
+import {isTurtlesDevChart, turtlesNamespace} from '../support/utils';
 
 Cypress.config();
 describe('Post Rancher Upgrade Setup - @upgrade', {tags: '@upgrade'}, () => {

@@ -192,17 +192,15 @@ describe('Enable CAPI Providers', () => {
       })
       );
     })
-  });
 
-  context('Docker provider', {tags: ['@short', '@short-nocaapf', '@nocaapf', '@capdk', '@capdr', '@upgrade', '@switch', '@use-caapf-switch', '@capdk-nocaapf', '@capdr-nocaapf']}, () => {
-    const dockerProviderNamespace = 'capd-system'
     qase(422, it('Verify CAPD provider', () => {
       // Verify Docker Infrastructure provider
+      const dockerProviderNamespace = 'capd-system'
       cy.navigateToProviders();
       matchAndWaitForProviderReadyStatus(providers.dockerProvider, 'infrastructure', providers.dockerProvider, providers.kubeadmProviderVersion, dockerProviderNamespace);
     })
     );
-  })
+  });
 
   context('vSphere provider', {tags: ['@vsphere', '@vsphere-nocaapf', '@capvk', '@capvk-nocaapf', '@capvr', '@capvr-nocaapf']}, () => {
     const vsphereProviderNamespace = 'capv-system'
