@@ -571,17 +571,14 @@ jobs:
       - name: Set Rancher Manager version for Upgrade
         if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') }}
         run: |
-          # Check if Rancher Version input is equal to nightly run version
-          if [[ "${{ inputs.rancher_version }}" != "head/2.15" ]]; then
-            # Check if Rancher Version input is valid for upgrade
-            if [[ "${{ inputs.rancher_version }}" != *"2.14"* ]]; then
-              echo "ERROR: Upgrade is only allowed to 2.14 Rancher Version"
-              exit 1
-            else
-              echo "RANCHER_VERSION=${{ inputs.rancher_version }}" >> ${GITHUB_ENV}
-            fi
+          VERSION="${{ inputs.rancher_version }}"
+          if [[ "$VERSION" == *"2.14"* ]]; then
+            echo "RANCHER_VERSION=$VERSION" >> "$GITHUB_ENV"
+          elif [[ "$VERSION" == head/* ]]; then
+            echo "RANCHER_VERSION=prime/2.14.4" >> "$GITHUB_ENV"
           else
-            echo "RANCHER_VERSION=prime/2.14.4" >> ${GITHUB_ENV}
+            echo "ERROR: Upgrade is only allowed to 2.14 Rancher Version"
+            exit 1
           fi
       - name: Upgrade Rancher Manager
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
