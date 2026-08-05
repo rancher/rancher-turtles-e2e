@@ -32,9 +32,12 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   config.expose.chartmuseum_repo = process.env.CHARTMUSEUM_REPO || '';
   config.expose.turtles_dev_chart = process.env.TURTLES_DEV_CHART == "true";
   config.expose.turtles_build_type = process.env.BUILD_TYPE || "prime";
-  config.expose.cluster = process.env.CLUSTER_NAME;
   config.expose.k8s_version = process.env.K8S_VERSION_TO_PROVISION;
   config.expose.rancher_version = process.env.RANCHER_VERSION;
+  // TODO(pvala): Investigate this, TURTLE_BRANCH is only referenced here and not passed from github workflow,
+  // so this value has always been 'main' and hence always worked, otherwise it might have failed if appropriate
+  // branches release/v0.X was passed. This envvar is apparently only used to add clusters via fleet (double check
+  // this).
   config.expose.turtles_branch = process.env.TURTLE_BRANCH || 'main';
   config.expose.turtles_chart_dev_version = process.env.TURTLES_CHART_DEV_VERSION || '108.0.0+up99.99.99';
   config.expose.username = process.env.RANCHER_USER;
