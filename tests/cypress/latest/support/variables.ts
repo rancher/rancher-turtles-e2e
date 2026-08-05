@@ -72,7 +72,16 @@ export const vars = {
   })()
 };
 
-type BuildType = 'prod-v2.12' | 'prod-v2.13' | 'prod-v2.14' | 'prod-v2.15' | 'dev-v2.12' | 'dev-v2.13' | 'dev-v2.14' | 'dev-v2.15';
+type BuildType =
+  'prod-v2.12'
+  | 'prod-v2.13'
+  | 'prod-v2.14'
+  | 'prod-v2.15'
+  | 'dev-v2.12'
+  | 'dev-v2.13'
+  | 'dev-v2.14'
+  | 'dev-v2.15'
+  | 'dev-v2.16';
 
 const buildType = ((): BuildType => {
   if (isTurtlesDevChart && isRancherManagerVersion('2.12')){
@@ -86,6 +95,9 @@ const buildType = ((): BuildType => {
   }
   if (isTurtlesDevChart && isRancherManagerVersion('2.15')) {
     return 'dev-v2.15';
+  }
+  if (isTurtlesDevChart && isRancherManagerVersion('2.16')) {
+    return 'dev-v2.16';
   }
   if(isRancherManagerVersion('2.12')){
     return 'prod-v2.12';
@@ -175,6 +187,16 @@ const buildTypeVersionMap = {
     azure: 'v1.22.0'
   },
   'dev-v2.15': {
+    capi: 'v1.13.3',
+    rke2: 'v0.25.0',
+    kubeadm: 'v1.13.3',
+    fleet: 'v0.15.0',
+    vsphere: 'v1.16.1',
+    amazon: 'v2.11.1',
+    google: 'v1.11.2',
+    azure: 'v1.23.2'
+  },
+  'dev-v2.16': {
     capi: 'v1.13.3',
     rke2: 'v0.25.0',
     kubeadm: 'v1.13.3',
