@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
     inputs:
       rancher_version:
-        description: Rancher Manager channel/<version|head_version>[/head_version] to use for installation
+        description: Rancher Manager channel/<version|head_version>[/head_version] to use for installation/upgrade/migration
         default: head/2.15
         type: string
       grep_test_by_tag:

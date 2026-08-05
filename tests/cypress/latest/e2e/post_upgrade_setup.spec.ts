@@ -32,4 +32,9 @@ describe('Post Rancher Upgrade Setup - @upgrade', {tags: '@upgrade'}, () => {
   })
   );
 
+  qase(419, it('Delete the Pre-upgrade resources', () => {
+    cy.removeFleetGitRepo('helm-ops');
+    cy.deleteKubernetesResource('local', ['Storage', 'ConfigMaps'], 'docker-rke2-lb-config', vars.capiClustersNS);
+  })
+  );
 });

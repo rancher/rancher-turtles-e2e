@@ -103,9 +103,7 @@ describe('Enable CAPI Providers (2.12)', () => {
       })
       );
     })
-  })
-
-  context('Docker provider', {tags: ['@short', '@capdk', '@capdr']}, () => {
+    
     const dockerProviderNamespace = 'capd-system'
     qase(500, it('Create Docker CAPIProvider Namespace', () => {
       cy.createNamespace([dockerProviderNamespace]);
