@@ -8,6 +8,8 @@ metadata:
     cluster-api.cattle.io/upstream-system-agent: "true"
   labels:
     cluster-api.cattle.io/rancher-auto-import: "true"
+    label-to-be-propagated: this-label-should-be-propagated
+    another-label-to-be-propagated: this-label-should-also-be-propagated
 spec:
   clusterNetwork:
     pods:
