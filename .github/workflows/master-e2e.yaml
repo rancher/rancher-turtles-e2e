@@ -338,7 +338,7 @@ jobs:
             echo "SPECS=" >> ${GITHUB_ENV}
           elif [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
             # Required for upgrade tests
-            echo "RANCHER_VERSION=prime/2.13.7" >> ${GITHUB_ENV}
+            echo "RANCHER_VERSION=head/2.13" >> ${GITHUB_ENV}
             echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> ${GITHUB_ENV}
           elif [[ "${{ inputs.grep_test_by_tag }}" =~ "@switch" ]]; then
             # Required for switch tests
@@ -572,7 +572,7 @@ jobs:
           if [[ "$VERSION" == *"2.14"* ]]; then
             echo "RANCHER_VERSION=$VERSION" >> "$GITHUB_ENV"
           elif [[ "$VERSION" == head/* ]]; then
-            echo "RANCHER_VERSION=prime/2.14.4" >> "$GITHUB_ENV"
+            echo "RANCHER_VERSION=head/2.14" >> "$GITHUB_ENV"
           else
             echo "ERROR: Upgrade is only allowed to 2.14 Rancher Version"
             exit 1
