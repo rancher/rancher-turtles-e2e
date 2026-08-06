@@ -33,13 +33,13 @@ describe('Switch CAPI Feature Flags (2.13)', {tags: '@switch'}, () => {
 
     context('[SETUP]', () => {
       qase(461, it('Verify rancher-turtles exists and rancher-provisioning-capi does not', () => {
-        cy.checkKubernetesResource('local', ['Apps', 'Installed Apps'], turtlesHelmApp, true, turtlesNamespace);
-        cy.checkKubernetesResource('local', ['Apps', 'Installed Apps'], capiProvisioningHelmApp, false, capiProvisioningNamespace);
+        cy.checkKubernetesResource(vars.localCluster, ['Apps', 'Installed Apps'], turtlesHelmApp, true, turtlesNamespace);
+        cy.checkKubernetesResource(vars.localCluster, ['Apps', 'Installed Apps'], capiProvisioningHelmApp, false, capiProvisioningNamespace);
       })
       );
 
       qase(462, it('Verify capi-controller-manager deployment exists', () => {
-        cy.checkKubernetesResource('local', ['Workloads', 'Deployments'], 'capi-controller-manager', true, capiNamespace);
+        cy.checkKubernetesResource(vars.localCluster, ['Workloads', 'Deployments'], 'capi-controller-manager', true, capiNamespace);
       })
       );
 
@@ -97,7 +97,7 @@ describe('Switch CAPI Feature Flags (2.13)', {tags: '@switch'}, () => {
     context('[SWITCH-TO-CAPI-PROVISIONING]', () => {
       qase(469, it('Uninstall Rancher Turtles Providers chart', () => {
         // Uninstall Rancher Turtles Providers chart
-        cy.deleteKubernetesResource('local', ['Apps', 'Installed Apps'], vars.turtlesProvidersHelmApp, turtlesNamespace);
+        cy.deleteKubernetesResource(vars.localCluster, ['Apps', 'Installed Apps'], vars.turtlesProvidersHelmApp, turtlesNamespace);
       })
       );
 
@@ -108,19 +108,19 @@ describe('Switch CAPI Feature Flags (2.13)', {tags: '@switch'}, () => {
       );
 
       qase(471, it('Verify rancher-provisioning-capi exists and rancher-turtles does not', {retries: 2}, () => {
-        cy.checkKubernetesResource('local', ['Apps', 'Installed Apps'], capiProvisioningHelmApp, true, capiProvisioningNamespace, timeout);
-        cy.checkKubernetesResource('local', ['Apps', 'Installed Apps'], turtlesHelmApp, false, turtlesNamespace);
+        cy.checkKubernetesResource(vars.localCluster, ['Apps', 'Installed Apps'], capiProvisioningHelmApp, true, capiProvisioningNamespace, timeout);
+        cy.checkKubernetesResource(vars.localCluster, ['Apps', 'Installed Apps'], turtlesHelmApp, false, turtlesNamespace);
       })
       );
 
       qase(472, it('Verify ClusterctlConfig does not exist', () => {
         // This resource will not be found since it was deployed in turtlesNamespace which gets deleted on uninstalling turtles chart
-        cy.checkKubernetesResource('local', ['More Resources', 'turtles-capi.cattle.io'], 'clusterctl-config', false, turtlesNamespace);
+        cy.checkKubernetesResource(vars.localCluster, ['More Resources', 'turtles-capi.cattle.io'], 'clusterctl-config', false, turtlesNamespace);
       })
       );
 
       qase(473, it('Verify core-cluster-api ConfigMap does not exist', () => {
-        cy.checkKubernetesResource('local', ['More Resources', 'Core', 'ConfigMaps'], coreCAPICM, false, capiNamespace);
+        cy.checkKubernetesResource(vars.localCluster, ['More Resources', 'Core', 'ConfigMaps'], coreCAPICM, false, capiNamespace);
       })
       );
 
@@ -141,13 +141,13 @@ describe('Switch CAPI Feature Flags (2.13)', {tags: '@switch'}, () => {
       );
 
       qase(476, it('Verify rancher-turtles exists and rancher-provisioning-capi does not', {retries: 2}, () => {
-        cy.checkKubernetesResource('local', ['Apps', 'Installed Apps'], turtlesHelmApp, true, turtlesNamespace, timeout);
-        cy.checkKubernetesResource('local', ['Apps', 'Installed Apps'], capiProvisioningHelmApp, false, capiProvisioningNamespace);
+        cy.checkKubernetesResource(vars.localCluster, ['Apps', 'Installed Apps'], turtlesHelmApp, true, turtlesNamespace, timeout);
+        cy.checkKubernetesResource(vars.localCluster, ['Apps', 'Installed Apps'], capiProvisioningHelmApp, false, capiProvisioningNamespace);
       })
       );
 
       qase(477, it('Verify core-cluster-api ConfigMap exists', () => {
-        cy.checkKubernetesResource('local', ['More Resources', 'Core', 'ConfigMaps'], coreCAPICM, true, capiNamespace, timeout);
+        cy.checkKubernetesResource(vars.localCluster, ['More Resources', 'Core', 'ConfigMaps'], coreCAPICM, true, capiNamespace, timeout);
       })
       );
 
@@ -159,7 +159,7 @@ describe('Switch CAPI Feature Flags (2.13)', {tags: '@switch'}, () => {
           text.providers.infrastructureDocker.enableAutomaticUpdate = true;
         }
         // Install Rancher Turtles Certified Providers chart
-        cy.checkChart('local', 'Install', vars.turtlesProvidersChartName, turtlesNamespace, {
+        cy.checkChart(vars.localCluster, 'Install', vars.turtlesProvidersChartName, turtlesNamespace, {
           version: !isTurtlesDevChart ? '0.25' : undefined,
           modifyYAMLOperation: providerSelectionFunction
         });

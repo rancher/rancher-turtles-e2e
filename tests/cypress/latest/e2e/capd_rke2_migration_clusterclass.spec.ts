@@ -107,14 +107,14 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
 
       qase(379, it('Pre-upgrade steps for migration', () => {
         // Uninstall Rancher Turtles chart
-        cy.deleteKubernetesResource('local', ['Apps', 'Installed Apps'], 'rancher-turtles', turtlesNamespace);
+        cy.deleteKubernetesResource(vars.localCluster, ['Apps', 'Installed Apps'], 'rancher-turtles', turtlesNamespace);
 
         // Patch CRDs with cattle-turtles-system namespace
         ['capiproviders.turtles-capi.cattle.io', 'clusterctlconfigs.turtles-capi.cattle.io'].forEach((resourceName) => {
           const resourceKind = 'CustomResourceDefinitions';
           const namespace = turtlesNamespace;
           const patch = {metadata: {annotations: {'meta.helm.sh/release-namespace': 'cattle-turtles-system'}}};
-          cy.patchYamlResource('local', namespace, resourceKind, resourceName, patch);
+          cy.patchYamlResource(vars.localCluster, namespace, resourceKind, resourceName, patch);
         })
       })
       );
@@ -128,7 +128,7 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
       qase(407, it('Create Fleet Provider using provider charts', () => {
         // Install Rancher Turtles Certified Providers chart with default values
         let providersChartVersion = isTurtlesDevChart ? undefined : '0.25';
-        cy.checkChart('local', 'Install', vars.turtlesProvidersChartName, turtlesNamespace, {version: providersChartVersion, refreshRepo: true});
+        cy.checkChart(vars.localCluster, 'Install', vars.turtlesProvidersChartName, turtlesNamespace, {version: providersChartVersion, refreshRepo: true});
       })
       );
 
@@ -193,13 +193,13 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
         cy.removeFleetGitRepo('calico-cni');
         // Remove the lb-config
         cy.removeFleetGitRepo('lb-docker');
-        cy.deleteKubernetesResource('local', ['Storage', 'ConfigMaps'], 'docker-rke2-lb-config', vars.capiClustersNS);
+        cy.deleteKubernetesResource(vars.localCluster, ['Storage', 'ConfigMaps'], 'docker-rke2-lb-config', vars.capiClustersNS);
 
         // Cleanup other resources
         capdResourcesCleanup();
 
         // Uninstall Rancher Turtles providers chart
-        cy.deleteKubernetesResource('local', ['Apps', 'Installed Apps'], vars.turtlesProvidersHelmApp, turtlesNamespace);
+        cy.deleteKubernetesResource(vars.localCluster, ['Apps', 'Installed Apps'], vars.turtlesProvidersHelmApp, turtlesNamespace);
 
         // Remove namespaces
         cy.deleteNamespace([vars.capiClassesNS, vars.capiClustersNS, capdProviderNS]);

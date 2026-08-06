@@ -53,7 +53,7 @@ describe('Enable CAPI Providers', () => {
           // Ensure that correct providers chart repo is used post-upgrade by deleting the repo that was added in
           // pre-upgrade
           cy.task('suiteLog', "Removing providers chart repo added in pre-upgrade");
-          cy.deleteKubernetesResource('local', ["Apps", "Repositories"], vars.providersChartRepoName);
+          cy.deleteKubernetesResource(vars.localCluster, ["Apps", "Repositories"], vars.providersChartRepoName);
         }
       }
       if (isTurtlesDevChart) {
@@ -66,7 +66,8 @@ describe('Enable CAPI Providers', () => {
 
   context('Local providers - @install', {tags: '@install'}, () => {
     // HelmOps to be used across all specs
-    qase(90, it('Add Applications fleet repo', () => {
+    // TODO cpinjani: Refactor below condition while adding 2.15 upgrade path
+    qase(90, (isRancherManagerVersion('2.14') && isUpgrade ? it.skip : it)('Add Applications fleet repo', () => {
       // Add upstream apps repo
       cy.addFleetGitRepo('helm-ops', vars.turtlesRepoUrl, vars.classBranch, 'examples/applications/', vars.capiClustersNS);
     })
@@ -79,7 +80,7 @@ describe('Enable CAPI Providers', () => {
         const repositoryName = vars.providersChartRepoName;
         const resourceKind = 'clusterrepos.catalog.cattle.io';
         const patch = {spec: {OCIOptions: {'downloadAllTags': true}}};
-        cy.patchYamlResource('local', 'default', resourceKind, repositoryName, patch);
+        cy.patchYamlResource(vars.localCluster, 'default', resourceKind, repositoryName, patch);
         cy.typeInFilter(repositoryName);
         // Make sure the repo is active before leaving
         // Always press Refresh button as workaround for https://github.com/rancher/rancher/issues/49671
@@ -139,8 +140,8 @@ describe('Enable CAPI Providers', () => {
 
       // Install Rancher Turtles Certified Providers chart
       let operation = isRancherManagerVersion('2.14') && isUpgrade ? 'Upgrade' : 'Install'
-      cy.task('suiteLog', `Installing turtles providers chart version ${vars.turtlesProvidersChartVersion}`)
-      cy.checkChart('local', operation, vars.turtlesProvidersChartName, turtlesNamespace, {
+      cy.task('suiteLog', `${operation} turtles providers chart version: ${vars.turtlesProvidersChartVersion}`)
+      cy.checkChart(vars.localCluster, operation, vars.turtlesProvidersChartName, turtlesNamespace, {
         version: vars.turtlesProvidersChartVersion,
         modifyYAMLOperation: providerSelectionFunction
       });
