@@ -109,7 +109,7 @@ describe('Import CAPV RKE2 Class-Cluster', {tags: ['@vsphere', '@capvr']}, () =>
         .should('exist');
 
       // Add CAPV fleet repository
-      cy.addFleetGitRepo(clusterRepoName, vars.repoUrl, vars.branch, path);
+      cy.addFleetGitRepo(clusterRepoName, vars.repoUrl, 'main', path);
 
       // Check CAPI cluster using its name
       cy.checkCAPICluster(clusterName);
