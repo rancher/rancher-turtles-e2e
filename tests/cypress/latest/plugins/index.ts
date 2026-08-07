@@ -32,10 +32,8 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   config.expose.chartmuseum_repo = process.env.CHARTMUSEUM_REPO || '';
   config.expose.turtles_dev_chart = process.env.TURTLES_DEV_CHART == "true";
   config.expose.turtles_build_type = process.env.BUILD_TYPE || "prime";
-  config.expose.cluster = process.env.CLUSTER_NAME;
   config.expose.k8s_version = process.env.K8S_VERSION_TO_PROVISION;
   config.expose.rancher_version = process.env.RANCHER_VERSION;
-  config.expose.turtles_branch = process.env.TURTLE_BRANCH || 'main';
   config.expose.turtles_chart_dev_version = process.env.TURTLES_CHART_DEV_VERSION || '108.0.0+up99.99.99';
   config.expose.username = process.env.RANCHER_USER;
   config.expose.grepTags = process.env.GREPTAGS || '';
