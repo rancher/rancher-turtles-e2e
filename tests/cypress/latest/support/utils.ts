@@ -33,6 +33,7 @@ export const isPrePrimeChannel = (): boolean => {
 
 export const isPreRelease = /(-alpha|-rc)/.test(rancherVersion);
 export const isHeadBuild = rancherVersion.includes('head');
+export const isStgRegistryVersions = rancherVersion.includes('2.13') || rancherVersion.includes('2.14');
 
 
 // Check if Rancher should use staging registry to install Rancher Turtles Providers Chart

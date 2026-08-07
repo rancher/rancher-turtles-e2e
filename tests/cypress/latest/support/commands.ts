@@ -28,6 +28,7 @@ import {
   isPreRelease,
   isPrimeChannel,
   isRancherManagerVersion,
+  isStgRegistryVersions,
   isTurtlesDevChart,
   isTurtlesPrimeBuild,
   isUpgrade, turtlesNamespace
@@ -1298,16 +1299,16 @@ const PROVIDER_REGISTRIES = {
  */
 function getV213PlusRegistry(providerNamespace: string): string {
   const isPrimeDev = isTurtlesDevChart && isTurtlesPrimeBuild();
-  const usesStgRegistry = isPrePrimeChannel() || (isRancherManagerVersion('2.13') && isHeadBuild);
+  const usesStgRegistry = isPrePrimeChannel() || (isStgRegistryVersions && isHeadBuild);
 
-  // Special handling for 2.13 prerelease community builds
-  if (isRancherManagerVersion('2.13') && isPreRelease && !isPrimeChannel()) {
+  // Special handling for 2.13, 2.14 prerelease community builds
+  if (isStgRegistryVersions && isPreRelease && !isPrimeChannel()) {
     return isPrimeDev ? PROVIDER_REGISTRIES.RANCHER_PRIME : getCommunityRegistry(providerNamespace);
   }
 
   // Staging registry takes precedence for:
   // - Prime prerelease channels (prime-alpha, prime-rc)
-  // - 2.13 head builds (2.13 alpha/rc community builds already handled above)
+  // - 2.13, 2.14 head builds (2.13, 2.14 alpha/rc community builds already handled above)
   if (usesStgRegistry) {
     return PROVIDER_REGISTRIES.RANCHER_STG_PRIME;
   }
