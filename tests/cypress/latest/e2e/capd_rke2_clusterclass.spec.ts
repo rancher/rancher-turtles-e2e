@@ -47,29 +47,24 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: ['@short', '@capdr']}, () => {
   });
 
   context('[SETUP]', () => {
-    qase(294, it('Setup the namespace for importing', () => {
+    it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
-    })
-    );
+    });
 
-    qase(295, it('Create Docker Auth Secret', () => {
+    it('Create Docker Auth Secret', () => {
       // Prevention for Docker.io rate limiting
       cy.createDockerAuthSecret();
-    })
-    );
+    });
 
-    qase(91,
-      it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
+    it('Add CAPD RKE2 ClusterClass Fleet Repo', () => {
         cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(classNamePrefix);
-      })
-    );
+      });
   })
 
   context('[CLUSTER-IMPORT]', () => {
-    qase(29,
-      it('Import CAPD RKE2 class-clusters using YAML', () => {
+    it('Import CAPD RKE2 class-clusters using YAML', () => {
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_rke2_version/g, vars.rke2Version)
@@ -79,11 +74,9 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: ['@short', '@capdr']}, () => {
 
         // Check CAPI cluster using its name
         cy.checkCAPICluster(clusterName);
-      })
-    );
+      });
 
-    qase(298,
-      it('Auto import child CAPD cluster', () => {
+    it('Auto import child CAPD cluster', () => {
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
         cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
@@ -99,21 +92,17 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: ['@short', '@capdr']}, () => {
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
         // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
         cy.checkCAPIClusterActive(clusterName, timeout);
-      })
-    );
+      });
 
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    qase(101,
-      // TODO: Remove the condition once logging is supported on 2.15
+    // TODO: Remove the condition once logging is supported on 2.15
       (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
         cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
-      })
-    );
+      });
 
-    qase(8,
-      it("Scale up imported CAPD cluster by patching class-cluster yaml", () => {
+    it("Scale up imported CAPD cluster by patching class-cluster yaml", () => {
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replicas: 2/g, 'replicas: 3')
 
@@ -130,29 +119,25 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: ['@short', '@capdr']}, () => {
         cy.typeInFilter(clusterName);
         cy.get('.content > .count', {timeout: timeout}).should('have.text', '3');
         cy.checkCAPIClusterActive(clusterName);
-      })
-    );
+      });
 
     if (isRancherManagerVersion('<=2.12')) {
-    qase(41,
-      it('Update chart and check cluster status', () => {
+    it('Update chart and check cluster status', () => {
         cy.checkChart('local', vars.chartUpdateOperation, 'Rancher Turtles', turtlesNamespace, {questions: questions});
 
         // Check cluster is Active
         cy.searchCluster(clusterName);
         cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
-      })
-    );
+      });
     }
 
-    qase(458, it('Re-import the CAPD cluster', () => {
+    it('Re-import the CAPD cluster', () => {
       // Delete the imported cluster
       // Ensure that the provisioned CAPI cluster still exists
       importedRancherv3ClusterDeletion(clusterName);
 
       reImportRancherv3Cluster(clusterName);
-    })
-    );
+    });
 
     it('Check for any errors in Turtles logs', () => {
       // Check for any errors
@@ -162,28 +147,23 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: ['@short', '@capdr']}, () => {
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
-      qase(356, it('Remove imported CAPD cluster from Rancher Manager', () => {
+      it('Remove imported CAPD cluster from Rancher Manager', () => {
         // Delete the imported cluster
         // Ensure that the provisioned CAPI cluster still exists
         importedRancherv3ClusterDeletion(clusterName);
-      })
-      );
+      });
 
-      qase(103,
-        it('Delete the CAPD cluster', {retries: 1}, () => {
+      it('Delete the CAPD cluster', {retries: 1}, () => {
           // Remove CAPI Resources related to the cluster
           capiClusterDeletion(clusterName, timeout);
-        })
-      );
+        });
 
-      qase(104,
-        it('Delete the ClusterClass fleet repo', () => {
+      it('Delete the ClusterClass fleet repo', () => {
           // Remove the clusterclass repo
           cy.removeFleetGitRepo(clusterClassRepoName);
           // Cleanup other resources
           capdResourcesCleanup();
-        })
-      );
+        });
     }
   })
 });

@@ -38,8 +38,7 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
     cy.addRepository('turtles-chart', 'https://rancher.github.io/turtles/', 'http', 'none');
   }
 
-  qase(404,
-    it("Add turtles GitRepo", () => {
+  it("Add turtles GitRepo", () => {
       if (isTurtlesDevChart) {
         addChartMuseumRepo();
       } else {
@@ -56,11 +55,9 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
           addTurtlesProvidersRepo();
         }
       }
-    })
-  );
+    });
 
-  qase(11, it('Install Turtles chart', {retries: 1}, () => {
+  it('Install Turtles chart', {retries: 1}, () => {
       cy.checkChart('local', 'Install', 'Rancher Turtles', turtlesNamespace, {version: isMigration ? '0.24.5' : undefined});
-    })
-  );
+    });
 });

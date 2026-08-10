@@ -25,25 +25,22 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: ['@full', '@capzr']}, () => {
 
 
   context('[SETUP]', () => {
-    qase(326, it('Setup the namespace for importing', () => {
+    it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
-    })
-    );
+    });
 
-    qase(87, it('Add CAPZ RKE2 ClusterClass Fleet Repo and check Azure CCM', () => {
+    it('Add CAPZ RKE2 ClusterClass Fleet Repo and check Azure CCM', () => {
         cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(classNamePrefix);
 
         // Navigate to `local` cluster, More Resources > Fleet > HelmOps and ensure the charts are present.
         cy.checkFleetHelmOps(['azure-ccm', 'calico-cni']);
-      })
-    );
+      });
   })
 
   context('[CLUSTER-IMPORT]', () => {
-    qase(78,
-      it('Import CAPZ RKE2 class-cluster using YAML', () => {
+    it('Import CAPZ RKE2 class-cluster using YAML', () => {
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_subscription_id/g, subscriptionID)
@@ -52,10 +49,9 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: ['@full', '@capzr']}, () => {
         });
         // Check CAPI cluster using its name
         cy.checkCAPICluster(clusterName);
-      })
-    );
+      });
 
-    qase(79, it('Auto import child CAPZ RKE2 cluster', () => {
+    it('Auto import child CAPZ RKE2 cluster', () => {
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
         cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
@@ -71,18 +67,16 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: ['@full', '@capzr']}, () => {
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
         // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
         cy.checkCAPIClusterActive(clusterName, timeout);
-      })
-    );
+      });
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
 
-    qase(80, (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
+    (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
-      })
-    );
+      });
 
-    qase(327, it("Scale up imported CAPZ cluster by patching class-cluster yaml", () => {
+    it("Scale up imported CAPZ cluster by patching class-cluster yaml", () => {
       cy.readFile(classClusterFileName).then((data) => {
         data = data.replace(/replicas: 2/g, 'replicas: 3')
 
@@ -99,8 +93,7 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: ['@full', '@capzr']}, () => {
       cy.typeInFilter(clusterName);
       cy.get('.content > .count', {timeout: timeout}).should('have.text', '3');
       cy.checkCAPIClusterActive(clusterName);
-    })
-    );
+    });
 
     it('Check for any errors in Turtles logs', () => {
       // Check for any errors
@@ -110,25 +103,21 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: ['@full', '@capzr']}, () => {
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
-      qase(365, it('Remove imported CAPZ cluster from Rancher Manager', () => {
+      it('Remove imported CAPZ cluster from Rancher Manager', () => {
         // Delete the imported cluster
         // Ensure that the provisioned CAPI cluster still exists
         importedRancherv3ClusterDeletion(clusterName);
-      })
-      );
+      });
 
-      qase(82,
-        it('Delete the CAPZ cluster', {retries: 1}, () => {
+      it('Delete the CAPZ cluster', {retries: 1}, () => {
           // Remove CAPI Resources related to the cluster
           capiClusterDeletion(clusterName, timeout);
-        })
-      );
+        });
 
-      qase(83, it('Delete the ClusterClass fleet repo and other resources', () => {
+      it('Delete the ClusterClass fleet repo and other resources', () => {
           // Remove the clusterclass repo
           cy.removeFleetGitRepo(clusterClassRepoName);
-        })
-      );
+        });
     }
   })
 });

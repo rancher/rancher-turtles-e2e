@@ -42,7 +42,7 @@ describe('Enable CAPI Providers', () => {
 
   context('Setup providers chart repository', {tags: ['@install']}, () => {
 
-    qase(403, it("Add Rancher Turtles Providers Chart GitRepo", () => {
+    it("Add Rancher Turtles Providers Chart GitRepo", () => {
       // For upgrade tests 2.13 > 2.14, dev=true is only applicable to the target version
       if (isUpgrade) {
         if (isRancherManagerVersion('2.13')) {
@@ -61,19 +61,18 @@ describe('Enable CAPI Providers', () => {
       } else {
         addTurtlesProvidersRepo();
       }
-    }));
+    });
   })
 
   context('Local providers - @install', {tags: '@install'}, () => {
     // HelmOps to be used across all specs
-    qase(90, it('Add Applications fleet repo', () => {
+    it('Add Applications fleet repo', () => {
       // Add upstream apps repo
       cy.addFleetGitRepo('helm-ops', vars.turtlesRepoUrl, vars.classBranch, 'examples/applications/', vars.capiClustersNS);
-    })
-    );
+    });
 
     if (!isTurtlesDevChart && isRancherManagerVersion('>=2.14')) {
-      qase(716, it('Patch the providers chart repository with OCIOptions.downloadAllTags: true', () => {
+      it('Patch the providers chart repository with OCIOptions.downloadAllTags: true', () => {
         // Enabling this option downloads all the chart versions and ensures only supported versions show up
         // Doing so makes updating the chart a smoother process.
         const repositoryName = vars.providersChartRepoName;
@@ -88,11 +87,10 @@ describe('Enable CAPI Providers', () => {
         cy.get('.icon.group-icon.icon-refresh').parent().click();
         cy.wait(1000);
         cy.contains(new RegExp('Active.*' + repositoryName), {timeout: 150000});
-      })
-      );
+      });
     }
 
-    qase(338, it('Create Providers using Charts', () => {
+    it('Create Providers using Charts', () => {
       const providerSelectionFunction = (text: any) => {
         // @ts-ignore
         text.providers.bootstrapKubeadm.enabled = true;
@@ -144,24 +142,21 @@ describe('Enable CAPI Providers', () => {
         version: vars.turtlesProvidersChartVersion,
         modifyYAMLOperation: providerSelectionFunction
       });
-    })
-    );
+    });
 
-    qase(347, it('Wait for all the providers to be Ready', {retries: 2}, () => {
+    it('Wait for all the providers to be Ready', {retries: 2}, () => {
       // Adding this extra check so that retry is not needed in other tests.
       cy.navigateToProviders();
       cy.waitForAllRowsInState('Ready', vars.shortTimeout);
-    })
-    );
+    });
 
-    qase(367, it('Verify Core CAPI Provider', () => {
+    it('Verify Core CAPI Provider', () => {
       cy.navigateToProviders();
       matchAndWaitForProviderReadyStatus(providers.coreCAPIProvider, 'core', providers.coreCAPIProvider, providers.coreCAPIProviderVersion, capiNamespace);
-    })
-    );
+    });
 
     providerTypes.forEach(providerType => {
-      qase([420,421], it('Verify Kubeadm Providers - ' + providerType, () => {
+      it('Verify Kubeadm Providers - ' + providerType, () => {
         // Verify CAPI Kubeadm providers
         if (providerType == 'control plane') {
           const namespace = kubeadmProviderNamespaces[1]
@@ -174,10 +169,9 @@ describe('Enable CAPI Providers', () => {
           cy.navigateToProviders()
           matchAndWaitForProviderReadyStatus(providerName, providerType, providers.kubeadmProvider, providers.kubeadmProviderVersion, namespace);
         }
-      })
-      );
+      });
 
-      qase([369,370], it('Verify RKE2 Providers - ' + providerType, () => {
+      it('Verify RKE2 Providers - ' + providerType, () => {
         if (providerType == 'control plane') {
           const namespace = 'rke2-control-plane-system'
           const providerName = providers.rke2Provider + '-' + 'control-plane'
@@ -189,22 +183,20 @@ describe('Enable CAPI Providers', () => {
           cy.navigateToProviders();
           matchAndWaitForProviderReadyStatus(providerName, providerType, providers.rke2Provider, providers.rke2ProviderVersion, namespace);
         }
-      })
-      );
+      });
     })
 
-    qase(422, it('Verify CAPD provider', () => {
+    it('Verify CAPD provider', () => {
       // Verify Docker Infrastructure provider
       const dockerProviderNamespace = 'capd-system'
       cy.navigateToProviders();
       matchAndWaitForProviderReadyStatus(providers.dockerProvider, 'infrastructure', providers.dockerProvider, providers.kubeadmProviderVersion, dockerProviderNamespace);
-    })
-    );
+    });
   });
 
   context('vSphere provider', {tags: ['@vsphere', '@vsphere-nocaapf', '@capvk', '@capvk-nocaapf', '@capvr', '@capvr-nocaapf']}, () => {
     const vsphereProviderNamespace = 'capv-system'
-    qase(423, it('Verify CAPV provider', () => {
+    it('Verify CAPV provider', () => {
       // Verify vsphere Infrastructure provider
       // See capv_rke2_cluster.spec.ts for more details about `vsphere_secrets_json_base64` structure
       const vsphere_secrets_json_base64 = Cypress.expose("vsphere_secrets_json_base64")
@@ -219,23 +211,21 @@ describe('Enable CAPI Providers', () => {
       cy.burgerMenuOperate('open');
       cy.navigateToProviders();
       matchAndWaitForProviderReadyStatus(providers.vsphereProvider, 'infrastructure', providers.vsphereProvider, providers.vsphereProviderVersion, vsphereProviderNamespace);
-    })
-    );
+    });
   })
 
   context('Cloud Providers', {tags: ['@full', '@full-nocaapf', '@nocaapf']}, () => {
     const providerType = 'infrastructure'
-    qase(424, it('Verify CAPA provider', {tags: ['@capak', '@capar', '@capaeks', '@capar-nocaapf', '@capak-nocaapf', '@capaeks-nocaapf']},() => {
+    it('Verify CAPA provider', {tags: ['@capak', '@capar', '@capaeks', '@capar-nocaapf', '@capak-nocaapf', '@capaeks-nocaapf']},() => {
       const namespace = 'capa-system'
       // Verify AWS Infrastructure provider
       cy.addCloudCredsAWS(providers.amazonProvider, Cypress.expose('aws_access_key'), Cypress.expose('aws_secret_key'));
       cy.burgerMenuOperate('open');
       cy.navigateToProviders();
       matchAndWaitForProviderReadyStatus(providers.amazonProvider, providerType, providers.amazonProvider, providers.amazonProviderVersion, namespace);
-    })
-    );
+    });
 
-    qase(425, it('Verify CAPG provider', {tags: ['@capgk', '@capgke', '@capgk-nocaapf', '@capgke-nocaapf']}, () => {
+    it('Verify CAPG provider', {tags: ['@capgk', '@capgke', '@capgk-nocaapf', '@capgke-nocaapf']}, () => {
       const namespace = 'capg-system'
       // Verify GCP Infrastructure provider
       cy.navigateToProviders();
@@ -252,28 +242,23 @@ describe('Enable CAPI Providers', () => {
       cy.getBySel('cluster-prov-select-credential').contains(providers.googleProvider).should('be.visible');
       cy.clickButton('Save');
       matchAndWaitForProviderReadyStatus(providers.googleProvider, providerType, providers.googleProvider, providers.googleProviderVersion, namespace);
-    })
-    );
+    });
 
     context('CAPZ Setup', {tags: ['@capzk', '@capzr', '@capzaks', '@capzk-nocaapf','@capzr-nocaapf', '@capzaks-nocaapf']}, ()=>{
-      qase(426,
-        it('Verify CAPZ provider', () => {
+      it('Verify CAPZ provider', () => {
           const namespace = 'capz-system'
           // Verify Azure Infrastructure provider
           cy.navigateToProviders();
           matchAndWaitForProviderReadyStatus(providers.azureProvider, providerType, providers.azureProvider, providers.azureProviderVersion, namespace);
-        })
-      );
+        });
 
-      qase(685,
-        it('Create AzureClusterIdentity', () => {
+      it('Create AzureClusterIdentity', () => {
           const clientID = Cypress.expose("azure_client_id")
           const clientSecret = btoa(Cypress.expose("azure_client_secret"))
           const tenantID = Cypress.expose("azure_tenant_id")
 
           cy.createAzureClusterIdentity(clientID, tenantID, clientSecret)
-        })
-      );
+        });
     })
   })
 });

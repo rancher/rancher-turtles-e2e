@@ -47,15 +47,14 @@ describe('Enable use-caapf feature gate and install fleet-addon provider', {tags
     // This feature gate needs to be enabled for >=2.14.1
     // This feature is set to true(in pre_upgrade_setup.spec.ts) before the rancher upgrade; that's why we skip this
     // step for upgrade test.
-    qase(686, it('Enable turtles feature gate: use-caapf', () => {
+    it('Enable turtles feature gate: use-caapf', () => {
         setUseCAAPFFeatureGate(true);
-      })
-    );
+      });
   }
 
   if (isRancherManagerVersion('>=2.14')) {
     // In <2.14 versions, fleet is enabled by default
-    qase(687, it('Enable Fleet addon provider', () => {
+    it('Enable Fleet addon provider', () => {
       const providerSelectionFunction = (text: any) => {
         // fleet-addon needs to be explicitly enabled for >=2.14.1.
         // @ts-ignore
@@ -66,15 +65,12 @@ describe('Enable use-caapf feature gate and install fleet-addon provider', {tags
         version: vars.turtlesProvidersChartVersion,
         modifyYAMLOperation: providerSelectionFunction
       });
-    })
-    );
+    });
   }
 
-  qase(688,
-    it('Verify Fleet addon provider', () => {
+  it('Verify Fleet addon provider', () => {
       cy.navigateToProviders();
       matchAndWaitForProviderReadyStatus(providers.fleetProvider, 'addon', providers.fleetProvider, providers.fleetProviderVersion, 'fleet-addon-system');
-    })
-  );
+    });
 
 });

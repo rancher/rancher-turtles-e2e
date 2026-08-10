@@ -11,15 +11,14 @@ describe('Post Rancher Upgrade Setup - @upgrade', {tags: '@upgrade'}, () => {
     cy.burgerMenuOperate('open');
   });
 
-  qase(510, it('Check the local cluster status is active post-upgrade', ()=>{
+  it('Check the local cluster status is active post-upgrade', ()=>{
     // Check local cluster is Active
     const localCluster = 'local'
     cy.searchCluster(localCluster);
     cy.contains(new RegExp('Active.*' + localCluster), {timeout: timeout});
-  })
-  );
+  });
 
-  qase(511, it('Check upgraded Turtles chart', () => {
+  it('Check upgraded Turtles chart', () => {
     cy.exploreCluster('local');
     cy.setNamespace(turtlesNamespace);
     cy.clickNavMenu(['Apps', 'Installed Apps']);
@@ -29,12 +28,10 @@ describe('Post Rancher Upgrade Setup - @upgrade', {tags: '@upgrade'}, () => {
     const turtlesChartVersion = isTurtlesDevChart? Cypress.expose('turtles_chart_dev_version'): '0.26'
     cy.getBySel('sortable-cell-0-3').contains(turtlesChartVersion, {timeout: timeout});
     cy.waitForAllRowsInState('Deployed', timeout);
-  })
-  );
+  });
 
-  qase(419, it('Delete the Pre-upgrade resources', () => {
+  it('Delete the Pre-upgrade resources', () => {
     cy.removeFleetGitRepo('helm-ops');
     cy.deleteKubernetesResource('local', ['Storage', 'ConfigMaps'], 'docker-rke2-lb-config', vars.capiClustersNS);
-  })
-  );
+  });
 });

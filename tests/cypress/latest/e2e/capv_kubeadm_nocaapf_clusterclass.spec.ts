@@ -32,12 +32,11 @@ describe('Import CAPV Kubeadm (No-Caapf) Class-Cluster', {tags: ['@vsphere', '@v
   });
 
   context('[SETUP]', () => {
-    qase(701, it('Setup the namespace for importing', () => {
+    it('Setup the namespace for importing', () => {
       cy.namespaceAutoImport('Disable');
-    })
-    );
+    });
 
-    qase(702, it('Create values.yaml Secret', () => {
+    it('Create values.yaml Secret', () => {
       let encodedData = ''
       cy.readFile('./fixtures/vsphere/capv-helm-values.yaml').then((data) => {
         data = data.replace(/replace_vsphere_server/g, JSON.stringify(vsphere_secrets_json.vsphere_server))
@@ -64,26 +63,23 @@ describe('Import CAPV Kubeadm (No-Caapf) Class-Cluster', {tags: ['@vsphere', '@v
         data = data.replace(/replace_values/g, encodedData)
         cy.importYAML(data)
       })
-    })
-    );
+    });
 
-    qase(703, it('Create VSphereClusterIdentity', () => {
+    it('Create VSphereClusterIdentity', () => {
       const vsphere_username = JSON.stringify(vsphere_secrets_json.vsphere_username).replace(/\"/g, "")
       const vsphere_password = JSON.stringify(vsphere_secrets_json.vsphere_password).replace(/\"/g, "")
       cy.createVSphereClusterIdentity(vsphere_username, vsphere_password)
-    })
-    );
+    });
 
-    qase(704, it('Add CAPV Kubeadm ClusterClass Fleet Repo', () => {
+    it('Add CAPV Kubeadm ClusterClass Fleet Repo', () => {
       cy.addFleetGitRepo(classRepoName, vars.turtlesRepoUrl, vars.noCaapfClassBranch, classesPath, vars.capiClassesNS)
       // Go to CAPI > ClusterClass to ensure the clusterclass is created
       cy.checkCAPIClusterClass(className);
-    })
-    );
+    });
   })
 
   context('[CLUSTER-IMPORT]', () => {
-    qase(705, it('Add CAPV class-clusters fleet repo', () => {
+    it('Add CAPV class-clusters fleet repo', () => {
       cypressLib.checkNavIcon('cluster-management')
         .should('exist');
 
@@ -95,15 +91,13 @@ describe('Import CAPV Kubeadm (No-Caapf) Class-Cluster', {tags: ['@vsphere', '@v
 
       // Check CAPI cluster status
       cy.checkCAPIClusterCPInitialized(clusterName);
-    })
-    );
+    });
 
-    qase(706, it('Apply the CNI, CCM & CSI manifest', () => {
+    it('Apply the CNI, CCM & CSI manifest', () => {
       cy.kubectlExecute([getCAPIClusterKubeconfig(clusterName), applyYAMLManifest(clusterName, vars.calicoCNIYaml), applyYAMLManifest(clusterName, vars.vSphereCCMYaml), applyYAMLManifest(clusterName, vars.vSphereCSIYaml)]);
-    })
-    );
+    });
 
-    qase(707, it('Auto import child CAPV cluster', () => {
+    it('Auto import child CAPV cluster', () => {
       // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
       cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
@@ -119,45 +113,39 @@ describe('Import CAPV Kubeadm (No-Caapf) Class-Cluster', {tags: ['@vsphere', '@v
       // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
       // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
       cy.checkCAPIClusterActive(clusterName, timeout);
-    })
-    );
+    });
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    qase(708, it.skip('Install App on imported cluster', {retries: 1}, () => {
+    it.skip('Install App on imported cluster', {retries: 1}, () => {
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
-    })
-    );
+    });
 
-    qase(709, it('Check for any errors in Turtles logs', () => {
+    it('Check for any errors in Turtles logs', () => {
       // Check for any errors
       cy.filterPodErrorLogs('rancher-turtles-controller-manager');
-    })
-    );
+    });
   })
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
-      qase(710, it('Remove imported CAPV cluster from Rancher Manager', () => {
+      it('Remove imported CAPV cluster from Rancher Manager', () => {
         // Delete the imported cluster
         // Ensure that the provisioned CAPI cluster still exists
         importedRancherv3ClusterDeletion(clusterName);
-      })
-      );
+      });
 
-      qase(711, it('Delete the CAPV cluster', {retries: 1}, () => {
+      it('Delete the CAPV cluster', {retries: 1}, () => {
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout, clusterRepoName);
-      })
-      );
+      });
 
-      qase(712, it('Delete the ClusterClass fleet repo and other resources', () => {
+      it('Delete the ClusterClass fleet repo and other resources', () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(classRepoName);
         // Cleanup other resources
         capvResourcesCleanup('kubeadm');
-      })
-      );
+      });
     }
   })
 });

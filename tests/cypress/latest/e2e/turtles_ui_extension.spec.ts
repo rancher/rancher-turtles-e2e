@@ -23,13 +23,11 @@ describe('Install CAPI extension - @install', {tags: '@install'}, () => {
     cy.burgerMenuOperate('open');
   });
 
-  qase(153, it('Add capi-ui repo', () => {
+  it('Add capi-ui repo', () => {
     cy.addRepository('capi-ui', 'https://rancher.github.io/capi-ui-extension', 'http', 'none')
-  })
-  );
+  });
 
-  qase(3,
-    it('Install CAPI extension', () => {
+  it('Install CAPI extension', () => {
       cy.contains('Extensions')
         .click();
       cy.contains('CAPI UI');
@@ -51,6 +49,5 @@ describe('Install CAPI extension - @install', {tags: '@install'}, () => {
       cy.get(pluginSelector)
         .children()
         .should('contain', 'UI for CAPI cluster provisioning');
-    })
-  );
+    });
 });

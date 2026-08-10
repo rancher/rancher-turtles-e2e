@@ -27,24 +27,19 @@ describe('Import CAPG GKE Class-Cluster', {tags: ['@full', '@capgke']}, () => {
   });
 
   context('[SETUP]', () => {
-    qase(396,
-      it('Setup the namespace for importing', () => {
+    it('Setup the namespace for importing', () => {
         cy.namespaceAutoImport('Disable');
-      })
-    );
+      });
 
-    qase(397,
-      it('Add CAPG GKE ClusterClass Fleet Repo', () => {
+    it('Add CAPG GKE ClusterClass Fleet Repo', () => {
         cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(classNamePrefix);
-      })
-    );
+      });
   })
 
   context('[CLUSTER-IMPORT]', () => {
-    qase(398,
-      it('Import CAPG GKE class-cluster using YAML', () => {
+    it('Import CAPG GKE class-cluster using YAML', () => {
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_k8sVersion/g, k8sVersion)
@@ -53,11 +48,9 @@ describe('Import CAPG GKE Class-Cluster', {tags: ['@full', '@capgke']}, () => {
         });
         // Check CAPI cluster using its name
         cy.checkCAPICluster(clusterName);
-      })
-    );
+      });
 
-    qase(399,
-      it('Auto import child CAPG cluster', () => {
+    it('Auto import child CAPG cluster', () => {
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
         cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
@@ -72,18 +65,15 @@ describe('Import CAPG GKE Class-Cluster', {tags: ['@full', '@capgke']}, () => {
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
         // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
         cy.checkCAPIClusterActive(clusterName, timeout, true);
-      })
-    );
+      });
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    qase(400,
-      (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
+    (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
       // Install Chart
       // We install Logging chart instead of Monitoring, since this is relatively lightweight.
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
-      })
-    );
+      });
 
     it('Check for any errors in Turtles logs', () => {
       // Check for any errors
@@ -93,27 +83,21 @@ describe('Import CAPG GKE Class-Cluster', {tags: ['@full', '@capgke']}, () => {
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
-      qase(414,
-        it('Remove imported CAPG cluster from Rancher Manager',() => {
+      it('Remove imported CAPG cluster from Rancher Manager',() => {
         // Delete the imported cluster
         // Ensure that the provisioned CAPI cluster still exists
         importedRancherv3ClusterDeletion(clusterName);
-      })
-      );
+      });
 
-      qase(401,
-        it('Delete the CAPG cluster', {retries: 1}, () => {
+      it('Delete the CAPG cluster', {retries: 1}, () => {
           // Remove CAPI Resources related to the cluster
           capiClusterDeletion(clusterName, timeout);
-        })
-      );
+        });
 
-      qase(402,
-        it('Delete the ClusterClass fleet repo', () => {
+      it('Delete the ClusterClass fleet repo', () => {
         // Remove the clusterclass repo
         cy.removeFleetGitRepo(clusterClassRepoName);
-        })
-      );
+        });
     }
   })
 });

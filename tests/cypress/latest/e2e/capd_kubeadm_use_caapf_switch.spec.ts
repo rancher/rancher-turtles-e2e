@@ -52,33 +52,28 @@ describe('Import CAPD Kubeadm Class-Cluster for Use-CAAPF Migration', {tags: ['@
 
   context('[SETUP]', () => {
     // To validate namespace auto-import
-    qase(587, it('Setup the namespace for importing', () => {
+    it('Setup the namespace for importing', () => {
         cy.namespaceAutoImport('Enable');
-      })
-    );
+      });
 
-    qase(588,
-      it('Add CAPD Kubeadm ClusterClass using fleet', () => {
+    it('Add CAPD Kubeadm ClusterClass using fleet', () => {
         cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
         // Go to CAPI > ClusterClass to ensure the clusterclass is created
         cy.checkCAPIClusterClass(classNamePrefix);
-      })
-    );
+      });
 
-    qase(589, it('Create Docker Pull Secret', () => {
+    it('Create Docker Pull Secret', () => {
         // Prevention for Docker.io rate limiting
         cy.readFile('./fixtures/docker/capd-image-pull-secret.yaml').then((data) => {
           data = data.replace(/replace_docker_registry_config/, dockerRegistryConfigBase64)
           data = data.replace(/replace_cluster_name/g, clusterName)
           cy.importYAML(data, vars.capiClustersNS)
         })
-      })
-    );
+      });
   })
 
   context('[CLUSTER-IMPORT]', () => {
-    qase(590,
-      it('Import CAPD Kubeadm class-clusters using YAML', () => {
+    it('Import CAPD Kubeadm class-clusters using YAML', () => {
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_kindVersion/g, vars.kindVersion)
@@ -87,11 +82,9 @@ describe('Import CAPD Kubeadm Class-Cluster for Use-CAAPF Migration', {tags: ['@
 
         // Check CAPI cluster using its name
         cy.checkCAPICluster(clusterName);
-      })
-    );
+      });
 
-    qase(591,
-      it('Auto import child CAPD cluster', () => {
+    it('Auto import child CAPD cluster', () => {
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
         cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
@@ -107,29 +100,28 @@ describe('Import CAPD Kubeadm Class-Cluster for Use-CAAPF Migration', {tags: ['@
         // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
         // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
         cy.checkCAPIClusterActive(clusterName, timeout);
-      })
-    );
+      });
   })
 
   context('[Pre Migration Steps]', ()=> {
-    qase(592, it('Download the migration script and run pre-phase on the local cluster', () => {
+    it('Download the migration script and run pre-phase on the local cluster', () => {
       cy.kubectlExecute(migrationCMD('pre'));
-    }))
+    })
 
-    qase(593, it('Set .helm.force=true for Calico CNI Helm Op', () => {
+    it('Set .helm.force=true for Calico CNI Helm Op', () => {
       ['calico-cni'].forEach((resourceName) => {
         const resourceKind = 'HelmOp';
         const namespace = vars.capiClustersNS;
         const patch = {spec: {helm: {'force': true}}};
         cy.patchYamlResource('local', namespace, resourceKind, resourceName, patch);
       })
-    }))
+    })
 
-    qase(594, it('Set use-caapf: false', () => {
+    it('Set use-caapf: false', () => {
       setUseCAAPFFeatureGate(false);
-    }))
+    })
 
-    qase(595, it('Disable fleet-addon provider', () => {
+    it('Disable fleet-addon provider', () => {
       const providerSelectionFunction = (text: any) => {
         // @ts-ignore
         text.providers.addonFleet.enabled = false;
@@ -140,28 +132,27 @@ describe('Import CAPD Kubeadm Class-Cluster for Use-CAAPF Migration', {tags: ['@
         modifyYAMLOperation: providerSelectionFunction,
         version: vars.turtlesProvidersChartVersion
       })
-    }))
+    })
   })
 
   context('[Post Migration Steps]', ()=>{
-    qase(596, it('Download the migration script and run post-phase', ()=>{
+    it('Download the migration script and run post-phase', ()=>{
       cy.kubectlExecute(migrationCMD('post'), timeout);
-    }));
+    });
 
-    qase(597, it('Ensure everything is migrated from capi-clusters to fleet-default',() => {
+    it('Ensure everything is migrated from capi-clusters to fleet-default',() => {
       cy.checkKubernetesResource('local',["More Resources", "Fleet", "Clusters"] , clusterName, false, vars.capiClustersNS);
       cy.checkKubernetesResource('local',["More Resources", "Fleet", "Clusters"] , clusterName, true, vars.fleetDefaultNS);
 
       cy.checkKubernetesResource('local',["More Resources", "Fleet", "Cluster Groups"] , classNamePrefix, false, vars.capiClustersNS);
       cy.checkKubernetesResource('local',["More Resources", "Fleet", "Cluster Groups"] , classNamePrefix, true, vars.fleetDefaultNS);
-    }));
+    });
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
 
     // Ref: https://github.com/rancher/turtles/issues/1880
-    qase(598,
-      it('Check the fleet-addon annotation and finalizer is removed from clusters', () => {
+    it('Check the fleet-addon annotation and finalizer is removed from clusters', () => {
         // Check the externally-managed annotation is removed from the Rancher management cluster
         cy.checkExternalFleetAnnotation(clusterName, false);
 
@@ -173,16 +164,12 @@ describe('Import CAPD Kubeadm Class-Cluster for Use-CAAPF Migration', {tags: ['@
           expect(text).not.to.include('fleet.addons.cluster.x-k8s.io');
         });
       })
-    )
 
-    qase(599,
-      it('Install App on imported cluster', {retries: 1}, () => {
+    it('Install App on imported cluster', {retries: 1}, () => {
         cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
-      })
-    );
+      });
 
-    qase(600,
-      it("Scale up imported CAPD cluster by patching class-cluster yaml", () => {
+    it("Scale up imported CAPD cluster by patching class-cluster yaml", () => {
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
 
@@ -198,41 +185,34 @@ describe('Import CAPD Kubeadm Class-Cluster for Use-CAAPF Migration', {tags: ['@
         cy.typeInFilter(clusterName);
         cy.get('.content > .count', {timeout: timeout}).should('have.text', '3');
         cy.checkCAPIClusterActive(clusterName);
-      })
-    );
+      });
 
-    qase(601, it('Re-import the CAPD cluster', () => {
+    it('Re-import the CAPD cluster', () => {
         // Delete the imported cluster
         // Ensure that the provisioned CAPI cluster still exists
         importedRancherv3ClusterDeletion(clusterName);
 
         reImportRancherv3Cluster(clusterName);
-      })
-    );
+      });
   })
 
   context('[TEARDOWN]', () => {
     if (skipClusterDeletion) {
-      qase(602, it('Remove imported CAPD cluster from Rancher Manager', () => {
+      it('Remove imported CAPD cluster from Rancher Manager', () => {
           // Delete the imported cluster
           // Ensure that the provisioned CAPI cluster still exists
           importedRancherv3ClusterDeletion(clusterName);
-        })
-      );
+        });
 
-      qase(603,
-        it('Delete the CAPD cluster', {retries: 1}, () => {
+      it('Delete the CAPD cluster', {retries: 1}, () => {
           // Remove CAPI Resources related to the cluster
           capiClusterDeletion(clusterName, timeout);
-        })
-      );
+        });
 
-      qase(604,
-        it('Delete the ClusterClass fleet repo', () => {
+      it('Delete the ClusterClass fleet repo', () => {
           // Remove the clusterclass repo
           cy.removeFleetGitRepo(clusterClassRepoName);
-        })
-      );
+        });
     }
   })
 });

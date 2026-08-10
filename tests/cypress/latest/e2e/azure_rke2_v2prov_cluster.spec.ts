@@ -24,13 +24,12 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
   });
 
   context('[SETUP]', () => {
-    qase(307, it('Create Azure Cloud credentials', () => {
+    it('Create Azure Cloud credentials', () => {
       // Create Azure Cloud credentials
       cy.addCloudCredsAzure('azure', Cypress.expose('azure_client_id'), Cypress.expose('azure_client_secret'), Cypress.expose('azure_subscription_id'));
-    })
-    );
+    });
 
-    qase(308, it('Get user ID and Cloud credential ID', () => {
+    it('Get user ID and Cloud credential ID', () => {
       cy.accesMenuSelection(['Users & Authentication']);
       cy.getBySel('router-link-user-retention').should('be.visible');
       cy.typeInFilter(userName);
@@ -49,24 +48,21 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
         ccID = $cell.text();
         cy.task('suiteLog', `Cloud credential ID: ${ccID}`);
       });
-    })
-    );
+    });
   })
 
   features.forEach((feature) => {
     context('[CLUSTER-IMPORT]', () => {
-      qase(309, it('Create the AzureConfig', () => {
+      it('Create the AzureConfig', () => {
         cy.readFile(rkeConfigFileName).then((data) => {
           data = data.replace(/replace_user_id/g, userID)
           data = data.replace(/replace_cluster_name/g, clusterName)
           cy.importYAML(data)
         });
-      })
-      );
+      });
 
       // Create Azure RKE2 Cluster using YAML
-      qase([132,390],
-        it('Create Azure RKE2 Cluster with feature - ' + feature, () => {
+      it('Create Azure RKE2 Cluster with feature - ' + feature, () => {
           cy.goToHome();
           cy.clickButton('Manage');
           cy.getBySel('cluster-list').should('be.visible');
@@ -116,20 +112,18 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
           // Check cluster is Active
           cy.searchCluster(clusterName);
           cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
-        })
-      );
+        });
     })
 
     context('[TEARDOWN]', () => {
       if (skipClusterDeletion) {
-        qase(310, it('Delete Azure RKE2 cluster from Rancher Manager', () => {
+        it('Delete Azure RKE2 cluster from Rancher Manager', () => {
           cy.deleteCluster(clusterName, timeout);
           cy.goToHome();
           // kubectl get clusters.cluster.x-k8s.io
           // This is checked by ensuring the cluster is not available in navigation menu
           cy.contains(clusterName).should('not.exist');
-        })
-        );
+        });
       }
     })
   })

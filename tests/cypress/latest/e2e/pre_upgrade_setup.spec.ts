@@ -13,10 +13,9 @@ describe('Pre Rancher Upgrade Setup - @upgrade', {tags: '@upgrade'}, () => {
     cy.burgerMenuOperate('open');
   });
 
-  qase(509, it("Enable use-caapf feature gate before Rancher upgrade", () => {
+  it("Enable use-caapf feature gate before Rancher upgrade", () => {
       // At this point the feature does not really exist, but it should be set before upgrading Rancher Turtles via Rancher Manager upgrade,
       // which is also one of the reasons why we do not wait for it to take effect
       setUseCAAPFFeatureGate(true, false)
-  })
-  );
+  });
 });

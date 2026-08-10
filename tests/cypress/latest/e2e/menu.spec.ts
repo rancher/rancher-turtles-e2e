@@ -22,13 +22,12 @@ describe('Menu testing - @install', {tags: '@install'}, () => {
     cy.burgerMenuOperate('open');
   });
 
-  qase(154, it('Check Turtles menu', () => {
+  it('Check Turtles menu', () => {
     // Cluster Management's icon should appear in the side menu
     cypressLib.checkNavIcon('cluster-management')
       .should('exist');
 
     // Check Turtles's side menu
     cy.checkCAPIMenu();
-  })
-  );
+  });
 });
