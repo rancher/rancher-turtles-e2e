@@ -38,10 +38,13 @@ import {vars} from './variables'
 function restoreSessionIfLoggedOut() {
   const loggedOutPathPattern = /(^|\/)(auth\/login|verify|logout)(\/|$)/;
 
-  cy.location('pathname', {timeout: vars.shortTimeout}).then((pathname) => {
+  return cy.location('pathname', {timeout: vars.shortTimeout}).then((pathname) => {
     if (loggedOutPathPattern.test(pathname)) {
       cy.task('suiteLog', `Detected Rancher logout on ${pathname}; logging in again`);
       cy.login();
+      cy.location('pathname', {timeout: vars.fullTimeout}).should((currentPath) => {
+        expect(currentPath).to.not.match(loggedOutPathPattern);
+      });
       cy.visit('/', {failOnStatusCode: false});
       cy.location('pathname', {timeout: vars.fullTimeout}).should((currentPath) => {
         expect(currentPath).to.not.match(loggedOutPathPattern);
@@ -905,8 +908,9 @@ Cypress.Commands.add('typeInFilter', (text, selector = '.input-sm') => {
 // Command to navigate to Home page
 Cypress.Commands.add('goToHome', () => {
   cy.visit('/', {failOnStatusCode: false});
-  restoreSessionIfLoggedOut();
-  cy.getBySel('banner-title', {timeout: vars.fullTimeout}).contains('Welcome to Rancher');
+  restoreSessionIfLoggedOut().then(() => {
+    cy.getBySel('banner-title', {timeout: vars.fullTimeout}).contains('Welcome to Rancher');
+  });
 });
 
 // Fleet commands
@@ -1053,15 +1057,16 @@ Cypress.Commands.add('waitForAllRowsInState', (desiredState, timeout = 120000) =
 });
 
 Cypress.Commands.add('burgerMenuOperate', (operation: 'open' | 'close') => {
-  restoreSessionIfLoggedOut();
   const isOpen = operation === 'open';
   const selector = isOpen ? 'menu-open' : 'menu-close';
-  cy.getBySel('side-menu', {timeout: vars.shortTimeout}).then(($el) => {
-    if (!$el.hasClass(selector)) {
-      cypressLib.burgerMenuToggle();
-    };
+  restoreSessionIfLoggedOut().then(() => {
+    cy.getBySel('side-menu', {timeout: vars.fullTimeout}).then(($el) => {
+      if (!$el.hasClass(selector)) {
+        cypressLib.burgerMenuToggle();
+      };
+    });
+    cy.get('.side-menu.' + selector).should('exist');
   });
-  cy.get('.side-menu.' + selector).should('exist');
 });
 
 
