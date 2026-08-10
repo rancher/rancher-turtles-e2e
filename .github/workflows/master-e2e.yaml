@@ -512,7 +512,7 @@ jobs:
       - name: Cypress tests
         id: cypress
         env:
-          TURTLES_BRANCH: ${{ env.TURTLES_BRANCH }}
+          E2E_TURTLES_BRANCH: ${{ github.ref_name }}
           RANCHER_VERSION: ${{ env.RANCHER_VERSION }}
           RANCHER_PASSWORD: ${{ secrets.rancher_password }}
           SPEC: |
@@ -603,6 +603,7 @@ jobs:
       - name: Cypress tests - Upgraded Rancher
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:
+          E2E_TURTLES_BRANCH: ${{ github.ref_name }}
           RANCHER_VERSION: ${{ env.RANCHER_VERSION }}
           RANCHER_PASSWORD: ${{ secrets.rancher_password }}
           QASE_TESTOPS_RUN_ID: ${{ steps.qase_run_id.outputs.qase_run_id }}

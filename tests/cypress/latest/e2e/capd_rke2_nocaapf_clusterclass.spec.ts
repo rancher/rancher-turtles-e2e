@@ -50,7 +50,7 @@ describe('Import CAPD RKE2 (No-Caapf) Class-Cluster using Fleet', {tags: ['@shor
   context('[CLUSTER-IMPORT]', () => {
     qase(575, it('Add CAPD cluster fleet repo and get cluster name', () => {
       cypressLib.checkNavIcon('cluster-management').should('exist');
-      cy.addFleetGitRepo(clustersRepoName, vars.repoUrl, vars.branch, path);
+      cy.addFleetGitRepo(clustersRepoName, vars.repoUrl, vars.e2eBranch, path);
 
       // Check CAPI cluster using its name prefix i.e. className
       cy.checkCAPICluster(classNamePrefix);
