@@ -35,6 +35,16 @@ import {
 } from './utils';
 import {vars} from './variables'
 
+function restoreSessionIfLoggedOut() {
+  cy.location('pathname', {timeout: vars.shortTimeout}).then((pathname) => {
+    if (pathname.includes('/auth/login') || pathname.includes('/verify') || pathname.includes('/logout')) {
+      cy.task('suiteLog', `Detected Rancher logout on ${pathname}; logging in again`);
+      cy.login();
+      cy.visit('/', {failOnStatusCode: false});
+    }
+  });
+}
+
 // Generic commands
 // Go to specific Sub Menu from Access Menu
 Cypress.Commands.add('accesMenuSelection', (menuPaths: string[]) => {
@@ -888,8 +898,9 @@ Cypress.Commands.add('typeInFilter', (text, selector = '.input-sm') => {
 
 // Command to navigate to Home page
 Cypress.Commands.add('goToHome', () => {
-  cy.visit('/');
-  cy.getBySel('banner-title').contains('Welcome to Rancher');
+  cy.visit('/', {failOnStatusCode: false});
+  restoreSessionIfLoggedOut();
+  cy.getBySel('banner-title', {timeout: vars.shortTimeout}).contains('Welcome to Rancher');
 });
 
 // Fleet commands
@@ -1036,9 +1047,10 @@ Cypress.Commands.add('waitForAllRowsInState', (desiredState, timeout = 120000) =
 });
 
 Cypress.Commands.add('burgerMenuOperate', (operation: 'open' | 'close') => {
+  restoreSessionIfLoggedOut();
   const isOpen = operation === 'open';
   const selector = isOpen ? 'menu-open' : 'menu-close';
-  cy.getBySel('side-menu').then(($el) => {
+  cy.getBySel('side-menu', {timeout: vars.shortTimeout}).then(($el) => {
     if (!$el.hasClass(selector)) {
       cypressLib.burgerMenuToggle();
     };
