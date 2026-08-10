@@ -46,6 +46,7 @@ function restoreSessionIfLoggedOut() {
       cy.location('pathname', {timeout: vars.fullTimeout}).should((currentPath) => {
         expect(currentPath).to.not.match(loggedOutPathPattern);
       });
+      cy.getBySel('banner-title', {timeout: vars.fullTimeout}).contains('Welcome to Rancher');
     }
   });
 }
