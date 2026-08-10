@@ -66,7 +66,7 @@ describe('Enable CAPI Providers', () => {
 
   context('Setting up Local providers - @install', {tags: '@install'}, () => {
     // HelmOps to be used across all specs
-    qase('43', it('Add Applications fleet repo', () => {
+    qase('43', it('Add Helm Ops Applications fleet repo', () => {
       // Add upstream apps repo
       cy.addFleetGitRepo('helm-ops', vars.turtlesRepoUrl, vars.classBranch, 'examples/applications/', vars.capiClustersNS);
     }));
@@ -90,7 +90,7 @@ describe('Enable CAPI Providers', () => {
       }));
     }
 
-    qase('45', it('Create Providers using Charts', () => {
+    qase('45', it('Enabling Providers using Charts', () => {
       const providerSelectionFunction = (text: any) => {
         // @ts-ignore
         text.providers.bootstrapKubeadm.enabled = true;
