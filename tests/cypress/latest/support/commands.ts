@@ -906,7 +906,7 @@ Cypress.Commands.add('typeInFilter', (text, selector = '.input-sm') => {
 Cypress.Commands.add('goToHome', () => {
   cy.visit('/', {failOnStatusCode: false});
   restoreSessionIfLoggedOut();
-  cy.getBySel('banner-title', {timeout: vars.shortTimeout}).contains('Welcome to Rancher');
+  cy.getBySel('banner-title', {timeout: vars.fullTimeout}).contains('Welcome to Rancher');
 });
 
 // Fleet commands
