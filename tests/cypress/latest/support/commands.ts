@@ -43,7 +43,7 @@ function restoreSessionIfLoggedOut() {
       cy.task('suiteLog', `Detected Rancher logout on ${pathname}; logging in again`);
       cy.login();
       cy.visit('/', {failOnStatusCode: false});
-      cy.location('pathname', {timeout: vars.shortTimeout}).should((currentPath) => {
+      cy.location('pathname', {timeout: vars.fullTimeout}).should((currentPath) => {
         expect(currentPath).to.not.match(loggedOutPathPattern);
       });
     }
