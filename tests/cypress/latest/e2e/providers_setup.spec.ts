@@ -66,13 +66,13 @@ describe('Enable CAPI Providers', () => {
 
   context('Setting up Local providers - @install', {tags: '@install'}, () => {
     // HelmOps to be used across all specs
-    qase('43', it('Add Helm Ops Applications fleet repo', () => {
+    qase([43, 63], it('Add Helm Ops Applications fleet repo', () => {
       // Add upstream apps repo
       cy.addFleetGitRepo('helm-ops', vars.turtlesRepoUrl, vars.classBranch, 'examples/applications/', vars.capiClustersNS);
     }));
 
     if (!isTurtlesDevChart && isRancherManagerVersion('>=2.14')) {
-      qase('44', it('Patch the providers chart repository with OCIOptions.downloadAllTags: true', () => {
+      qase(44, it('Patch the providers chart repository with OCIOptions.downloadAllTags: true', () => {
         // Enabling this option downloads all the chart versions and ensures only supported versions show up
         // Doing so makes updating the chart a smoother process.
         const repositoryName = vars.providersChartRepoName;
@@ -90,7 +90,7 @@ describe('Enable CAPI Providers', () => {
       }));
     }
 
-    qase('45', it('Enabling Providers using Charts', () => {
+    qase(45, it('Enabling Providers using Charts', () => {
       const providerSelectionFunction = (text: any) => {
         // @ts-ignore
         text.providers.bootstrapKubeadm.enabled = true;
@@ -144,19 +144,19 @@ describe('Enable CAPI Providers', () => {
       });
     }));
 
-    qase('46', it('Wait for all the providers to be Ready', {retries: 2}, () => {
+    qase(46, it('Wait for all the providers to be Ready', {retries: 2}, () => {
       // Adding this extra check so that retry is not needed in other tests.
       cy.navigateToProviders();
       cy.waitForAllRowsInState('Ready', vars.shortTimeout);
     }));
 
-    qase('47', it('Verify Core CAPI Provider', () => {
+    qase(47, it('Verify Core CAPI Provider', () => {
       cy.navigateToProviders();
       matchAndWaitForProviderReadyStatus(providers.coreCAPIProvider, 'core', providers.coreCAPIProvider, providers.coreCAPIProviderVersion, capiNamespace);
     }));
 
     providerTypes.forEach(providerType => {
-      qase([48, 50], it('Verify Kubeadm Providers - ' + providerType, () => {
+      qase([48, 50], it('Verify Kubeadm Providers : ' + providerType, () => {
         // Verify CAPI Kubeadm providers
         if (providerType == 'control plane') {
           const namespace = kubeadmProviderNamespaces[1]
@@ -171,7 +171,7 @@ describe('Enable CAPI Providers', () => {
         }
       }));
 
-      qase([49, 51], it('Verify RKE2 Providers - ' + providerType, () => {
+      qase([49, 51], it('Verify RKE2 Providers : ' + providerType, () => {
         if (providerType == 'control plane') {
           const namespace = 'rke2-control-plane-system'
           const providerName = providers.rke2Provider + '-' + 'control-plane'
@@ -186,7 +186,7 @@ describe('Enable CAPI Providers', () => {
       }));
     })
 
-    qase('52', it('Verify CAPD provider', () => {
+    qase(52, it('Verify CAPD provider was installed properly', () => {
       // Verify Docker Infrastructure provider
       const dockerProviderNamespace = 'capd-system'
       cy.navigateToProviders();
