@@ -36,11 +36,16 @@ import {
 import {vars} from './variables'
 
 function restoreSessionIfLoggedOut() {
+  const loggedOutPaths = ['/auth/login', '/verify', '/logout'];
+
   cy.location('pathname', {timeout: vars.shortTimeout}).then((pathname) => {
-    if (pathname.includes('/auth/login') || pathname.includes('/verify') || pathname.includes('/logout')) {
+    if (loggedOutPaths.some((loggedOutPath) => pathname.includes(loggedOutPath))) {
       cy.task('suiteLog', `Detected Rancher logout on ${pathname}; logging in again`);
       cy.login();
       cy.visit('/', {failOnStatusCode: false});
+      cy.location('pathname', {timeout: vars.shortTimeout}).then((currentPath) => {
+        expect(loggedOutPaths.some((loggedOutPath) => currentPath.includes(loggedOutPath))).to.be.false;
+      });
     }
   });
 }
