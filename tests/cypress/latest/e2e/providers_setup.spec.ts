@@ -64,7 +64,7 @@ describe('Enable CAPI Providers', () => {
     });
   })
 
-  context('Local providers - @install', {tags: '@install'}, () => {
+  context('Local providers setup - @install', {tags: '@install'}, () => {
     // HelmOps to be used across all specs
     it('Add Applications fleet repo', () => {
       // Add upstream apps repo
