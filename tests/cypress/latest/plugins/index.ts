@@ -36,7 +36,6 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   config.expose.k8s_version = process.env.K8S_VERSION_TO_PROVISION;
   config.expose.rancher_version = process.env.RANCHER_VERSION;
   config.expose.e2e_turtles_branch = process.env.E2E_TURTLES_BRANCH || 'main';
-  config.expose.turtles_branch = process.env.TURTLES_BRANCH || 'main';
   config.expose.turtles_chart_dev_version = process.env.TURTLES_CHART_DEV_VERSION || '108.0.0+up99.99.99';
   config.expose.username = process.env.RANCHER_USER;
   config.expose.grepTags = process.env.GREPTAGS || '';
