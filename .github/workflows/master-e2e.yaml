@@ -254,7 +254,7 @@ jobs:
       CONTROLLER_IMG: localhost:5000/rancher/turtles
       BROWSER: chrome
       CYPRESS_DOCKER: 'cypress/included:15.17.0@sha256:9378699679f7d6ddb63c572866d4f11ec822abacb099345e89f5b86381efd53f'
-      E2E_TURTLES_BRANCH: ${{ github.ref_name }}
+      RANCHER_TURTLES_E2E_BRANCH: ${{ github.ref_name }}
       # Inputs
       GREPTAGS: ${{ inputs.grep_test_by_tag }}
       SKIP_CLUSTER_DELETE: ${{ inputs.skip_cluster_delete }}
@@ -513,7 +513,7 @@ jobs:
       - name: Cypress tests
         id: cypress
         env:
-          E2E_TURTLES_BRANCH: ${{ env.E2E_TURTLES_BRANCH }}
+          RANCHER_TURTLES_E2E_BRANCH: ${{ env.RANCHER_TURTLES_E2E_BRANCH }}
           RANCHER_VERSION: ${{ env.RANCHER_VERSION }}
           RANCHER_PASSWORD: ${{ secrets.rancher_password }}
           SPEC: |
@@ -604,7 +604,7 @@ jobs:
       - name: Cypress tests - Upgraded Rancher
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:
-          E2E_TURTLES_BRANCH: ${{ env.E2E_TURTLES_BRANCH }}
+          RANCHER_TURTLES_E2E_BRANCH: ${{ env.RANCHER_TURTLES_E2E_BRANCH }}
           RANCHER_VERSION: ${{ env.RANCHER_VERSION }}
           RANCHER_PASSWORD: ${{ secrets.rancher_password }}
           QASE_TESTOPS_RUN_ID: ${{ steps.qase_run_id.outputs.qase_run_id }}
