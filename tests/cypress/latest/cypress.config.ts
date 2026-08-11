@@ -1,5 +1,4 @@
 import {defineConfig} from 'cypress'
-import {afterSpecHook} from 'cypress-qase-reporter/hooks';
 import {writeFileSync} from 'fs';
 import {plugin as cypressGrepPlugin} from '@cypress/grep/plugin';
 
@@ -20,7 +19,7 @@ export default defineConfig({
     },
     cypressQaseReporterReporterOptions: {
       mode: "testops",
-        debug: false,
+      debug: true,
         testops: {
           api: {
            token: qaseAPIToken,
@@ -45,52 +44,40 @@ export default defineConfig({
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {
-      // Help for memory issues.
-      // Ref: https://www.bigbinary.com/blog/how-we-fixed-the-cypress-out-of-memory-error-in-chromium-browsers
+      // 1. Browser launch options
       on("before:browser:launch", (browser, launchOptions) => {
-
         if (["chrome", "edge"].includes(browser.name)) {
-          launchOptions.args.push("--no-sandbox");
-          launchOptions.args.push("--disable-gpu");
-          launchOptions.args.push("--use-gl=swiftshader"); // Forces software rendering safely
-          launchOptions.args.push("--js-flags=--max-old-space-size=8192");
-          launchOptions.args.push("--disable-dev-shm-usage");
+          launchOptions.args.push("--no-sandbox", "--disable-gpu", "--use-gl=swiftshader", "--js-flags=--max-old-space-size=8192", "--disable-dev-shm-usage");
         }
         return launchOptions;
       });
+
+      // 2. Custom plugins
       require('./plugins/index.ts')(on, config);
-      require('cypress-qase-reporter/plugin')(on, config);
-      require('cypress-qase-reporter/metadata')(on);
-      on('after:spec', async (spec, results) => {
-        return await afterSpecHook(spec, config);
-      });
+      cypressGrepPlugin(config);
+
+      // 3. Register your custom before:spec FIRST (if you are on Cypress < 12)
+      // or combine them if you notice the text file isn't generating.
       on('before:spec', () => {
-        // Writes QASE_TESTOPS_RUN_ID to a file before running each spec
-        // and overwrites it with the same content over and over again
-        // but it is ok as the value is the same during the whole run.
-        // Later this file is used as output value in .github/workflows/master-e2e.yaml for:
-        // 1) Marking cancelled test run in Qase TestOps as Completed
-        // 2) Linking the run in the summary
         const qaseRunId = process.env.QASE_TESTOPS_RUN_ID;
         if (qaseRunId) {
-          // process.stdout.write(`QASE_TESTOPS_RUN_ID=${qaseRunId}\n`);
           writeFileSync('./QASE_TESTOPS_RUN_ID.txt', qaseRunId, {encoding: 'utf8'});
-        } else {
-          // process.stdout.write('QASE_TESTOPS_RUN_ID is not set.\n');
         }
-        // Output all environment variables to stdout for debugging purposes
-        // for (const [key, value] of Object.entries(process.env)) {
-        //   process.stdout.write(`${key}=${value}\n`);
-        // }
       });
-      // Register the 'suiteLog' task
+
+      // 4. Register Qase Plugins LAST so their hooks wrap everything correctly
+      require('cypress-qase-reporter/metadata')(on);
+      require('cypress-qase-reporter/plugin')(on, config);
+
+      // REMOVED: on('after:spec') manual block
+
       on('task', {
         suiteLog(message) {
           console.log(message);
-          return null; // Tasks must return a value or null
+          return null;
         },
       });
-      cypressGrepPlugin(config);
+
       return config;
     },
     supportFile: './support/e2e.ts',
