@@ -64,51 +64,54 @@ describe('Enable CAPI Providers', () => {
     });
   })
 
-  context('Setting up Local providers - @install', {tags: '@install'}, () => {
+  context('Local providers - @install', {tags: '@install'}, () => {
     // HelmOps to be used across all specs
-    qase([43, 63], it('Add Helm Ops Applications fleet repo', () => {
-      // Add upstream apps repo
-      cy.addFleetGitRepo('helm-ops', vars.turtlesRepoUrl, vars.classBranch, 'examples/applications/', vars.capiClustersNS);
-    }));
+    qase(25, it('Add Applications fleet repo', () => {
+        // Add upstream apps repo
+        cy.addFleetGitRepo('helm-ops', vars.turtlesRepoUrl, vars.classBranch, 'examples/applications/', vars.capiClustersNS);
+      })
+    );
 
     if (!isTurtlesDevChart && isRancherManagerVersion('>=2.14')) {
-      qase(44, it('Patch the providers chart repository with OCIOptions.downloadAllTags: true', () => {
-        // Enabling this option downloads all the chart versions and ensures only supported versions show up
-        // Doing so makes updating the chart a smoother process.
-        const repositoryName = vars.providersChartRepoName;
-        const resourceKind = 'clusterrepos.catalog.cattle.io';
-        const patch = {spec: {OCIOptions: {'downloadAllTags': true}}};
-        cy.patchYamlResource('local', 'default', resourceKind, repositoryName, patch);
-        cy.typeInFilter(repositoryName);
-        // Make sure the repo is active before leaving
-        // Always press Refresh button as workaround for https://github.com/rancher/rancher/issues/49671
-        cy.getBySel('sortable-table-0-action-button').click();
-        cy.wait(1000);
-        cy.get('.icon.group-icon.icon-refresh').parent().click();
-        cy.wait(1000);
-        cy.contains(new RegExp('Active.*' + repositoryName), {timeout: 150000});
-      }));
+      qase(26, it('Patch the providers chart repository with OCIOptions.downloadAllTags: true', () => {
+          // Enabling this option downloads all the chart versions and ensures only supported versions show up
+          // Doing so makes updating the chart a smoother process.
+          const repositoryName = vars.providersChartRepoName;
+          const resourceKind = 'clusterrepos.catalog.cattle.io';
+          const patch = {spec: {OCIOptions: {'downloadAllTags': true}}};
+          cy.patchYamlResource('local', 'default', resourceKind, repositoryName, patch);
+          cy.typeInFilter(repositoryName);
+          // Make sure the repo is active before leaving
+          // Always press Refresh button as workaround for https://github.com/rancher/rancher/issues/49671
+          cy.getBySel('sortable-table-0-action-button').click();
+          cy.wait(1000);
+          cy.get('.icon.group-icon.icon-refresh').parent().click();
+          cy.wait(1000);
+          cy.contains(new RegExp('Active.*' + repositoryName), {timeout: 150000});
+        })
+      );
     }
 
-    qase(45, it('Enabling Providers using Charts', () => {
-      const providerSelectionFunction = (text: any) => {
-        // @ts-ignore
-        text.providers.bootstrapKubeadm.enabled = true;
-        // @ts-ignore
-        text.providers.bootstrapKubeadm.enableAutomaticUpdate = true;
+    qase(27, it('Create Providers using Charts', () => {
+        const providerSelectionFunction = (text: any) => {
+          // @ts-ignore
+          text.providers.bootstrapKubeadm.enabled = true;
+          // @ts-ignore
+          text.providers.bootstrapKubeadm.enableAutomaticUpdate = true;
 
-        // @ts-ignore
-        text.providers.controlplaneKubeadm.enabled = true;
-        // @ts-ignore
-        text.providers.controlplaneKubeadm.enableAutomaticUpdate = true;
+          // @ts-ignore
+          text.providers.controlplaneKubeadm.enabled = true;
+          // @ts-ignore
+          text.providers.controlplaneKubeadm.enableAutomaticUpdate = true;
 
-        // @ts-ignore
-        text.providers.infrastructureDocker.enabled = true;
-        // @ts-ignore
-        text.providers.infrastructureDocker.enableAutomaticUpdate = true;
+          // @ts-ignore
+          text.providers.infrastructureDocker.enabled = true;
+          // @ts-ignore
+          text.providers.infrastructureDocker.enableAutomaticUpdate = true;
 
-        // there is no easy way to only install a specific provider when something like `@capgke` is passed, so we enable all the cloud providers
-        if (isCypressTag('@full') || isCypressTag('@nocaapf') || isCypressTag('@capg') || isCypressTag('@capa') || isCypressTag('@capz')) {
+          // there is no easy way to only install a specific provider when something like `@capgke` is passed, so we
+          // enable all the cloud providers
+          if (isCypressTag('@full') || isCypressTag('@nocaapf') || isCypressTag('@capg') || isCypressTag('@capa') || isCypressTag('@capz')) {
             // @ts-ignore
             text.providers.infrastructureGCP.enabled = true;
             // @ts-ignore
@@ -127,71 +130,77 @@ describe('Enable CAPI Providers', () => {
             text.providers.infrastructureAWS.enableAutomaticUpdate = true;
           }
 
-        if (isCypressTag('@vsphere') || isCypressTag('@capv')) {
+          if (isCypressTag('@vsphere') || isCypressTag('@capv')) {
             // @ts-ignore
             text.providers.infrastructureVSphere.enabled = true;
             // @ts-ignore
             text.providers.infrastructureVSphere.enableAutomaticUpdate = true;
           }
-      }
+        }
 
-      // Install Rancher Turtles Certified Providers chart
-      let operation = isRancherManagerVersion('2.14') && isUpgrade ? 'Upgrade' : 'Install'
-      cy.task('suiteLog', `Installing turtles providers chart version ${vars.turtlesProvidersChartVersion}`)
-      cy.checkChart('local', operation, vars.turtlesProvidersChartName, turtlesNamespace, {
-        version: vars.turtlesProvidersChartVersion,
-        modifyYAMLOperation: providerSelectionFunction
-      });
-    }));
+        // Install Rancher Turtles Certified Providers chart
+        let operation = isRancherManagerVersion('2.14') && isUpgrade ? 'Upgrade' : 'Install'
+        cy.task('suiteLog', `Installing turtles providers chart version ${vars.turtlesProvidersChartVersion}`)
+        cy.checkChart('local', operation, vars.turtlesProvidersChartName, turtlesNamespace, {
+          version: vars.turtlesProvidersChartVersion,
+          modifyYAMLOperation: providerSelectionFunction
+        });
+      })
+    );
 
-    qase(46, it('Wait for all the providers to be Ready', {retries: 2}, () => {
-      // Adding this extra check so that retry is not needed in other tests.
-      cy.navigateToProviders();
-      cy.waitForAllRowsInState('Ready', vars.shortTimeout);
-    }));
+    qase(28, it('Wait for all the providers to be Ready', {retries: 2}, () => {
+        // Adding this extra check so that retry is not needed in other tests.
+        cy.navigateToProviders();
+        cy.waitForAllRowsInState('Ready', vars.shortTimeout);
+      })
+    );
 
-    qase(47, it('Verify Core CAPI Provider', () => {
-      cy.navigateToProviders();
-      matchAndWaitForProviderReadyStatus(providers.coreCAPIProvider, 'core', providers.coreCAPIProvider, providers.coreCAPIProviderVersion, capiNamespace);
-    }));
+    qase(29, it('Verify Core CAPI Provider', () => {
+        cy.navigateToProviders();
+        matchAndWaitForProviderReadyStatus(providers.coreCAPIProvider, 'core', providers.coreCAPIProvider, providers.coreCAPIProviderVersion, capiNamespace);
+      })
+    );
 
     providerTypes.forEach(providerType => {
-      qase([48, 50], it('Verify Kubeadm Providers : ' + providerType, () => {
-        // Verify CAPI Kubeadm providers
-        if (providerType == 'control plane') {
-          const namespace = kubeadmProviderNamespaces[1]
-          const providerName = providers.kubeadmProvider + '-' + 'control-plane'
-          cy.navigateToProviders();
-          matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', providers.kubeadmProvider, providers.kubeadmProviderVersion, namespace);
-        } else {
-          const namespace = kubeadmProviderNamespaces[0]
-          const providerName = providers.kubeadmProvider + '-' + providerType
-          cy.navigateToProviders()
-          matchAndWaitForProviderReadyStatus(providerName, providerType, providers.kubeadmProvider, providers.kubeadmProviderVersion, namespace);
-        }
-      }));
+      qase([30, 32], it('Verify Kubeadm Providers ' + providerType, () => {
+          // Verify CAPI Kubeadm providers
+          if (providerType == 'control plane') {
+            const namespace = kubeadmProviderNamespaces[1]
+            const providerName = providers.kubeadmProvider + '-' + 'control-plane'
+            cy.navigateToProviders();
+            matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', providers.kubeadmProvider, providers.kubeadmProviderVersion, namespace);
+          } else {
+            const namespace = kubeadmProviderNamespaces[0]
+            const providerName = providers.kubeadmProvider + '-' + providerType
+            cy.navigateToProviders()
+            matchAndWaitForProviderReadyStatus(providerName, providerType, providers.kubeadmProvider, providers.kubeadmProviderVersion, namespace);
+          }
+        })
+      );
 
-      qase([49, 51], it('Verify RKE2 Providers : ' + providerType, () => {
-        if (providerType == 'control plane') {
-          const namespace = 'rke2-control-plane-system'
-          const providerName = providers.rke2Provider + '-' + 'control-plane'
-          cy.navigateToProviders();
-          matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', providers.rke2Provider, providers.rke2ProviderVersion, namespace);
-        } else {
-          const namespace = 'rke2-bootstrap-system'
-          const providerName = providers.rke2Provider + '-' + providerType
-          cy.navigateToProviders();
-          matchAndWaitForProviderReadyStatus(providerName, providerType, providers.rke2Provider, providers.rke2ProviderVersion, namespace);
-        }
-      }));
+      qase([31, 33], it('Verify RKE2 Providers ' + providerType, () => {
+          if (providerType == 'control plane') {
+            const namespace = 'rke2-control-plane-system'
+            const providerName = providers.rke2Provider + '-' + 'control-plane'
+            cy.navigateToProviders();
+            matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', providers.rke2Provider, providers.rke2ProviderVersion, namespace);
+          } else {
+            const namespace = 'rke2-bootstrap-system'
+            const providerName = providers.rke2Provider + '-' + providerType
+            cy.navigateToProviders();
+            matchAndWaitForProviderReadyStatus(providerName, providerType, providers.rke2Provider, providers.rke2ProviderVersion, namespace);
+          }
+        })
+      );
     })
 
-    qase(52, it('Verify CAPD provider was installed properly', () => {
-      // Verify Docker Infrastructure provider
-      const dockerProviderNamespace = 'capd-system'
-      cy.navigateToProviders();
-      matchAndWaitForProviderReadyStatus(providers.dockerProvider, 'infrastructure', providers.dockerProvider, providers.kubeadmProviderVersion, dockerProviderNamespace);
-    }));
+    qase(34, it('Verify CAPD provider installation', () => {
+        // Verify Docker Infrastructure provider
+        const dockerProviderNamespace = 'capd-system'
+        cy.navigateToProviders();
+        matchAndWaitForProviderReadyStatus(providers.dockerProvider, 'infrastructure', providers.dockerProvider, providers.kubeadmProviderVersion, dockerProviderNamespace);
+      })
+    );
   });
 
   context('vSphere provider', {tags: ['@vsphere', '@vsphere-nocaapf', '@capvk', '@capvk-nocaapf', '@capvr', '@capvr-nocaapf']}, () => {
