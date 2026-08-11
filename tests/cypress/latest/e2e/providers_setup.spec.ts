@@ -161,7 +161,7 @@ describe('Enable CAPI Providers', () => {
     );
 
     providerTypes.forEach(providerType => {
-      qase([420,421], it('Verify Kubeadm Providers - ' + providerType, () => {
+      qase([420, 421], it('Verify Kubeadm Providers ' + providerType, () => {
         // Verify CAPI Kubeadm providers
         if (providerType == 'control plane') {
           const namespace = kubeadmProviderNamespaces[1]
@@ -177,7 +177,7 @@ describe('Enable CAPI Providers', () => {
       })
       );
 
-      qase([369,370], it('Verify RKE2 Providers - ' + providerType, () => {
+      qase([369, 370], it('Verify RKE2 Providers ' + providerType, () => {
         if (providerType == 'control plane') {
           const namespace = 'rke2-control-plane-system'
           const providerName = providers.rke2Provider + '-' + 'control-plane'
@@ -193,7 +193,7 @@ describe('Enable CAPI Providers', () => {
       );
     })
 
-    qase(422, it('Verify CAPD provider', () => {
+    qase(422, it('Verify CAPD provider is enabled', () => {
       // Verify Docker Infrastructure provider
       const dockerProviderNamespace = 'capd-system'
       cy.navigateToProviders();
