@@ -21,7 +21,7 @@ import {
 } from '../support/utils';
 import {providers, vars} from '../support/variables';
 import {addChartMuseumRepo, addTurtlesProvidersRepo, matchAndWaitForProviderReadyStatus} from "../support/commands";
-
+import {qase} from 'cypress-qase-reporter/mocha';
 Cypress.config();
 describe('Enable CAPI Providers', () => {
   const providerTypes = ['bootstrap', 'control plane']
@@ -148,19 +148,19 @@ describe('Enable CAPI Providers', () => {
       })
     );
 
-    it(qase(28, 'Wait for all the providers to be Ready'), {retries: 2}, () => {
+    qase(28, it('Wait for all the providers to be Ready', {retries: 2}, () => {
         // Adding this extra check so that retry is not needed in other tests.
         cy.navigateToProviders();
         cy.waitForAllRowsInState('Ready', vars.shortTimeout);
-    });
+    }));
 
-    it(qase(29, 'Verify Core CAPI Provider'), () => {
+    qase(29, it('Qase ID: 29 Verify Core CAPI Provider', () => {
         cy.navigateToProviders();
         matchAndWaitForProviderReadyStatus(providers.coreCAPIProvider, 'core', providers.coreCAPIProvider, providers.coreCAPIProviderVersion, capiNamespace);
-    });
+    }));
 
     providerTypes.forEach(providerType => {
-      it(qase([30, 32], 'Verify Kubeadm Providers ' + providerType), () => {
+      qase([30, 32], it('Verify Kubeadm Providers ' + providerType, () => {
           // Verify CAPI Kubeadm providers
           if (providerType == 'control plane') {
             const namespace = kubeadmProviderNamespaces[1]
@@ -173,9 +173,9 @@ describe('Enable CAPI Providers', () => {
             cy.navigateToProviders()
             matchAndWaitForProviderReadyStatus(providerName, providerType, providers.kubeadmProvider, providers.kubeadmProviderVersion, namespace);
           }
-      });
+      }));
 
-      it(qase([31, 33], 'Verify RKE2 Providers ' + providerType), () => {
+      qase([31, 33], it('Qase ID: [31, 33] Verify RKE2 Providers ' + providerType, () => {
         if (providerType == 'control plane') {
           const namespace = 'rke2-control-plane-system'
           const providerName = providers.rke2Provider + '-' + 'control-plane'
@@ -187,15 +187,15 @@ describe('Enable CAPI Providers', () => {
           cy.navigateToProviders();
           matchAndWaitForProviderReadyStatus(providerName, providerType, providers.rke2Provider, providers.rke2ProviderVersion, namespace);
         }
-      });
+      }));
     })
 
-    it(qase(34, 'Verify CAPD provider installation'), () => {
+    qase(34, it('Verify CAPD provider installation', () => {
       // Verify Docker Infrastructure provider
       const dockerProviderNamespace = 'capd-system'
       cy.navigateToProviders();
       matchAndWaitForProviderReadyStatus(providers.dockerProvider, 'infrastructure', providers.dockerProvider, providers.kubeadmProviderVersion, dockerProviderNamespace);
-    });
+    }));
   });
 
   context('vSphere provider', {tags: ['@vsphere', '@vsphere-nocaapf', '@capvk', '@capvk-nocaapf', '@capvr', '@capvr-nocaapf']}, () => {
