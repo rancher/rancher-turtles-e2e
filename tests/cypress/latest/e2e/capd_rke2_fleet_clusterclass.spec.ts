@@ -59,7 +59,7 @@ describe('Import CAPD RKE2 (Default CNI) Class-Cluster using Fleet', {tags: '@sh
   context('[CLUSTER-IMPORT]', () => {
     qase(741, it('Add CAPD cluster fleet repo and get cluster name', () => {
       cypressLib.checkNavIcon('cluster-management').should('exist');
-      cy.addFleetGitRepo(clustersRepoName, vars.repoUrl, vars.branch, path);
+      cy.addFleetGitRepo(clustersRepoName, vars.repoUrl, vars.rancherTurtlesE2EBranch, path);
 
       // Check CAPI cluster using its name prefix i.e. className
       cy.checkCAPICluster(classNamePrefix);
