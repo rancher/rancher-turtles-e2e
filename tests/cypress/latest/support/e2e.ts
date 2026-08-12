@@ -18,9 +18,10 @@ import './capz_support';
 import './cleanup_support';
 import {ChartInstallExtraOptions, Cluster, EditKubernetesResourceOptions} from './structs';
 import {register as registerCypressGrep} from '@cypress/grep'
+import {qase} from 'cypress-qase-reporter/mocha';
 
 // This ensures the qase() function exists globally before ANY spec file loads
-(window as any).qase = (id: any, fn: any) => fn;
+(window as any).qase = qase;
 console.log('Qase global initialized');
 
 declare global {
