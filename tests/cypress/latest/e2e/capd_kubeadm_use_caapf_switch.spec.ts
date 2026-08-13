@@ -121,7 +121,7 @@ describe('Import CAPD Kubeadm Class-Cluster for Use-CAAPF Migration', {tags: ['@
         const resourceKind = 'HelmOp';
         const namespace = vars.capiClustersNS;
         const patch = {spec: {helm: {'force': true}}};
-        cy.patchYamlResource('local', namespace, resourceKind, resourceName, patch);
+        cy.patchYamlResource(vars.localCluster, namespace, resourceKind, resourceName, patch);
       })
     }))
 
@@ -136,7 +136,7 @@ describe('Import CAPD Kubeadm Class-Cluster for Use-CAAPF Migration', {tags: ['@
       }
 
       // Update Rancher Turtles Certified Providers chart to disable the fleet addon provider
-      cy.checkChart('local', vars.chartUpdateOperation, vars.turtlesProvidersChartName, turtlesNamespace, {
+      cy.checkChart(vars.localCluster, vars.chartUpdateOperation, vars.turtlesProvidersChartName, turtlesNamespace, {
         modifyYAMLOperation: providerSelectionFunction,
         version: vars.turtlesProvidersChartVersion
       })
@@ -149,11 +149,11 @@ describe('Import CAPD Kubeadm Class-Cluster for Use-CAAPF Migration', {tags: ['@
     }));
 
     qase(597, it('Ensure everything is migrated from capi-clusters to fleet-default',() => {
-      cy.checkKubernetesResource('local',["More Resources", "Fleet", "Clusters"] , clusterName, false, vars.capiClustersNS);
-      cy.checkKubernetesResource('local',["More Resources", "Fleet", "Clusters"] , clusterName, true, vars.fleetDefaultNS);
+      cy.checkKubernetesResource(vars.localCluster,["More Resources", "Fleet", "Clusters"] , clusterName, false, vars.capiClustersNS);
+      cy.checkKubernetesResource(vars.localCluster,["More Resources", "Fleet", "Clusters"] , clusterName, true, vars.fleetDefaultNS);
 
-      cy.checkKubernetesResource('local',["More Resources", "Fleet", "Cluster Groups"] , classNamePrefix, false, vars.capiClustersNS);
-      cy.checkKubernetesResource('local',["More Resources", "Fleet", "Cluster Groups"] , classNamePrefix, true, vars.fleetDefaultNS);
+      cy.checkKubernetesResource(vars.localCluster,["More Resources", "Fleet", "Cluster Groups"] , classNamePrefix, false, vars.capiClustersNS);
+      cy.checkKubernetesResource(vars.localCluster,["More Resources", "Fleet", "Cluster Groups"] , classNamePrefix, true, vars.fleetDefaultNS);
     }));
   })
 

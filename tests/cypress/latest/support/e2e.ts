@@ -93,6 +93,7 @@ declare global {
       checkCAPIClusterCPInitialized(clustername: string): Chainable<Element>;
       kubectlExecute(commands: string[], timeout?: number): Chainable<Element>;
       filterPodErrorLogs(podName: string): Chainable<Element>;
+      checkAppDeployed(appName: string, namespace: string, chartVersion: string): Chainable<Element>;
       // Functions declared in capz_support.js
       createAzureClusterIdentity(clientID: string, tenantID: string, clientSecret: string): Chainable<Element>;
       createAzureASOCredential(clientID: string, tenantID: string, clientSecret: string, subscriptionID: string): Chainable<Element>;

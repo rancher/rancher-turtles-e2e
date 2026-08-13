@@ -136,7 +136,7 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: ['@short', '@capdr']}, () => {
     if (isRancherManagerVersion('<=2.12')) {
     qase(41,
       it('Update chart and check cluster status', () => {
-        cy.checkChart('local', vars.chartUpdateOperation, 'Rancher Turtles', turtlesNamespace, {questions: questions});
+        cy.checkChart(vars.localCluster, vars.chartUpdateOperation, 'Rancher Turtles', turtlesNamespace, {questions: questions});
 
         // Check cluster is Active
         cy.searchCluster(clusterName);

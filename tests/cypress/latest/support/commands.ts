@@ -22,13 +22,11 @@ import _ from 'lodash';
 import {
   capiNamespace,
   isAPIv1beta1,
-  isHeadBuild,
   isMigration,
   isPrePrimeChannel,
   isPreRelease,
   isPrimeChannel,
   isRancherManagerVersion,
-  isStgRegistryVersions,
   isTurtlesDevChart,
   isTurtlesPrimeBuild,
   isUpgrade, turtlesNamespace
@@ -46,7 +44,7 @@ Cypress.Commands.add('accesMenuSelection', (menuPaths: string[]) => {
 
 // Command to set CAPI Auto-import on capi-clusters namespace
 Cypress.Commands.add('namespaceAutoImport', (mode) => {
-  cy.contains('local')
+  cy.contains(vars.localCluster)
     .click();
   cypressLib.accesMenu('Projects/Namespaces');
   cy.contains('Create Project')
@@ -88,7 +86,7 @@ Cypress.Commands.add('createNamespace', (namespaces: string[]) => {
   namespaces.forEach((namespace) => {
     cy.task('suiteLog', `Creating Namespace: ${namespace}`);
     cy.burgerMenuOperate('open');
-    cy.contains('local')
+    cy.contains(vars.localCluster)
       .click();
     cypressLib.accesMenu('Projects/Namespaces');
     cy.contains('Create Project').should('be.visible');
@@ -109,7 +107,7 @@ Cypress.Commands.add('createNamespace', (namespaces: string[]) => {
 // Command to create namespace
 Cypress.Commands.add('deleteNamespace', (namespaces: string[]) => {
   namespaces.forEach((namespace) => {
-    cy.deleteKubernetesResource('local', ['Projects/Namespaces'], namespace);
+    cy.deleteKubernetesResource(vars.localCluster, ['Projects/Namespaces'], namespace);
   })
 });
 
@@ -364,7 +362,7 @@ Cypress.Commands.add('checkCAPIMenu', () => {
 // Command to check presence of HelmOps under Fleet on local cluster
 Cypress.Commands.add('checkFleetHelmOps', (appList: string[]) => {
   cy.burgerMenuOperate('open');
-  cy.contains('local').click();
+  cy.contains(vars.localCluster).click();
   cy.accesMenuSelection(['More Resources', 'Fleet', 'Helm Ops']);
   appList.forEach((app) => {
     cy.typeInFilter(app);
@@ -518,7 +516,7 @@ Cypress.Commands.add('addCloudCredsVMware', (name: string, vsphere_username: str
 
 Cypress.Commands.add('addRepository', (repositoryName: string, repositoryURL: string, repositoryType: 'oci' | 'http' | 'git', repositoryBranch: string) => {
   cy.burgerMenuOperate('open');
-  cy.contains('local').click();
+  cy.contains(vars.localCluster).click();
   cy.clickNavMenu(['Apps', 'Repositories'])
   // Make sure we are in the 'Repositories' screen (test failed here before)
   // Test fails sporadically here, screen stays in pending state forever
@@ -588,7 +586,7 @@ function checkApiStatus (retries = 20) {
 // Command to Install, Update or Upgrade App from Charts menu
 // Operation types: Install, Update, Upgrade
 // You can optionally provide an array of questions and answer them before the installation starts
-// Example1: cy.checkChart('local', 'Alerting', 'default', [{ menuEntry: '(None)', checkbox: 'Enable Microsoft Teams' }]);
+// Example1: cy.checkChart(vars.localCluster, 'Alerting', 'default', [{ menuEntry: '(None)', checkbox: 'Enable Microsoft Teams' }]);
 // Example2: cy.checkChart('capg-kubeadm', Rancher Turtles', 'cattle-turtles-system', [{ menuEntry: 'Rancher Turtles Features Settings', checkbox: 'Seamless integration with Fleet and CAPI'},{ menuEntry: 'Rancher webhook cleanup settings', inputBoxTitle: 'Webhook Cleanup Image', inputBoxValue: 'registry.k8s.io/kubernetes/kubectl:v1.28.0'}]);
 Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace, options = {}) => {
   const isTurtlesChart = chartName === 'Rancher Turtles';
@@ -979,7 +977,7 @@ Cypress.Commands.add('checkFleetGitRepoActive', (repoName, workspace) => {
 })
 
 // Fleet namespace toggle
-Cypress.Commands.add('fleetNamespaceToggle', (toggleOption = 'local') => {
+Cypress.Commands.add('fleetNamespaceToggle', (toggleOption = vars.localCluster) => {
   cy.getBySel('workspace-switcher').click();
   cy.contains(toggleOption).should('be.visible').click();
 });
@@ -1047,7 +1045,7 @@ Cypress.Commands.add('burgerMenuOperate', (operation: 'open' | 'close') => {
 });
 
 
-Cypress.Commands.add('deleteKubernetesResource', (clusterName = 'local', resourcePath: string[], resourceName: string, namespace?: string) => {
+Cypress.Commands.add('deleteKubernetesResource', (clusterName = vars.localCluster, resourcePath: string[], resourceName: string, namespace?: string) => {
   cy.exploreCluster(clusterName);
 
   if (namespace) {
@@ -1113,7 +1111,7 @@ Cypress.Commands.add('editKubernetesResource', (options) => {
   cy.namespaceReset();
 })
 
-Cypress.Commands.add('checkKubernetesResource', (clusterName = 'local', resourcePath: string[], resourceName: string, shouldExist: boolean, namespace: string, timeout: number = 60000) => {
+Cypress.Commands.add('checkKubernetesResource', (clusterName = vars.localCluster, resourcePath: string[], resourceName: string, shouldExist: boolean, namespace: string, timeout: number = 60000) => {
   cy.exploreCluster(clusterName);
 
   // Check if the namespace exists in the dropdown before attempting to set it
@@ -1212,7 +1210,7 @@ Cypress.Commands.add('checkAWSClusterStaticIdentity', () => {
   cy.getBySel('sortable-cell-0-0').then(($cell) => {
     const ccID = $cell.text();
     cy.task('suiteLog', `Cloud credential ID: ${ccID}`);
-    cy.checkKubernetesResource('local', ['More Resources', 'Cluster Provisioning', 'AWSClusterStaticIdentities'], ccID, true, 'capa-system');
+    cy.checkKubernetesResource(vars.localCluster, ['More Resources', 'Cluster Provisioning', 'AWSClusterStaticIdentities'], ccID, true, 'capa-system');
   });
 });
 
@@ -1234,7 +1232,7 @@ Cypress.Commands.add('checkCAPIProvider', (providerName) => {
   cy.waitForAllRowsInState('Ready');
 });
 
-Cypress.Commands.add('importYAML', (yamlOrPath, namespace, clusterName = 'local') => {
+Cypress.Commands.add('importYAML', (yamlOrPath, namespace, clusterName = vars.localCluster) => {
   cy.burgerMenuOperate('open');
   cy.accesMenuSelection([clusterName])
   cy.wait(250);
@@ -1299,17 +1297,16 @@ const PROVIDER_REGISTRIES = {
  */
 function getV213PlusRegistry(providerNamespace: string): string {
   const isPrimeDev = isTurtlesDevChart && isTurtlesPrimeBuild();
-  const usesStgRegistry = isPrePrimeChannel() || (isStgRegistryVersions && isHeadBuild);
 
   // Special handling for 2.13, 2.14 prerelease community builds
-  if (isStgRegistryVersions && isPreRelease && !isPrimeChannel()) {
+  if (isPreRelease && !isPrimeChannel()) {
     return isPrimeDev ? PROVIDER_REGISTRIES.RANCHER_PRIME : getCommunityRegistry(providerNamespace);
   }
 
   // Staging registry takes precedence for:
   // - Prime prerelease channels (prime-alpha, prime-rc)
   // - 2.13, 2.14 head builds (2.13, 2.14 alpha/rc community builds already handled above)
-  if (usesStgRegistry) {
+  if (isPrePrimeChannel()) {
     return PROVIDER_REGISTRIES.RANCHER_STG_PRIME;
   }
 
@@ -1379,7 +1376,7 @@ function determineProviderImageRegistry(providerNamespace: string): string {
 Cypress.Commands.add('verifyCAPIProviderImage', (providerNamespace) => {
   const providerImageRegistry = determineProviderImageRegistry(providerNamespace);
 
-  cy.exploreCluster('local');
+  cy.exploreCluster(vars.localCluster);
   cy.accesMenuSelection(['Workloads', 'Deployments']);
   cy.setNamespace(providerNamespace);
   cy.contains(providerImageRegistry).should('be.visible');
@@ -1435,7 +1432,7 @@ Cypress.Commands.add('checkExternalFleetAnnotation', (clusterName, required = tr
 
 // Commands to execute on kubectl shell
 Cypress.Commands.add('kubectlExecute', (commands: string[], timeout = 60000) => {
-  cy.searchCluster('local');
+  cy.searchCluster(vars.localCluster);
   cy.getBySel('sortable-table-0-action-button').click();
   cy.get('i.icon.group-icon.icon-terminal').should('be.visible').click();
   cy.contains('Connected').should('be.visible');
@@ -1484,7 +1481,7 @@ Cypress.Commands.add('checkCAPIClusterCPInitialized', (clusterName) => {
 });
 
 Cypress.Commands.add('filterPodErrorLogs', (podName) => {
-  cy.exploreCluster('local');
+  cy.exploreCluster(vars.localCluster);
   cy.accesMenuSelection(['Workloads', 'Pods']);
   cy.setNamespace('All Namespaces', 'all_user');
   cy.typeInFilter(podName);
@@ -1504,6 +1501,17 @@ Cypress.Commands.add('filterPodErrorLogs', (podName) => {
     }
   });
   cy.getBySel('wm-tab-close-button').click();
+  cy.namespaceReset();
+});
+
+Cypress.Commands.add('checkAppDeployed', (appName: string, namespace: string, chartVersion: string) => {
+  cy.exploreCluster(vars.localCluster);
+  cy.setNamespace(namespace);
+  cy.clickNavMenu(['Apps', 'Installed Apps']);
+  cy.typeInFilter(appName);
+  cy.getBySel('sortable-cell-0-1').should('exist');
+  cy.getBySel('sortable-cell-0-3').contains(chartVersion, {timeout: vars.shortTimeout});
+  cy.waitForAllRowsInState('Deployed', vars.shortTimeout);
   cy.namespaceReset();
 });
 
@@ -1528,7 +1536,7 @@ export function matchAndWaitForProviderReadyStatus(
       // Only check provider version for Rancher >=2.13 and -
       // 1. pre-prime & prime rancher
       // 2. for turtles build with dev=true & target_build_type=prime
-      if (isRancherManagerVersion('>=2.13') && (isPrimeChannel() || (isTurtlesDevChart && isTurtlesPrimeBuild()))) {
+      if (isRancherManagerVersion('>=2.13') && (isPrimeChannel() || isPrePrimeChannel() || (isTurtlesDevChart && isTurtlesPrimeBuild()))) {
         cy.get('td').eq(5).should('contain.text', providerVersion); // InstalledVersion
       } else {
         cy.task('log', 'This is not a prime Rancher; skipping provider version check');
@@ -1543,7 +1551,7 @@ export function setUseCAAPFFeatureGate(enabled: boolean, wait: boolean=true) {
   const resourceKind = 'ConfigMap';
   const namespace = vars.cattleSystemNS;
   const patch = {data: {"rancher-turtles": {isNestedIn: true, "features": {"use-caapf": {"enabled": Boolean(enabled)}}}}};
-  cy.patchYamlResource('local', namespace, resourceKind, 'rancher-config', patch);
+  cy.patchYamlResource(vars.localCluster, namespace, resourceKind, 'rancher-config', patch);
 
   if(wait){
     // Ensure the turtles deployment has the feature gate enabled

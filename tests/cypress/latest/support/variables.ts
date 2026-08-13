@@ -19,6 +19,7 @@ export const vars = {
   capiClassesNS: 'capi-classes',
   fleetDefaultNS: 'fleet-default',
   cattleSystemNS: 'cattle-system',
+  localCluster: 'local',
   chartMuseumRepoName: 'chartmuseum-repo',
   providersChartRepoName: 'turtles-providers-chart',
   repoUrl: 'https://github.com/rancher/rancher-turtles-e2e',

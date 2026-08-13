@@ -62,7 +62,7 @@ describe('Enable use-caapf feature gate and install fleet-addon provider', {tags
         text.providers.addonFleet.enabled = true;
       }
 
-      cy.checkChart('local', vars.chartUpdateOperation, vars.turtlesProvidersChartName, turtlesNamespace, {
+      cy.checkChart(vars.localCluster, vars.chartUpdateOperation, vars.turtlesProvidersChartName, turtlesNamespace, {
         version: vars.turtlesProvidersChartVersion,
         modifyYAMLOperation: providerSelectionFunction
       });

@@ -83,6 +83,9 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
   context('Post-Upgrade Cluster checks and Resources cleanup', () => {
     if (isRancherManagerVersion('2.14')) {
       qase(355, it('Check cluster & Resources status post-upgrade', () => {
+        // Check CAPI cluster Provisioned
+        cy.checkCAPIClusterProvisioned(clusterName, timeout);
+
         cy.viewCAPIClusterYAML(clusterName);
         cy.get('.CodeMirror').then((editor) => {
           // @ts-expect-error known error with CodeMirror
