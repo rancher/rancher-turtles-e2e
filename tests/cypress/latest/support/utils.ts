@@ -19,6 +19,11 @@ export const isRancherManagerVersion = (version: string) => {
   return semver.satisfies(rancherVersion, version)
 }
 
+export const isRancherManagerUpgradeVersion = (version: string) => {
+  const rancherUpgradeVersion = semver.valid(semver.coerce(Cypress.expose('rancher_upgrade_version')));
+  return semver.satisfies(rancherUpgradeVersion, version)
+}
+
 const rancherVersion = Cypress.expose("rancher_version");
 export const isPreRelease = /(-alpha|-rc)/.test(rancherVersion);
 export const isHeadBuild = rancherVersion.includes('head');

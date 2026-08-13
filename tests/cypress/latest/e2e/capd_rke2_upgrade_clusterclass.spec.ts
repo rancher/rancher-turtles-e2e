@@ -1,5 +1,5 @@
 import '../support/commands';
-import {getClusterName, isRancherManagerVersion, isAPIv1beta1, skipClusterDeletion} from '../support/utils';
+import {getClusterName, isRancherManagerVersion, isRancherManagerUpgradeVersion, isAPIv1beta1, skipClusterDeletion} from '../support/utils';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
@@ -18,7 +18,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
   });
 
   context('Pre-Upgrade Resources and Cluster creation', () => {
-    if (isRancherManagerVersion('2.13')) {
+    if (isRancherManagerVersion('2.13') || isRancherManagerVersion('2.14')) {
       qase(234, it('Create Docker Auth Secret', () => {
         // Prevention for Docker.io rate limiting
         cy.createDockerAuthSecret();
@@ -81,7 +81,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
   })
 
   context('Post-Upgrade Cluster checks and Resources cleanup', () => {
-    if (isRancherManagerVersion('2.14')) {
+    if (isRancherManagerUpgradeVersion('2.14') || isRancherManagerUpgradeVersion('2.15')) {
       qase(355, it('Check cluster & Resources status post-upgrade', () => {
         // Check CAPI cluster Provisioned
         cy.checkCAPIClusterProvisioned(clusterName, timeout);
