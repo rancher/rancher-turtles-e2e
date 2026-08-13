@@ -15,7 +15,9 @@ import '../support/commands';
 import {
   capiNamespace,
   isCypressTag,
-  isRancherManagerVersion, isTurtlesDevChart,
+  isRancherManagerVersion,
+  isRancherUpgraded,
+  isTurtlesDevChart,
   isUpgrade,
   turtlesNamespace,
 } from '../support/utils';
@@ -43,19 +45,18 @@ describe('Enable CAPI Providers', () => {
   context('Setup providers chart repository', {tags: ['@install']}, () => {
 
     qase(403, it("Add Rancher Turtles Providers Chart GitRepo", () => {
-      // For upgrade tests 2.13 > 2.14, dev=true is only applicable to the target version
+      // For upgrade tests, dev=true is only applicable to the target version
       if (isUpgrade) {
-        if (isRancherManagerVersion('2.13')) {
+        if (isRancherUpgraded) {
+          // Ensure that correct providers chart repo is used post-upgrade by deleting the repo that was added in pre-upgrade
+          cy.task('suiteLog', "Removing providers chart repo added in pre-upgrade");
+          cy.deleteKubernetesResource(vars.localCluster, ["Apps", "Repositories"], vars.providersChartRepoName);
+        } else {
           addTurtlesProvidersRepo();
           return
         }
-        if (isRancherManagerVersion('2.14')) {
-          // Ensure that correct providers chart repo is used post-upgrade by deleting the repo that was added in
-          // pre-upgrade
-          cy.task('suiteLog', "Removing providers chart repo added in pre-upgrade");
-          cy.deleteKubernetesResource(vars.localCluster, ["Apps", "Repositories"], vars.providersChartRepoName);
-        }
       }
+
       if (isTurtlesDevChart) {
         addChartMuseumRepo();
       } else {
@@ -66,12 +67,10 @@ describe('Enable CAPI Providers', () => {
 
   context('Local providers - @install', {tags: '@install'}, () => {
     // HelmOps to be used across all specs
-    // TODO cpinjani: Refactor below condition while adding 2.15 upgrade path
-    qase(90, (isRancherManagerVersion('2.14') && isUpgrade ? it.skip : it)('Add Applications fleet repo', () => {
+    qase(90, (isRancherUpgraded) ? it.skip : it)('Add Applications fleet repo', () => {
       // Add upstream apps repo
       cy.addFleetGitRepo('helm-ops', vars.turtlesRepoUrl, vars.classBranch, 'examples/applications/', vars.capiClustersNS);
     })
-    );
 
     if (!isTurtlesDevChart && isRancherManagerVersion('>=2.14')) {
       qase(716, it('Patch the providers chart repository with OCIOptions.downloadAllTags: true', () => {
@@ -139,7 +138,7 @@ describe('Enable CAPI Providers', () => {
       }
 
       // Install Rancher Turtles Certified Providers chart
-      let operation = isRancherManagerVersion('2.14') && isUpgrade ? 'Upgrade' : 'Install'
+      let operation = isRancherUpgraded ? 'Upgrade' : 'Install'
       cy.task('suiteLog', `${operation} turtles providers chart version: ${vars.turtlesProvidersChartVersion}`)
       cy.checkChart(vars.localCluster, operation, vars.turtlesProvidersChartName, turtlesNamespace, {
         version: vars.turtlesProvidersChartVersion,

@@ -35,6 +35,7 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   config.expose.cluster = process.env.CLUSTER_NAME;
   config.expose.k8s_version = process.env.K8S_VERSION_TO_PROVISION;
   config.expose.rancher_version = process.env.RANCHER_VERSION;
+  config.expose.rancher_upgrade_version = process.env.RANCHER_UPGRADE_VERSION;
   config.expose.rancher_turtles_e2e_branch = process.env.RANCHER_TURTLES_E2E_BRANCH || 'main';
   config.expose.turtles_chart_dev_version = process.env.TURTLES_CHART_DEV_VERSION || '108.0.0+up99.99.99';
   config.expose.username = process.env.RANCHER_USER;
@@ -45,6 +46,7 @@ module.exports = (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions)
   config.expose.prime_registry = process.env.PRIME_REGISTRY;
   config.expose.stg_prime_registry = process.env.STG_PRIME_REGISTRY;
   config.expose.skip_fleet_addon_installation = process.env.SKIP_FLEET_ADDON_INSTALLATION == "true";
+  config.expose.is_rancher_upgraded = process.env.IS_RANCHER_UPGRADED || "false";
 
   // Secrets
   config.expose.password = process.env.RANCHER_PASSWORD;
