@@ -92,7 +92,7 @@ describe('Import CAPZ Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full', '@full
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    qase(611, it.skip('Install App on imported cluster', {retries: 1}, () => {
+    qase(611, it('Install App on imported cluster', {retries: 1}, () => {
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
     );

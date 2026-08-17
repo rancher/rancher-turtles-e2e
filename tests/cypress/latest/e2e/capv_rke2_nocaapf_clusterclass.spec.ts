@@ -140,7 +140,7 @@ describe('Import CAPV RKE2 (No-Caapf) Class-Cluster', {tags: ['@vsphere', '@vsph
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    qase(696, it.skip('Install App on imported cluster', {retries: 1}, () => {
+    qase(696, it('Install App on imported cluster', {retries: 1}, () => {
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
     );

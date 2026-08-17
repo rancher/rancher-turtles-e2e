@@ -102,7 +102,7 @@ describe('Import CAPD RKE2 (Default CNI) Class-Cluster using Fleet', {tags: '@sh
     })
     );
 
-    qase(744, (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
+    qase(744, it('Install App on imported cluster', {retries: 1}, () => {
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
     );

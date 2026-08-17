@@ -120,7 +120,7 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: ['@short', '@capdk']}, () =
     )
 
     qase(7,
-      (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
+      it('Install App on imported cluster', {retries: 1}, () => {
         cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
     );
