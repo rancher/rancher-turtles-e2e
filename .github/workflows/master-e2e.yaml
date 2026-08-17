@@ -511,6 +511,7 @@ jobs:
         with:
           node-version: current
       - name: Cypress tests
+        timeout-minutes: 480 # @full tests require more than the default 360 minutes timeout to run
         id: cypress
         env:
           RANCHER_TURTLES_E2E_BRANCH: ${{ env.RANCHER_TURTLES_E2E_BRANCH }}

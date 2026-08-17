@@ -142,8 +142,8 @@ const buildTypeVersionMap = {
     fleet: 'v0.15.0',
     vsphere: 'v1.16.1',
     amazon: 'v2.11.1',
-    google: 'v1.11.2',
-    azure: 'v1.23.2'
+    google: 'v1.13.1',
+    azure: 'v1.26.0'
   },
   'dev-v2.12': {
     capi: 'v1.10.5',
@@ -182,8 +182,8 @@ const buildTypeVersionMap = {
     fleet: 'v0.15.0',
     vsphere: 'v1.16.1',
     amazon: 'v2.11.1',
-    google: 'v1.11.2',
-    azure: 'v1.23.2'
+    google: 'v1.13.1',
+    azure: 'v1.26.0'
   }
 }
 
