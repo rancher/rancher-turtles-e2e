@@ -119,7 +119,7 @@ describe('Import CAPD RKE2 (No-Caapf) Class-Cluster using Fleet', {tags: ['@shor
     })
     );
 
-    qase(579, it.skip('Install App on imported cluster', {retries: 1}, () => {
+    qase(579, it('Install App on imported cluster', {retries: 1}, () => {
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
     );

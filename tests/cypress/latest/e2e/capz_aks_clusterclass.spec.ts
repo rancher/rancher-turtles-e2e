@@ -77,7 +77,7 @@ describe('Import CAPZ AKS Class-Cluster', {tags: ['@full', '@capzaks']}, () => {
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    qase(57, (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
+    qase(57, it('Install App on imported cluster', {retries: 1}, () => {
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
     );

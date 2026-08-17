@@ -76,7 +76,7 @@ describe('Import CAPG GKE (No-Caapf) Class-Cluster', {tags: ['@full', '@nocaapf'
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    qase(679, it.skip('Install App on imported cluster', {retries: 1}, () => {
+    qase(679, it('Install App on imported cluster', {retries: 1}, () => {
       // Install Chart
       // We install Logging chart instead of Monitoring, since this is relatively lightweight.
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');

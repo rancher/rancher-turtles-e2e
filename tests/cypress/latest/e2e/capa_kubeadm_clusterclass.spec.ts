@@ -85,7 +85,7 @@ describe('Import CAPA Kubeadm Class-Cluster', {tags: ['@full', '@capak']}, () =>
 
   context('[CLUSTER-OPERATIONS]', () => {
     qase(393,
-      (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
+      it('Install App on imported cluster', {retries: 1}, () => {
         cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
     );

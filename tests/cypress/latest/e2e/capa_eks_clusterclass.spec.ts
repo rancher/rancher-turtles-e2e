@@ -81,7 +81,7 @@ describe('Import CAPA EKS Class-Cluster', {tags: ['@full', '@capaeks']}, () => {
 
   context('[CLUSTER-OPERATIONS]', () => {
     qase(126,
-      (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
+      it('Install App on imported cluster', {retries: 1}, () => {
         if (isAPIv1beta1) {
           appVersion = '108.0'
         } else {
