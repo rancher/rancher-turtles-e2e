@@ -179,6 +179,9 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 				extraFlags = nil
 			}
 
+			// Overrides ele-testhelpers default behavior, put it as last to ensure it takes precedence over existing flags.
+			extraFlags = append(extraFlags, "--set", "useBundledSystemChart=false")
+
 			// Log the extra flags
 			GinkgoWriter.Write([]byte(strings.Join(extraFlags, " ") + "\n"))
 
