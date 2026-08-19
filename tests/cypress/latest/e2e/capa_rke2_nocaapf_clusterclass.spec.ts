@@ -4,7 +4,7 @@ import {capaResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDelet
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Import CAPA RKE2 (No-Caapf) Class-Cluster', {tags: ['@full', '@full-nocaapf', '@nocaapf', '@capar-nocaapf']}, () => {
+describe('Import CAPA RKE2 (No-Caapf) Class-Cluster', {tags: ['@full-nocaapf', '@nocaapf', '@capar-nocaapf']}, () => {
   let ccID: string;
   const timeout = vars.fullTimeout
   const classNamePrefix = 'aws-rke2'

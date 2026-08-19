@@ -5,7 +5,7 @@ import {vars} from '../support/variables';
 
 
 Cypress.config();
-describe('Import CAPG GKE (No-Caapf) Class-Cluster', {tags: ['@full', '@nocaapf', '@capgke-nocaapf']}, () => {
+describe('Import CAPG GKE (No-Caapf) Class-Cluster', {tags: ['@full-nocaapf', '@nocaapf', '@capgke-nocaapf']}, () => {
   const timeout = vars.fullTimeout * 2
   const classNamePrefix = 'gcp-gke'
   const clusterName = getClusterName(classNamePrefix)

@@ -4,7 +4,7 @@ import {capiClusterDeletion, capzResourcesCleanup, importedRancherv3ClusterDelet
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Import CAPZ AKS (No-Caapf) Class-Cluster', {tags: ['@full', '@nocaapf', '@capzaks-nocaapf']}, () => {
+describe('Import CAPZ AKS (No-Caapf) Class-Cluster', {tags: ['@full-nocaapf', '@nocaapf', '@capzaks-nocaapf']}, () => {
   const timeout = vars.fullTimeout
   const classNamePrefix = 'azure-aks'
   const clusterName = getClusterName(classNamePrefix)

@@ -4,7 +4,7 @@ import {capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Import CAPZ RKE2 (No-Caapf) Class-Cluster', {tags: ['@full', '@full-nocaapf', '@nocaapf', '@capzr-nocaapf']}, () => {
+describe('Import CAPZ RKE2 (No-Caapf) Class-Cluster', {tags: ['@full-nocaapf', '@nocaapf', '@capzr-nocaapf']}, () => {
   const timeout = vars.fullTimeout
   const classNamePrefix = 'azure-rke2'
   const clusterName = getClusterName(classNamePrefix)
