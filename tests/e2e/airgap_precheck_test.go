@@ -69,7 +69,7 @@ func componentManifestImages() []imageRef {
 		{"rancher/cluster-api-aws-controller-components", vAws},
 		{"rancher/cluster-api-azure-controller-components", vAzure},
 		{"rancher/cluster-api-gcp-controller-components", vGcp},
-		{"rancher/cluster-api-provider-rke2-components", vRke2},
+		// {"rancher/cluster-api-provider-rke2-components", vRke2},
 		{"rancher/cluster-api-vsphere-controller-components", vVsphere},
 	}
 }
