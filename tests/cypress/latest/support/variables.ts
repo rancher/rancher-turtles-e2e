@@ -48,6 +48,7 @@ export const vars = {
   : 'cluster-api-ubuntu-2404-v1-36-1-1779178908',
   chartUpdateOperation: isRancherManagerVersion('>=2.13') ? 'Edit' : 'Update',
   azureCCMVersion: '1.36.0',
+  gcpCCMVersion: 'v35.1.3',
   calicoCNIYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/calico.yaml',
   awsCCMYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/cloud-provider-aws.yaml',
   awsCSIYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/csi-aws-ebs.yaml',

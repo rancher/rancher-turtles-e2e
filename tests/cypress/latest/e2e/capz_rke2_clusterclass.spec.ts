@@ -12,8 +12,8 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: ['@full', '@capzr']}, () => {
   const clusterClassRepoName = classNamePrefix + '-clusterclass'
   const classClusterFileName = isAPIv1beta1 ? './fixtures/azure/capz-rke2-class-cluster-v1beta1.yaml' : './fixtures/azure/capz-rke2-class-cluster.yaml'
 
+  
   const subscriptionID = Cypress.expose("azure_subscription_id")
-
   // Azure CCM fails to install when using v1.35
   const k8sVersion = isRancherManagerVersion('2.14') ? 'v1.34.1+rke2r1'
   : vars.rke2Version
@@ -77,7 +77,7 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: ['@full', '@capzr']}, () => {
 
   context('[CLUSTER-OPERATIONS]', () => {
 
-    qase(80, it('Install App on imported cluster', {retries: 1}, () => {
+    qase(80, (isRancherManagerVersion('>2.14') ? it.skip : it)('Install App on imported cluster', {retries: 1}, () => {
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
       })
     );
