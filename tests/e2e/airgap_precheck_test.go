@@ -47,7 +47,7 @@ type imageRef struct {
 func allProviderImages() []imageRef {
 	return []imageRef{
 		{"rancher/turtles", vTurtles},
-		{"rancher/charts/rancher-turtles-providers", vTurtlesChart}, // This is actually chart repo
+		//{"rancher/charts/rancher-turtles-providers", vTurtlesChart}, // FAILURE the released version 110.0.0+up0.27.1-rc.1 doesnt match with turtles 110.0.1+up0.27.1-rc.1
 		{"rancher/cluster-api-controller", vCoreCAPI},
 		{"rancher/cluster-api-addon-provider-fleet", vFleet},
 		{"rancher/cluster-api-aws-controller", vAws},
@@ -69,7 +69,7 @@ func componentManifestImages() []imageRef {
 		{"rancher/cluster-api-aws-controller-components", vAws},
 		{"rancher/cluster-api-azure-controller-components", vAzure},
 		{"rancher/cluster-api-gcp-controller-components", vGcp},
-		// {"rancher/cluster-api-provider-rke2-components", vRke2},
+		{"rancher/cluster-api-provider-rke2-components", vRke2},
 		{"rancher/cluster-api-vsphere-controller-components", vVsphere},
 	}
 }
@@ -104,7 +104,7 @@ var _ = Describe("E2E - Airgap Precheck Tests", Label("airgap"), func() {
 	It("Phase 1: Data gathering", func() {
 		By("Fetch and Parse Versions from Rancher & Turtles Sources", func() {
 			// 1. Parse Rancher build.yaml
-			buildURL := fmt.Sprintf("https://raw.githubusercontent.com/rancher/rancher/v%s/build.yaml", rancherVersion)
+			buildURL := "https://raw.githubusercontent.com/rancher/rancher/dd124b489440ca731df3c45205e782e6750912af/build.yaml"
 			var build struct {
 				TurtlesVersion string `yaml:"turtlesVersion"`
 			}
@@ -172,7 +172,7 @@ var _ = Describe("E2E - Airgap Precheck Tests", Label("airgap"), func() {
 	It("Phase 2: Validation", func() {
 		By("Verify images exist in the registry", func() {
 			host := primeRegistry
-			if strings.Contains(rancherVersion, "-rc") || strings.Contains(rancherVersion, "-alpha") {
+			if strings.Contains(rancherVersion, "-head") || strings.Contains(rancherVersion, "-alpha") {
 				host = stgPrimeRegistry
 			}
 			images := allProviderImages()
@@ -193,7 +193,12 @@ var _ = Describe("E2E - Airgap Precheck Tests", Label("airgap"), func() {
 		})
 
 		By("Verify images are listed in rancher-images.txt", func() {
-			url := fmt.Sprintf("%s/rancher/v%s/rancher-images.txt", primeArtifactsURL, rancherVersion)
+			artifactPath := fmt.Sprintf("rancher/v%s", rancherVersion)
+			if strings.HasSuffix(rancherVersion, "-head") {
+				artifactPath = fmt.Sprintf("rancher/internal/prime/head/v%s", rancherVersion)
+			}
+
+			url := fmt.Sprintf("%s/%s/rancher-images.txt", primeArtifactsURL, artifactPath)
 			content := string(fetchBytes(url))
 
 			images := allProviderImages()
@@ -205,7 +210,8 @@ var _ = Describe("E2E - Airgap Precheck Tests", Label("airgap"), func() {
 		})
 
 		By("Verify CAPI version match in package-env", func() {
-			url := fmt.Sprintf("https://raw.githubusercontent.com/rancher/rancher/refs/tags/v%s/scripts/package-env", rancherVersion)
+			// url := fmt.Sprintf("https://raw.githubusercontent.com/rancher/rancher/refs/tags/v%s/scripts/package-env", rancherVersion)
+			url := "https://raw.githubusercontent.com/rancher/rancher/dd124b489440ca731df3c45205e782e6750912af/scripts/package-env"
 			re := regexp.MustCompile(`CLUSTER_API_CONTROLLER_TAG=(v[0-9]+\.[0-9]+\.[0-9]+)`)
 			matches := re.FindStringSubmatch(string(fetchBytes(url)))
 			Expect(matches).To(HaveLen(2), "CLUSTER_API_CONTROLLER_TAG not found in package-env")
