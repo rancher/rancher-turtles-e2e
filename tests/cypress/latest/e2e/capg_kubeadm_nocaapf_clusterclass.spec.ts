@@ -20,7 +20,7 @@ describe('Import CAPG Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full-nocaapf'
 
   const gcpProject = Cypress.expose("gcp_project")
   const gcpCCMFileName = "cloud-provider-gcp.yaml"
-  const gcpCCMCmd = [`wget ${vars.gcpCCMYaml}`, `sed -i 's|\${CLUSTER_CIDR}|192.168.0.0/16|g' ${gcpCCMFileName}`, applyYAMLManifest(clusterName, gcpCCMFileName)]
+  const gcpCCMCmd = [`wget ${vars.gcpCCMYaml}`, `sed -i 's|\${CLUSTER_CIDR}|192.168.0.0/16|g' ${gcpCCMFileName}`, `sed -i 's|\${GCP_CCM_VERSION}|${vars.gcpCCMVersion}|g' ${gcpCCMFileName}`, applyYAMLManifest(clusterName, gcpCCMFileName)]
 
   before(function () {
     if (isRancherManagerVersion('<2.15')) {
@@ -67,7 +67,7 @@ describe('Import CAPG Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full-nocaapf'
     );
 
     qase(632, it('Apply the CNI & CCM manifest', () => {
-      cy.kubectlExecute([getCAPIClusterKubeconfig(clusterName), applyYAMLManifest(clusterName, vars.calicoCNIYaml), gcpCCMCmd[0], gcpCCMCmd[1], gcpCCMCmd[2]]);
+      cy.kubectlExecute([getCAPIClusterKubeconfig(clusterName), applyYAMLManifest(clusterName, vars.calicoCNIYaml), gcpCCMCmd[0], gcpCCMCmd[1], gcpCCMCmd[2], gcpCCMCmd[3]]);
     })
     );
 

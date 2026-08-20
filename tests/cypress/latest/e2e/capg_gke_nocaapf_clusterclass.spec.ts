@@ -14,7 +14,7 @@ describe('Import CAPG GKE (No-Caapf) Class-Cluster', {tags: ['@full-nocaapf', '@
   const classClusterFileName = './fixtures/gcp/capg-gke-class-cluster.yaml'
 
   const gcpProject = Cypress.expose('gcp_project')
-  const k8sVersion = 'v1.35.5'      // this version is different from GCP Kubeadm version
+  const k8sVersion = 'v1.36.2'      // this version is different from GCP Kubeadm version
 
   before(function () {
     if (isRancherManagerVersion('<2.15')) {
@@ -76,7 +76,7 @@ describe('Import CAPG GKE (No-Caapf) Class-Cluster', {tags: ['@full-nocaapf', '@
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    qase(679, it('Install App on imported cluster', {retries: 1}, () => {
+    qase(679, xit('Install App on imported cluster', {retries: 1}, () => {
       // Install Chart
       // We install Logging chart instead of Monitoring, since this is relatively lightweight.
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');

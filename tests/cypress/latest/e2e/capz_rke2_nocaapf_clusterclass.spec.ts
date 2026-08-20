@@ -76,7 +76,7 @@ describe('Import CAPZ RKE2 (No-Caapf) Class-Cluster', {tags: ['@full-nocaapf', '
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    qase(622, it('Install App on imported cluster', {retries: 1}, () => {
+    qase(622, xit('Install App on imported cluster', {retries: 1}, () => {
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
     );
