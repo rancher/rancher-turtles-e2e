@@ -8,7 +8,7 @@ set -eo pipefail
 # Variables
 
 # Chartmuseum installer (pinned by tag + checksum)
-CHARTMUSEUM_VERSION="v0.16.5"
+CHARTMUSEUM_VERSION="v0.16.6"
 CHARTMUSEUM_INSTALLER_URL="https://raw.githubusercontent.com/helm/chartmuseum/refs/tags/${CHARTMUSEUM_VERSION}/scripts/get-chartmuseum"
 CHARTMUSEUM_INSTALLER_SHA256="f1116c09104abb4610b5d00be0ef80e625ec44838fb10e9fb042d16970f79356"
 # To refresh SHA256:
