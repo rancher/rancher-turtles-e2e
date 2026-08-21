@@ -7,7 +7,7 @@ metadata:
     csi: aws-ebs-csi-driver
     cluster-api.cattle.io/rancher-auto-import: "true"
   name: replace_cluster_name
-  namespace: fleet-default
+  namespace: fleet-default # AWSClusterStaticIdentity only allows provisioning clusters in "fleet-default"
 spec:
   clusterNetwork:
     pods:
