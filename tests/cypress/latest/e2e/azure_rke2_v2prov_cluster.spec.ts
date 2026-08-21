@@ -4,14 +4,14 @@ import * as randomstring from "randomstring";
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
+describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration', '@v2prov']}, () => {
   let userID: string, ccID: string;
   let features = ['turtles']
   const timeout = vars.fullTimeout
   const userName = 'admin'
   const clusterName = 'turtles-qa-azure-v2-' + randomstring.generate({length: 4, capitalization: "lowercase"})
-  const clusterFileName = isAPIv1beta1 ? './fixtures/azure/azure-rke2-cluster-v1beta1.yaml' : './fixtures/azure/azure-rke2-cluster.yaml'
-  const rkeConfigFileName = isAPIv1beta1 ? './fixtures/azure/azure-rke-config-v1beta1.yaml' : './fixtures/azure/azure-rke-config.yaml'
+  const clusterFileName = './fixtures/azure/azure-rke2-cluster.yaml'
+  const rkeConfigFileName = './fixtures/azure/azure-rke-config.yaml'
   const k8sVersion = vars.v2provRKE2Version
 
   if (isRancherManagerVersion('2.13')) {
@@ -59,6 +59,7 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration']}, () => {
         cy.readFile(rkeConfigFileName).then((data) => {
           data = data.replace(/replace_user_id/g, userID)
           data = data.replace(/replace_cluster_name/g, clusterName)
+          data = data.replace(/replace_image_id/g, vars.v2provImageId)
           cy.importYAML(data)
         });
       })

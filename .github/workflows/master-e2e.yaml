@@ -377,7 +377,7 @@ jobs:
       - name: Set k3s Install version
         run: |
           if [[ "${{ env.RANCHER_VERSION }}" =~ (2\.12) ]]; then
-            echo INSTALL_K3S_VERSION="v1.32.3+k3s1" >> ${GITHUB_ENV}
+            echo INSTALL_K3S_VERSION="v1.33.4+k3s1" >> ${GITHUB_ENV}
           else
             echo INSTALL_K3S_VERSION=${{ inputs.upstream_cluster_version }} >> ${GITHUB_ENV}
           fi

@@ -3,6 +3,7 @@ kind: Cluster
 metadata:
   annotations:
     field.cattle.io/creatorId: replace_user_id
+    provisioning.cattle.io/management-cluster-display-name: replace_cluster_name
   name: replace_cluster_name
   namespace: fleet-default
 spec:
@@ -14,6 +15,7 @@ spec:
       rke2-calico: {}
       rke2-ingress-nginx: {}
       rke2-traefik: {}
+    dataDirectories: {}
     etcd:
       snapshotRetention: 5
       snapshotScheduleCron: 0 */5 * * *
@@ -37,7 +39,7 @@ spec:
     machineSelectorConfig:
     - config:
         protect-kernel-defaults: false
-    networking: {}    
+    networking: {}
     registries: {}
     upgradeStrategy:
       controlPlaneConcurrency: "1"
@@ -48,9 +50,6 @@ spec:
         force: false
         gracePeriod: -1
         ignoreDaemonSets: true
-        ignoreErrors: false
-        postDrainHooks: null
-        preDrainHooks: null
         skipWaitForDeleteTimeoutSeconds: 0
         timeout: 120
       workerConcurrency: "1"
@@ -61,8 +60,5 @@ spec:
         force: false
         gracePeriod: -1
         ignoreDaemonSets: true
-        ignoreErrors: false
-        postDrainHooks: null
-        preDrainHooks: null
         skipWaitForDeleteTimeoutSeconds: 0
         timeout: 120
