@@ -6,7 +6,7 @@ metadata:
     cloud-provider: aws
     csi: aws-ebs-csi-driver
   name: replace_cluster_name
-  namespace: fleet-default
+  namespace: fleet-default # AWSClusterStaticIdentity only allows provisioning clusters in "fleet-default"
 spec:
   clusterNetwork:
     pods:
