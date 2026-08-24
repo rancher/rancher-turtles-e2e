@@ -40,21 +40,28 @@ jobs:
            echo "Deleting GKE cluster: $cl"
            gcloud container clusters delete --location asia-south2 $cl --async --quiet
           done
+      - name: Cleanup GCP Resources
+        if: always()
+        continue-on-error: true
+        uses: rancher/gcp-janitor@a26ad042cc51fee265a080d862af88e5c3b11bc0 # v0.1.0
+        with:
+          credentials-json: ${{ secrets.GCP_CREDENTIALS }}
+          zones: "*"
+          project-id: ${{ secrets.GCP_PROJECT }}
+          age-in-hours: 6
+          resource-label-key: owner
+          resource-label-value: turtles-qa
 
   azure-janitor:
     name: azure-janitor
     runs-on: ubuntu-latest
     steps:
-     - name: Login to Azure
-       uses: azure/login@f5d393ae46f8fde4be8b75f32e3fc50e654ad0ca # v3.0.1
-       with:
-         creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
-     - name: Cleanup
-       continue-on-error: true
-       run: |
-         # Get the AKS clusters by prefix
-         for rg in $(az group list --query "[?starts_with(name,'turtles-qa-azure')].name" | jq -r ".[]" 2> /dev/null); do
-           echo "Deleting AKS resource group: $rg"
-           az group delete --name $rg --yes
-         done
+      - name: Cleanup
+        uses: rancher/azure-janitor@90a1ba53f7e37ad1e1a20455efe355c06849d84e # v0.1.2
+        with:
+          resource-groups: turtles-qa-azure*
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID}}
+          client-id: ${{ secrets.AZURE_CLIENT_ID}}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET}}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID}}
+          commit: true
