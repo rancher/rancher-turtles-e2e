@@ -36,21 +36,25 @@ jobs:
         continue-on-error: true
         run: |
           # Get the GKE clusters by prefix
-          for cl in $(gcloud container clusters list --location asia-south2 --filter="name:turtles-qa-gcp" --format json | jq -r ".[] | .name" 2> /dev/null); do
+          for cl in $(gcloud container clusters list --location asia-south2 --filter="name:turtles-qa-gcp" --format="value(name)"); do
            echo "Deleting GKE cluster: $cl"
            gcloud container clusters delete --location asia-south2 $cl --async --quiet
           done
-      - name: Cleanup GCP Resources
-        if: always()
-        continue-on-error: true
-        uses: rancher/gcp-janitor@a26ad042cc51fee265a080d862af88e5c3b11bc0 # v0.1.0
-        with:
-          credentials-json: ${{ secrets.GCP_CREDENTIALS }}
-          zones: "*"
-          project-id: ${{ secrets.GCP_PROJECT }}
-          age-in-hours: 6
-          resource-label-key: owner
-          resource-label-value: turtles-qa
+
+          # Delete Forwarding Rule
+          gcloud compute forwarding-rules delete $(gcloud compute forwarding-rules list --global --format="value(name)" --filter="name:turtles-qa-gcp" | xargs) --global --quiet
+
+          # Delete Target TCP Proxies
+          gcloud compute target-tcp-proxies delete $(gcloud compute target-tcp-proxies list  --filter="name:turtles-qa-gcp"  --format="value(name)" --global | xargs) --global --quiet
+
+          # Delete Backend Services
+          gcloud compute backend-services delete $(gcloud compute backend-services list --filter="name:turtles-qa-gcp" --format="value(name)" --global | xargs) --global --quiet
+
+          # Delete Instance Group
+          gcloud compute instance-groups unmanaged delete $(gcloud compute instance-groups unmanaged list --zones=asia-south2-a --filter="name:turtles-qa-gcp" --format="value(name)" | xargs) --zone=asia-south2-a --quiet
+
+          # Delete Instances
+          gcloud compute instances delete --zone=asia-south2-a $(gcloud compute instances list --zones=asia-south2-a --filter="name:turtles-qa-gcp" --format="value(name)" | xargs) --quiet
 
   azure-janitor:
     name: azure-janitor
