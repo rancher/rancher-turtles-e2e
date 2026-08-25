@@ -63,7 +63,7 @@ export const vars = {
       return '0.25';
     }
 
-    if (!isTurtlesDevChart && providersChartNeedsStgRegistry()) {
+    if (!isTurtlesDevChart) {
       if (isRancherManagerVersion('2.13')) return '0.25';
       if (isRancherManagerVersion('2.14')) return '0.26';
       if (isRancherManagerVersion('2.15')) return '0.27';
