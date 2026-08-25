@@ -8,16 +8,22 @@ metadata:
 acceleratedNetworking: false
 availabilitySet: replace_cluster_name
 availabilityZone: ""
+clientId: ""
+clientSecret: ""
+customData: ""
 diskSize: "30"
+dns: ""
 dockerPort: "2376"
 enablePublicIpStandardSku: false
 environment: AzurePublicCloud
 faultDomainCount: "3"
-image: canonical:ubuntu-24_04-lts:server-gen1:latest
+image: replace_image_id
 location: centralindia
 managedDisks: true
 noPublicIp: false
 nsg: rancher-managed-BZhXsqxh
+plan: ""
+privateIpAddress: null
 resourceGroup: replace_cluster_name
 size: Standard_D2_v2
 sshUser: docker-user
@@ -25,10 +31,12 @@ staticPublicIp: false
 storageType: Standard_LRS
 subnet: replace_cluster_name
 subnetPrefix: 192.168.0.0/16
+subscriptionId: ""
+tags: null
+tenantId: ""
 updateDomainCount: "5"
 usePrivateIp: false
 vnet: replace_cluster_name-vnet
-plan: ""
 openPort:
 - 6443/tcp
 - 2379/tcp
