@@ -69,6 +69,9 @@ on:
       prime_artifacts_url:
         description: URL to fetch artifacts list for prime releases
         required: true
+      prime_head_chart_url:
+        description: URL to fetch prime pre-release helm chart
+        required: true
     inputs:
       cert-manager_version:
         description: Version of cert-manager to use
@@ -477,6 +480,12 @@ jobs:
           INDEX=$(((${{ github.run_number }} % 3) + 1))
           CP_ENDPOINT_IP=$(echo ${{ secrets.vsphere_endpoints_list }} | cut -d' ' -f${INDEX})
           sed -i "s/replace_cluster_control_plane_endpoint_ip/${CP_ENDPOINT_IP}/" tests/cypress/latest/fixtures/vsphere/capv-helm-values.yaml
+      - name: Get Rancher prime-head version for Install
+        if: ${{ contains(env.RANCHER_VERSION, 'prime-head') }}
+        run: |
+          HEAD_VERSION="${RANCHER_VERSION#prime-head/}"
+          RM_VERSION=$(curl -fsSL ${{ secrets.prime_head_chart_url }} | yq ".entries.rancher | map(select(.version | test(\"^${HEAD_VERSION}\"))) | sort_by(.created) | .[-1].version")
+          echo "RANCHER_VERSION=prime-rc/${RM_VERSION}" >> ${GITHUB_ENV}
       - name: Install Rancher Manager
         env:
           RANCHER_VERSION: ${{ env.RANCHER_VERSION }}
@@ -574,6 +583,12 @@ jobs:
             echo "ERROR: Upgrade is only allowed to 2.14 Rancher Version"
             exit 1
           fi
+      - name: Get Rancher prime-head version for Upgrade
+        if: ${{ contains(env.RANCHER_VERSION, 'prime-head') && (contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
+        run: |
+          HEAD_VERSION="${RANCHER_VERSION#prime-head/}"
+          RM_VERSION=$(curl -fsSL ${{ secrets.prime_head_chart_url }} | yq ".entries.rancher | map(select(.version | test(\"^${HEAD_VERSION}\"))) | sort_by(.created) | .[-1].version")
+          echo "RANCHER_VERSION=prime-rc/${RM_VERSION}" >> ${GITHUB_ENV}
       - name: Upgrade Rancher Manager
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:

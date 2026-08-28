@@ -60,7 +60,8 @@ describe('Install Turtles Chart - @install', {tags: '@install'}, () => {
   );
 
   qase(11, it('Install Turtles chart', {retries: 1}, () => {
-      cy.checkChart(vars.localCluster, 'Install', 'Rancher Turtles', turtlesNamespace, {version: isMigration ? '0.24.5' : undefined});
+      let version = isMigration || !isTurtlesDevChart ? '0.24' : undefined;
+      cy.checkChart(vars.localCluster, 'Install', 'Rancher Turtles', turtlesNamespace, {version: version});
     })
   );
 });

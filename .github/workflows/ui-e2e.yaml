@@ -91,6 +91,7 @@ jobs:
       prime_registry: ${{ secrets.PRIME_REGISTRY }}
       stg_prime_registry: ${{ secrets.STG_PRIME_REGISTRY }}
       prime_artifacts_url: ${{ secrets.PRIME_ARTIFACTS_URL }}
+      prime_head_chart_url: ${{ secrets.PRIME_HEAD_CHART_URL }}
     with:
       test_description: "UI - e2e tests with Standard K3s"
       destroy_runner: ${{ github.event_name == 'schedule' && true || inputs.destroy_runner }}
