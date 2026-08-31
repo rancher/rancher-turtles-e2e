@@ -68,8 +68,10 @@ describe('Enable CAPI Providers', () => {
     // HelmOps to be used across all specs
     // TODO cpinjani: Refactor below condition while adding 2.15 upgrade path
     qase(90, (isRancherManagerVersion('2.14') && isUpgrade ? it.skip : it)('Add Applications fleet repo', () => {
+      // Use release branch as main does not have helm-ops applications targets
+      let classBranch = isRancherManagerVersion('>=2.15') ? 'release/v0.27' : vars.classBranch
       // Add upstream apps repo
-      cy.addFleetGitRepo('helm-ops', vars.turtlesRepoUrl, vars.classBranch, 'examples/applications/', vars.capiClustersNS);
+      cy.addFleetGitRepo('helm-ops', vars.turtlesRepoUrl, classBranch, 'examples/applications/', vars.capiClustersNS);
     })
     );
 

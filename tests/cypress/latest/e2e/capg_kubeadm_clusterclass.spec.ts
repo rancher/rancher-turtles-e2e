@@ -122,7 +122,7 @@ describe('Import CAPG Kubeadm Class-Cluster', {tags: ['@full', '@capgk']}, () =>
       );
 
       qase(146,
-        it('Delete the CAPG cluster', {retries: 1}, () => {
+        it('Delete the CAPG cluster', () => {
           // Remove CAPI Resources related to the cluster
           capiClusterDeletion(clusterName, timeout);
         })

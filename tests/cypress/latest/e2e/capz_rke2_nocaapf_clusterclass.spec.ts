@@ -118,7 +118,7 @@ describe('Import CAPZ RKE2 (No-Caapf) Class-Cluster', {tags: ['@full-nocaapf', '
       })
       );
 
-      qase(626, it('Delete the CAPZ cluster', {retries: 1}, () => {
+      qase(626, it('Delete the CAPZ cluster', () => {
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout);
       })

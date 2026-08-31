@@ -59,7 +59,7 @@ export function capiClusterDeletion(clusterName: string, timeout: number, cluste
     // This is checked by ensuring the cluster is not available in the CAPI menu
     cy.checkCAPIClusterDeleted(clusterName, timeout);
   } else {
-    // Delete CAPI cluster created via UI
+    // Delete CAPI cluster created via YAML
     cy.removeCAPIResource('Clusters', clusterName, timeout);
   }
 

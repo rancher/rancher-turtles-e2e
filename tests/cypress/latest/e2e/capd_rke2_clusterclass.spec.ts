@@ -169,7 +169,7 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: ['@short', '@capdr']}, () => {
       );
 
       qase(103,
-        it('Delete the CAPD cluster', {retries: 1}, () => {
+        it('Delete the CAPD cluster', () => {
           // Remove CAPI Resources related to the cluster
           capiClusterDeletion(clusterName, timeout);
         })

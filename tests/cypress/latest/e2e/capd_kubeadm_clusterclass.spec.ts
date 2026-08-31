@@ -64,6 +64,10 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: ['@short', '@capdk']}, () =
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_kindVersion/g, vars.kindVersion)
+          if (isRancherManagerVersion(">=2.16")) {
+            data = data.replace(/- name: imagePullSecret/g, '')
+            data = data.replace(/value: docker-config/g, '')
+          }
           cy.importYAML(data, vars.capiClustersNS)
         });
 
@@ -128,11 +132,15 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: ['@short', '@capdk']}, () =
     qase(95,
       it("Scale up imported CAPD cluster by patching class-cluster yaml", () => {
         cy.readFile(classClusterFileName).then((data) => {
-          data = data.replace(/replace_cluster_name/g, clusterName)
+          data = data.replace(/replicas: 2/g, 'replicas: 3')
 
           // workaround; these values need to be re-replaced before applying the scaling changes
+          data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_kindVersion/g, vars.kindVersion)
-          data = data.replace(/replicas: 2/g, 'replicas: 3')
+          if (isRancherManagerVersion(">=2.16")) {
+            data = data.replace(/- name: imagePullSecret/g, '')
+            data = data.replace(/value: docker-config/g, '')
+          }
           cy.importYAML(data, vars.capiClustersNS)
         });
 
@@ -170,7 +178,7 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: ['@short', '@capdk']}, () =
       );
 
       qase(98,
-        it('Delete the CAPD cluster', {retries: 1}, () => {
+        it('Delete the CAPD cluster', () => {
           // Remove CAPI Resources related to the cluster
           capiClusterDeletion(clusterName, timeout);
         })

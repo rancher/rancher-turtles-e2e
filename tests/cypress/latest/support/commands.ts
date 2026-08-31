@@ -437,7 +437,6 @@ Cypress.Commands.add('removeCAPIResource', (resourcetype, resourceName, timeout)
   cy.getBySel('sortable-table_check_select_all').click();
   cy.getBySel('sortable-table-promptRemove').click({ctrlKey: true}); // this will prevent to display confirmation dialog
   cy.wait(2000); // needed for 2.12
-  cy.typeInFilter(resourceName);
   if (timeout != undefined) {
     cy.getBySel('sortable-cell-0-1', {timeout: timeout}).should('not.exist');
   } else {
@@ -802,9 +801,7 @@ Cypress.Commands.add('patchYamlResource', (clusterName, namespace, resourceKind,
   cy.exploreCluster(clusterName);
   cy.setNamespace(namespace);
   // Open Resource Search modal
-  cy.get('.icon-search.icon-lg').click();
-  cy.get('input.search').type(resourceKind);
-  cy.contains('a', resourceKind, {matchCase: false}).click();
+  searchResourceKind(resourceKind);
   cy.wait(2000);
   cy.typeInFilter(resourceName);
   // Click three dots menu on filtered resource (must be unique)
@@ -876,7 +873,8 @@ Cypress.Commands.add('deleteCluster', (clusterName, timeout = 120000) => {
 });
 
 // Command to type in Filter input
-Cypress.Commands.add('typeInFilter', (text, selector = '.input-sm') => {
+let filter = isRancherManagerVersion('<2.16') ? '.input-sm' : '[data-testid="search-box-filter-row"]'
+Cypress.Commands.add('typeInFilter', (text, selector = filter) => {
   cy.get(selector)
     .click()
     .clear()
@@ -1569,6 +1567,21 @@ export function setUseCAAPFFeatureGate(enabled: boolean, wait: boolean=true) {
     cy.get('.CodeMirror-code').contains(`use-caapf=${enabled}`);
     cy.clickButton('Close');
     cy.namespaceReset();
+  }
+}
+
+export function searchResourceKind(resourceKind: string) {
+  // Select first of the matching listed version
+  if (isRancherManagerVersion('<2.16')) {
+    cy.get('.icon-search.icon-lg').click();
+    cy.get('input.search').type(resourceKind);
+    cy.contains('a', resourceKind, {matchCase: false}).click();
+  } else {
+    cy.getBySel('nav-jump-to-input').click();
+    cy.getBySel('nav-jump-to-dropdown')
+      .should('be.visible')
+      .contains(resourceKind)
+      .click();
   }
 }
 

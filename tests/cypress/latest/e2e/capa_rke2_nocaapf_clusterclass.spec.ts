@@ -137,7 +137,7 @@ describe('Import CAPA RKE2 (No-Caapf) Class-Cluster', {tags: ['@full-nocaapf', '
       })
       );
 
-      qase(663, it('Delete the CAPA cluster', {retries: 1}, () => {
+      qase(663, it('Delete the CAPA cluster', () => {
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout);
       })

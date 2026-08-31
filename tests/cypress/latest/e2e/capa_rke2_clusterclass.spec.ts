@@ -163,7 +163,7 @@ describe('Import CAPA RKE2 Class-Cluster', {tags: ['@full', '@capar']}, () => {
 
 
       qase(114,
-        it('Delete the CAPA cluster', {retries: 1}, () => {
+        it('Delete the CAPA cluster', () => {
           // Remove CAPI Resources related to the cluster
           capiClusterDeletion(clusterName, timeout);
         })
