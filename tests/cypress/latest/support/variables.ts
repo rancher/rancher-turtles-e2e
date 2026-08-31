@@ -179,7 +179,7 @@ const buildTypeVersionMap = {
   },
   'dev-v2.15': {
     capi: 'v1.13.3',
-    rke2: 'v0.25.0',
+    rke2: 'v0.25.2',
     kubeadm: 'v1.13.3',
     fleet: 'v0.15.0',
     vsphere: 'v1.16.1',
