@@ -52,16 +52,11 @@ jobs:
               | xargs -r gcloud container clusters delete --location="$REGION" --quiet
           done
 
-          echo "Cleaning up GKE clusters filter=name~^capg- in $REGION"
-          # GKE Clusters provisioned on Rancher <2.15 cannot be filtered using $FILTER, since they use default name that is prefixed by `capg-`
-          gcloud container clusters list --location="$REGION" --filter="name~^capg-" --format="value(name)" \
-            | xargs -r gcloud container clusters delete --location="$REGION" --quiet
-
           # Delete the global load balancer resources, front-end first
           for kind in forwarding-rules target-tcp-proxies backend-services; do
             echo "Cleaning up $kind"
-            gcloud compute "$kind" list --regions="$REGION" --filter="$FILTER" --format="value(name)" \
-              | xargs -r gcloud compute "$kind" delete --region="$REGION" --quiet
+            gcloud compute "$kind" list --global --filter="$FILTER" --format="value(name)" \
+              | xargs -r gcloud compute "$kind" delete --global --quiet
           done
 
           for zone in $(gcloud compute zones list --filter="name:$REGION" --format="value(name)"); do
