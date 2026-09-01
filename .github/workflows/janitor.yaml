@@ -81,7 +81,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Cleanup
-        uses: rancher/azure-janitor@47483c1c497134308c83c61b8e68ae0555c43be4 # main @ 2026-04-13 v0.1.2
+        uses: rancher/azure-janitor@90a1ba53f7e37ad1e1a20455efe355c06849d84e # v0.1.2
         with:
           resource-groups: turtles-qa-azure*
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
