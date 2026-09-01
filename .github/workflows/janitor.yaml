@@ -30,33 +30,40 @@ jobs:
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
-        
+
       - name: Setup gcloud
         uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
-        
+
       - name: Cleanup
         continue-on-error: true
+        env:
+          # Resources are named by getClusterName() in tests/cypress/latest/support/utils.ts
+          FILTER: name:turtles-qa-gcp
+          REGION: asia-south2
         run: |
-          # Get the GKE clusters by prefix
-          for cl in $(gcloud container clusters list --location asia-south2 --filter="name:turtles-qa-gcp" --format="value(name)"); do
-           echo "Deleting GKE cluster: $cl"
-           gcloud container clusters delete --location asia-south2 $cl --async --quiet
+          # Best-effort cleanup: keep going past individual failures instead of
+          # letting the default `bash -eo pipefail` skip the remaining resources.
+          set +e
+
+          ZONES="$REGION-a,$REGION-b,$REGION-c"
+
+          # Delete GKE clusters
+          gcloud container clusters list --location "$REGION" --filter="$FILTER" --format="value(name)" \
+            | xargs -r gcloud container clusters delete --location "$REGION" --async --quiet
+
+          # Delete the global load balancer resources, front-end first
+          for kind in forwarding-rules target-tcp-proxies backend-services; do
+            gcloud compute "$kind" list --global --filter="$FILTER" --format="value(name)" \
+              | xargs -r gcloud compute "$kind" delete --global --quiet
           done
 
-          # Delete Forwarding Rule
-          gcloud compute forwarding-rules list --global --format="value(name)" --filter="name:turtles-qa-gcp" | xargs -r gcloud compute forwarding-rules delete  --global --quiet
-
-          # Delete Target TCP Proxies
-          gcloud compute target-tcp-proxies list  --filter="name:turtles-qa-gcp"  --format="value(name)" --global | xargs -r gcloud compute target-tcp-proxies delete --global --quiet
-
-          # Delete Backend Services
-          gcloud compute backend-services list --filter="name:turtles-qa-gcp" --format="value(name)" --global | xargs -r gcloud compute backend-services delete --global --quiet
-
-          # Delete Instance Group
-          gcloud compute instance-groups unmanaged list --zones=asia-south2-a --filter="name:turtles-qa-gcp" --format="value(name)" | xargs -r gcloud compute instance-groups unmanaged delete --zone=asia-south2-a --quiet
+          # Delete Instance Groups
+          gcloud compute instance-groups unmanaged list --zones="$ZONES" --filter="$FILTER" --format="value(name)" \
+            | xargs -r gcloud compute instance-groups unmanaged delete --quiet
 
           # Delete Instances
-          gcloud compute instances list --zones=asia-south2-a --filter="name:turtles-qa-gcp" --format="value(name)" | xargs -r gcloud compute instances delete --zone=asia-south2-a --quiet
+          gcloud compute instances list --zones="$ZONES" --filter="$FILTER" --format="value(name)" \
+            | xargs -r gcloud compute instances delete --quiet
 
   azure-janitor:
     name: azure-janitor
@@ -64,7 +71,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Cleanup
-        uses: rancher/azure-janitor@90a1ba53f7e37ad1e1a20455efe355c06849d84e # v0.1.2
+        uses: rancher/azure-janitor@47483c1c497134308c83c61b8e68ae0555c43be4 # main @ 2026-04-13 v0.1.2
         with:
           resource-groups: turtles-qa-azure*
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
