@@ -24,7 +24,7 @@ jobs:
     name: gcp-janitor
     runs-on: ubuntu-latest
     env:
-      GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
+      GCP_PROJECT: ${{ secrets.GCP_PROJECT }} # this helps in masking the project value
     steps:
       - name: Authenticate to GCP
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
@@ -45,25 +45,35 @@ jobs:
           # letting the default `bash -eo pipefail` skip the remaining resources.
           set +e
 
-          ZONES="$REGION-a,$REGION-b,$REGION-c"
-
           # Delete GKE clusters
-          gcloud container clusters list --location "$REGION" --filter="$FILTER" --format="value(name)" \
-            | xargs -r gcloud container clusters delete --location "$REGION" --async --quiet
+          for filter in $FILTER "name~^capg-"; do
+            echo "Cleaning up GKE clusters filter=$filter in $REGION"
+            gcloud container clusters list --location="$REGION" --filter="$filter" --format="value(name)" \
+              | xargs -r gcloud container clusters delete --location="$REGION" --quiet
+          done
+
+          echo "Cleaning up GKE clusters filter=name~^capg- in $REGION"
+          # GKE Clusters provisioned on Rancher <2.15 cannot be filtered using $FILTER, since they use default name that is prefixed by `capg-`
+          gcloud container clusters list --location="$REGION" --filter="name~^capg-" --format="value(name)" \
+            | xargs -r gcloud container clusters delete --location="$REGION" --quiet
 
           # Delete the global load balancer resources, front-end first
           for kind in forwarding-rules target-tcp-proxies backend-services; do
-            gcloud compute "$kind" list --global --filter="$FILTER" --format="value(name)" \
-              | xargs -r gcloud compute "$kind" delete --global --quiet
+            echo "Cleaning up $kind"
+            gcloud compute "$kind" list --regions="$REGION" --filter="$FILTER" --format="value(name)" \
+              | xargs -r gcloud compute "$kind" delete --region="$REGION" --quiet
           done
 
-          # Delete Instance Groups
-          gcloud compute instance-groups unmanaged list --zones="$ZONES" --filter="$FILTER" --format="value(name)" \
-            | xargs -r gcloud compute instance-groups unmanaged delete --quiet
+          for zone in $(gcloud compute zones list --filter="name:$REGION" --format="value(name)"); do
+            echo "Cleaning up Instance Groups and Instances in Zone: $zone"
+            # Delete Instance Groups
+            gcloud compute instance-groups unmanaged list --zones="$zone" --filter="$FILTER" --format="value(name)" \
+              | xargs -r gcloud compute instance-groups unmanaged delete --zone="$zone" --quiet
 
-          # Delete Instances
-          gcloud compute instances list --zones="$ZONES" --filter="$FILTER" --format="value(name)" \
-            | xargs -r gcloud compute instances delete --quiet
+            # Delete Instances
+            gcloud compute instances list --zones="$zone" --filter="$FILTER" --format="value(name)" \
+              | xargs -r gcloud compute instances delete --quiet --zone="$zone"
+          done
 
   azure-janitor:
     name: azure-janitor
