@@ -23,38 +23,64 @@ jobs:
   gcp-janitor:
     name: gcp-janitor
     runs-on: ubuntu-latest
+    env:
+      GCP_PROJECT: ${{ secrets.GCP_PROJECT }} # this helps in masking the project value
     steps:
       - name: Authenticate to GCP
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
-        
+
       - name: Setup gcloud
         uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
-        
+
       - name: Cleanup
         continue-on-error: true
+        env:
+          # Resources are named by getClusterName() in tests/cypress/latest/support/utils.ts
+          FILTER: name:turtles-qa-gcp
+          REGION: asia-south2
         run: |
-          # Get the GKE clusters by prefix
-          for cl in $(gcloud container clusters list --location asia-south2 --filter="name:turtles-qa-gcp" --format json | jq -r ".[] | .name" 2> /dev/null); do
-           echo "Deleting GKE cluster: $cl"
-           gcloud container clusters delete --location asia-south2 $cl --async --quiet
+          # Best-effort cleanup: keep going past individual failures instead of
+          # letting the default `bash -eo pipefail` skip the remaining resources.
+          set +e
+
+          # Delete GKE clusters
+          for filter in $FILTER "name~^capg-"; do
+            echo "Cleaning up GKE clusters filter=$filter in $REGION"
+            gcloud container clusters list --location="$REGION" --filter="$filter" --format="value(name)" \
+              | xargs -r gcloud container clusters delete --location="$REGION" --quiet
+          done
+
+          # Delete the global load balancer resources, front-end first
+          for kind in forwarding-rules target-tcp-proxies backend-services; do
+            echo "Cleaning up $kind"
+            gcloud compute "$kind" list --global --filter="$FILTER" --format="value(name)" \
+              | xargs -r gcloud compute "$kind" delete --global --quiet
+          done
+
+          for zone in $(gcloud compute zones list --filter="name:$REGION" --format="value(name)"); do
+            echo "Cleaning up Instance Groups and Instances in Zone: $zone"
+            # Delete Instance Groups
+            gcloud compute instance-groups unmanaged list --zones="$zone" --filter="$FILTER" --format="value(name)" \
+              | xargs -r gcloud compute instance-groups unmanaged delete --zone="$zone" --quiet
+
+            # Delete Instances
+            gcloud compute instances list --zones="$zone" --filter="$FILTER" --format="value(name)" \
+              | xargs -r gcloud compute instances delete --quiet --zone="$zone"
           done
 
   azure-janitor:
     name: azure-janitor
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
-     - name: Login to Azure
-       uses: azure/login@f5d393ae46f8fde4be8b75f32e3fc50e654ad0ca # v3.0.1
-       with:
-         creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
-     - name: Cleanup
-       continue-on-error: true
-       run: |
-         # Get the AKS clusters by prefix
-         for rg in $(az group list --query "[?starts_with(name,'turtles-qa-azure')].name" | jq -r ".[]" 2> /dev/null); do
-           echo "Deleting AKS resource group: $rg"
-           az group delete --name $rg --yes
-         done
+      - name: Cleanup
+        uses: rancher/azure-janitor@90a1ba53f7e37ad1e1a20455efe355c06849d84e # v0.1.2
+        with:
+          resource-groups: turtles-qa-azure*
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          commit: true
