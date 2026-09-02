@@ -178,9 +178,9 @@ const buildTypeVersionMap = {
     azure: 'v1.22.0'
   },
   'dev-v2.15': {
-    capi: 'v1.13.3',
+    capi: 'v1.14.0',
     rke2: 'v0.25.2',
-    kubeadm: 'v1.13.3',
+    kubeadm: 'v1.14.0',
     fleet: 'v0.15.0',
     vsphere: 'v1.16.1',
     amazon: 'v2.11.1',
