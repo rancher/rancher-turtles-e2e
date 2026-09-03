@@ -649,7 +649,7 @@ jobs:
         env:
           KUBECONFIG: /etc/rancher/k3s/k3s.yaml
           RANCHER_LOG_COLLECTOR: ${{ github.workspace }}/.github/scripts/collect-rancher-logs.sh
-        if: ${{ always() }}
+        if: false
         run: |
           chmod +x ${{ env.RANCHER_LOG_COLLECTOR }}
           bash ${{ env.RANCHER_LOG_COLLECTOR }}
