@@ -227,7 +227,7 @@ describe('Import CAPV RKE2 Class-Cluster', {tags: ['@vsphere', '@capvr']}, () =>
       })
       );
 
-      qase(282, it('Delete the CAPV cluster', {retries: 1}, () => {
+      qase(282, it('Delete the CAPV cluster', () => {
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout, clusterRepoName);
       })

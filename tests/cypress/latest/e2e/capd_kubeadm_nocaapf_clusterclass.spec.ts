@@ -140,7 +140,7 @@ describe('Import CAPD Kubeadm (No-Caapf) Class-Cluster', {tags: ['@short', '@sho
       })
       );
       
-      qase(570, it('Delete the CAPD cluster', {retries: 1}, () => {
+      qase(570, it('Delete the CAPD cluster', () => {
           // Remove CAPI Resources related to the cluster
           capiClusterDeletion(clusterName, timeout);
       })

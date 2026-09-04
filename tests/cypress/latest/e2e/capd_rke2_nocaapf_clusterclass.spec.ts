@@ -140,7 +140,7 @@ describe('Import CAPD RKE2 (No-Caapf) Class-Cluster using Fleet', {tags: ['@shor
       })
       );
 
-      qase(582, it('Delete the CAPD cluster', {retries: 1}, () => {
+      qase(582, it('Delete the CAPD cluster', () => {
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout, clustersRepoName, true);
       })

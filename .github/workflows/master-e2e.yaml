@@ -236,7 +236,7 @@ jobs:
       qase_run_id: ${{ steps.qase_run_id.outputs.qase_run_id }}
     env:
       # Rancher versions with embedded turtles
-      RANCHER_RECENT_VERSIONS: '2\.(13|14|15)'
+      RANCHER_RECENT_VERSIONS: '2\.(13|14|15|16)'
       # K3S flags to use for installation
       INSTALL_K3S_SKIP_ENABLE: true
       INSTALL_K3S_VERSION: ${{ inputs.upstream_cluster_version }}
@@ -370,6 +370,8 @@ jobs:
             echo "TURTLES_BRANCH=release/v0.25" >> ${GITHUB_ENV}
           elif [[ "${{ env.RANCHER_VERSION }}" =~ 2.14 ]]; then
             echo "TURTLES_BRANCH=release/v0.26" >> ${GITHUB_ENV}
+          elif [[ "${{ env.RANCHER_VERSION }}" =~ 2.15 ]]; then
+            echo "TURTLES_BRANCH=release/v0.27" >> ${GITHUB_ENV}
           elif [[ "${{ inputs.grep_test_by_tag }}" =~ "@migration" ]]; then
             echo "TURTLES_BRANCH=release/v0.25" >> ${GITHUB_ENV}
           elif [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then

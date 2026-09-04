@@ -130,7 +130,7 @@ describe('Import CAPA Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full-nocaapf'
       })
       );
 
-      qase(727, it('Delete the CAPA cluster', {retries: 1}, () => {
+      qase(727, it('Delete the CAPA cluster', () => {
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout);
       })

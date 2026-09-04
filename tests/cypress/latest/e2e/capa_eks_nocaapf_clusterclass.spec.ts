@@ -120,7 +120,7 @@ describe('Import CAPA EKS (No-Caapf) Class-Cluster', {tags: ['@full-nocaapf', '@
       })
       );
 
-      qase(649, it('Delete the CAPA cluster', {retries: 1}, () => {
+      qase(649, it('Delete the CAPA cluster', () => {
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout);
       })

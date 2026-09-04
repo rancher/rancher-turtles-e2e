@@ -161,7 +161,7 @@ describe('Import CAPV RKE2 (No-Caapf) Class-Cluster', {tags: ['@vsphere', '@vsph
       })
       );
 
-      qase(699, it('Delete the CAPV cluster', {retries: 1}, () => {
+      qase(699, it('Delete the CAPV cluster', () => {
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout, clusterRepoName);
       })

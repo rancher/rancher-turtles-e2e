@@ -67,6 +67,7 @@ export const vars = {
       if (isRancherManagerVersion('2.13')) return '0.25';
       if (isRancherManagerVersion('2.14')) return '0.26';
       if (isRancherManagerVersion('2.15')) return '0.27';
+      if (isRancherManagerVersion('2.16')) return '0.28';
     }
     // for stable releases, only supported versions will be listed, so we do not need to return/select a specific
     // versions; selecting a version is only necessary for alpha/rc/head builds where we use staging registry that
@@ -75,32 +76,41 @@ export const vars = {
   })()
 };
 
-type BuildType = 'prod-v2.12' | 'prod-v2.13' | 'prod-v2.14' | 'prod-v2.15' | 'dev-v2.12' | 'dev-v2.13' | 'dev-v2.14' | 'dev-v2.15';
+type BuildType = 'prod-v2.12' | 'prod-v2.13' | 'prod-v2.14' | 'prod-v2.15' | 'prod-v2.16' | 'dev-v2.12' | 'dev-v2.13' | 'dev-v2.14' | 'dev-v2.15' | 'dev-v2.16';
 
 const buildType = ((): BuildType => {
-  if (isTurtlesDevChart && isRancherManagerVersion('2.12')){
-    return 'dev-v2.12';
-  }
-  if (isTurtlesDevChart && isRancherManagerVersion('2.13')) {
-    return 'dev-v2.13';
-  }
-  if (isTurtlesDevChart && isRancherManagerVersion('2.14')) {
-    return 'dev-v2.14';
-  }
-  if (isTurtlesDevChart && isRancherManagerVersion('2.15')) {
-    return 'dev-v2.15';
-  }
-  if(isRancherManagerVersion('2.12')){
-    return 'prod-v2.12';
-  }
-  if (isRancherManagerVersion('2.13')) {
-    return 'prod-v2.13';
-  }
-  if (isRancherManagerVersion('2.14')) {
-    return 'prod-v2.14';
-  }
-  if (isRancherManagerVersion('2.15')) {
-    return 'prod-v2.15';
+  if (isTurtlesDevChart) {
+    if (isRancherManagerVersion('2.12')){
+      return 'dev-v2.12';
+    }
+    if (isRancherManagerVersion('2.13')) {
+      return 'dev-v2.13';
+    }
+    if (isRancherManagerVersion('2.14')) {
+      return 'dev-v2.14';
+    }
+    if (isRancherManagerVersion('2.15')) {
+      return 'dev-v2.15';
+    }
+    if (isRancherManagerVersion('2.16')) {
+      return 'dev-v2.16';
+    }
+  } else {
+    if (isRancherManagerVersion('2.12')){
+      return 'prod-v2.12';
+    }
+    if (isRancherManagerVersion('2.13')) {
+      return 'prod-v2.13';
+    }
+    if (isRancherManagerVersion('2.14')) {
+      return 'prod-v2.14';
+    }
+    if (isRancherManagerVersion('2.15')) {
+      return 'prod-v2.15';
+    }
+    if (isRancherManagerVersion('2.16')) {
+      return 'prod-v2.16';
+    }
   }
   // This should never happen
   throw new Error('Unable to determine BuildType from Rancher Manager version and chart settings');
@@ -147,6 +157,16 @@ const buildTypeVersionMap = {
     google: 'v1.13.1',
     azure: 'v1.26.0'
   },
+  'prod-v2.16': {
+    capi: 'v1.14.0',
+    rke2: 'v0.25.2',
+    kubeadm: 'v1.14.0',
+    fleet: 'v0.15.0',
+    vsphere: 'v1.16.1',
+    amazon: 'v2.11.1',
+    google: 'v1.13.1',
+    azure: 'v1.26.0'
+  },
   'dev-v2.12': {
     capi: 'v1.10.5',
     rke2: 'v0.20.1',
@@ -184,6 +204,16 @@ const buildTypeVersionMap = {
     fleet: 'v0.15.0',
     vsphere: 'v1.16.1',
     amazon: 'v2.11.1',
+    google: 'v1.13.1',
+    azure: 'v1.26.0'
+  },
+  'dev-v2.16': {
+    capi: 'v1.14.0',
+    rke2: 'v0.25.2',
+    kubeadm: 'v1.14.0',
+    fleet: 'v0.15.0',
+    vsphere: 'v1.16.1',
+    amazon: 'v2.13.0',
     google: 'v1.13.1',
     azure: 'v1.26.0'
   }

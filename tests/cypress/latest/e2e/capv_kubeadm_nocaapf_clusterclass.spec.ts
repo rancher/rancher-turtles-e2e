@@ -145,7 +145,7 @@ describe('Import CAPV Kubeadm (No-Caapf) Class-Cluster', {tags: ['@vsphere', '@v
       })
       );
 
-      qase(711, it('Delete the CAPV cluster', {retries: 1}, () => {
+      qase(711, it('Delete the CAPV cluster', () => {
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout, clusterRepoName);
       })

@@ -117,7 +117,7 @@ describe('Import CAPD RKE2 (Default CNI) Class-Cluster using Fleet', {tags: '@sh
       })
       );
 
-      qase(746, it('Delete the CAPD cluster', {retries: 1}, () => {
+      qase(746, it('Delete the CAPD cluster', () => {
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout, clustersRepoName, true);
       })

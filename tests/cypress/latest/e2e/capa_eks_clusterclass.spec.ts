@@ -128,7 +128,7 @@ describe('Import CAPA EKS Class-Cluster', {tags: ['@full', '@capaeks']}, () => {
       );
 
       qase(127,
-        it('Delete the CAPA cluster', {retries: 1}, () => {
+        it('Delete the CAPA cluster', () => {
           // Remove CAPI Resources related to the cluster
           capiClusterDeletion(clusterName, timeout);
         })

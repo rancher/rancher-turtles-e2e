@@ -133,7 +133,7 @@ describe('Import CAPZ Kubeadm (No-Caapf) Class-Cluster', {tags: ['@full-nocaapf'
       })
       );
 
-      qase(615, it('Delete the CAPZ cluster', {retries: 1}, () => {
+      qase(615, it('Delete the CAPZ cluster', () => {
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout);
       })

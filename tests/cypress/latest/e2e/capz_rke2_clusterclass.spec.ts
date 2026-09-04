@@ -118,7 +118,7 @@ describe('Import CAPZ RKE2 Class-Cluster', {tags: ['@full', '@capzr']}, () => {
       );
 
       qase(82,
-        it('Delete the CAPZ cluster', {retries: 1}, () => {
+        it('Delete the CAPZ cluster', () => {
           // Remove CAPI Resources related to the cluster
           capiClusterDeletion(clusterName, timeout);
         })

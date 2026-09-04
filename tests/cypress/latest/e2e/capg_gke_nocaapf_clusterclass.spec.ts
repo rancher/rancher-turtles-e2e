@@ -99,7 +99,7 @@ describe('Import CAPG GKE (No-Caapf) Class-Cluster', {tags: ['@full-nocaapf', '@
       })
       );
 
-      qase(682, it('Delete the CAPG cluster', {retries: 1}, () => {
+      qase(682, it('Delete the CAPG cluster', () => {
         // Remove CAPI Resources related to the cluster
         capiClusterDeletion(clusterName, timeout);
       })

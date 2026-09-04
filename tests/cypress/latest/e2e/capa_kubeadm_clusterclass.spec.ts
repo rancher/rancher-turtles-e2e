@@ -126,7 +126,7 @@ describe('Import CAPA Kubeadm Class-Cluster', {tags: ['@full', '@capak']}, () =>
       );
 
       qase(394,
-        it('Delete the CAPA cluster', {retries: 1}, () => {
+        it('Delete the CAPA cluster', () => {
           // Remove CAPI Resources related to the cluster
           capiClusterDeletion(clusterName, timeout);
         })
