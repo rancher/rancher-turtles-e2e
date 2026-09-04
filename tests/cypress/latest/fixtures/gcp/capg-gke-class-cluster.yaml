@@ -16,6 +16,8 @@ spec:
       namespace: capi-classes
     version: replace_k8sVersion
     variables:
+      - name: releaseChannel
+        value: regular
       - name: project
         value: replace_gcp_project
       - name: region
