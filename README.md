@@ -75,3 +75,14 @@ For example:
 ```
 npx cypress run -C cypress.config.ts  --env grepTags="@short" cypress/e2e/*.spec.ts
 ```
+
+# Test artifacts
+CI runs upload two kinds of artifact: `support-logs-<run_number>` (Cypress screenshots and the
+collected cluster logs) and `cypress-videos-<run_number>` (Cypress videos). Both are tarballs
+encrypted with GPG symmetric AES256, using the `LOG_ENCRYPTION_KEY` repository secret as the
+passphrase.
+
+To inspect one after downloading:
+```
+gpg --decrypt support-logs-123.tar.gz.gpg | tar -xzv
+```

@@ -45,7 +45,7 @@ echo "${CRUST_GATHER_INSTALLER_SHA256}  crust-gather-installer.sh" | sha256sum -
 chmod +x crust-gather-installer.sh
 sudo VERSION=${CRUST_GATHER_INSTALLER_VERSION} ./crust-gather-installer.sh -y
 
-crust-gather collect
+crust-gather collect $(echo "--secret $SECRET_KEYS_TO_MASK" | sed 's/,/ --secret /g')
 
 cat > USAGE.md <<EOF
 To use crust-gather; do the following:
