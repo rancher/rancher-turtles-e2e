@@ -130,6 +130,37 @@ on:
         default: false
 
 jobs:
+  determine-milestone:
+    runs-on: ubuntu-latest
+    outputs:
+      milestone: ${{ steps.milestone.outputs.milestone }}
+    steps:
+      - name: Determine milestone from latest matching rancher/rancher release
+        id: milestone
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          RANCHER_VERSION="${{ inputs.rancher_version }}"
+          RANCHER_VERSION="${RANCHER_VERSION#*/}"
+          if [[ "${RANCHER_VERSION}" =~ ^[0-9]+\.[0-9]+$ ]]; then
+            LATEST=$(gh api "repos/rancher/rancher/milestones?state=open&per_page=100" | \
+              jq -r --arg ver "${RANCHER_VERSION}" '
+              [.[].title | ltrimstr("v")] |
+              map(select(startswith($ver))) |
+              sort_by(
+                split(".") |
+                map(split("-") | .[0] | tonumber? // 0)
+              ) |
+              last // empty')
+            if [[ -z "${LATEST}" ]]; then
+              echo "No matching release found for v${RANCHER_VERSION}.x, falling back to v${RANCHER_VERSION}.0"
+              LATEST="v${RANCHER_VERSION}.0"
+            fi
+            echo "milestone=${LATEST}" >> ${GITHUB_OUTPUT}
+          else
+            echo "milestone=v${RANCHER_VERSION}" >> ${GITHUB_OUTPUT}
+          fi
+
   determine-runner:
     runs-on: ubuntu-latest
     outputs:
@@ -250,6 +281,7 @@ jobs:
       QASE_MODE: ${{ inputs.qase_report == true && 'testops' || 'off' }}
       QASE_TESTOPS_RUN_TITLE: ${{ format('[{4}] Rancher-{0} - {1} destroy={2} dev={3}', inputs.rancher_version, inputs.grep_test_by_tag, inputs.destroy_runner, inputs.turtles_dev_chart, github.run_number) }}
       QASE_TESTOPS_RUN_DESCRIPTION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      QASE_TESTOPS_RUN_MILESTONE: ${{ needs.determine-milestone.outputs.milestone }} ## v2.15.2
       # Cypress
       TURTLES_REPO: rancher/turtles
       TURTLES_BRANCH: main
