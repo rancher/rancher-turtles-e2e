@@ -146,7 +146,9 @@ jobs:
             # Next unreleased patch = highest released patch + 1 (milestones can exist ahead of actual releases)
             LATEST=$(gh api "repos/rancher/rancher/releases?per_page=100" --jq '.[] | select(.prerelease == false) | .tag_name' | \
               grep "^v${RANCHER_VERSION}\." | sort -V | tail -n 1)
-            LATEST="v${RANCHER_VERSION}.$(( ${LATEST##*.} + 1 ))"
+            # No release yet for this minor -> start at patch 0 instead of treating missing patch as 0+1
+            LATEST_PATCH=$([[ -z "${LATEST}" ]] && echo -1 || echo "${LATEST##*.}")
+            LATEST="v${RANCHER_VERSION}.$(( LATEST_PATCH + 1 ))" # As -1 + 1 = 0
             echo "milestone=${LATEST}" | tee -a "${GITHUB_OUTPUT}"
           else
             echo "milestone=v${RANCHER_VERSION}" | tee -a "${GITHUB_OUTPUT}"
