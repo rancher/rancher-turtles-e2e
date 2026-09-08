@@ -31,6 +31,8 @@ echo "${RANCHER_LOG_COLLECTER_SHA256}  rancherlogcollector.sh" | sha256sum -c -
 
 chmod +x rancherlogcollector.sh
 sudo ./rancherlogcollector.sh -d ../cluster-logs
+# Delete the script
+rm rancherlogcollector.sh
 
 # Move back to logs dir
 cd ..
@@ -45,7 +47,24 @@ echo "${CRUST_GATHER_INSTALLER_SHA256}  crust-gather-installer.sh" | sha256sum -
 chmod +x crust-gather-installer.sh
 sudo VERSION=${CRUST_GATHER_INSTALLER_VERSION} ./crust-gather-installer.sh -y
 
-crust-gather collect $(echo "--secret $SECRET_KEYS_TO_MASK" | sed 's/,/ --secret /g')
+# Turn the comma-separated SECRET_KEYS_TO_MASK list into one --secret flag per key.
+IFS=',' read -ra SECRET_KEYS <<< "${SECRET_KEYS_TO_MASK:?SECRET_KEYS_TO_MASK is required}"
+SECRET_ARGS=()
+for KEY in "${SECRET_KEYS[@]}"; do
+  [ -n "${KEY}" ] && SECRET_ARGS+=(--secret "${KEY}")
+done
+
+# Read keys from VSPHERE_SECRETS_JSON_BASE64, export them as envvars and add them to the SECRET_ARGS array.
+# This ensures they are also masked in logs.
+VSPHERE_SECRETS_JSON_BASE64_DECODED=$(echo "${VSPHERE_SECRETS_JSON_BASE64}" | base64 -d)
+eval "$(echo "${VSPHERE_SECRETS_JSON_BASE64_DECODED}" | jq -r 'to_entries[] | @sh "export \(.key)=\(.value)"')"
+for KEY in $(echo $VSPHERE_SECRETS_JSON_BASE64_DECODED | jq -r 'keys[]'); do
+  [ -n "${KEY}" ] && SECRET_ARGS+=(--secret "${KEY}")
+done
+
+
+crust-gather collect "${SECRET_ARGS[@]}"
+
 
 cat > USAGE.md <<EOF
 To use crust-gather; do the following:
