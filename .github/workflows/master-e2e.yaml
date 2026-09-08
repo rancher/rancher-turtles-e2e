@@ -259,7 +259,7 @@ jobs:
           fi
 
   e2e:
-    needs: create-runner
+    needs: [create-runner,determine-milestone]
     runs-on: ${{ needs.create-runner.outputs.uuid }}
     outputs:
       qase_run_id: ${{ steps.qase_run_id.outputs.qase_run_id }}
