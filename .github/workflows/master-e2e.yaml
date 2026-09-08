@@ -142,7 +142,7 @@ jobs:
         run: |
           RANCHER_VERSION="${{ inputs.rancher_version }}"
           RANCHER_VERSION="${RANCHER_VERSION#*/}"
-          # Strip any leading "v" and trailing sha/label suffix (e.g. "v2.15.1-<sha>-head" -> "2.15.1")
+          # Strip any leading "v" and trailing sha-head/alpha/rc suffix (e.g. "v2.15.1-<sha>-head" -> "2.15.1")
           if [[ "${RANCHER_VERSION}" =~ ^v?([0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
             RANCHER_VERSION="${BASH_REMATCH[1]}"
           fi
