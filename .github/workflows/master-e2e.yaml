@@ -143,7 +143,7 @@ jobs:
           RANCHER_VERSION="${{ inputs.rancher_version }}"
           RANCHER_VERSION="${RANCHER_VERSION#*/}"
           if [[ "${RANCHER_VERSION}" =~ ^[0-9]+\.[0-9]+$ ]]; then
-            LATEST=$(gh api "repos/rancher/rancher/milestones " \
+            LATEST=$(gh api "repos/rancher/rancher/milestones" \
               --jq '.[].title' | sort -V | grep "^v${RANCHER_VERSION}\." | tail -n 1)
             if [[ -z "${LATEST}" ]]; then
               echo "No matching release found for v${RANCHER_VERSION}.x, falling back to v${RANCHER_VERSION}.0"
