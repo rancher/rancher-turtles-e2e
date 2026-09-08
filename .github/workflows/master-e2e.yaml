@@ -144,9 +144,9 @@ jobs:
           RANCHER_VERSION="${RANCHER_VERSION#*/}"
           if [[ "${RANCHER_VERSION}" =~ ^[0-9]+\.[0-9]+$ ]]; then
             # Next unreleased patch = highest released patch + 1 (milestones can exist ahead of actual releases)
-            LATEST_PATCH=$(gh api "repos/rancher/rancher/releases?per_page=100" --jq '.[] | select(.prerelease == false) | .tag_name' | \
+            LATEST=$(gh api "repos/rancher/rancher/releases?per_page=100" --jq '.[] | select(.prerelease == false) | .tag_name' | \
               grep "^v${RANCHER_VERSION}\." | sort -V | tail -n 1)
-            LATEST="v${RANCHER_VERSION}.$(( ${LATEST_PATCH##*.} + 1 ))"
+            LATEST="v${RANCHER_VERSION}.$(( ${LATEST##*.} + 1 ))"
             echo "milestone=${LATEST}" | tee -a "${GITHUB_OUTPUT}"
           else
             echo "milestone=v${RANCHER_VERSION}" | tee -a "${GITHUB_OUTPUT}"
