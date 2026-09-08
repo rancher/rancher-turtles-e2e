@@ -152,7 +152,7 @@ jobs:
               grep "^v${RANCHER_VERSION}\." | sort -V | tail -n 1)
             # No release yet for this minor -> start at patch 0 instead of treating missing patch as 0+1
             LATEST_PATCH=$([[ -z "${LATEST}" ]] && echo -1 || echo "${LATEST##*.}")
-            LATEST="v${RANCHER_VERSION}.$(( LATEST_PATCH + 1 ))" # As -1 + 1 = 0
+            LATEST="v${RANCHER_VERSION}.$(( LATEST_PATCH + 1 ))" # For not released yet: -1+1=0
             echo "milestone=${LATEST}" | tee -a "${GITHUB_OUTPUT}"
           else
             echo "milestone=v${RANCHER_VERSION}" | tee -a "${GITHUB_OUTPUT}"
