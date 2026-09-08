@@ -132,6 +132,7 @@ on:
 jobs:
   determine-milestone:
     runs-on: ubuntu-latest
+    continue-on-error: true
     outputs:
       milestone: ${{ steps.milestone.outputs.milestone }}
     steps:
