@@ -113,7 +113,7 @@ describe('Enable CAPI Providers', () => {
         text.providers.infrastructureDocker.enableAutomaticUpdate = true;
 
         // there is no easy way to only install a specific provider when something like `@capgke` is passed, so we enable all the cloud providers
-        if (isCypressTag('@install') || isCypressTag('@full') || isCypressTag('@nocaapf') || isCypressTag('@capg') || isCypressTag('@capa') || isCypressTag('@capz')) {
+        if (isCypressTag('@full') || isCypressTag('@nocaapf') || isCypressTag('@capg') || isCypressTag('@capa') || isCypressTag('@capz')) {
             // @ts-ignore
             text.providers.infrastructureGCP.enabled = true;
             // @ts-ignore
@@ -132,7 +132,7 @@ describe('Enable CAPI Providers', () => {
             text.providers.infrastructureAWS.enableAutomaticUpdate = true;
           }
 
-        if (isCypressTag('@install') || isCypressTag('@vsphere') || isCypressTag('@capv')) {
+        if (isCypressTag('@vsphere') || isCypressTag('@capv')) {
             // @ts-ignore
             text.providers.infrastructureVSphere.enabled = true;
             // @ts-ignore
@@ -205,7 +205,7 @@ describe('Enable CAPI Providers', () => {
     );
   });
 
-  context('vSphere provider', {tags: ['@install', '@vsphere', '@vsphere-nocaapf', '@capvk', '@capvk-nocaapf', '@capvr', '@capvr-nocaapf']}, () => {
+  context('vSphere provider', {tags: ['@vsphere', '@vsphere-nocaapf', '@capvk', '@capvk-nocaapf', '@capvr', '@capvr-nocaapf']}, () => {
     const vsphereProviderNamespace = 'capv-system'
     qase(423, it('Verify CAPV provider', () => {
       // Verify vsphere Infrastructure provider
@@ -226,7 +226,7 @@ describe('Enable CAPI Providers', () => {
     );
   })
 
-  context('Cloud Providers', {tags: ['@install', '@full', '@full-nocaapf', '@nocaapf']}, () => {
+  context('Cloud Providers', {tags: ['@full', '@full-nocaapf', '@nocaapf']}, () => {
     const providerType = 'infrastructure'
     qase(424, it('Verify CAPA provider', {tags: ['@capak', '@capar', '@capaeks', '@capar-nocaapf', '@capak-nocaapf', '@capaeks-nocaapf']},() => {
       const namespace = 'capa-system'
@@ -250,7 +250,7 @@ describe('Enable CAPI Providers', () => {
       cy.contains('Edit Config').click();
       cy.contains(`Provider: Google - ${providers.googleProvider}`).should('exist');
       cy.typeValue('Credential Name', providers.googleProvider);
-      cy.getBySel('text-area-auto-grow').type(Cypress.expose('gcp_credentials'), {log: false});
+      cy.getBySel('text-area-auto-grow').type(Cypress.expose('gcp_credentials'), {log: false, parseSpecialCharSequences: false});
       cy.clickButton('Continue');
       cy.getBySel('cluster-prov-select-credential').contains(providers.googleProvider).should('be.visible');
       cy.clickButton('Save');
