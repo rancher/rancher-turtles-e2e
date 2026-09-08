@@ -142,6 +142,10 @@ jobs:
         run: |
           RANCHER_VERSION="${{ inputs.rancher_version }}"
           RANCHER_VERSION="${RANCHER_VERSION#*/}"
+          # Strip any leading "v" and trailing sha/label suffix (e.g. "v2.15.1-<sha>-head" -> "2.15.1")
+          if [[ "${RANCHER_VERSION}" =~ ^v?([0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
+            RANCHER_VERSION="${BASH_REMATCH[1]}"
+          fi
           if [[ "${RANCHER_VERSION}" =~ ^[0-9]+\.[0-9]+$ ]]; then
             # Next unreleased patch = highest released patch + 1 (milestones can exist ahead of actual releases)
             LATEST=$(gh api "repos/rancher/rancher/releases?per_page=100" --jq '.[] | select(.prerelease == false) | .tag_name' | \
