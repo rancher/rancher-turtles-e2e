@@ -77,12 +77,21 @@ npx cypress run -C cypress.config.ts  --env grepTags="@short" cypress/e2e/*.spec
 ```
 
 # Test artifacts
-CI runs upload two kinds of artifact: `support-logs-<run_number>` (Cypress screenshots and the
-collected cluster logs) and `cypress-videos-<run_number>` (Cypress videos). Both are tarballs
-encrypted with GPG symmetric AES256, using the `LOG_ENCRYPTION_KEY` repository secret as the
-passphrase.
+
+CI runs upload three kinds of artifact:
+
+| Artifact                                            | Contents                                           |
+|-----------------------------------------------------|----------------------------------------------------|
+| `logs-and-screenshots-<run_number>.tar.gz.gpg`      | Cypress screenshots and the collected cluster logs |
+| `cypress-videos-<run_number>.tar.gpg`               | Cypress videos                                     |
+| `cypress-videos-after-upgrade-<run_number>.tar.gpg` | Cypress videos from `@migration`/`@upgrade` runs   |
+
+All are tarballs encrypted with GPG symmetric AES256, using the `LOG_ENCRYPTION_KEY` repository
+secret as the passphrase — ask a repository admin if you need it. Video archives are not gzipped,
+since Cypress writes already-compressed mp4.
 
 To inspect one after downloading:
 ```
-gpg --decrypt support-logs-123.tar.gz.gpg | tar -xzv
+gpg --decrypt logs-and-screenshots-123.tar.gpg | tar -xv
+gpg --decrypt cypress-videos-123.tar.gpg | tar -xv
 ```
