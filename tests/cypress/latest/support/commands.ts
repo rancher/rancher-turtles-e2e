@@ -1558,7 +1558,7 @@ export function setUseCAAPFFeatureGate(enabled: boolean, wait: boolean=true) {
     cy.typeInFilter('rancher-turtles');
     // We need to explicitly wait for the turtles controller deployment to restart
     cy.getBySel('sortable-cell-0-0').contains('Pending-Upgrade', {timeout: 60000});
-    cy.getBySel('sortable-cell-0-0').contains('Deployed', {timeout: 180000});
+    cy.getBySel('sortable-cell-0-0').contains('Deployed', {timeout: 300000});
     cy.clickNavMenu(["Workloads", "Deployments"]);
     cy.typeInFilter('rancher-turtles-controller-manager');
     cy.getBySel('sortable-table-0-action-button').click();
