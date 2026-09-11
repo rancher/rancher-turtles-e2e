@@ -29,12 +29,13 @@ export default defineConfig({
           uploadAttachments: true,
           run: {
             complete: true,
-            milestone_id: process.env.QASE_TESTOPS_RUN_MILESTONE_ID,
+            milestoneId: process.env.QASE_TESTOPS_RUN_MILESTONE_ID,
           },
         },
       framework: {
         cypress: {
           screenshotsFolder: './screenshots',
+          videosFolder: './videos',
         },
       },
     },
