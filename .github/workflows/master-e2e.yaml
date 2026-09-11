@@ -148,7 +148,7 @@ jobs:
           RANCHER_VERSION="${RANCHER_VERSION#*/}"
           # Strip any leading "v" and trailing sha-head/alpha/rc suffix (e.g. "v2.15.1-<sha>-head" -> "2.15.1")
           if [[ "${RANCHER_VERSION}" =~ ^v?([0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
-            RANCHER_VERSION="${BASH_REMATCH[1]}" # return (first capturing group) the matched version without leading "v" and suffixes
+            RANCHER_VERSION="${BASH_REMATCH[1]}" # returns (first capturing group) the matched version without leading "v" and suffixes
           fi
           if [[ "${RANCHER_VERSION}" =~ ^[0-9]+\.[0-9]+$ ]]; then
             # Next unreleased patch = highest released patch + 1 (milestones can exist ahead of actual releases)
@@ -163,6 +163,8 @@ jobs:
           fi
           echo "milestone=${MILESTONE_TITLE}" | tee -a "${GITHUB_OUTPUT}"
 
+          # TODO DO THIS ONLY WHEN QASE IS ENABLED
+
           # 1. Try to find existing milestone ID
           MILESTONE_ID=$(
             curl -s --request GET \
@@ -174,6 +176,7 @@ jobs:
 
           # 2. If not found, create it and get the new ID
           if [ -z "$MILESTONE_ID" ]; then
+            echo "Creating new milestone ${MILESTONE_TITLE} in QASE"
             MILESTONE_ID=$(
               curl -s --request POST \
                 --url "https://api.qase.io/v1/milestone/${QASE_PROJECT_CODE}" \
@@ -608,10 +611,10 @@ jobs:
             --url "https://api.qase.io/v1/run/${QASE_PROJECT_CODE}/${QASE_TESTOPS_RUN_ID}" \
             --header "Token: ${QASE_API_TOKEN}" \
             --header "accept: application/json" \
-            --data "{\"milestone_id\":${QASE_TESTOPS_MILESTONE_ID}}" \
+            --data "{\"milestone_id\":${QASE_TESTOPS_RUN_MILESTONE_IDQASE_TESTOPS_RUN_MILESTONE_ID}}" \
             | jq -r '.status')
           if [[ "$STATUS" != "true" ]]; then
-            echo "Failed to set milestone ID for run ${QASE_TESTOPS_RUN_ID}"
+            echo "Failed to set milestone ID ${QASE_TESTOPS_RUN_MILESTONE_ID} for run ${QASE_TESTOPS_RUN_ID}"
           fi
       - name: Upload Cypress screenshots
         if: failure()
