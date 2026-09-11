@@ -20,7 +20,7 @@ export default defineConfig({
     },
     cypressQaseReporterReporterOptions: {
       mode: "testops",
-        debug: false,
+        debug: true,
         testops: {
           api: {
            token: qaseAPIToken,
@@ -29,6 +29,7 @@ export default defineConfig({
           uploadAttachments: true,
           run: {
             complete: true,
+            milestone_id: process.env.QASE_TESTOPS_RUN_MILESTONE_ID,
           },
         },
       framework: {

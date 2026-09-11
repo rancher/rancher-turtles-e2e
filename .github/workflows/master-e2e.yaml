@@ -135,29 +135,56 @@ jobs:
     continue-on-error: true
     outputs:
       milestone: ${{ steps.milestone.outputs.milestone }}
+      milestone_id: ${{ steps.milestone.outputs.milestone_id }}
     steps:
       - name: Determine milestone from latest matching rancher/rancher release
         id: milestone
         env:
           GH_TOKEN: ${{ github.token }}
+          QASE_API_TOKEN: ${{ secrets.qase_api_token }}
+          QASE_PROJECT_CODE: RT
         run: |
           RANCHER_VERSION="${{ inputs.rancher_version }}"
           RANCHER_VERSION="${RANCHER_VERSION#*/}"
           # Strip any leading "v" and trailing sha-head/alpha/rc suffix (e.g. "v2.15.1-<sha>-head" -> "2.15.1")
           if [[ "${RANCHER_VERSION}" =~ ^v?([0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
-            RANCHER_VERSION="${BASH_REMATCH[1]}"
+            RANCHER_VERSION="${BASH_REMATCH[1]}" # return (first capturing group) the matched version without leading "v" and suffixes
           fi
           if [[ "${RANCHER_VERSION}" =~ ^[0-9]+\.[0-9]+$ ]]; then
             # Next unreleased patch = highest released patch + 1 (milestones can exist ahead of actual releases)
             LATEST=$(gh api "repos/rancher/rancher/releases?per_page=100" --jq '.[] | select(.prerelease == false) | .tag_name' | \
               grep "^v${RANCHER_VERSION}\." | sort -V | tail -n 1)
             # No release yet for this minor -> start at patch 0 instead of treating missing patch as 0+1
-            LATEST_PATCH=$([[ -z "${LATEST}" ]] && echo -1 || echo "${LATEST##*.}")
+            LATEST_PATCH=$([[ -z "${LATEST}" ]] && echo -1 || echo "${LATEST##*.}") # || strip everything except the number after last dot (patch)
             LATEST="v${RANCHER_VERSION}.$(( LATEST_PATCH + 1 ))" # For not released yet: -1+1=0
-            echo "milestone=${LATEST}" | tee -a "${GITHUB_OUTPUT}"
+            MILESTONE_TITLE="${LATEST}"
           else
-            echo "milestone=v${RANCHER_VERSION}" | tee -a "${GITHUB_OUTPUT}"
+            MILESTONE_TITLE="v${RANCHER_VERSION}"
           fi
+          echo "milestone=${MILESTONE_TITLE}" | tee -a "${GITHUB_OUTPUT}"
+
+          # 1. Try to find existing milestone ID
+          MILESTONE_ID=$(
+            curl -s --request GET \
+              --url "https://api.qase.io/v1/milestone/${QASE_PROJECT_CODE}?limit=100&offset=0" \
+              --header "Token: ${QASE_API_TOKEN}" \
+              --header "accept: application/json" \
+            | jq -r --arg TITLE "$MILESTONE_TITLE" '.result.entities[] | select(.title == $TITLE) | .id'
+            )
+
+          # 2. If not found, create it and get the new ID
+          if [ -z "$MILESTONE_ID" ]; then
+            MILESTONE_ID=$(
+              curl -s --request POST \
+                --url "https://api.qase.io/v1/milestone/${QASE_PROJECT_CODE}" \
+                --header "Token: ${QASE_API_TOKEN}" \
+                --header "Content-Type: application/json" \
+                --header "accept: application/json" \
+                --data "$(jq -n --arg t "$MILESTONE_TITLE" '{title: $t, description: $t}')" \
+              | jq -r '.result.id'
+              )
+          fi
+          echo "milestone_id=${MILESTONE_ID}" | tee -a "${GITHUB_OUTPUT}"
 
   determine-runner:
     runs-on: ubuntu-latest
@@ -279,7 +306,8 @@ jobs:
       QASE_MODE: ${{ inputs.qase_report == true && 'testops' || 'off' }}
       QASE_TESTOPS_RUN_TITLE: ${{ format('[{4}] Rancher-{0} - {1} destroy={2} dev={3}', inputs.rancher_version, inputs.grep_test_by_tag, inputs.destroy_runner, inputs.turtles_dev_chart, github.run_number) }}
       QASE_TESTOPS_RUN_DESCRIPTION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-      QASE_TESTOPS_RUN_MILESTONE: ${{ needs.determine-milestone.outputs.milestone }} ## v2.15.2
+      QASE_TESTOPS_RUN_MILESTONE: ${{ needs.determine-milestone.outputs.milestone }} ### This is not used yet
+      QASE_TESTOPS_RUN_MILESTONE_ID: ${{ needs.determine-milestone.outputs.milestone_id }}
       # Cypress
       TURTLES_REPO: rancher/turtles
       TURTLES_BRANCH: main
