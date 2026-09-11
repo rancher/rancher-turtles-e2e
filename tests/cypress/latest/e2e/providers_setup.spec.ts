@@ -250,7 +250,7 @@ describe('Enable CAPI Providers', () => {
       cy.contains('Edit Config').click();
       cy.contains(`Provider: Google - ${providers.googleProvider}`).should('exist');
       cy.typeValue('Credential Name', providers.googleProvider);
-      cy.getBySel('text-area-auto-grow').type(Cypress.expose('gcp_credentials'), {log: false});
+      cy.getBySel('text-area-auto-grow').type(Cypress.expose('gcp_credentials'), {log: false, parseSpecialCharSequences: false});
       cy.clickButton('Continue');
       cy.getBySel('cluster-prov-select-credential').contains(providers.googleProvider).should('be.visible');
       cy.clickButton('Save');

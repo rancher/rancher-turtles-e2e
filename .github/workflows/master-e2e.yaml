@@ -72,6 +72,9 @@ on:
       prime_head_chart_url:
         description: URL to fetch prime pre-release helm chart
         required: true
+      log_encryption_key:
+        description: Passphrase used to GPG-encrypt the uploaded test artifacts
+        required: true
     inputs:
       cert-manager_version:
         description: Version of cert-manager to use
@@ -80,10 +83,6 @@ on:
         description: Destroy the auto-generated self-hosted runner
         default: true
         type: boolean
-      rancher_log_collector:
-        description: URL of the Rancher log collector script
-        default: https://raw.githubusercontent.com/rancherlabs/support-tools/master/collection/rancher/v2.x/logs-collector/rancher2_logs_collector.sh
-        type: string
       rancher_version:
         description: Rancher Manager channel/version/head_version to use for installation
         type: string
@@ -281,6 +280,9 @@ jobs:
       PRIME_REGISTRY: ${{ secrets.prime_registry }}
       STG_PRIME_REGISTRY: ${{ secrets.stg_prime_registry }}
       PRIME_ARTIFACTS_URL: ${{ secrets.prime_artifacts_url }}
+
+      # Script to zip and encrypt artifacts
+      ARTIFACT_ENCRYPTOR: ${{ github.workspace }}/.github/scripts/encrypt-artifact.sh
 
       # Common specs: @short @vsphere @full
       SPECS: |
@@ -537,22 +539,32 @@ jobs:
             export CHARTMUSEUM_REPO=http://${{ needs.create-runner.outputs.public_dns }}
           fi
           cd tests && make start-cypress-tests
-      - name: Upload Cypress screenshots
-        if: failure()
+      - name: Stage Cypress screenshots for upload
+        if: ${{ failure() && steps.cypress.outcome != 'skipped' }}
+        run: |
+          # Cypress only creates this directory once it writes a failure screenshot,
+          # and a failure before the Cypress step means it never existed.
+          [ -d tests/cypress/latest/screenshots ] || exit 0
+          mkdir -p ${{ runner.temp }}/logs-and-screenshots
+          mv tests/cypress/latest/screenshots ${{ runner.temp }}/logs-and-screenshots/screenshots
+      - name: Encrypt Cypress videos
+        # Test run video is always captured, so this step uses "always()" condition
+        if: ${{ always() && steps.cypress.outcome != 'skipped' }}
+        env:
+          LOG_ENCRYPTION_KEY: ${{ secrets.log_encryption_key }}
+        run: |
+          bash ${{ env.ARTIFACT_ENCRYPTOR }} \
+            tests/cypress/latest/videos \
+            ${{ runner.temp }}/cypress-videos-${{ github.run_number }}.tar.gpg
+      - name: Upload encrypted Cypress videos
+        if: ${{ always() && steps.cypress.outcome != 'skipped' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: cypress-screenshots-${{ github.run_number }}
-          path: tests/cypress/latest/screenshots
+          name: cypress-videos-${{ github.run_number }}.tar.gpg
+          path: ${{ runner.temp }}/cypress-videos-${{ github.run_number }}.tar.gpg
           retention-days: 7
+          archive: 'false'
           if-no-files-found: ignore
-      - name: Upload Cypress videos
-        # Test run video is always captured, so this action uses "always()" condition
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: cypress-videos-${{ github.run_number }}
-          path: tests/cypress/latest/videos
-          retention-days: 7
       - name: Store QASE_TESTOPS_RUN_ID for later use
         if: ${{ always() && inputs.qase_report == true }}
         id: qase_run_id
@@ -615,6 +627,7 @@ jobs:
         run: |
           ${{ github.workspace }}/tests/assets/migrate-providers-ownership.sh --adopt docker:capd-system
       - name: Cypress tests - Upgraded Rancher
+        id: cypress_upgraded
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:
           RANCHER_TURTLES_E2E_BRANCH: ${{ env.RANCHER_TURTLES_E2E_BRANCH }}
@@ -631,36 +644,65 @@ jobs:
             export CHARTMUSEUM_REPO=http://${{ needs.create-runner.outputs.public_dns }}
           fi
           cd tests && make start-cypress-tests
-      - name: Upload Cypress screenshots (after-upgrade)
+      - name: Stage Cypress screenshots (after-upgrade) for upload
         if: ${{ (contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) && failure() }}
+        run: |
+          # Absent when the pre-upgrade run already staged them, or when the
+          # upgraded-Rancher Cypress step was skipped because that run failed.
+          [ -d tests/cypress/latest/screenshots ] || exit 0
+          mkdir -p ${{ runner.temp }}/logs-and-screenshots
+          mv tests/cypress/latest/screenshots ${{ runner.temp }}/logs-and-screenshots/screenshots-after-upgrade
+      - name: Encrypt Cypress videos (after-upgrade)
+        # Test run video is always captured, so this step uses "always()" condition
+        if: ${{ always() && steps.cypress_upgraded.outcome != 'skipped' }}
+        env:
+          LOG_ENCRYPTION_KEY: ${{ secrets.log_encryption_key }}
+        run: |
+          bash ${{ env.ARTIFACT_ENCRYPTOR }} \
+            tests/cypress/latest/videos \
+            ${{ runner.temp }}/cypress-videos-after-upgrade-${{ github.run_number }}.tar.gpg
+      - name: Upload encrypted Cypress videos (after-upgrade)
+        if: ${{ always() && steps.cypress_upgraded.outcome != 'skipped' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: cypress-screenshots-after-upgrade-${{ github.run_number }}
-          path: tests/cypress/latest/screenshots
+          name: cypress-videos-after-upgrade-${{ github.run_number }}.tar.gpg
+          path: ${{ runner.temp }}/cypress-videos-after-upgrade-${{ github.run_number }}.tar.gpg
           retention-days: 7
+          archive: 'false'
           if-no-files-found: ignore
-      - name: Upload Cypress videos (after-upgrade)
-        # Test run video is always captured, so this action uses "always()" condition
-        if: ${{ (contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) && always() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: cypress-videos-after-upgrade-${{ github.run_number }}
-          path: tests/cypress/latest/videos
-          retention-days: 7
-      - name: Collect logs
+      - name: Collect cluster logs
         env:
           KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+          # Environment variable keys whose values are excluded from collected artifact data.
+          SECRET_KEYS_TO_MASK: RANCHER_HOSTNAME,RANCHER_PASSWORD,GCP_PROJECT,GCP_CREDENTIALS,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AZURE_SUBSCRIPTION_ID,AZURE_CLIENT_ID,AZURE_CLIENT_SECRET,AZURE_TENANT_ID,AZURE_SUBSCRIPTION_ID,DOCKER_AUTH_USERNAME,DOCKER_AUTH_PASSWORD,DOCKER_REGISTRY_CONFIG,VSPHERE_SECRETS_JSON_BASE64,GH_TOKEN
           RANCHER_LOG_COLLECTOR: ${{ github.workspace }}/.github/scripts/collect-rancher-logs.sh
-        if: false
+          RANCHER_PASSWORD: ${{ secrets.rancher_password }}
+        if: always()
+        run: bash ${{ env.RANCHER_LOG_COLLECTOR }}
+      - name: Stage cluster logs for upload
+        # Kept separate from collection: the collector is `set -e`, so if it dies
+        # partway (curl, checksum, crust-gather) we still want whatever it wrote.
+        if: always()
         run: |
-          chmod +x ${{ env.RANCHER_LOG_COLLECTOR }}
-          bash ${{ env.RANCHER_LOG_COLLECTOR }}
-      - name: Upload cluster logs
+          [ -d ${{ github.workspace }}/logs ] || exit 0
+          mkdir -p ${{ runner.temp }}/logs-and-screenshots
+          mv ${{ github.workspace }}/logs ${{ runner.temp }}/logs-and-screenshots/logs
+      - name: Encrypt screenshots and cluster logs
+        if: always()
+        env:
+          LOG_ENCRYPTION_KEY: ${{ secrets.log_encryption_key }}
+        run: |
+          bash ${{ env.ARTIFACT_ENCRYPTOR }} \
+            ${{ runner.temp }}/logs-and-screenshots \
+            ${{ runner.temp }}/logs-and-screenshots-${{ github.run_number }}.tar.gpg
+      - name: Upload encrypted screenshots and cluster logs
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: support-logs-${{ github.run_number }}
-          path: ${{ github.workspace }}/logs/*
+          name: logs-and-screenshots-${{ github.run_number }}.tar.gpg
+          path: ${{ runner.temp }}/logs-and-screenshots-${{ github.run_number }}.tar.gpg
+          retention-days: 7
+          archive: 'false'
           if-no-files-found: ignore
       - name: Add summary
         env:

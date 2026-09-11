@@ -3,6 +3,9 @@
 /bin
 *.swp
 .idea
+# Local AI-assistant config; may hold personal API tokens
+/.gemini
+/.claude
 /tests/cypress/*/videos/*
 /tests/cypress/*/screenshots/*
 /tests/cypress/*/downloads/*
