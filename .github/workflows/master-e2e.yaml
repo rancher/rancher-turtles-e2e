@@ -611,7 +611,7 @@ jobs:
             --url "https://api.qase.io/v1/run/${QASE_PROJECT_CODE}/${QASE_TESTOPS_RUN_ID}" \
             --header "Token: ${QASE_API_TOKEN}" \
             --header "accept: application/json" \
-            --data "{\"milestone_id\":${QASE_TESTOPS_RUN_MILESTONE_IDQASE_TESTOPS_RUN_MILESTONE_ID}}" \
+            --data "{\"milestone_id\":${QASE_TESTOPS_RUN_MILESTONE_ID}}" \
             | jq -r '.status')
           if [[ "$STATUS" != "true" ]]; then
             echo "Failed to set milestone ID ${QASE_TESTOPS_RUN_MILESTONE_ID} for run ${QASE_TESTOPS_RUN_ID}"
