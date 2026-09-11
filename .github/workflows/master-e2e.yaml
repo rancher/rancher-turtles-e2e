@@ -612,8 +612,12 @@ jobs:
             --header "Token: ${QASE_API_TOKEN}" \
             --header "accept: application/json" \
             --data "{\"milestone_id\":${QASE_TESTOPS_RUN_MILESTONE_ID}}" \
-            | jq -r '.status')
-          if [[ "$STATUS" != "true" ]]; then
+            | jq -r)
+          echo $?
+          echo "STATUS=$STATUS"
+          echo "QASE_TESTOPS_RUN_MILESTONE_ID=${QASE_TESTOPS_RUN_MILESTONE_ID}"
+          echo "QASE_TESTOPS_RUN_ID=${QASE_TESTOPS_RUN_ID}"
+          if [[ ! "$STATUS" =~ "true" ]]; then
             echo "Failed to set milestone ID ${QASE_TESTOPS_RUN_MILESTONE_ID} for run ${QASE_TESTOPS_RUN_ID}"
           fi
       - name: Upload Cypress screenshots
