@@ -56,10 +56,25 @@ done
 
 # Read keys from VSPHERE_SECRETS_JSON_BASE64, export them as envvars and add them to the SECRET_ARGS array.
 # This ensures they are also masked in logs.
+# The jq output is captured before it is eval'd: a command substitution inside eval would hide a
+# jq failure (e.g. a non-scalar value, which @sh rejects), leaving the secrets unexported. Unset
+# keys are silently dropped by crust-gather, so they would then end up unmasked in the archive.
+#
+# jq's stderr is dropped because its error messages quote the offending input -- "object ({...})
+# can not be escaped for shell" -- which would print decoded secret data into the workflow log.
+# The decoded values are not registered GitHub secrets, so nothing would redact them there.
 VSPHERE_SECRETS_JSON_BASE64_DECODED=$(echo "${VSPHERE_SECRETS_JSON_BASE64}" | base64 -d)
-eval "$(echo "${VSPHERE_SECRETS_JSON_BASE64_DECODED}" | jq -r 'to_entries[] | @sh "export \(.key)=\(.value)"')"
-for KEY in $(echo $VSPHERE_SECRETS_JSON_BASE64_DECODED | jq -r 'keys[]'); do
-  [ -n "${KEY}" ] && SECRET_ARGS+=(--secret "${KEY}")
+VSPHERE_SECRETS_EXPORTS=$(jq -r 'to_entries[] | @sh "export \(.key)=\(.value)"' 2>/dev/null <<< "${VSPHERE_SECRETS_JSON_BASE64_DECODED}") ||
+  { echo "Failed to read VSPHERE_SECRETS_JSON_BASE64; expected a flat JSON object of scalar values." >&2;}
+eval "${VSPHERE_SECRETS_EXPORTS}"
+
+VSPHERE_SECRETS_JSON_KEYS=$(jq -r 'keys[]' 2>/dev/null <<< "${VSPHERE_SECRETS_JSON_BASE64_DECODED}") ||
+  { echo "Failed to read keys from VSPHERE_SECRETS_JSON_BASE64." >&2; }
+mapfile -t VSPHERE_SECRET_KEYS <<< "${VSPHERE_SECRETS_JSON_KEYS}"
+for KEY in "${VSPHERE_SECRET_KEYS[@]}"; do
+  if [ -n "${KEY}" ]; then
+    SECRET_ARGS+=(--secret "${KEY}")
+  fi
 done
 
 
