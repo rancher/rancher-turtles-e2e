@@ -1,7 +1,7 @@
 import {
   isAPIv1beta1,
   isRancherManagerVersion,
-  isTurtlesDevChart, isUpgrade,
+  isTurtlesDevChart,
   providersChartNeedsStgRegistry
 } from './utils';
 
@@ -58,11 +58,6 @@ export const vars = {
   vSphereCCMYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/cloud-provider-vsphere.yaml',
   vSphereCSIYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/csi-vsphere.yaml',
   turtlesProvidersChartVersion: (() => {
-    if (isUpgrade && isRancherManagerVersion('2.13')) {
-      // for upgrade tests, 2.13 will always be dev=false; dev=true is only applicable to 2.14
-      return '0.25';
-    }
-
     if (!isTurtlesDevChart) {
       if (isRancherManagerVersion('2.13')) return '0.25';
       if (isRancherManagerVersion('2.14')) return '0.26';
@@ -72,7 +67,7 @@ export const vars = {
     // for stable releases, only supported versions will be listed, so we do not need to return/select a specific
     // versions; selecting a version is only necessary for alpha/rc/head builds where we use staging registry that
     // consists of unsupported versions
-    return undefined;
+    return "";
   })()
 };
 

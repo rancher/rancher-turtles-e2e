@@ -1,5 +1,5 @@
 import '../support/commands';
-import {getClusterName, isRancherManagerVersion, isAPIv1beta1, skipClusterDeletion} from '../support/utils';
+import {getClusterName, isRancherUpgraded, isAPIv1beta1, skipClusterDeletion} from '../support/utils';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
@@ -11,6 +11,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
   const classesPath = 'examples/clusterclasses/docker/rke2'
   const clusterClassRepoName = 'docker-rke2-clusterclass'
   const classClusterFileName = isAPIv1beta1 ? "./fixtures/docker/capd-rke2-class-cluster-v1beta1.yaml" : "./fixtures/docker/capd-rke2-class-cluster.yaml"
+  const preUpgradeRKE2Version = vars.rke2Version
 
   beforeEach(() => {
     cy.login();
@@ -18,7 +19,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
   });
 
   context('Pre-Upgrade Resources and Cluster creation', () => {
-    if (isRancherManagerVersion('2.13')) {
+    if (!isRancherUpgraded) {
       qase(234, it('Create Docker Auth Secret', () => {
         // Prevention for Docker.io rate limiting
         cy.createDockerAuthSecret();
@@ -33,12 +34,16 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
       );
 
       qase(236, it('Import CAPD RKE2 class-clusters using YAML', () => {
+        Cypress.expose('preUpgradeRKE2Version', vars.rke2Version);
+
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
-          data = data.replace(/replace_rke2_version/g, vars.rke2Version)
+          data = data.replace(/replace_rke2_version/g, preUpgradeRKE2Version)
           data = data.replace(/replace_kind_version/g, vars.kindVersion)
           cy.importYAML(data, vars.capiClustersNS)
         });
+        cy.task('suiteLog', `rke2 version: ${vars.rke2Version}`)
+        cy.task('suiteLog', `pre upgrade rke2 version: ${preUpgradeRKE2Version}`)
 
         // Check CAPI cluster using its name
         cy.checkCAPICluster(clusterName);
@@ -81,7 +86,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
   })
 
   context('Post-Upgrade Cluster checks and Resources cleanup', () => {
-    if (isRancherManagerVersion('2.14')) {
+    if (isRancherUpgraded) {
       qase(355, it('Check cluster & Resources status post-upgrade', () => {
         // Check CAPI cluster Provisioned
         cy.checkCAPIClusterProvisioned(clusterName, timeout);
@@ -122,12 +127,13 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
           cy.importYAML(data, vars.capiClustersNS)
         });
 
+        cy.task('suiteLog', `rke2 version: ${vars.rke2Version}`)
+        cy.task('suiteLog', `pre upgrade rke2 version: ${preUpgradeRKE2Version}`)
         // Check CAPI cluster upgrade status
         cy.checkCAPIMenu();
         cy.contains('Machine Sets').click();
         cy.contains(vars.rke2Version, {timeout: timeout});
-        cy.contains('v1.34', {timeout: timeout}).should('not.exist');
-
+        cy.contains(preUpgradeRKE2Version, {timeout: timeout}).should('not.exist');
         cy.checkCAPIClusterProvisioned(clusterName, timeout);
         cy.contains(vars.rke2Version);
         cy.checkCAPIClusterActive(clusterName);
