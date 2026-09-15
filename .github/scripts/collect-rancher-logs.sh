@@ -56,14 +56,20 @@ done
 
 # Read keys from VSPHERE_SECRETS_JSON_BASE64, export them as envvars and add them to the SECRET_ARGS array.
 # This ensures they are also masked in logs.
+VSPHERE_SECRETS_JSON_BASE64_DECODED=$(base64 -d <<< "${VSPHERE_SECRETS_JSON_BASE64:?VSPHERE_SECRETS_JSON_BASE64 is required}")
 
-VSPHERE_SECRETS_JSON_BASE64_DECODED=$(echo "${VSPHERE_SECRETS_JSON_BASE64}" | base64 -d)
-while IFS= read -r -d '' KEY && IFS= read -r -d '' VAL; do
-  if [[ -n "${KEY}" ]]; then
+# ensure the secrets are JSON compliant with identifier-safe keys;
+# this is to ensure we do not accidentally log the json to output.
+# On failure we skip the export loop instead of aborting, so the rest of the collection still runs.
+if jq -e 'type == "object" and all(keys[]; test("^[A-Za-z_][A-Za-z0-9_]*$"))' >/dev/null 2>&1 <<< "${VSPHERE_SECRETS_JSON_BASE64_DECODED}"; then
+  # read keys from VSPHERE_SECRETS_JSON_BASE64, export them as envvars and add them to the SECRET_ARGS array.
+  while IFS= read -r -d '' KEY && IFS= read -r -d '' VAL; do
     export "${KEY}=${VAL}"
     SECRET_ARGS+=(--secret "${KEY}")
-  fi
-done < <(jq -j 'to_entries[] | "\(.key)\u0000\(.value)\u0000"' 2>/dev/null <<< "${VSPHERE_SECRETS_JSON_BASE64_DECODED}")
+  done < <(jq -j 'to_entries[] | "\(.key)\u0000\(.value)\u0000"' 2>/dev/null <<< "${VSPHERE_SECRETS_JSON_BASE64_DECODED}")
+else
+  echo "ERROR: VSPHERE_SECRETS_JSON_BASE64 is not a JSON object with identifier-safe keys; skipping vSphere secret masking" >&2
+fi
 
 
 crust-gather collect "${SECRET_ARGS[@]}"
