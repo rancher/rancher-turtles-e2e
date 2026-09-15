@@ -737,7 +737,7 @@ jobs:
           fi
           cd tests && make start-cypress-tests
       - name: Stage Cypress screenshots (after-upgrade) for upload
-        if: ${{ (contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) && failure() }}
+        if: ${{ failure() && steps.cypress_upgraded.outcome != 'skipped' }}
         run: |
           # Absent when the pre-upgrade run already staged them, or when the
           # upgraded-Rancher Cypress step was skipped because that run failed.
