@@ -639,8 +639,8 @@ jobs:
               echo "Failed to set milestone ID ${QASE_TESTOPS_MILESTONE_ID} for run ${QASE_TESTOPS_RUN_ID}"
             fi
           fi
-      - name: Create a separate folder for screenshots and log
-        if: always()
+      - name: Stage Cypress screenshots for upload
+        if: ${{ failure() && steps.cypress.outcome != 'skipped' }}
         run: |
           # Cypress only creates this directory once it writes a failure screenshot,
           # and a failure before the Cypress step means it never existed.
@@ -665,14 +665,6 @@ jobs:
           retention-days: 7
           archive: 'false'
           if-no-files-found: ignore
-      - name: Store QASE_TESTOPS_RUN_ID for later use
-        if: ${{ always() && inputs.qase_report == true }}
-        id: qase_run_id
-        run: |
-          if [ -f tests/cypress/latest/QASE_TESTOPS_RUN_ID.txt ]; then
-            QASE_TESTOPS_RUN_ID=$(cat tests/cypress/latest/QASE_TESTOPS_RUN_ID.txt)
-            echo "qase_run_id=${QASE_TESTOPS_RUN_ID}" >> ${GITHUB_OUTPUT}
-          fi
       - name: Set Rancher Manager version for Migration
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') }}
         run: |
