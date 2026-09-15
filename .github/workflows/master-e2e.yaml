@@ -154,6 +154,7 @@ jobs:
             # Rematch returns first () matching group
             VERSION="${BASH_REMATCH[1]}"
           fi
+          # If no patch version found (for e.g. VERSION=2.15), calculate the latest patch version
           if [[ "${VERSION}" =~ ^[0-9]+\.[0-9]+$ ]]; then
             # Query the latest released patch for this minor version
             LATEST=$(gh api "repos/rancher/rancher/releases?per_page=100" \
