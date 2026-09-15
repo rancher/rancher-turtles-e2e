@@ -149,6 +149,7 @@ jobs:
           CHANNEL="${RANCHER_VERSION%%/*}"
           VERSION="${RANCHER_VERSION#*/}"
           # Extract base version (e.g. "v2.15.1-<sha>-head" -> "2.15.1")
+          # Examples: 2.15.10. v2.15, v2.15-1-head-bla
           if [[ "${VERSION}" =~ ^v?([0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
             # Rematch returns first () matching group
             VERSION="${BASH_REMATCH[1]}"
