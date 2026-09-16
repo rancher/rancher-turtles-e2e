@@ -25,7 +25,7 @@ export default defineConfig({
           api: {
            token: qaseAPIToken,
           },
-          project: 'RT',
+          project: 'PT',
           uploadAttachments: true,
           run: {
             complete: true,

@@ -48,7 +48,7 @@ describe('First login on Rancher - @install', {tags: '@install'}, () => {
   })
   );
 
-  qase(150, it('Change Rancher password', () => {
+  qase(150, it('Change Rancher bootstrap password', () => {
     // Change default password
     cy.login(Cypress.expose('username'), password);
     cy.getBySel('nav_header_showUserMenu').click();
