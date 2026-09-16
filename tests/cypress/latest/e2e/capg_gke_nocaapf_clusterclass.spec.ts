@@ -14,7 +14,7 @@ describe('Import CAPG GKE (No-Caapf) Class-Cluster', {tags: ['@full-nocaapf', '@
   const classClusterFileName = './fixtures/gcp/capg-gke-class-cluster.yaml'
 
   const gcpProject = Cypress.expose('gcp_project')
-  const k8sVersion = 'v1.36.2'      // this version is different from GCP Kubeadm version
+  const k8sVersion = 'v1.36.3'      // this version is different from GCP Kubeadm version
 
   before(function () {
     if (isRancherManagerVersion('<2.15')) {
