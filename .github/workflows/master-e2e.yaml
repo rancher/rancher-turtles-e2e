@@ -130,6 +130,83 @@ on:
         default: false
 
 jobs:
+  determine-milestone:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    outputs:
+      milestone: ${{ steps.milestone.outputs.milestone }}
+      milestone_id: ${{ steps.milestone.outputs.milestone_id }}
+    steps:
+      - name: Determine milestone from latest matching rancher/rancher release
+        id: milestone
+        env:
+          GH_TOKEN: ${{ github.token }}
+          QASE_API_TOKEN: ${{ secrets.qase_api_token }}
+          QASE_PROJECT_CODE: RT
+          QASE_REPORT: ${{ inputs.qase_report }}
+          RANCHER_VERSION: ${{ inputs.rancher_version }}
+        run: |
+          CHANNEL="${RANCHER_VERSION%%/*}"
+          VERSION="${RANCHER_VERSION#*/}"
+          # Extract base version (e.g. "v2.15.1-<sha>-head" -> "2.15.1")
+          # Examples: 2.15.10. v2.15, v2.15-1-head-bla
+          if [[ "${VERSION}" =~ ^v?([0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
+            # Rematch returns first () matching group
+            VERSION="${BASH_REMATCH[1]}"
+          fi
+          # If no patch version found (for e.g. VERSION=2.15), calculate the latest patch version
+          if [[ "${VERSION}" =~ ^[0-9]+\.[0-9]+$ ]]; then
+            # Query the latest released patch for this minor version
+            LATEST=$(gh api "repos/rancher/rancher/releases?per_page=100" \
+              --jq '.[] | select(.prerelease == false) | .tag_name' | \
+              { grep "^v${VERSION}\." || true; } | sort -V | tail -n 1)
+            if [[ -z "${LATEST}" ]]; then
+              LATEST_PATCH=-1
+            else
+              LATEST_PATCH="${LATEST##*.}"
+            fi
+            MILESTONE_TITLE="v${VERSION}.$(( LATEST_PATCH + 1 ))" # For not released yet: -1+1=0
+          else
+            MILESTONE_TITLE="v${VERSION}"
+          fi
+
+          # Append "-head" to the milestone title if the channel is "head"
+          if [[ "${CHANNEL}" =~ head ]]; then
+            MILESTONE_TITLE="${MILESTONE_TITLE}-head"
+          fi
+
+          echo "milestone=${MILESTONE_TITLE}" | tee -a "${GITHUB_OUTPUT}"
+
+          # Finish here if QASE reporting not enabled
+          if [ "${QASE_REPORT}" != "true" ]; then
+            exit 0
+          fi
+
+          # 1. Try to find existing milestone ID
+          MILESTONE_ID=$(
+            curl -s --request GET \
+              --url "https://api.qase.io/v1/milestone/${QASE_PROJECT_CODE}?search=${MILESTONE_TITLE}" \
+              --header "Token: ${QASE_API_TOKEN}" \
+              --header "accept: application/json" \
+            | jq -r --arg TITLE "$MILESTONE_TITLE" '.result.entities[] | select(.title == $TITLE) | .id'
+            )
+
+          # 2. If not found, create it and get the new ID
+          if [ -z "$MILESTONE_ID" ]; then
+            echo "Creating new milestone ${MILESTONE_TITLE} in QASE"
+            MILESTONE_ID=$(
+              curl -s --request POST \
+                --url "https://api.qase.io/v1/milestone/${QASE_PROJECT_CODE}" \
+                --header "Token: ${QASE_API_TOKEN}" \
+                --header "Content-Type: application/json" \
+                --header "accept: application/json" \
+                --data "$(jq -n --arg t "$MILESTONE_TITLE" '{title: $t, description: $t}')" \
+              | jq -r '.result.id // empty'
+              )
+          fi
+
+          echo "milestone_id=${MILESTONE_ID}" | tee -a "${GITHUB_OUTPUT}"
+
   determine-runner:
     runs-on: ubuntu-latest
     outputs:
@@ -207,7 +284,7 @@ jobs:
         run: |
           if [[ ${{ needs.determine-runner.outputs.initial-runner }} == "vsphere" ]]; then
             LOCAL_IP=$(ip route get 8.8.8.8 | awk '{print $7}')
-            # Raise an error if IP is are empty
+            # Raise an error if IP is empty
             if [[ -z "${LOCAL_IP}" ]]; then
               echo "LOCAL_IP is empty!" >&2
               false
@@ -230,7 +307,7 @@ jobs:
           fi
 
   e2e:
-    needs: create-runner
+    needs: [create-runner,determine-milestone]
     runs-on: ${{ needs.create-runner.outputs.uuid }}
     outputs:
       qase_run_id: ${{ steps.qase_run_id.outputs.qase_run_id }}
@@ -250,6 +327,8 @@ jobs:
       QASE_MODE: ${{ inputs.qase_report == true && 'testops' || 'off' }}
       QASE_TESTOPS_RUN_TITLE: ${{ format('[{4}] Rancher-{0} - {1} destroy={2} dev={3}', inputs.rancher_version, inputs.grep_test_by_tag, inputs.destroy_runner, inputs.turtles_dev_chart, github.run_number) }}
       QASE_TESTOPS_RUN_DESCRIPTION: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      QASE_TESTOPS_RUN_MILESTONE: ${{ needs.determine-milestone.outputs.milestone }} ### Used only in Summary report
+      QASE_TESTOPS_MILESTONE_ID: ${{ needs.determine-milestone.outputs.milestone_id }}
       # Cypress
       TURTLES_REPO: rancher/turtles
       TURTLES_BRANCH: main
@@ -537,6 +616,27 @@ jobs:
             export CHARTMUSEUM_REPO=http://${{ needs.create-runner.outputs.public_dns }}
           fi
           cd tests && make start-cypress-tests
+      - name: Set milestone_id for current run and store QASE_TESTOPS_RUN_ID for later
+        if: ${{ always() && inputs.qase_report == true }}
+        id: qase_run_id
+        run: |
+          if [ -f tests/cypress/latest/QASE_TESTOPS_RUN_ID.txt ]; then
+            QASE_TESTOPS_RUN_ID=$(cat tests/cypress/latest/QASE_TESTOPS_RUN_ID.txt)
+            echo "qase_run_id=${QASE_TESTOPS_RUN_ID}" >> ${GITHUB_OUTPUT}
+          fi
+          ## Set milestone_id for the current run
+          if [ -n "${QASE_TESTOPS_RUN_ID}" ] && [ -n "${QASE_TESTOPS_MILESTONE_ID}" ]; then
+            STATUS=$(curl -s --request PATCH \
+              --url "https://api.qase.io/v1/run/${QASE_PROJECT_CODE}/${QASE_TESTOPS_RUN_ID}" \
+              --header "Token: ${QASE_API_TOKEN}" \
+              --header "Content-Type: application/json" \
+              --header "accept: application/json" \
+              --data "{\"milestone_id\":${QASE_TESTOPS_MILESTONE_ID}}" \
+              | jq -r '.status // empty')
+            if [ "$STATUS" != "true" ]; then
+              echo "Failed to set milestone ID ${QASE_TESTOPS_MILESTONE_ID} for run ${QASE_TESTOPS_RUN_ID}"
+            fi
+          fi
       - name: Upload Cypress screenshots
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -553,14 +653,6 @@ jobs:
           name: cypress-videos-${{ github.run_number }}
           path: tests/cypress/latest/videos
           retention-days: 7
-      - name: Store QASE_TESTOPS_RUN_ID for later use
-        if: ${{ always() && inputs.qase_report == true }}
-        id: qase_run_id
-        run: |
-          if [ -f tests/cypress/latest/QASE_TESTOPS_RUN_ID.txt ]; then
-            QASE_TESTOPS_RUN_ID=$(cat tests/cypress/latest/QASE_TESTOPS_RUN_ID.txt)
-            echo "qase_run_id=${QASE_TESTOPS_RUN_ID}" >> ${GITHUB_OUTPUT}
-          fi
       - name: Set Rancher Manager version for Migration
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') }}
         run: |
@@ -673,6 +765,7 @@ jobs:
           echo "### Rancher Manager & Turtles Information" >> ${GITHUB_STEP_SUMMARY}
           echo "Rancher Manager Image: ${{ steps.component.outputs.rm_image_version }}" >> ${GITHUB_STEP_SUMMARY}
           echo "Rancher Manager Version: ${{ steps.component.outputs.rm_version }}" >> ${GITHUB_STEP_SUMMARY}
+          echo "Rancher Manager Milestone: ${{ needs.determine-milestone.outputs.milestone }}" >> ${GITHUB_STEP_SUMMARY}
           echo "CertManager Image: ${{ steps.component.outputs.cert_manager_image_version }}" >> ${GITHUB_STEP_SUMMARY}
           if [[ "${{ env.RANCHER_VERSION }}" =~ $RANCHER_RECENT_VERSIONS ]]; then
             TURTLES_NAMESPACE="cattle-turtles-system"
