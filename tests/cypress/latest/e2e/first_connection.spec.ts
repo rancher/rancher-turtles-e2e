@@ -13,6 +13,7 @@ limitations under the License.
 */
 
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
+import {qase} from 'cypress-qase-reporter/mocha';
 
 Cypress.config();
 describe('First login on Rancher - @install', {tags: '@install'}, () => {
@@ -48,7 +49,7 @@ describe('First login on Rancher - @install', {tags: '@install'}, () => {
   })
   );
 
-  qase(150, it('Change Rancher bootstrap password', () => {
+  qase(150, it('Change Rancher BOOTSTRAP password', () => {
     // Change default password
     cy.login(Cypress.expose('username'), password);
     cy.getBySel('nav_header_showUserMenu').click();
