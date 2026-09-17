@@ -8,7 +8,7 @@ set -eo pipefail
 RANCHER_LOG_COLLECTER_COMMIT="618baf2700382943b25c503383b4a7bfd9fac35c"
 RANCHER_LOG_COLLECTER_PATH="collection/rancher/v2.x/logs-collector/rancher2_logs_collector.sh"
 RANCHER_LOG_COLLECTER="https://raw.githubusercontent.com/rancherlabs/support-tools/${RANCHER_LOG_COLLECTER_COMMIT}/${RANCHER_LOG_COLLECTER_PATH}"
-RANCHER_LOG_COLLECTER_SHA256="6f28bd73a2e55ba5affddfb2189aea89c30ef994532c08b239bc17690d2e0451"
+RANCHER_LOG_COLLECTER_SHA256="75f72d4a7ed5d15ec2a73a75e34350c60e5fc39b85e095bd33d5dbd68c0d6f9d"
 # To refresh SHA256:
 # RANCHER_LOG_COLLECTER_SHA256="$(curl -sSfL "${RANCHER_LOG_COLLECTER}" | sha256sum | awk '{print $1}')"
 
