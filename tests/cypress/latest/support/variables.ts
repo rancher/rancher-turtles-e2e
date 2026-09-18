@@ -1,7 +1,9 @@
 import {
   isAPIv1beta1,
   isRancherManagerVersion,
-  isTurtlesDevChart, isUpgrade,
+  isRancherUpgraded,
+  isTurtlesDevChart,
+  isUpgrade,
   providersChartNeedsStgRegistry
 } from './utils';
 
@@ -57,13 +59,14 @@ export const vars = {
   gcpCCMYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/cloud-provider-gcp.yaml',
   vSphereCCMYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/cloud-provider-vsphere.yaml',
   vSphereCSIYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/csi-vsphere.yaml',
+  turtlesChartVersion: isRancherManagerVersion('2.12') ? '0.24' 
+                     : isRancherManagerVersion('2.13') ? '0.25' 
+                     : isRancherManagerVersion('2.14') ? '0.26' 
+                     : isRancherManagerVersion('2.15') ? '0.27' 
+                     : isRancherManagerVersion('2.16') ? '0.28' 
+                     : '0.29',
   turtlesProvidersChartVersion: (() => {
-    if (isUpgrade && isRancherManagerVersion('2.13')) {
-      // for upgrade tests, 2.13 will always be dev=false; dev=true is only applicable to 2.14
-      return '0.25';
-    }
-
-    if (!isTurtlesDevChart) {
+    if ((!isTurtlesDevChart) || (isUpgrade && !isRancherUpgraded)) {
       if (isRancherManagerVersion('2.13')) return '0.25';
       if (isRancherManagerVersion('2.14')) return '0.26';
       if (isRancherManagerVersion('2.15')) return '0.27';
@@ -72,7 +75,7 @@ export const vars = {
     // for stable releases, only supported versions will be listed, so we do not need to return/select a specific
     // versions; selecting a version is only necessary for alpha/rc/head builds where we use staging registry that
     // consists of unsupported versions
-    return undefined;
+    return "";
   })()
 };
 

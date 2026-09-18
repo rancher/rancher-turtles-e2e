@@ -1,5 +1,5 @@
 import '../support/commands';
-import {getClusterName, isRancherManagerVersion, isAPIv1beta1, skipClusterDeletion} from '../support/utils';
+import {getClusterName, isRancherUpgraded, isAPIv1beta1, skipClusterDeletion} from '../support/utils';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
@@ -18,7 +18,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
   });
 
   context('Pre-Upgrade Resources and Cluster creation', () => {
-    if (isRancherManagerVersion('2.13')) {
+    if (!isRancherUpgraded) {
       qase(234, it('Create Docker Auth Secret', () => {
         // Prevention for Docker.io rate limiting
         cy.createDockerAuthSecret();
@@ -33,6 +33,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
       );
 
       qase(236, it('Import CAPD RKE2 class-clusters using YAML', () => {
+
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_rke2_version/g, vars.rke2Version)
@@ -81,7 +82,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
   })
 
   context('Post-Upgrade Cluster checks and Resources cleanup', () => {
-    if (isRancherManagerVersion('2.14')) {
+    if (isRancherUpgraded) {
       qase(355, it('Check cluster & Resources status post-upgrade', () => {
         // Check CAPI cluster Provisioned
         cy.checkCAPIClusterProvisioned(clusterName, timeout);
@@ -126,8 +127,9 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
         cy.checkCAPIMenu();
         cy.contains('Machine Sets').click();
         cy.contains(vars.rke2Version, {timeout: timeout});
-        cy.contains('v1.34', {timeout: timeout}).should('not.exist');
-
+        cy.get('table > tbody > tr.main-row', {timeout}).should(($rows) => {
+          expect($rows.length).to.be.equal(1);
+        });
         cy.checkCAPIClusterProvisioned(clusterName, timeout);
         cy.contains(vars.rke2Version);
         cy.checkCAPIClusterActive(clusterName);
