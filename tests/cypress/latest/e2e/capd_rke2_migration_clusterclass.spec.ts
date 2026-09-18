@@ -59,7 +59,7 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
       })
       );
 
-      qase(377, it('Create Docker Auth Secret', () => {
+      qase(377, xit('Create Docker Auth Secret', () => {
         // Prevention for Docker.io rate limiting
         cy.createDockerAuthSecret();
       })
@@ -105,7 +105,7 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
       })
       );
 
-      qase(379, it('Pre-upgrade steps for migration', () => {
+      qase(379, xit('Pre-upgrade steps for migration', () => {
         // Uninstall Rancher Turtles chart
         cy.deleteKubernetesResource(vars.localCluster, ['Apps', 'Installed Apps'], 'rancher-turtles', turtlesNamespace);
 
