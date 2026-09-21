@@ -29,7 +29,8 @@ import {
   isRancherManagerVersion,
   isTurtlesDevChart,
   isTurtlesPrimeBuild,
-  isUpgrade, turtlesNamespace
+  isRancherUpgraded, turtlesNamespace,
+  isUpgrade
 } from './utils';
 import {vars} from './variables'
 
@@ -598,7 +599,7 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
     }
 
     if (isTurtlesProvidersChart) {
-      return (!isTurtlesDevChart || (isRancherManagerVersion('2.13') && isUpgrade)) ? `item-card-cluster/${vars.providersChartRepoName}/rancher-turtles-providers` : `item-card-cluster/${vars.chartMuseumRepoName}/rancher-turtles-providers`;
+      return (!isTurtlesDevChart || (isUpgrade && !isRancherUpgraded)) ? `item-card-cluster/${vars.providersChartRepoName}/rancher-turtles-providers` : `item-card-cluster/${vars.chartMuseumRepoName}/rancher-turtles-providers`;
     }
 
     return `item-card-cluster/rancher-charts/rancher-${chartName.toLowerCase()}`;
@@ -1053,7 +1054,7 @@ Cypress.Commands.add('deleteKubernetesResource', (clusterName = vars.localCluste
   // using `cy.clickNavMenu()` does not always work here, so we explicitly wait after clicking a label.
   resourcePath.forEach(label => {
     cy.get('.nav').contains(label).click()
-    cy.wait(1000);
+    cy.wait(3000);
   });
 
   cy.typeInFilter(resourceName);

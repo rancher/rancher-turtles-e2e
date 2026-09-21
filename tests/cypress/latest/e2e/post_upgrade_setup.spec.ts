@@ -1,11 +1,12 @@
 import '../support/commands';
+import semver from 'semver';
 import {vars} from '../support/variables';
 import {isTurtlesDevChart, turtlesNamespace} from '../support/utils';
 
 Cypress.config();
 describe('Post Rancher Upgrade Checks - @upgrade', {tags: '@upgrade'}, () => {
-  const rancherVersion = '2.14'
-  const turtlesChartVersion = isTurtlesDevChart? Cypress.expose('turtles_chart_dev_version'): '0.26'
+  const rancherVersion = semver.valid(semver.coerce(Cypress.expose('rancher_version')));
+  const turtlesChartVersion = isTurtlesDevChart? Cypress.expose('turtles_chart_dev_version'): vars.turtlesChartVersion
 
   beforeEach(() => {
     cy.login();
