@@ -31,6 +31,8 @@ echo "${RANCHER_LOG_COLLECTER_SHA256}  rancherlogcollector.sh" | sha256sum -c -
 
 chmod +x rancherlogcollector.sh
 sudo ./rancherlogcollector.sh -d ../cluster-logs
+# Delete the script
+rm rancherlogcollector.sh
 
 # Move back to logs dir
 cd ..
@@ -45,7 +47,33 @@ echo "${CRUST_GATHER_INSTALLER_SHA256}  crust-gather-installer.sh" | sha256sum -
 chmod +x crust-gather-installer.sh
 sudo VERSION=${CRUST_GATHER_INSTALLER_VERSION} ./crust-gather-installer.sh -y
 
-crust-gather collect
+# Turn the comma-separated SECRET_KEYS_TO_MASK list into one --secret flag per key.
+IFS=',' read -ra SECRET_KEYS <<< "${SECRET_KEYS_TO_MASK:?SECRET_KEYS_TO_MASK is required}"
+SECRET_ARGS=()
+for KEY in "${SECRET_KEYS[@]}"; do
+  [ -n "${KEY}" ] && SECRET_ARGS+=(--secret "${KEY}")
+done
+
+# Read keys from VSPHERE_SECRETS_JSON_BASE64, export them as envvars and add them to the SECRET_ARGS array.
+# This ensures they are also masked in logs.
+VSPHERE_SECRETS_JSON_BASE64_DECODED=$(base64 -d <<< "${VSPHERE_SECRETS_JSON_BASE64:?VSPHERE_SECRETS_JSON_BASE64 is required}")
+
+# ensure the secrets are JSON compliant with identifier-safe keys;
+# this is to ensure we do not accidentally log the json to output.
+# On failure we skip the export loop instead of aborting, so the rest of the collection still runs.
+if jq -e 'type == "object" and all(keys[]; test("^[A-Za-z_][A-Za-z0-9_]*$"))' >/dev/null 2>&1 <<< "${VSPHERE_SECRETS_JSON_BASE64_DECODED}"; then
+  # read keys from VSPHERE_SECRETS_JSON_BASE64, export them as envvars and add them to the SECRET_ARGS array.
+  while IFS= read -r -d '' KEY && IFS= read -r -d '' VAL; do
+    export "${KEY}=${VAL}"
+    SECRET_ARGS+=(--secret "${KEY}")
+  done < <(jq -j 'to_entries[] | "\(.key)\u0000\(.value)\u0000"' 2>/dev/null <<< "${VSPHERE_SECRETS_JSON_BASE64_DECODED}")
+else
+  echo "ERROR: VSPHERE_SECRETS_JSON_BASE64 is not a JSON object with identifier-safe keys; skipping vSphere secret masking" >&2
+fi
+
+
+crust-gather collect "${SECRET_ARGS[@]}"
+
 
 cat > USAGE.md <<EOF
 To use crust-gather; do the following:
