@@ -423,44 +423,35 @@ jobs:
           echo "${HELM_SHA256}  helm.tar.gz" | sha256sum -c -
           sudo tar -xzf helm.tar.gz --strip-components=1 -C /usr/local/bin/ linux-amd64/helm && rm helm.tar.gz
 
+      - name: Set Rancher Manager version for Installation
+        run: |
+          # Default version for tests
+          echo "RANCHER_VERSION=${{ inputs.rancher_version }}" >> ${GITHUB_ENV}
+
       - name: Set Rancher Manager version and COMMON_SPECS for Pre-Migration
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') }}
         run: |
           echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> ${GITHUB_ENV}
           echo "SPECS=" >> ${GITHUB_ENV}
-          RANCHER_VERSION="${{ inputs.rancher_version }}"
           # Pre-Migration
           if [[ "$RANCHER_VERSION" == *"2.12"* ]]; then
             echo "RANCHER_VERSION=$RANCHER_VERSION" >> "$GITHUB_ENV"
-          elif [[ "$RANCHER_VERSION" == head/* ]]; then
+          else
             # Default version for pre-migration tests
             echo "RANCHER_VERSION=${{ env.PRE_MIGRATION_DEFAULT_RANCHER_VERSION }}" >> "$GITHUB_ENV"
-          else
-            echo "ERROR: Migration is only allowed from 2.12 Rancher Version"
-            exit 1
           fi
 
       - name: Set Rancher Manager version and COMMON_SPECS for Pre-Upgrade
         if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') }}
         run: |
           echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> ${GITHUB_ENV}
-          RANCHER_VERSION="${{ inputs.rancher_version }}"
           # Pre-Upgrade
           if [[ "$RANCHER_VERSION" == *"2.13"* || "$RANCHER_VERSION" == *"2.14"* ]]; then
             echo "RANCHER_VERSION=$RANCHER_VERSION" >> "$GITHUB_ENV"
-          elif [[ "$RANCHER_VERSION" == head/* ]]; then
-            # Default version for pre-upgrade tests
-            echo "RANCHER_VERSION=${{ env.POST_MIGRATION_DEFAULT_RANCHER_VERSION }}" >> "$GITHUB_ENV"
           else
-            echo "ERROR: Upgrade is only allowed from 2.13, 2.14 Rancher Version"
-            exit 1
+            # Default version for pre-upgrade tests
+            echo "RANCHER_VERSION=${{ env.PRE_UPGRADE_DEFAULT_RANCHER_VERSION }}" >> "$GITHUB_ENV"
           fi
-
-      - name: Set Rancher Manager version for Installation
-        if: ${{ (!contains(inputs.grep_test_by_tag, 'migration')) || (!contains(inputs.grep_test_by_tag, '@upgrade')) }}
-        run: |
-          # Default version for tests
-          echo "RANCHER_VERSION=${{ inputs.rancher_version }}" >> ${GITHUB_ENV}
 
       - name: Set Rancher Manager point version
         if: ${{ inputs.turtles_dev_chart == true }}
@@ -521,7 +512,7 @@ jobs:
       - name: Set k3s Install version
         run: |
           if [[ "${{ env.RANCHER_VERSION }}" =~ (2\.12) ]]; then
-            echo INSTALL_K3S_VERSION="v1.33.4+k3s1" >> ${GITHUB_ENV}
+            echo INSTALL_K3S_VERSION="v1.32.4+k3s1" >> ${GITHUB_ENV}
           else
             echo INSTALL_K3S_VERSION=${{ inputs.upstream_cluster_version }} >> ${GITHUB_ENV}
           fi
@@ -621,6 +612,18 @@ jobs:
           INDEX=$(((${{ github.run_number }} % 3) + 1))
           CP_ENDPOINT_IP=$(echo ${{ secrets.vsphere_endpoints_list }} | cut -d' ' -f${INDEX})
           sed -i "s/replace_cluster_control_plane_endpoint_ip/${CP_ENDPOINT_IP}/" tests/cypress/latest/fixtures/vsphere/capv-helm-values.yaml
+      - name: Check Rancher Manager version for Pre-Migration, Pre-Upgrade
+        run: |
+          if [[ "${{ inputs.grep_test_by_tag }}" =~ "@migration" && "$RANCHER_VERSION" != *"2.12"* ]]; then
+            echo "ERROR: Migration is only allowed from 2.12 Rancher Version"
+            exit 1
+          fi
+          if [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
+            if [[ "$RANCHER_VERSION" != *"2.13"* && "$RANCHER_VERSION" != *"2.14"* ]]; then
+              echo "ERROR: Upgrade is only allowed from 2.13, 2.14 Rancher Version"
+              exit 1
+            fi
+          fi
       - name: Get Rancher prime-head tag for Install
         if: ${{ contains(env.RANCHER_VERSION, 'prime-head') }}
         run: |
@@ -790,8 +793,8 @@ jobs:
           QASE_TESTOPS_RUN_ID: ${{ steps.qase_run_id.outputs.qase_run_id }}
           IS_RANCHER_UPGRADED: true
           SPEC: |
-            e2e/capd_rke2_migration_clusterclass.spec.ts
             e2e/post_upgrade_setup.spec.ts
+            e2e/capd_rke2_migration_clusterclass.spec.ts
             ${{ env.COMMON_SPECS }}
             e2e/capd_rke2_upgrade_clusterclass.spec.ts
         run: |

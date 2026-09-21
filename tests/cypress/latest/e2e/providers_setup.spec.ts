@@ -143,7 +143,7 @@ describe('Enable CAPI Providers', () => {
       }
 
       // Install Rancher Turtles Certified Providers chart
-      let operation = isRancherUpgraded ? 'Upgrade' : 'Install'
+      let operation = (isUpgrade && isRancherUpgraded) ? 'Upgrade' : 'Install'
       cy.task('suiteLog', `${operation} turtles providers chart version: ${vars.turtlesProvidersChartVersion}`)
       cy.checkChart(vars.localCluster, operation, vars.turtlesProvidersChartName, turtlesNamespace, {
         version: vars.turtlesProvidersChartVersion,

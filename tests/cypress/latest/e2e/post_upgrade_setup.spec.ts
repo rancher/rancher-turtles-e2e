@@ -4,7 +4,7 @@ import {vars} from '../support/variables';
 import {isTurtlesDevChart, turtlesNamespace} from '../support/utils';
 
 Cypress.config();
-describe('Post Rancher Upgrade Checks - @upgrade', {tags: '@upgrade'}, () => {
+describe('Post Rancher Upgrade Checks - @upgrade', {tags: ['@upgrade', '@migration']}, () => {
   const rancherVersion = semver.valid(semver.coerce(Cypress.expose('rancher_version')));
   const turtlesChartVersion = isTurtlesDevChart? Cypress.expose('turtles_chart_dev_version'): vars.turtlesChartVersion
 
