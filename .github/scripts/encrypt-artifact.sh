@@ -25,11 +25,5 @@ fi
 
 # The passphrase goes over fd 3 rather than the command line to keep it out of
 # the process table; fd 0 is taken by the tar stream.
-#
-# Encrypt to a .part file and rename only on success, so a failing tar (e.g. a
-# video still being flushed) can never leave a truncated archive for the upload
-# step -- which runs under always() -- to publish as if it were valid.
 tar -c -C "${SOURCE_DIR}" . \
-  | gpg --symmetric --cipher-algo AES256 --batch --passphrase-fd 3 --output "${OUTPUT}.part" 3<<<"${LOG_ENCRYPTION_KEY}"
-
-mv "${OUTPUT}.part" "${OUTPUT}"
+  | gpg --symmetric --cipher-algo AES256 --batch --yes --passphrase-fd 3 --output "${OUTPUT}" 3<<<"${LOG_ENCRYPTION_KEY}"
