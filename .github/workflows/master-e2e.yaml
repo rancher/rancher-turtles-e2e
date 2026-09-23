@@ -618,11 +618,9 @@ jobs:
             echo "ERROR: Migration is only allowed from 2.12 Rancher Version"
             exit 1
           fi
-          if [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
-            if [[ "$RANCHER_VERSION" != *"2.13"* && "$RANCHER_VERSION" != *"2.14"* ]]; then
-              echo "ERROR: Upgrade is only allowed from 2.13, 2.14 Rancher Version"
-              exit 1
-            fi
+          if [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" && ! "$RANCHER_VERSION" =~ 2\.(13|14) ]]; then
+            echo "ERROR: Upgrade is only allowed from 2.13, 2.14 Rancher Version"
+            exit 1
           fi
       - name: Get Rancher prime-head tag for Install
         if: ${{ contains(env.RANCHER_VERSION, 'prime-head') }}
