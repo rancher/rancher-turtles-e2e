@@ -341,7 +341,7 @@ jobs:
       TURTLES_CHART_DEV_VERSION: 108.0.0+up99.99.99
       CONTROLLER_IMG: localhost:5000/rancher/turtles
       BROWSER: chrome
-      CYPRESS_DOCKER: 'cypress/included:15.20.0@sha256:5baa6e2f1831e7b9823246d22b5914fe77187a9bab030aa2f44fceabde17c9d1'
+      CYPRESS_DOCKER: 'cypress/included:16.0.0@sha256:2ad59498de089a8eb03b6a3923c4e2f0801099f9be044ae2825531cb585e9370'
       RANCHER_TURTLES_E2E_BRANCH: ${{ github.ref_name }}
       IS_RANCHER_UPGRADED: false
       # Inputs
@@ -516,7 +516,7 @@ jobs:
               echo "TURTLES_BRANCH=release/v0.27" >> ${GITHUB_ENV}
             else
               echo "TURTLES_BRANCH=${{ env.TURTLES_BRANCH }}" >> ${GITHUB_ENV}
-            fi          
+            fi
           fi
       - name: Set k3s Install version
         run: |

@@ -10,8 +10,6 @@ export default defineConfig({
   video: true,
   viewportWidth: 1920,
   viewportHeight: 1080,
-  allowCypressEnv: false,
-  experimentalMemoryManagement: true,
   reporter: 'cypress-multi-reporters',
   reporterOptions: {
     reporterEnabled: 'cypress-mochawesome-reporter, cypress-qase-reporter',
