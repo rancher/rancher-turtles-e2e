@@ -13,7 +13,7 @@ limitations under the License.
 
 import '../support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import {isUseCAAPFSupported, skipClusterDeletion, isRancherManagerVersion} from '../support/utils';
+import {isUseCAAPFSupported, skipClusterDeletion} from '../support/utils';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 

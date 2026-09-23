@@ -228,7 +228,7 @@ describe('Enable CAPI Providers', () => {
     );
   })
 
-  context('Cloud Providers', {tags: ['@full', '@full-nocaapf', '@nocaapf']}, () => {
+  context('Cloud Providers', {tags: ['@full', '@full-nocaapf']}, () => {
     const providerType = 'infrastructure'
     qase(424, it('Verify CAPA provider', {tags: ['@capak', '@capar', '@capaeks', '@capar-nocaapf', '@capak-nocaapf', '@capaeks-nocaapf']},() => {
       const namespace = 'capa-system'

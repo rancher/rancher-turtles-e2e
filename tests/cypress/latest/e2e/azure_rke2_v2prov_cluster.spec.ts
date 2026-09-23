@@ -1,5 +1,5 @@
 import '../support/commands';
-import {isAPIv1beta1, isRancherManagerVersion, skipClusterDeletion} from '../support/utils';
+import {isRancherManagerVersion, skipClusterDeletion} from '../support/utils';
 import * as randomstring from "randomstring";
 import {vars} from '../support/variables';
 

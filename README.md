@@ -1,6 +1,6 @@
 # rancher-turtles-e2e
 
-[![UI-E2E_head_2.14](https://github.com/rancher/rancher-turtles-e2e/actions/workflows/ui-e2e.yaml/badge.svg?event=schedule)](https://github.com/rancher/rancher-turtles-e2e/actions/workflows/ui-e2e.yaml)
+[![UI-E2E_head_2.15](https://github.com/rancher/rancher-turtles-e2e/actions/workflows/ui-e2e.yaml/badge.svg?event=schedule)](https://github.com/rancher/rancher-turtles-e2e/actions/workflows/ui-e2e.yaml)
 
 What tests are doing:
 1. Create the infra stack ( GCP runner, cert-manager, rancher )
@@ -13,8 +13,8 @@ What tests are doing:
 8. Scale the imported CAPI cluster
 9. Remove & Delete the imported CAPI cluster
 10. Migration test from 2.12 to 2.13 to test turtles migration from an external chart(2.12) to system integrated chart(
-    2.13). These tests are only supported with `dev=true` options; `dev=true` is applicable to 2.13.
-11. Upgrade tests from 2.13 to 2.14 to test Turtles & CAPI upgrade from v1.10 to v1.12.
+    2.13).
+11. Upgrade tests from 2.13|2.14 to 2.14|2.15, to test Turtles & CAPI upgrade from v1.10 to v1.12|v1.13
 12. Add Feature Switch test for 2.13 to test switch between `embedded-cluster-api` and `turtles` features switch.
 
 ## Running the tests locally
@@ -59,7 +59,7 @@ Additional tags that are supported:
 | `@capzaks`   | CAPZ AKS                                                                                              |
 | `@migration` | Migration from 2.12 (Externally-managed Rancher Turtles) to 2.13 (System integration Rancher Turtles) |
 | `@switch`    | (2.13 Only) Switch from Turtles to Embedded-CAPI and back                                             |
-| `@upgrade`   | Upgrade from 2.13 to 2.14                                                                             |
+| `@upgrade`   | Upgrade from 2.13|2.14 to 2.14|2.15                                                                   |
 
 
 # Running tests using Cypress grep

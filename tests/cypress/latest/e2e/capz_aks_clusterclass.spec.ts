@@ -1,5 +1,5 @@
 import '../support/commands';
-import {getClusterName, isAPIv1beta1, skipClusterDeletion, isRancherManagerVersion} from '../support/utils';
+import {getClusterName, isAPIv1beta1, skipClusterDeletion} from '../support/utils';
 import {capiClusterDeletion, capzResourcesCleanup, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
