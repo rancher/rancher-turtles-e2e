@@ -19,7 +19,7 @@ spec:
       replicas: 3
     variables:
     - name: region
-      value: ap-south-2
+      value: eu-central-1
     - name: sshKeyName
       value: turtles-qa-rke2
     - name: controlPlaneMachineType
