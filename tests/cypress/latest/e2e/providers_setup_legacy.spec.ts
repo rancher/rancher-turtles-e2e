@@ -24,7 +24,6 @@ import {matchAndWaitForProviderReadyStatus} from "../support/commands";
 Cypress.config();
 describe('Enable CAPI Providers (2.12)', () => {
   const kubeadmBaseURL = 'https://github.com/kubernetes-sigs/cluster-api/releases/'
-  const providerTypes = ['bootstrap', 'control plane']
   const capiNamespaces = [vars.capiClustersNS, vars.capiClassesNS]
   const kubeadmProviderNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system']
 
@@ -65,8 +64,8 @@ describe('Enable CAPI Providers (2.12)', () => {
     })
     );
 
-    providerTypes.forEach(providerType => {
-      qase([496,498], it('Create Kubeadm Providers - ' + providerType, () => {
+    Object.entries({"bootstrap": [496, 497], "control plane": [498, 499]}).forEach(([providerType, qaseID]) => {
+      qase(qaseID[0], it('Create Kubeadm Providers - ' + providerType, () => {
         // Create CAPI Kubeadm providers
         if (providerType == 'control plane') {
           const namespace = kubeadmProviderNamespaces[1]
@@ -88,7 +87,7 @@ describe('Enable CAPI Providers (2.12)', () => {
       })
       );
 
-      qase([497,499], it('Verify RKE2 Providers - ' + providerType, () => {
+      qase(qaseID[1], it('Verify RKE2 Providers - ' + providerType, () => {
         if (providerType == 'control plane') {
           const namespace = 'rke2-control-plane-system'
           const providerName = providers.rke2Provider + '-' + 'control-plane'

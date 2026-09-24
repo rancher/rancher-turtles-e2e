@@ -66,7 +66,7 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration', '@v2prov']
       );
 
       // Create Azure RKE2 Cluster using YAML
-      qase([132,390],
+      qase(feature == "turtles" ? 132 : 390,
         it('Create Azure RKE2 Cluster with feature - ' + feature, () => {
           cy.goToHome();
           cy.clickButton('Manage');

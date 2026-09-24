@@ -26,7 +26,6 @@ import {addChartMuseumRepo, addTurtlesProvidersRepo, matchAndWaitForProviderRead
 
 Cypress.config();
 describe('Enable CAPI Providers', () => {
-  const providerTypes = ['bootstrap', 'control plane']
   const kubeadmProviderNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system']
 
   before(function () {
@@ -165,8 +164,8 @@ describe('Enable CAPI Providers', () => {
     })
     );
 
-    providerTypes.forEach(providerType => {
-      qase([420,421], it('Verify Kubeadm Providers - ' + providerType, () => {
+    Object.entries({"bootstrap": [420, 369], "control plane": [421, 370]}).forEach(([providerType, qaseID]) => {
+      qase(qaseID[0], it('Verify Kubeadm Providers - ' + providerType, () => {
         // Verify CAPI Kubeadm providers
         if (providerType == 'control plane') {
           const namespace = kubeadmProviderNamespaces[1]
@@ -182,7 +181,7 @@ describe('Enable CAPI Providers', () => {
       })
       );
 
-      qase([369,370], it('Verify RKE2 Providers - ' + providerType, () => {
+      qase(qaseID[1], it('Verify RKE2 Providers - ' + providerType, () => {
         if (providerType == 'control plane') {
           const namespace = 'rke2-control-plane-system'
           const providerName = providers.rke2Provider + '-' + 'control-plane'
