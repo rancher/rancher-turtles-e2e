@@ -46,7 +46,11 @@ jobs:
         id: sync
         run: |
           EXIT_CODE=0
-          node .github/scripts/qase-sync/qase-sync.mjs --fix || EXIT_CODE=$?
+          # Captured rather than piped so $? stays the script's, then echoed so the
+          # run log still shows it. The PR body quotes the same file.
+          node .github/scripts/qase-sync/qase-sync.mjs --fix \
+            > "${RUNNER_TEMP}/qase-sync-report.txt" 2>&1 || EXIT_CODE=$?
+          cat "${RUNNER_TEMP}/qase-sync-report.txt"
 
           # 0 clean, 1 fixes applied but some IDs still need a human, anything
           # else is a real failure: a crash, a bad token, Qase unreachable.
@@ -100,16 +104,37 @@ jobs:
           # just recomputed from scratch on top of ${TARGET_BRANCH}.
           git push origin "${SYNC_BRANCH}" --force
 
+          REPORT="${RUNNER_TEMP}/qase-sync-report.txt"
+          PR_BODY="${RUNNER_TEMP}/pr_body.md"
+          # A PR body is capped at 65536 characters; leave room for the preamble.
+          MAX_REPORT_BYTES=50000
+
+          {
+            printf '### What does this PR do?\n'
+            printf 'Automated update of Qase IDs in Cypress tests generated after running `qase-sync.mjs --fix`.\n\n'
+            printf '### Checklist:\n- [x] Added/Modified Qase IDs\n\n'
+            printf '<details><summary>qase-sync report</summary>\n\n'
+            printf '```text\n'
+            # Backticks are dropped so a Qase case title cannot close the fence and
+            # inject markup into the body; the report itself never contains any.
+            tr -d '`' < "${REPORT}" | head -c "${MAX_REPORT_BYTES}"
+            if [ "$(wc -c < "${REPORT}")" -gt "${MAX_REPORT_BYTES}" ]; then
+              printf '\n... truncated, see the run log for the full report\n'
+            fi
+            printf '```\n\n</details>\n'
+          } > "${PR_BODY}"
+
+          # The branch was just rewritten from scratch, so last month's body no
+          # longer describes it either.
           if [[ -n "${EXISTING_PR}" ]]; then
+            gh pr edit "${EXISTING_PR}" --body-file "${PR_BODY}"
             echo "Updated PR #${EXISTING_PR} for ${SYNC_BRANCH} -> ${TARGET_BRANCH}."
             exit 0
           fi
 
-          printf '### What does this PR do?\nAutomated update of Qase IDs in Cypress tests generated after running `qase-sync.mjs --fix`.\n\n### Checklist:\n- [x] Added/Modified Qase IDs\n' > /tmp/pr_body.md
-
           PR_URL=$(gh pr create \
             --title "Sync Qase IDs for ${TARGET_BRANCH}" \
-            --body-file /tmp/pr_body.md \
+            --body-file "${PR_BODY}" \
             --base "${TARGET_BRANCH}" \
             --head "${SYNC_BRANCH}")
 
@@ -120,5 +145,5 @@ jobs:
       - name: Fail if any Qase IDs still need a human
         if: steps.sync.outputs.needs_review == 'true'
         run: |
-          echo "::error::qase-sync could not resolve every Qase ID. See the report above; the missing cases likely need creating in Qase."
+          echo "::error::qase-sync could not resolve every Qase ID. See the report above: unmatched cases likely need creating in Qase, and anything under 'needs manual review' has to be wired up by hand."
           exit 1

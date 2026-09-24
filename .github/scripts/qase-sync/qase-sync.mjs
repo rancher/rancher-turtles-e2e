@@ -21,11 +21,16 @@ Usage:
 
 Reads QASE_API_TOKEN and QASE_PROJECT_CODE from the environment; both are required.
 
-Exit codes: 0 clean, 1 drift found, 2 error.
+Exit codes: 0 clean, 1 needs a human, 2 error.
 
-Only stale, missing and duplicate count towards the exit code: they are the ones
-this script can repair. qase-only cases, title/suite mismatches and anything on
-the manual-review list are reported but never fail the run.
+Everything a person has to act on counts towards the exit code: stale, missing
+and duplicate, which this script can repair, plus the manual-review list, which
+it cannot. Under --fix the first three drop out once they are rewritten, so a
+clean run ends at 0 while an unreadable loop or computed ID keeps it at 1.
+
+qase-only cases and title/suite mismatches never fail the run: a case with no
+local test, or a test that was legitimately renamed, is not something a change
+to the specs would resolve.
 */
 
 import {existsSync, readdirSync} from 'node:fs';
@@ -559,7 +564,7 @@ function printReport(report, manual, fixing) {
 function usage(log) {
   log('usage: node qase-sync.mjs [--fix]');
   log('       --fix   repair stale IDs and insert missing ones, in place');
-  log('       run with no flags to report only; exits 1 if there is drift');
+  log('       run with no flags to report only; exits 1 if anything needs a human');
   log('env:   QASE_API_TOKEN, QASE_PROJECT_CODE (both required)');
   log('note:  via npm the flag needs a separator - npm run qase-sync -- --fix');
 }
@@ -637,17 +642,18 @@ async function main() {
 
   if (fix) {
     const {applied, skipped} = applyFixes(sourceFiles, report);
-    console.error(`Applied ${applied} fix(es); ${skipped} left for manual handling.`);
-    return skipped === 0 ? 0 : 1;
+    console.error(
+      `Applied ${applied} fix(es); ${skipped} could not be repaired, ${manual.length} need manual review.`,
+    );
+    return skipped === 0 && manual.length === 0 ? 0 : 1;
   }
 
   const drift = report.stale.length > 0 || report.missing.length > 0 || report.duplicate.length > 0;
-  return drift ? 1 : 0;
+  return drift || manual.length > 0 ? 1 : 0;
 }
 
-// Exit 1 has to mean "drift" and nothing else: --fix uses it to say "some items
-// are left for a human", and CI reads that as a soft failure it can still open a
-// PR from. A crash must not be mistaken for it.
+// Exit 1 has to mean "a human is needed" and nothing else: CI reads it as a soft
+// failure it can still open a PR from. A crash must not be mistaken for it.
 process.exitCode = await main().catch((error) => {
   console.error(error?.stack ?? error);
   return 2;
