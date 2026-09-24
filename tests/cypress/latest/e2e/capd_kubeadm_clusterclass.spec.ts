@@ -108,7 +108,7 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: ['@short', '@capdk']}, () =
     }
 
     // Ref: https://github.com/rancher/turtles/issues/1880
-    qase([453,455],
+    qase(453,
       it('Check the fleet-addon annotation and finalizer is set on clusters', () => {
         // Check the externally-managed annotation is set on Rancher management cluster
         cy.checkExternalFleetAnnotation(clusterName);
