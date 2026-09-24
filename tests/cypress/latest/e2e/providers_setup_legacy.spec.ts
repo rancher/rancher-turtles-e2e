@@ -65,7 +65,7 @@ describe('Enable CAPI Providers (2.12)', () => {
     );
 
     Object.entries({"bootstrap": [496, 497], "control plane": [498, 499]}).forEach(([providerType, qaseID]) => {
-      qase(qaseID[0], it('Create Kubeadm Providers - ' + providerType, () => {
+      qase(qaseID[0], it('Create and Verify Kubeadm Providers - ' + providerType, () => {
         // Create CAPI Kubeadm providers
         if (providerType == 'control plane') {
           const namespace = kubeadmProviderNamespaces[1]
