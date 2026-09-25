@@ -24,9 +24,7 @@ import {matchAndWaitForProviderReadyStatus} from "../support/commands";
 Cypress.config();
 describe('Enable CAPI Providers (2.12)', () => {
   const kubeadmBaseURL = 'https://github.com/kubernetes-sigs/cluster-api/releases/'
-  const providerTypes = ['bootstrap', 'control plane']
   const capiNamespaces = [vars.capiClustersNS, vars.capiClassesNS]
-  const kubeadmProviderNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system']
 
   before(function () {
     if (!isRancherManagerVersion('2.12') || isMigration) {
@@ -65,40 +63,46 @@ describe('Enable CAPI Providers (2.12)', () => {
     })
     );
 
-    providerTypes.forEach(providerType => {
-      qase([496,498], it('Create Kubeadm Providers - ' + providerType, () => {
-        // Create CAPI Kubeadm providers
-        if (providerType == 'control plane') {
-          const namespace = kubeadmProviderNamespaces[1]
-          const providerName = providers.kubeadmProvider + '-' + 'control-plane'
-          cy.createNamespace([namespace]);
-          // https://github.com/kubernetes-sigs/cluster-api/releases/v1.10.6/control-plane-components.yaml
-          const providerURL = kubeadmBaseURL + providers.kubeadmProviderVersion + '/' + 'control-plane' + '-components.yaml'
-          cy.addCustomProvider(providerName, 'capi-kubeadm-control-plane-system', providers.kubeadmProvider, providerType, providers.kubeadmProviderVersion, providerURL);
-          matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', providers.kubeadmProvider, providers.kubeadmProviderVersion, namespace);
-        } else {
-          const namespace = kubeadmProviderNamespaces[0]
-          const providerName = providers.kubeadmProvider + '-' + providerType
-          cy.createNamespace([namespace]);
-          // https://github.com/kubernetes-sigs/cluster-api/releases/v1.10.6/bootstrap-components.yaml
-          const providerURL = kubeadmBaseURL + providers.kubeadmProviderVersion + '/' + providerType + '-components.yaml'
-          cy.addCustomProvider(providerName, 'capi-kubeadm-bootstrap-system', providers.kubeadmProvider, providerType, providers.kubeadmProviderVersion, providerURL);
-          matchAndWaitForProviderReadyStatus(providerName, providerType, providers.kubeadmProvider, providers.kubeadmProviderVersion, namespace);
-        }
-      })
+    const kubeadmProviderTypes = [
+      {qaseID: 496, type: 'bootstrap', namespace: 'capi-kubeadm-bootstrap-system'},
+      {qaseID: 498, type: 'control plane', namespace: 'capi-kubeadm-control-plane-system'}
+    ]
+    kubeadmProviderTypes.forEach((kubeadmProvider) => {
+      qase(kubeadmProvider.qaseID, it('Create and Verify Kubeadm Providers - ' + kubeadmProvider.type, () => {
+          // Create CAPI Kubeadm providers
+          if (kubeadmProvider.type == 'control plane') {
+            const providerName = providers.kubeadmProvider + '-' + 'control-plane'
+            cy.createNamespace([kubeadmProvider.namespace]);
+            // https://github.com/kubernetes-sigs/cluster-api/releases/v1.10.6/control-plane-components.yaml
+            const providerURL = kubeadmBaseURL + providers.kubeadmProviderVersion + '/' + 'control-plane' + '-components.yaml'
+            cy.addCustomProvider(providerName, 'capi-kubeadm-control-plane-system', providers.kubeadmProvider, kubeadmProvider.type, providers.kubeadmProviderVersion, providerURL);
+            matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', providers.kubeadmProvider, providers.kubeadmProviderVersion, kubeadmProvider.namespace);
+          } else {
+            const providerName = providers.kubeadmProvider + '-' + kubeadmProvider.type
+            cy.createNamespace([kubeadmProvider.namespace]);
+            // https://github.com/kubernetes-sigs/cluster-api/releases/v1.10.6/bootstrap-components.yaml
+            const providerURL = kubeadmBaseURL + providers.kubeadmProviderVersion + '/' + kubeadmProvider.type + '-components.yaml'
+            cy.addCustomProvider(providerName, 'capi-kubeadm-bootstrap-system', providers.kubeadmProvider, kubeadmProvider.type, providers.kubeadmProviderVersion, providerURL);
+            matchAndWaitForProviderReadyStatus(providerName, kubeadmProvider.type, providers.kubeadmProvider, providers.kubeadmProviderVersion, kubeadmProvider.namespace);
+          }
+        })
       );
+    })
 
-      qase([497,499], it('Verify RKE2 Providers - ' + providerType, () => {
-        if (providerType == 'control plane') {
-          const namespace = 'rke2-control-plane-system'
-          const providerName = providers.rke2Provider + '-' + 'control-plane'
-          cy.navigateToProviders();
-          matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', providers.rke2Provider, providers.rke2ProviderVersion, namespace);
-         } else {
-          const namespace = 'rke2-bootstrap-system'
-          const providerName = providers.rke2Provider + '-' + providerType
-          cy.navigateToProviders();
-          matchAndWaitForProviderReadyStatus(providerName, providerType, providers.rke2Provider, providers.rke2ProviderVersion, namespace);
+    const rke2ProviderTypes = [
+      {qaseID: 497, type: 'bootstrap', namespace: 'rke2-bootstrap-system'},
+      {qaseID: 499, type: 'control plane', namespace: 'rke2-control-plane-system'}
+    ]
+    rke2ProviderTypes.forEach((rke2Provider) => {
+      qase(rke2Provider.qaseID, it('Verify RKE2 Providers - ' + rke2Provider.type, () => {
+          if (rke2Provider.type == 'control plane') {
+            const providerName = providers.rke2Provider + '-' + 'control-plane'
+            cy.navigateToProviders();
+            matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', providers.rke2Provider, providers.rke2ProviderVersion, rke2Provider.namespace);
+          } else {
+            const providerName = providers.rke2Provider + '-' + rke2Provider.type
+            cy.navigateToProviders();
+            matchAndWaitForProviderReadyStatus(providerName, rke2Provider.type, providers.rke2Provider, providers.rke2ProviderVersion, rke2Provider.namespace);
         }
       })
       );

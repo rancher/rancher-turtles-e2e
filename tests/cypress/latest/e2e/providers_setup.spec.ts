@@ -26,9 +26,6 @@ import {addChartMuseumRepo, addTurtlesProvidersRepo, matchAndWaitForProviderRead
 
 Cypress.config();
 describe('Enable CAPI Providers', () => {
-  const providerTypes = ['bootstrap', 'control plane']
-  const kubeadmProviderNamespaces = ['capi-kubeadm-bootstrap-system', 'capi-kubeadm-control-plane-system']
-
   before(function () {
     if (isRancherManagerVersion('<2.13')) {
       return cy.task('suiteLog', 'Skipping for Rancher versions < 2.13').then(() => {
@@ -165,34 +162,42 @@ describe('Enable CAPI Providers', () => {
     })
     );
 
-    providerTypes.forEach(providerType => {
-      qase([420,421], it('Verify Kubeadm Providers - ' + providerType, () => {
-        // Verify CAPI Kubeadm providers
-        if (providerType == 'control plane') {
-          const namespace = kubeadmProviderNamespaces[1]
-          const providerName = providers.kubeadmProvider + '-' + 'control-plane'
-          cy.navigateToProviders();
-          matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', providers.kubeadmProvider, providers.kubeadmProviderVersion, namespace);
-        } else {
-          const namespace = kubeadmProviderNamespaces[0]
-          const providerName = providers.kubeadmProvider + '-' + providerType
-          cy.navigateToProviders()
-          matchAndWaitForProviderReadyStatus(providerName, providerType, providers.kubeadmProvider, providers.kubeadmProviderVersion, namespace);
-        }
-      })
+    const kubeadmProviderTypes = [
+      {qaseID: 420, type: 'bootstrap', namespace: 'capi-kubeadm-bootstrap-system'},
+      {qaseID: 421, type: 'control plane', namespace: 'capi-kubeadm-control-plane-system'}
+    ]
+    kubeadmProviderTypes.forEach((kubeadmProvider) => {
+      qase(kubeadmProvider.qaseID, it('Verify Kubeadm Providers - ' + kubeadmProvider.type, () => {
+          // Verify CAPI Kubeadm providers
+          if (kubeadmProvider.type == 'control plane') {
+            const namespace = kubeadmProvider.namespace
+            const providerName = providers.kubeadmProvider + '-' + 'control-plane'
+            cy.navigateToProviders();
+            matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', providers.kubeadmProvider, providers.kubeadmProviderVersion, namespace);
+          } else {
+            const namespace = kubeadmProvider.namespace
+            const providerName = providers.kubeadmProvider + '-' + kubeadmProvider.type
+            cy.navigateToProviders()
+            matchAndWaitForProviderReadyStatus(providerName, kubeadmProvider.type, providers.kubeadmProvider, providers.kubeadmProviderVersion, namespace);
+          }
+        })
       );
+    })
 
-      qase([369,370], it('Verify RKE2 Providers - ' + providerType, () => {
-        if (providerType == 'control plane') {
-          const namespace = 'rke2-control-plane-system'
-          const providerName = providers.rke2Provider + '-' + 'control-plane'
-          cy.navigateToProviders();
-          matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', providers.rke2Provider, providers.rke2ProviderVersion, namespace);
+    const rke2ProviderTypes = [
+      {qaseID: 369, type: 'bootstrap', namespace: 'rke2-bootstrap-system'},
+      {qaseID: 370, type: 'control plane', namespace: 'rke2-control-plane-system'}
+    ]
+    rke2ProviderTypes.forEach((rke2Provider) => {
+      qase(rke2Provider.qaseID, it('Verify RKE2 Providers - ' + rke2Provider.type, () => {
+          if (rke2Provider.type == 'control plane') {
+            const providerName = providers.rke2Provider + '-' + 'control-plane'
+            cy.navigateToProviders();
+            matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', providers.rke2Provider, providers.rke2ProviderVersion, rke2Provider.namespace);
         } else {
-          const namespace = 'rke2-bootstrap-system'
-          const providerName = providers.rke2Provider + '-' + providerType
-          cy.navigateToProviders();
-          matchAndWaitForProviderReadyStatus(providerName, providerType, providers.rke2Provider, providers.rke2ProviderVersion, namespace);
+            const providerName = providers.rke2Provider + '-' + rke2Provider.type
+            cy.navigateToProviders();
+            matchAndWaitForProviderReadyStatus(providerName, rke2Provider.type, providers.rke2Provider, providers.rke2ProviderVersion, rke2Provider.namespace);
         }
       })
       );
