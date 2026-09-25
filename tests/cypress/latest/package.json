@@ -54,6 +54,6 @@
     "eslint-plugin-cypress": "^7.0.0"
   },
   "allowScripts": {
-    "cypress@15.17.0": true
+    "cypress@16.0.0": true
   }
 }
