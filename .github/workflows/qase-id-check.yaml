@@ -1,0 +1,149 @@
+name: Qase ID check
+
+on:
+  # Monthly housekeeping: reconcile the specs against Qase and raise one PR with
+  # whatever drifted. Runs on the default branch.
+  schedule:
+    - cron: '0 6 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# A manual dispatch can land on top of the scheduled run; both write the same
+# branch, so serialise them. No cancel-in-progress: a half-finished run would
+# leave the sync branch pushed but no PR opened.
+concurrency:
+  group: qase-id-check-${{ github.ref }}
+
+env:
+  NODE_VERSION: current
+
+jobs:
+  qase-id-check:
+    runs-on: ubuntu-latest
+    env:
+      QASE_API_TOKEN: ${{ secrets.QASE_API_TOKEN }}
+      QASE_PROJECT_CODE: RT
+      # The branch under test, and the throwaway branch the fixes are raised on.
+      TARGET_BRANCH: ${{ github.ref_name }}
+      SYNC_BRANCH: qase-sync-ids-${{ github.ref_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: .github/scripts/qase-sync
+        run: npm ci
+
+      - name: Run Qase sync
+        id: sync
+        run: |
+          EXIT_CODE=0
+          # Captured rather than piped so $? stays the script's, then echoed so the
+          # run log still shows it. The PR body quotes the same file.
+          node .github/scripts/qase-sync/qase-sync.mjs --fix \
+            > "${RUNNER_TEMP}/qase-sync-report.txt" 2>&1 || EXIT_CODE=$?
+          cat "${RUNNER_TEMP}/qase-sync-report.txt"
+
+          # 0 clean, 1 fixes applied but some IDs still need a human, anything
+          # else is a real failure: a crash, a bad token, Qase unreachable.
+          if [ "${EXIT_CODE}" -gt 1 ]; then
+            echo "qase-sync.mjs failed with exit code ${EXIT_CODE}"
+            exit "${EXIT_CODE}"
+          fi
+
+          if [ "${EXIT_CODE}" -eq 1 ]; then
+            echo "qase-sync.mjs applied fixes with some items remaining for manual review."
+            echo "needs_review=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "needs_review=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create commit
+        id: commit
+        run: |
+          # Stage any spec changes produced by qase-sync.mjs
+          git add tests/cypress/latest/e2e/
+
+          if git diff --cached --quiet; then
+            echo "No changes detected in specs after running qase-sync."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Branch off ${TARGET_BRANCH} before committing, so the PR carries the
+          # ID changes and nothing else. -B rather than -b: last month's branch
+          # may still be around locally, and this run recomputes it from scratch.
+          # Moving the branch pointer leaves the staged changes alone.
+          git checkout -B "${SYNC_BRANCH}"
+          git commit -s -m "Sync Qase IDs"
+
+      - name: Open a pull request with the fixes
+        if: steps.commit.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          # Checked before the push: afterwards the branch has already been
+          # rewritten, so an existing PR would silently change contents.
+          EXISTING_PR=$(gh pr list --head "${SYNC_BRANCH}" --base "${TARGET_BRANCH}" --state open --json number --jq '.[0].number // empty')
+
+          # Forcing discards last month's unmerged attempt, which this run has
+          # just recomputed from scratch on top of ${TARGET_BRANCH}.
+          git push origin "${SYNC_BRANCH}" --force
+
+          REPORT="${RUNNER_TEMP}/qase-sync-report.txt"
+          PR_BODY="${RUNNER_TEMP}/pr_body.md"
+          # A PR body is capped at 65536 characters; leave room for the preamble.
+          MAX_REPORT_BYTES=50000
+
+          {
+            printf '### What does this PR do?\n'
+            printf 'Automated update of Qase IDs in Cypress tests generated after running `qase-sync.mjs --fix`.\n\n'
+            printf '### Checklist:\n- [x] Added/Modified Qase IDs\n\n'
+            printf '<details><summary>qase-sync report</summary>\n\n'
+            printf '```text\n'
+            # Backticks are dropped so a Qase case title cannot close the fence and
+            # inject markup into the body; the report itself never contains any.
+            tr -d '`' < "${REPORT}" | head -c "${MAX_REPORT_BYTES}"
+            if [ "$(wc -c < "${REPORT}")" -gt "${MAX_REPORT_BYTES}" ]; then
+              printf '\n... truncated, see the run log for the full report\n'
+            fi
+            printf '```\n\n</details>\n'
+          } > "${PR_BODY}"
+
+          # The branch was just rewritten from scratch, so last month's body no
+          # longer describes it either.
+          if [[ -n "${EXISTING_PR}" ]]; then
+            gh pr edit "${EXISTING_PR}" --body-file "${PR_BODY}"
+            echo "Updated PR #${EXISTING_PR} for ${SYNC_BRANCH} -> ${TARGET_BRANCH}."
+            exit 0
+          fi
+
+          PR_URL=$(gh pr create \
+            --title "Sync Qase IDs for ${TARGET_BRANCH}" \
+            --body-file "${PR_BODY}" \
+            --base "${TARGET_BRANCH}" \
+            --head "${SYNC_BRANCH}")
+
+          echo "Created PR: ${PR_URL}"
+
+      # Last, so the repairable IDs are still committed and raised as a PR first.
+      # On a scheduled run a red job is the only notification anyone gets.
+      - name: Fail if any Qase IDs still need a human
+        if: steps.sync.outputs.needs_review == 'true'
+        run: |
+          echo "::error::qase-sync could not resolve every Qase ID. See the report above: unmatched cases likely need creating in Qase, and anything under 'needs manual review' has to be wired up by hand."
+          exit 1

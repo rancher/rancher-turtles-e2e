@@ -10,5 +10,8 @@
 /tests/cypress/*/screenshots/*
 /tests/cypress/*/downloads/*
 /tests/cypress/*/node_modules
+/.github/scripts/qase-sync/node_modules
 *package-lock.json
+# ...except this one: CI runs `npm ci` against it so the check is reproducible
+!/.github/scripts/qase-sync/package-lock.json
 /tests/cypress/*/fixtures/runtime_test_result.yaml

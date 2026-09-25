@@ -1,0 +1,14 @@
+{
+  "name": "qase-sync",
+  "version": "1.0.0",
+  "description": "Keeps the Qase IDs in the Cypress e2e specs in sync with the Qase project",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "qase-sync": "node qase-sync.mjs"
+  },
+  "dependencies": {
+    "ts-morph": "^28.0.0"
+  }
+}
