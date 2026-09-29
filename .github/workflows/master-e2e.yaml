@@ -7,10 +7,13 @@ on:
 
     secrets:
       gcp_credentials:
-        description: Credentials to use to connect
+        description: Credentials to use to connect to GCP for CI tests
         required: true
       gcp_project:
         description: GCP Project name details
+        required: true
+      gcp_credentials_ci_runner:
+        description: Credentials to use to connect to GCP for CI self-hosted runner
         required: true
       pat_token:
         # A token is needed to be able to add runner on the repo, maybe this can be changed later
@@ -263,7 +266,7 @@ jobs:
         if: ${{ needs.determine-runner.outputs.initial-runner != 'vsphere' }}
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
-          credentials_json: ${{ secrets.gcp_credentials }}
+          credentials_json: ${{ secrets.gcp_credentials_ci_runner }}
       - name: Setup gcloud
         if: ${{ needs.determine-runner.outputs.initial-runner != 'vsphere' }}
         uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
@@ -355,6 +358,7 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
       GCP_CREDENTIALS: ${{ secrets.gcp_credentials }}
+      GCP_CREDENTIALS_CI_RUNNER: ${{ secrets.gcp_credentials_ci_runner }}
       GCP_PROJECT: ${{ secrets.gcp_project }}
       AZURE_CLIENT_SECRET: ${{ secrets.azure_client_secret }}
       AZURE_CLIENT_ID: ${{ secrets.azure_client_id }}
@@ -922,7 +926,7 @@ jobs:
       - name: Authenticate to GCP
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
-          credentials_json: ${{ secrets.gcp_credentials }}
+          credentials_json: ${{ secrets.gcp_credentials_ci_runner }}
       - name: Setup gcloud
         uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
       - name: Delete GCP secrets
