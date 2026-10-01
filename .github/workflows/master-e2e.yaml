@@ -7,7 +7,7 @@ on:
 
     secrets:
       gcp_credentials:
-        description: Credentials to use to connect
+        description: Credentials to use to connect to GCP for CI tests
         required: true
       gcp_project:
         description: GCP Project name details
