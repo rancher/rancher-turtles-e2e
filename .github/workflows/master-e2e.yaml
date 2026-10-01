@@ -876,7 +876,10 @@ jobs:
 
           TURTLES_PROVIDERS_VERSION=$(helm list -n $TURTLES_NAMESPACE -o json 2> /dev/null | jq -r '.[] | .chart' | tail -n 1)
           QASE_TESTOPS_RUN_DESCRIPTION="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\nTurtles Version: ${TURTLES_VERSION}\nTurtles Providers Version: ${TURTLES_PROVIDERS_VERSION}"
-          curl -s --request PATCH  --url "https://api.qase.io/v1/run/${QASE_PROJECT_CODE}/${QASE_TESTOPS_RUN_ID}" --header "Token: ${QASE_API_TOKEN}" --header 'content-type: application/json' --header "accept: application/json" --data '{"description": $QASE_TESTOPS_RUN_DESCRIPTION}'
+          curl -s --request PATCH  --url "https://api.qase.io/v1/run/${QASE_PROJECT_CODE}/${QASE_TESTOPS_RUN_ID}" \
+            --header "Token: ${QASE_API_TOKEN}" \
+            --header 'content-type: application/json' --header "accept: application/json" \
+            --data "{\"description\": \"${QASE_TESTOPS_RUN_DESCRIPTION}\"}"
       - name: Add summary
         env:
           KUBECONFIG: /etc/rancher/k3s/k3s.yaml
