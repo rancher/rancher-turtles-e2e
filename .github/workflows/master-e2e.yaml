@@ -909,10 +909,13 @@ jobs:
           QASE_TESTOPS_RUN_ID=${{ steps.qase_run_id.outputs.qase_run_id }}
           if [[ -n "${QASE_TESTOPS_RUN_ID}" ]]; then
             # Push the summary to Qase Run description
-            curl -s --request PATCH  --url "https://api.qase.io/v1/run/${QASE_PROJECT_CODE}/${QASE_TESTOPS_RUN_ID}" \
-            --header "Token: ${QASE_API_TOKEN}" \
-            --header 'content-type: application/json' --header "accept: application/json" \
-            --data "{\"description\": \"${GITHUB_STEP_SUMMARY}\"}"
+            jq -n --rawfile desc "${GITHUB_STEP_SUMMARY}" '{"description": $desc}' | \
+              curl -s --request PATCH \
+                --url "https://api.qase.io/v1/run/${QASE_PROJECT_CODE}/${QASE_TESTOPS_RUN_ID}" \
+                --header "Token: ${QASE_API_TOKEN}" \
+                --header "Content-Type: application/json" \
+                --header "Accept: application/json" \
+                --data-binary @-
 
             echo -e "\n### QASE Report" >> ${GITHUB_STEP_SUMMARY}
             echo "View the detailed report [here](https://app.qase.io/run/RT/dashboard/${QASE_TESTOPS_RUN_ID})" >> ${GITHUB_STEP_SUMMARY}
