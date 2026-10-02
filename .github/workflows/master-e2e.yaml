@@ -131,6 +131,13 @@ on:
         type: boolean
         default: false
 
+# Shared by the determine-milestone and e2e jobs
+env:
+  PRE_MIGRATION_DEFAULT_RANCHER_VERSION: prime-head/2.12
+  POST_MIGRATION_DEFAULT_RANCHER_VERSION: prime-head/2.13
+  PRE_UPGRADE_DEFAULT_RANCHER_VERSION: prime-head/2.14
+  POST_UPGRADE_DEFAULT_RANCHER_VERSION: prime-head/2.15
+
 jobs:
   determine-milestone:
     runs-on: ubuntu-latest
@@ -147,7 +154,20 @@ jobs:
           QASE_PROJECT_CODE: RT
           QASE_REPORT: ${{ inputs.qase_report }}
           RANCHER_VERSION: ${{ inputs.rancher_version }}
+          RANCHER_UPGRADE_VERSION: ${{ inputs.rancher_upgrade_version }}
+          GREPTAGS: ${{ inputs.grep_test_by_tag }}
         run: |
+          # Migration and upgrade runs end on the upgrade target, so the milestone
+          # must track that version rather than the one installed first.
+          # WARN: Unlike e2e job, this will not flag if RANCHER_UPGRADE_VERSION is invalid,
+          # so a milestone might still be created even if the job later fails.
+          if [[ "${GREPTAGS}" =~ @migration ]]; then
+            RANCHER_VERSION="${RANCHER_UPGRADE_VERSION:-${POST_MIGRATION_DEFAULT_RANCHER_VERSION}}"
+          fi
+          if [[ "${GREPTAGS}" =~ @upgrade ]]; then
+            RANCHER_VERSION="${RANCHER_UPGRADE_VERSION:-${POST_UPGRADE_DEFAULT_RANCHER_VERSION}}"
+          fi
+
           CHANNEL="${RANCHER_VERSION%%/*}"
           VERSION="${RANCHER_VERSION#*/}"
           # Extract base version (e.g. "v2.15.1-<sha>-head" -> "2.15.1")
@@ -323,10 +343,6 @@ jobs:
       RANCHER_USER: admin
       RANCHER_URL: https://${{ needs.create-runner.outputs.public_dns }}/dashboard
       CERT_MANAGER_VERSION: ${{ inputs.cert-manager_version }}
-      PRE_MIGRATION_DEFAULT_RANCHER_VERSION: prime-head/2.12
-      POST_MIGRATION_DEFAULT_RANCHER_VERSION: prime-head/2.13
-      PRE_UPGRADE_DEFAULT_RANCHER_VERSION: prime-head/2.14
-      POST_UPGRADE_DEFAULT_RANCHER_VERSION: prime-head/2.15
       # Qase
       QASE_API_TOKEN: ${{ secrets.qase_api_token }}
       QASE_PROJECT_CODE: RT
@@ -723,7 +739,7 @@ jobs:
           retention-days: 7
           archive: 'false'
           if-no-files-found: ignore
-      - name: Set Rancher Manager version for Migration
+      - name: Set Rancher Manager version for Post-Migration
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') }}
         run: |
           RANCHER_UPGRADE_VERSION="${{ inputs.rancher_upgrade_version }}"
