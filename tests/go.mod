@@ -36,3 +36,5 @@ require (
 	gotest.tools/v3 v3.5.2 // indirect
 	libvirt.org/libvirt-go-xml v7.4.0+incompatible // indirect
 )
+
+replace github.com/rancher-sandbox/ele-testhelpers => github.com/valaparthvi/ele-testhelpers v0.0.0-20261005142037-6877dde19324
