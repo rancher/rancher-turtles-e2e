@@ -637,12 +637,6 @@ jobs:
             echo "ERROR: Upgrade is only allowed from 2.13, 2.14 Rancher Version"
             exit 1
           fi
-      - name: Get Rancher prime-head tag for Install
-        if: ${{ contains(env.RANCHER_VERSION, 'prime-head') }}
-        run: |
-          HEAD_VERSION="${RANCHER_VERSION#prime-head/}"
-          RM_VERSION=$(curl -fsSL ${{ secrets.prime_head_chart_url }} | yq ".entries.rancher | map(select(.version | test(\"^${HEAD_VERSION}\"))) | sort_by(.created) | .[-1].version")
-          echo "RANCHER_VERSION=prime-rc/${RM_VERSION}" >> ${GITHUB_ENV}
       - name: Install Rancher Manager
         env:
           RANCHER_VERSION: ${{ env.RANCHER_VERSION }}
