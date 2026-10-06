@@ -11,25 +11,35 @@
 
 set -euo pipefail
 
-# Default Rancher versions for migration/upgrade tests
-PRE_MIGRATION_DEFAULT_RANCHER_VERSION=prime-head/2.12
-POST_MIGRATION_DEFAULT_RANCHER_VERSION=prime-head/2.13
-PRE_UPGRADE_DEFAULT_RANCHER_VERSION=prime-head/2.14
-POST_UPGRADE_DEFAULT_CHANNEL=prime-head
-# Rancher major.minor versions @upgrade tests can start from, each one upgrades to major.(minor+1).
-# To support a new upgrade, e.g. 2.15 -> 2.16:
-#   1. Add the starting version (2.15) to UPGRADE_FROM_VERSIONS.
-#   2. Optionally set PRE_UPGRADE_DEFAULT_RANCHER_VERSION to it (prime-head/2.15), so @upgrade runs
-#      without a supported --rancher-version test the new upgrade.
-#   3. Add the target (2.16) to the turtles branch case below once its rancher/turtles release branch
-#      exists; until then dev chart runs build turtles from DEFAULT_TURTLES_BRANCH.
-#   4. Make sure RANCHER_RECENT_VERSIONS matches the target (2.16).
+# --- Versions: the only section to edit when Rancher versions change ---
+DEFAULT_CHANNEL=prime-head
+# Rancher major.minor versions each test type can start from. Every migration/upgrade test goes from
+# major.minor to major.(minor+1); the newest entry is used when --rancher-version is empty or unsupported.
+MIGRATION_FROM_VERSIONS=(2.12)
 UPGRADE_FROM_VERSIONS=(2.13 2.14)
+
+# rancher/turtles branch used to build the dev chart for a Rancher major.minor version
+turtles_branch() {
+  case "$1" in
+    2.12) echo release-0.24 ;;
+    2.13) echo release/v0.25 ;;
+    2.14) echo release/v0.26 ;;
+    2.15) echo release/v0.27 ;;
+    *)    echo main ;;
+  esac
+}
+
 # Rancher versions with embedded turtles
 RANCHER_RECENT_VERSIONS='2\.(13|14|15|16)'
-DEFAULT_TURTLES_BRANCH=main
 DEFAULT_K3S_VERSION=v1.34.4+k3s1
 RANCHER_2_12_K3S_VERSION=v1.32.4+k3s1
+
+# To support a new upgrade, e.g. 2.15 -> 2.16:
+#   1. Add 2.15 to UPGRADE_FROM_VERSIONS (it becomes the default starting version).
+#   2. Add 2.16 to turtles_branch once its rancher/turtles release branch exists,
+#      until then dev chart runs build turtles from main.
+#   3. Make sure RANCHER_RECENT_VERSIONS matches 2.16.
+# ---
 
 # Common specs: @short @vsphere @full
 COMMON_SPECS_LIST=(
@@ -160,73 +170,52 @@ if ${IS_MIGRATION} && ${IS_UPGRADE}; then
   die "@migration and @upgrade tests cannot be combined"
 fi
 
-SPECS="${COMMON_SPECS_LIST[*]}"
-COMMON_SPECS=""
-
-# Pre-Migration/Pre-Upgrade Rancher version, empty or unsupported versions fall back to the defaults
+TEST=""
 if ${IS_MIGRATION}; then
-  COMMON_SPECS="${SPECS}"
-  SPECS=""
-  if [[ "${RANCHER_VERSION}" != *"2.12"* ]]; then
-    if [[ -n "${RANCHER_VERSION}" ]]; then
-      warn "Migration is only allowed from 2.12 Rancher Version, using ${PRE_MIGRATION_DEFAULT_RANCHER_VERSION} instead of ${RANCHER_VERSION}"
-    fi
-    RANCHER_VERSION="${PRE_MIGRATION_DEFAULT_RANCHER_VERSION}"
-  fi
-fi
-if ${IS_UPGRADE}; then
-  COMMON_SPECS="${SPECS}"
-  UPGRADE_FROM=$(major_minor "${RANCHER_VERSION}")
-  if [[ " ${UPGRADE_FROM_VERSIONS[*]} " != *" ${UPGRADE_FROM} "* ]]; then
-    if [[ -n "${RANCHER_VERSION}" ]]; then
-      warn "Upgrade is only allowed from ${UPGRADE_FROM_VERSIONS[*]} Rancher Version, using ${PRE_UPGRADE_DEFAULT_RANCHER_VERSION} instead of ${RANCHER_VERSION}"
-    fi
-    RANCHER_VERSION="${PRE_UPGRADE_DEFAULT_RANCHER_VERSION}"
-    UPGRADE_FROM=$(major_minor "${RANCHER_VERSION}")
-  fi
-  UPGRADE_TO=$(next_minor "${UPGRADE_FROM}")
-fi
-
-# Post-Migration/Post-Upgrade Rancher version, empty versions fall back to the defaults
-if ${IS_MIGRATION}; then
-  if [[ -z "${RANCHER_UPGRADE_VERSION}" ]]; then
-    RANCHER_UPGRADE_VERSION="${POST_MIGRATION_DEFAULT_RANCHER_VERSION}"
-  elif [[ "${RANCHER_UPGRADE_VERSION}" != *"2.13"* ]]; then
-    die "Migration is only allowed to 2.13 Rancher Version"
-  fi
+  TEST=Migration
+  FROM_VERSIONS=("${MIGRATION_FROM_VERSIONS[@]}")
 elif ${IS_UPGRADE}; then
+  TEST=Upgrade
+  FROM_VERSIONS=("${UPGRADE_FROM_VERSIONS[@]}")
+fi
+
+# Migration/upgrade versions: empty or unsupported starting versions fall back to the default,
+# empty upgrade versions to the next minor version, unsupported upgrade versions are an error
+UPGRADE_TO=""
+if [[ -n "${TEST}" ]]; then
+  UPGRADE_FROM=$(major_minor "${RANCHER_VERSION}")
+  if [[ " ${FROM_VERSIONS[*]} " != *" ${UPGRADE_FROM} "* ]]; then
+    UPGRADE_FROM="${FROM_VERSIONS[${#FROM_VERSIONS[@]}-1]}"
+    if [[ -n "${RANCHER_VERSION}" ]]; then
+      warn "${TEST} is only allowed from ${FROM_VERSIONS[*]} Rancher Version, using ${DEFAULT_CHANNEL}/${UPGRADE_FROM} instead of ${RANCHER_VERSION}"
+    fi
+    RANCHER_VERSION="${DEFAULT_CHANNEL}/${UPGRADE_FROM}"
+  fi
+
+  UPGRADE_TO=$(next_minor "${UPGRADE_FROM}")
   if [[ -z "${RANCHER_UPGRADE_VERSION}" ]]; then
-    RANCHER_UPGRADE_VERSION="${POST_UPGRADE_DEFAULT_CHANNEL}/${UPGRADE_TO}"
+    RANCHER_UPGRADE_VERSION="${DEFAULT_CHANNEL}/${UPGRADE_TO}"
   elif [[ "$(major_minor "${RANCHER_UPGRADE_VERSION}")" != "${UPGRADE_TO}" ]]; then
-    die "Upgrade is only allowed from ${UPGRADE_FROM} to ${UPGRADE_TO} Rancher Version"
+    die "${TEST} is only allowed from ${UPGRADE_FROM} to ${UPGRADE_TO} Rancher Version"
   fi
 else
   # Not used for fresh-install tests
   RANCHER_UPGRADE_VERSION=""
 fi
 
-# Rancher point version and rancher/turtles branch, only needed for the dev chart.
+# Rancher point version, only needed for the dev chart.
 # Migration/upgrade tests build the chart for the Rancher version they upgrade to.
 RANCHER_POINT_VERSION=""
-TURTLES_BRANCH="${DEFAULT_TURTLES_BRANCH}"
 if [[ "${TURTLES_DEV_CHART}" == true ]]; then
-  if ${IS_MIGRATION}; then
-    RANCHER_POINT_VERSION="2.13"
-  elif ${IS_UPGRADE}; then
+  if [[ -n "${UPGRADE_TO}" ]]; then
     RANCHER_POINT_VERSION="${UPGRADE_TO}"
   elif [[ "${RANCHER_VERSION}" =~ ${RANCHER_RECENT_VERSIONS} ]]; then
     RANCHER_POINT_VERSION="${BASH_REMATCH[0]}"
   elif [[ "${RANCHER_VERSION}" == *"2.12"* ]]; then
     RANCHER_POINT_VERSION="2.12"
   fi
-
-  case "${RANCHER_POINT_VERSION}" in
-    2.12) TURTLES_BRANCH="release-0.24" ;;
-    2.13) TURTLES_BRANCH="release/v0.25" ;;
-    2.14) TURTLES_BRANCH="release/v0.26" ;;
-    2.15) TURTLES_BRANCH="release/v0.27" ;;
-  esac
 fi
+TURTLES_BRANCH=$(turtles_branch "${RANCHER_POINT_VERSION}")
 
 # K3s version
 if [[ "${RANCHER_VERSION}" == *"2.12"* ]]; then
@@ -235,13 +224,23 @@ else
   INSTALL_K3S_VERSION="${K3S_VERSION}"
 fi
 
-# Cypress specs for the first run and for the run after Rancher upgrade
+# Cypress specs for the first run and for the run after Rancher upgrade.
+# Migration runs the common specs only after the upgrade, upgrade runs them before and after.
+FIRST_RUN_COMMON_SPECS="${COMMON_SPECS_LIST[*]}"
+UPGRADE_COMMON_SPECS=""
+if ${IS_MIGRATION}; then
+  FIRST_RUN_COMMON_SPECS=""
+fi
+if [[ -n "${TEST}" ]]; then
+  UPGRADE_COMMON_SPECS="${COMMON_SPECS_LIST[*]}"
+fi
+
 SPEC="e2e/first_connection.spec.ts e2e/turtles_chart_legacy.spec.ts e2e/turtles_ui_extension.spec.ts e2e/menu.spec.ts"
-[[ -n "${SPECS}" ]] && SPEC+=" ${SPECS}"
+[[ -n "${FIRST_RUN_COMMON_SPECS}" ]] && SPEC+=" ${FIRST_RUN_COMMON_SPECS}"
 SPEC+=" e2e/capd_rke2_migration_clusterclass.spec.ts e2e/capd_rke2_upgrade_clusterclass.spec.ts e2e/pre_upgrade_setup.spec.ts"
 
 UPGRADE_SPEC="e2e/post_upgrade_setup.spec.ts e2e/capd_rke2_migration_clusterclass.spec.ts"
-[[ -n "${COMMON_SPECS}" ]] && UPGRADE_SPEC+=" ${COMMON_SPECS}"
+[[ -n "${UPGRADE_COMMON_SPECS}" ]] && UPGRADE_SPEC+=" ${UPGRADE_COMMON_SPECS}"
 UPGRADE_SPEC+=" e2e/capd_rke2_upgrade_clusterclass.spec.ts"
 
 emit() {
@@ -253,13 +252,7 @@ emit() {
   fi
 }
 
-emit RANCHER_VERSION "${RANCHER_VERSION}"
-emit RANCHER_UPGRADE_VERSION "${RANCHER_UPGRADE_VERSION}"
-emit RANCHER_POINT_VERSION "${RANCHER_POINT_VERSION}"
-emit RANCHER_RECENT_VERSIONS "${RANCHER_RECENT_VERSIONS}"
-emit TURTLES_BRANCH "${TURTLES_BRANCH}"
-emit INSTALL_K3S_VERSION "${INSTALL_K3S_VERSION}"
-emit SPECS "${SPECS}"
-emit COMMON_SPECS "${COMMON_SPECS}"
-emit SPEC "${SPEC}"
-emit UPGRADE_SPEC "${UPGRADE_SPEC}"
+for VAR in RANCHER_VERSION RANCHER_UPGRADE_VERSION RANCHER_POINT_VERSION RANCHER_RECENT_VERSIONS TURTLES_BRANCH \
+           INSTALL_K3S_VERSION SPEC UPGRADE_SPEC; do
+  emit "${VAR}" "${!VAR}"
+done
