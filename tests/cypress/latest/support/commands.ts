@@ -762,7 +762,7 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
 
   cy.burgerMenuOperate('open');
   // Click on the cluster
-  cy.get('.side-menu .clusters').within(() => {
+  cy.getBySel('side-menu').within(() => {
     cy.contains(clusterName).click();
   });
 
