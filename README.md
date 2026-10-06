@@ -37,6 +37,23 @@ What tests are doing:
 
 The Cypress GUI should now be visible.
 
+### Computing the CI environment locally
+The versions, branches and spec lists used by the CI workflow (`RANCHER_VERSION`, `RANCHER_UPGRADE_VERSION`,
+`RANCHER_POINT_VERSION`, `TURTLES_BRANCH`, `INSTALL_K3S_VERSION`, `SPEC`, `UPGRADE_SPEC`, ...) are computed by
+[tests/scripts/compute-e2e-env](tests/scripts/compute-e2e-env), which takes the same inputs as the workflow and
+fails if the migration/upgrade versions are not supported. See `tests/scripts/compute-e2e-env --help`.
+
+```bash
+set -a
+source <(tests/scripts/compute-e2e-env --rancher-version prime/2.13.3 --upgrade-version prime/2.14.1 \
+           --tags "@install @upgrade" --dev-chart true)
+set +a
+cd tests && make e2e-install-rancher && make start-cypress-tests
+# Migration/upgrade tests only (prime-head upgrade versions must first be resolved to a prime-rc tag):
+RANCHER_VERSION=$RANCHER_UPGRADE_VERSION make e2e-upgrade-rancher
+RANCHER_VERSION=$RANCHER_UPGRADE_VERSION SPEC="$UPGRADE_SPEC" IS_RANCHER_UPGRADED=true make start-cypress-tests
+```
+
 ---
 
 # Test structure
