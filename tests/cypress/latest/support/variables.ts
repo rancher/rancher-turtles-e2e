@@ -34,6 +34,7 @@ export const vars = {
   turtlesProvidersOCIRepo: `oci://${turtlesProvidersRegistry}/rancher/charts/rancher-turtles-providers`,
   turtlesProvidersChartName: 'rancher-turtles-providers',
   eksVersion: isAPIv1beta1 ? 'v1.32.0' : 'v1.35.4',
+  gkeVersion: isRancherManagerVersion('2.14') ? 'v1.35.8' : 'v1.36.4',
   aksVersion: isRancherManagerVersion('2.12') ? 'v1.33.4' : isRancherManagerVersion('2.13') ? 'v1.34.7' : 'v1.35.4',
   kindVersion: isRancherManagerVersion('2.12') ? 'v1.33.4' : isRancherManagerVersion('2.13') ? 'v1.34.0' : isRancherManagerVersion('2.14') ? 'v1.35.0' : 'v1.36.1',
   kubeadmVersion: isRancherManagerVersion('2.12') ? 'v1.33.4' : isRancherManagerVersion('2.13') ? 'v1.34.1' : isRancherManagerVersion('2.14') ? 'v1.35.0' : 'v1.36.1',

@@ -13,9 +13,7 @@ describe('Import CAPG GKE Class-Cluster', {tags: ['@full', '@capgke']}, () => {
   const classesPath = 'examples/clusterclasses/gcp/gke'
   const clusterClassRepoName = 'gcp-gke-example'
   const classClusterFileName = './fixtures/gcp/capg-gke-class-cluster.yaml'
-
   const gcpProject = Cypress.expose('gcp_project')
-  const k8sVersion = 'v1.35.8'      // this version is different from GCP Kubeadm version
 
   beforeEach(function () {
     if (isRancherManagerVersion('<2.14')) {
@@ -47,7 +45,7 @@ describe('Import CAPG GKE Class-Cluster', {tags: ['@full', '@capgke']}, () => {
       it('Import CAPG GKE class-cluster using YAML', () => {
         cy.readFile(classClusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
-          data = data.replace(/replace_k8sVersion/g, k8sVersion)
+          data = data.replace(/replace_k8sVersion/g, vars.gkeVersion)
           data = data.replace(/replace_gcp_project/g, gcpProject)
           cy.importYAML(data, vars.capiClustersNS)
         });
