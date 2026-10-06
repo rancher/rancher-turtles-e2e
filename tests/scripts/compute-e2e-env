@@ -15,7 +15,16 @@ set -euo pipefail
 PRE_MIGRATION_DEFAULT_RANCHER_VERSION=prime-head/2.12
 POST_MIGRATION_DEFAULT_RANCHER_VERSION=prime-head/2.13
 PRE_UPGRADE_DEFAULT_RANCHER_VERSION=prime-head/2.14
-POST_UPGRADE_DEFAULT_RANCHER_VERSION=prime-head/2.15
+POST_UPGRADE_DEFAULT_CHANNEL=prime-head
+# Rancher major.minor versions @upgrade tests can start from, each one upgrades to major.(minor+1).
+# To support a new upgrade, e.g. 2.15 -> 2.16:
+#   1. Add the starting version (2.15) to UPGRADE_FROM_VERSIONS.
+#   2. Optionally set PRE_UPGRADE_DEFAULT_RANCHER_VERSION to it (prime-head/2.15), so @upgrade runs
+#      without a supported --rancher-version test the new upgrade.
+#   3. Add the target (2.16) to the turtles branch case below once its rancher/turtles release branch
+#      exists; until then dev chart runs build turtles from DEFAULT_TURTLES_BRANCH.
+#   4. Make sure RANCHER_RECENT_VERSIONS matches the target (2.16).
+UPGRADE_FROM_VERSIONS=(2.13 2.14)
 # Rancher versions with embedded turtles
 RANCHER_RECENT_VERSIONS='2\.(13|14|15|16)'
 DEFAULT_TURTLES_BRANCH=main
@@ -78,6 +87,18 @@ EOF
 die() {
   echo "ERROR: $*" >&2
   exit 1
+}
+
+# Prints the major.minor of a Rancher version (e.g. prime/v2.14.1-rc1 -> 2.14), or nothing
+major_minor() {
+  if [[ "$1" =~ [0-9]+\.[0-9]+ ]]; then
+    echo "${BASH_REMATCH[0]}"
+  fi
+}
+
+# Prints the next minor version (e.g. 2.14 -> 2.15)
+next_minor() {
+  echo "${1%%.*}.$(( ${1#*.} + 1 ))"
 }
 
 warn() {
@@ -155,12 +176,15 @@ if ${IS_MIGRATION}; then
 fi
 if ${IS_UPGRADE}; then
   COMMON_SPECS="${SPECS}"
-  if [[ "${RANCHER_VERSION}" != *"2.13"* && "${RANCHER_VERSION}" != *"2.14"* ]]; then
+  UPGRADE_FROM=$(major_minor "${RANCHER_VERSION}")
+  if [[ " ${UPGRADE_FROM_VERSIONS[*]} " != *" ${UPGRADE_FROM} "* ]]; then
     if [[ -n "${RANCHER_VERSION}" ]]; then
-      warn "Upgrade is only allowed from 2.13, 2.14 Rancher Version, using ${PRE_UPGRADE_DEFAULT_RANCHER_VERSION} instead of ${RANCHER_VERSION}"
+      warn "Upgrade is only allowed from ${UPGRADE_FROM_VERSIONS[*]} Rancher Version, using ${PRE_UPGRADE_DEFAULT_RANCHER_VERSION} instead of ${RANCHER_VERSION}"
     fi
     RANCHER_VERSION="${PRE_UPGRADE_DEFAULT_RANCHER_VERSION}"
+    UPGRADE_FROM=$(major_minor "${RANCHER_VERSION}")
   fi
+  UPGRADE_TO=$(next_minor "${UPGRADE_FROM}")
 fi
 
 # Post-Migration/Post-Upgrade Rancher version, empty versions fall back to the defaults
@@ -172,9 +196,9 @@ if ${IS_MIGRATION}; then
   fi
 elif ${IS_UPGRADE}; then
   if [[ -z "${RANCHER_UPGRADE_VERSION}" ]]; then
-    RANCHER_UPGRADE_VERSION="${POST_UPGRADE_DEFAULT_RANCHER_VERSION}"
-  elif ! [[ "${RANCHER_VERSION}" == *"2.13"* && "${RANCHER_UPGRADE_VERSION}" == *"2.14"* || "${RANCHER_VERSION}" == *"2.14"* && "${RANCHER_UPGRADE_VERSION}" == *"2.15"* ]]; then
-    die "Upgrade is only allowed to 2.14, 2.15 Rancher Versions"
+    RANCHER_UPGRADE_VERSION="${POST_UPGRADE_DEFAULT_CHANNEL}/${UPGRADE_TO}"
+  elif [[ "$(major_minor "${RANCHER_UPGRADE_VERSION}")" != "${UPGRADE_TO}" ]]; then
+    die "Upgrade is only allowed from ${UPGRADE_FROM} to ${UPGRADE_TO} Rancher Version"
   fi
 else
   # Not used for fresh-install tests
@@ -189,11 +213,7 @@ if [[ "${TURTLES_DEV_CHART}" == true ]]; then
   if ${IS_MIGRATION}; then
     RANCHER_POINT_VERSION="2.13"
   elif ${IS_UPGRADE}; then
-    if [[ "${RANCHER_VERSION}" == *"2.13"* ]]; then
-      RANCHER_POINT_VERSION="2.14"
-    else
-      RANCHER_POINT_VERSION="2.15"
-    fi
+    RANCHER_POINT_VERSION="${UPGRADE_TO}"
   elif [[ "${RANCHER_VERSION}" =~ ${RANCHER_RECENT_VERSIONS} ]]; then
     RANCHER_POINT_VERSION="${BASH_REMATCH[0]}"
   elif [[ "${RANCHER_VERSION}" == *"2.12"* ]]; then
