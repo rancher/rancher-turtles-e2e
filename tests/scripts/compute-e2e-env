@@ -162,22 +162,12 @@ done
 [[ "${FORMAT}" =~ ^(shell|github)$ ]] || die "--format must be 'shell' or 'github'"
 [[ "${TURTLES_DEV_CHART}" =~ ^(true|false)$ ]] || die "--dev-chart must be 'true' or 'false'"
 
-IS_MIGRATION=false
-IS_UPGRADE=false
-[[ "${GREPTAGS}" =~ @migration ]] && IS_MIGRATION=true
-[[ "${GREPTAGS}" =~ @upgrade ]] && IS_UPGRADE=true
-if ${IS_MIGRATION} && ${IS_UPGRADE}; then
-  die "@migration and @upgrade tests cannot be combined"
-fi
-
 TEST=""
-if ${IS_MIGRATION}; then
-  TEST=Migration
-  FROM_VERSIONS=("${MIGRATION_FROM_VERSIONS[@]}")
-elif ${IS_UPGRADE}; then
-  TEST=Upgrade
-  FROM_VERSIONS=("${UPGRADE_FROM_VERSIONS[@]}")
-fi
+case "${GREPTAGS}" in
+  *@migration*@upgrade*|*@upgrade*@migration*) die "@migration and @upgrade tests cannot be combined" ;;
+  *@migration*) TEST=Migration; FROM_VERSIONS=("${MIGRATION_FROM_VERSIONS[@]}") ;;
+  *@upgrade*) TEST=Upgrade; FROM_VERSIONS=("${UPGRADE_FROM_VERSIONS[@]}") ;;
+esac
 
 # Migration/upgrade versions: empty or unsupported starting versions fall back to the default,
 # empty upgrade versions to the next minor version, unsupported upgrade versions are an error
@@ -209,16 +199,14 @@ RANCHER_POINT_VERSION=""
 if [[ "${TURTLES_DEV_CHART}" == true ]]; then
   if [[ -n "${UPGRADE_TO}" ]]; then
     RANCHER_POINT_VERSION="${UPGRADE_TO}"
-  elif [[ "${RANCHER_VERSION}" =~ ${RANCHER_RECENT_VERSIONS} ]]; then
+  elif [[ "$(major_minor "${RANCHER_VERSION}")" =~ ^(2\.12|${RANCHER_RECENT_VERSIONS})$ ]]; then
     RANCHER_POINT_VERSION="${BASH_REMATCH[0]}"
-  elif [[ "${RANCHER_VERSION}" == *"2.12"* ]]; then
-    RANCHER_POINT_VERSION="2.12"
   fi
 fi
 TURTLES_BRANCH=$(turtles_branch "${RANCHER_POINT_VERSION}")
 
 # K3s version
-if [[ "${RANCHER_VERSION}" == *"2.12"* ]]; then
+if [[ "$(major_minor "${RANCHER_VERSION}")" == 2.12 ]]; then
   INSTALL_K3S_VERSION="${RANCHER_2_12_K3S_VERSION}"
 else
   INSTALL_K3S_VERSION="${K3S_VERSION}"
@@ -226,22 +214,15 @@ fi
 
 # Cypress specs for the first run and for the run after Rancher upgrade.
 # Migration runs the common specs only after the upgrade, upgrade runs them before and after.
-FIRST_RUN_COMMON_SPECS="${COMMON_SPECS_LIST[*]}"
-UPGRADE_COMMON_SPECS=""
-if ${IS_MIGRATION}; then
-  FIRST_RUN_COMMON_SPECS=""
-fi
-if [[ -n "${TEST}" ]]; then
-  UPGRADE_COMMON_SPECS="${COMMON_SPECS_LIST[*]}"
-fi
+SPEC_LIST=(e2e/first_connection.spec.ts e2e/turtles_chart_legacy.spec.ts e2e/turtles_ui_extension.spec.ts e2e/menu.spec.ts)
+[[ "${TEST}" == Migration ]] || SPEC_LIST+=("${COMMON_SPECS_LIST[@]}")
+SPEC_LIST+=(e2e/capd_rke2_migration_clusterclass.spec.ts e2e/capd_rke2_upgrade_clusterclass.spec.ts e2e/pre_upgrade_setup.spec.ts)
+SPEC="${SPEC_LIST[*]}"
 
-SPEC="e2e/first_connection.spec.ts e2e/turtles_chart_legacy.spec.ts e2e/turtles_ui_extension.spec.ts e2e/menu.spec.ts"
-[[ -n "${FIRST_RUN_COMMON_SPECS}" ]] && SPEC+=" ${FIRST_RUN_COMMON_SPECS}"
-SPEC+=" e2e/capd_rke2_migration_clusterclass.spec.ts e2e/capd_rke2_upgrade_clusterclass.spec.ts e2e/pre_upgrade_setup.spec.ts"
-
-UPGRADE_SPEC="e2e/post_upgrade_setup.spec.ts e2e/capd_rke2_migration_clusterclass.spec.ts"
-[[ -n "${UPGRADE_COMMON_SPECS}" ]] && UPGRADE_SPEC+=" ${UPGRADE_COMMON_SPECS}"
-UPGRADE_SPEC+=" e2e/capd_rke2_upgrade_clusterclass.spec.ts"
+UPGRADE_SPEC_LIST=(e2e/post_upgrade_setup.spec.ts e2e/capd_rke2_migration_clusterclass.spec.ts)
+[[ -z "${TEST}" ]] || UPGRADE_SPEC_LIST+=("${COMMON_SPECS_LIST[@]}")
+UPGRADE_SPEC_LIST+=(e2e/capd_rke2_upgrade_clusterclass.spec.ts)
+UPGRADE_SPEC="${UPGRADE_SPEC_LIST[*]}"
 
 emit() {
   local key="$1" value="$2"
