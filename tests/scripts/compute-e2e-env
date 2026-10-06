@@ -1,0 +1,245 @@
+#!/bin/bash
+
+# Computes the environment used by the e2e tests (Rancher versions, turtles branch,
+# k3s version, Cypress specs, ...) from the same inputs as .github/workflows/master-e2e.yaml.
+# This is the single source of truth for both CI and local runs.
+#
+# Local usage:
+#   set -a; source <(tests/scripts/compute-e2e-env --rancher-version prime/2.15.1 --tags "@install @short"); set +a
+# CI usage:
+#   tests/scripts/compute-e2e-env --format github ... >> "$GITHUB_ENV"
+
+set -euo pipefail
+
+# Default Rancher versions for migration/upgrade tests
+PRE_MIGRATION_DEFAULT_RANCHER_VERSION=prime-head/2.12
+POST_MIGRATION_DEFAULT_RANCHER_VERSION=prime-head/2.13
+PRE_UPGRADE_DEFAULT_RANCHER_VERSION=prime-head/2.14
+POST_UPGRADE_DEFAULT_RANCHER_VERSION=prime-head/2.15
+# Rancher versions with embedded turtles
+RANCHER_RECENT_VERSIONS='2\.(13|14|15|16)'
+DEFAULT_TURTLES_BRANCH=main
+DEFAULT_K3S_VERSION=v1.34.4+k3s1
+RANCHER_2_12_K3S_VERSION=v1.32.4+k3s1
+
+# Common specs: @short @vsphere @full
+COMMON_SPECS_LIST=(
+  e2e/providers_setup_legacy.spec.ts
+  e2e/providers_setup.spec.ts
+  e2e/capd_kubeadm_nocaapf_clusterclass.spec.ts
+  e2e/capd_rke2_nocaapf_clusterclass.spec.ts
+  e2e/capa_kubeadm_nocaapf_clusterclass.spec.ts
+  e2e/capa_eks_nocaapf_clusterclass.spec.ts
+  e2e/capa_rke2_nocaapf_clusterclass.spec.ts
+  e2e/capz_aks_nocaapf_clusterclass.spec.ts
+  e2e/capz_kubeadm_nocaapf_clusterclass.spec.ts
+  e2e/capz_rke2_nocaapf_clusterclass.spec.ts
+  e2e/capg_kubeadm_nocaapf_clusterclass.spec.ts
+  e2e/capg_gke_nocaapf_clusterclass.spec.ts
+  e2e/capv_rke2_nocaapf_clusterclass.spec.ts
+  e2e/capv_kubeadm_nocaapf_clusterclass.spec.ts
+  e2e/fleet_addon_provider_setup.spec.ts
+  e2e/capd_rke2_clusterclass.spec.ts
+  e2e/capd_rke2_fleet_clusterclass.spec.ts
+  e2e/capd_kubeadm_clusterclass.spec.ts
+  e2e/azure_rke2_v2prov_cluster.spec.ts
+  e2e/capv_rke2_clusterclass.spec.ts
+  e2e/capv_kubeadm_clusterclass.spec.ts
+  e2e/capa_rke2_clusterclass.spec.ts
+  e2e/capa_kubeadm_clusterclass.spec.ts
+  e2e/capa_eks_clusterclass.spec.ts
+  e2e/capg_gke_clusterclass.spec.ts
+  e2e/capg_kubeadm_clusterclass.spec.ts
+  e2e/capz_aks_clusterclass.spec.ts
+  e2e/capz_rke2_clusterclass.spec.ts
+  e2e/capz_kubeadm_clusterclass.spec.ts
+  e2e/capi_features_switch.spec.ts
+  e2e/capd_kubeadm_use_caapf_switch.spec.ts
+)
+
+usage() {
+  cat <<EOF
+Usage: $(basename "$0") [options]
+
+Options:
+  --rancher-version VERSION   Rancher version to install (e.g. prime/2.15.1, prime-head/2.15)
+  --upgrade-version VERSION   Rancher version to upgrade to (@migration/@upgrade only)
+  --tags TAGS                 Space separated grep tags (e.g. "@install @short")
+  --dev-chart [true|false]    Install rancher turtles dev chart (default: false, bare flag: true)
+  --k3s-version VERSION       Upstream K3s version (default: ${DEFAULT_K3S_VERSION})
+  --format shell|github       shell: quoted KEY='VALUE' lines for sourcing (default)
+                              github: raw KEY=VALUE lines for \$GITHUB_ENV
+  -h, --help                  Show this help
+
+Options also accept the --opt=value form.
+EOF
+}
+
+die() {
+  echo "ERROR: $*" >&2
+  exit 1
+}
+
+warn() {
+  # In CI, show the warning as a GitHub Actions annotation
+  if [[ "${FORMAT}" == github ]]; then
+    echo "::warning::$*" >&2
+  else
+    echo "WARNING: $*" >&2
+  fi
+}
+
+RANCHER_VERSION=""
+RANCHER_UPGRADE_VERSION=""
+GREPTAGS=""
+TURTLES_DEV_CHART=false
+K3S_VERSION=${DEFAULT_K3S_VERSION}
+FORMAT=shell
+
+while [[ $# -gt 0 ]]; do
+  # Accept both "--opt value" and "--opt=value"
+  INLINE_VALUE=false
+  if [[ "$1" == --*=* ]]; then
+    set -- "${1%%=*}" "${1#*=}" "${@:2}"
+    INLINE_VALUE=true
+  fi
+  case "$1" in
+    --rancher-version|--upgrade-version|--tags|--k3s-version|--format)
+      # Empty values are allowed (CI passes unset workflow inputs as "")
+      [[ $# -ge 2 ]] || die "$1 requires a value"
+      ;;
+  esac
+  case "$1" in
+    --rancher-version) RANCHER_VERSION="$2"; shift 2 ;;
+    --upgrade-version) RANCHER_UPGRADE_VERSION="$2"; shift 2 ;;
+    --tags) GREPTAGS="$2"; shift 2 ;;
+    --k3s-version) K3S_VERSION="${2:-${DEFAULT_K3S_VERSION}}"; shift 2 ;;
+    --format) FORMAT="$2"; shift 2 ;;
+    --dev-chart)
+      # Value is optional: a bare "--dev-chart" means true
+      if ${INLINE_VALUE} || [[ "${2-}" =~ ^(true|false)$ ]]; then
+        TURTLES_DEV_CHART="$2"; shift 2
+      else
+        TURTLES_DEV_CHART=true; shift
+      fi
+      ;;
+    -h|--help) usage; exit 0 ;;
+    *) usage >&2; die "Unknown option: $1" ;;
+  esac
+done
+
+[[ "${FORMAT}" =~ ^(shell|github)$ ]] || die "--format must be 'shell' or 'github'"
+[[ "${TURTLES_DEV_CHART}" =~ ^(true|false)$ ]] || die "--dev-chart must be 'true' or 'false'"
+
+IS_MIGRATION=false
+IS_UPGRADE=false
+[[ "${GREPTAGS}" =~ @migration ]] && IS_MIGRATION=true
+[[ "${GREPTAGS}" =~ @upgrade ]] && IS_UPGRADE=true
+if ${IS_MIGRATION} && ${IS_UPGRADE}; then
+  die "@migration and @upgrade tests cannot be combined"
+fi
+
+SPECS="${COMMON_SPECS_LIST[*]}"
+COMMON_SPECS=""
+
+# Pre-Migration/Pre-Upgrade Rancher version, empty or unsupported versions fall back to the defaults
+if ${IS_MIGRATION}; then
+  COMMON_SPECS="${SPECS}"
+  SPECS=""
+  if [[ "${RANCHER_VERSION}" != *"2.12"* ]]; then
+    if [[ -n "${RANCHER_VERSION}" ]]; then
+      warn "Migration is only allowed from 2.12 Rancher Version, using ${PRE_MIGRATION_DEFAULT_RANCHER_VERSION} instead of ${RANCHER_VERSION}"
+    fi
+    RANCHER_VERSION="${PRE_MIGRATION_DEFAULT_RANCHER_VERSION}"
+  fi
+fi
+if ${IS_UPGRADE}; then
+  COMMON_SPECS="${SPECS}"
+  if [[ "${RANCHER_VERSION}" != *"2.13"* && "${RANCHER_VERSION}" != *"2.14"* ]]; then
+    if [[ -n "${RANCHER_VERSION}" ]]; then
+      warn "Upgrade is only allowed from 2.13, 2.14 Rancher Version, using ${PRE_UPGRADE_DEFAULT_RANCHER_VERSION} instead of ${RANCHER_VERSION}"
+    fi
+    RANCHER_VERSION="${PRE_UPGRADE_DEFAULT_RANCHER_VERSION}"
+  fi
+fi
+
+# Post-Migration/Post-Upgrade Rancher version, empty versions fall back to the defaults
+if ${IS_MIGRATION}; then
+  if [[ -z "${RANCHER_UPGRADE_VERSION}" ]]; then
+    RANCHER_UPGRADE_VERSION="${POST_MIGRATION_DEFAULT_RANCHER_VERSION}"
+  elif [[ "${RANCHER_UPGRADE_VERSION}" != *"2.13"* ]]; then
+    die "Migration is only allowed to 2.13 Rancher Version"
+  fi
+elif ${IS_UPGRADE}; then
+  if [[ -z "${RANCHER_UPGRADE_VERSION}" ]]; then
+    RANCHER_UPGRADE_VERSION="${POST_UPGRADE_DEFAULT_RANCHER_VERSION}"
+  elif ! [[ "${RANCHER_VERSION}" == *"2.13"* && "${RANCHER_UPGRADE_VERSION}" == *"2.14"* || "${RANCHER_VERSION}" == *"2.14"* && "${RANCHER_UPGRADE_VERSION}" == *"2.15"* ]]; then
+    die "Upgrade is only allowed to 2.14, 2.15 Rancher Versions"
+  fi
+else
+  # Not used for fresh-install tests
+  RANCHER_UPGRADE_VERSION=""
+fi
+
+# Rancher point version and rancher/turtles branch, only needed for the dev chart.
+# Migration/upgrade tests build the chart for the Rancher version they upgrade to.
+RANCHER_POINT_VERSION=""
+TURTLES_BRANCH="${DEFAULT_TURTLES_BRANCH}"
+if [[ "${TURTLES_DEV_CHART}" == true ]]; then
+  if ${IS_MIGRATION}; then
+    RANCHER_POINT_VERSION="2.13"
+  elif ${IS_UPGRADE}; then
+    if [[ "${RANCHER_VERSION}" == *"2.13"* ]]; then
+      RANCHER_POINT_VERSION="2.14"
+    else
+      RANCHER_POINT_VERSION="2.15"
+    fi
+  elif [[ "${RANCHER_VERSION}" =~ ${RANCHER_RECENT_VERSIONS} ]]; then
+    RANCHER_POINT_VERSION="${BASH_REMATCH[0]}"
+  elif [[ "${RANCHER_VERSION}" == *"2.12"* ]]; then
+    RANCHER_POINT_VERSION="2.12"
+  fi
+
+  case "${RANCHER_POINT_VERSION}" in
+    2.12) TURTLES_BRANCH="release-0.24" ;;
+    2.13) TURTLES_BRANCH="release/v0.25" ;;
+    2.14) TURTLES_BRANCH="release/v0.26" ;;
+    2.15) TURTLES_BRANCH="release/v0.27" ;;
+  esac
+fi
+
+# K3s version
+if [[ "${RANCHER_VERSION}" == *"2.12"* ]]; then
+  INSTALL_K3S_VERSION="${RANCHER_2_12_K3S_VERSION}"
+else
+  INSTALL_K3S_VERSION="${K3S_VERSION}"
+fi
+
+# Cypress specs for the first run and for the run after Rancher upgrade
+SPEC="e2e/first_connection.spec.ts e2e/turtles_chart_legacy.spec.ts e2e/turtles_ui_extension.spec.ts e2e/menu.spec.ts"
+[[ -n "${SPECS}" ]] && SPEC+=" ${SPECS}"
+SPEC+=" e2e/capd_rke2_migration_clusterclass.spec.ts e2e/capd_rke2_upgrade_clusterclass.spec.ts e2e/pre_upgrade_setup.spec.ts"
+
+UPGRADE_SPEC="e2e/post_upgrade_setup.spec.ts e2e/capd_rke2_migration_clusterclass.spec.ts"
+[[ -n "${COMMON_SPECS}" ]] && UPGRADE_SPEC+=" ${COMMON_SPECS}"
+UPGRADE_SPEC+=" e2e/capd_rke2_upgrade_clusterclass.spec.ts"
+
+emit() {
+  local key="$1" value="$2"
+  if [[ "${FORMAT}" == github ]]; then
+    printf '%s=%s\n' "${key}" "${value}"
+  else
+    printf "%s='%s'\n" "${key}" "${value//\'/\'\\\'\'}"
+  fi
+}
+
+emit RANCHER_VERSION "${RANCHER_VERSION}"
+emit RANCHER_UPGRADE_VERSION "${RANCHER_UPGRADE_VERSION}"
+emit RANCHER_POINT_VERSION "${RANCHER_POINT_VERSION}"
+emit RANCHER_RECENT_VERSIONS "${RANCHER_RECENT_VERSIONS}"
+emit TURTLES_BRANCH "${TURTLES_BRANCH}"
+emit INSTALL_K3S_VERSION "${INSTALL_K3S_VERSION}"
+emit SPECS "${SPECS}"
+emit COMMON_SPECS "${COMMON_SPECS}"
+emit SPEC "${SPEC}"
+emit UPGRADE_SPEC "${UPGRADE_SPEC}"
