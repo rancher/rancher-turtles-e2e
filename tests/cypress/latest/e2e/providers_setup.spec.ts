@@ -79,7 +79,7 @@ describe('Enable CAPI Providers', () => {
         // Enabling this option downloads all the chart versions and ensures only supported versions show up
         // Doing so makes updating the chart a smoother process.
         const repositoryName = vars.providersChartRepoName;
-        const resourceKind = 'clusterrepos.catalog.cattle.io';
+        const resourceKind = 'Repositories';
         const patch = {spec: {OCIOptions: {'downloadAllTags': true}}};
         cy.patchYamlResource(vars.localCluster, 'default', resourceKind, repositoryName, patch);
         cy.typeInFilter(repositoryName);
