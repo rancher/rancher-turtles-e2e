@@ -214,12 +214,24 @@ fi
 
 # Cypress specs for the first run and for the run after Rancher upgrade.
 # Migration runs the common specs only after the upgrade, upgrade runs them before and after.
-SPEC_LIST=(e2e/first_connection.spec.ts e2e/turtles_chart_legacy.spec.ts e2e/turtles_ui_extension.spec.ts e2e/menu.spec.ts)
+SPEC_LIST=(
+  e2e/first_connection.spec.ts
+  e2e/turtles_chart_legacy.spec.ts
+  e2e/turtles_ui_extension.spec.ts
+  e2e/menu.spec.ts
+)
 [[ "${TEST}" == Migration ]] || SPEC_LIST+=("${COMMON_SPECS_LIST[@]}")
-SPEC_LIST+=(e2e/capd_rke2_migration_clusterclass.spec.ts e2e/capd_rke2_upgrade_clusterclass.spec.ts e2e/pre_upgrade_setup.spec.ts)
+SPEC_LIST+=(
+  e2e/capd_rke2_migration_clusterclass.spec.ts
+  e2e/capd_rke2_upgrade_clusterclass.spec.ts
+  e2e/pre_upgrade_setup.spec.ts
+)
 SPEC="${SPEC_LIST[*]}"
 
-UPGRADE_SPEC_LIST=(e2e/post_upgrade_setup.spec.ts e2e/capd_rke2_migration_clusterclass.spec.ts)
+UPGRADE_SPEC_LIST=(
+  e2e/post_upgrade_setup.spec.ts
+  e2e/capd_rke2_migration_clusterclass.spec.ts
+)
 [[ -z "${TEST}" ]] || UPGRADE_SPEC_LIST+=("${COMMON_SPECS_LIST[@]}")
 UPGRADE_SPEC_LIST+=(e2e/capd_rke2_upgrade_clusterclass.spec.ts)
 UPGRADE_SPEC="${UPGRADE_SPEC_LIST[*]}"
