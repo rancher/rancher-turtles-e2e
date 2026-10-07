@@ -64,7 +64,7 @@ export const isTurtlesDevChart = Cypress.expose('turtles_dev_chart')
 
 export const isRancherUpgraded = Cypress.expose('is_rancher_upgraded') == "true"
 
-export const isUseCAAPFSupported = (isRancherManagerVersion('>=2.14.1') || (isRancherManagerVersion('>=2.14') && isHeadBuild))
+export const isUseCAAPFSupported = ((isRancherManagerVersion('>=2.14.1') && isRancherManagerVersion('<2.16')) || ((isRancherManagerVersion('>=2.14') && isRancherManagerVersion('<2.16')) && isHeadBuild))
 
 export const skipFleetAddOnInstallation = Cypress.expose('skip_fleet_addon_installation')
 

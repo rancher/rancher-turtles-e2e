@@ -71,11 +71,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
 
         // Check the finalizer is set on CAPI cluster
         cy.viewCAPIClusterYAML(clusterName);
-        cy.get('.CodeMirror').then((editor) => {
-          // @ts-expect-error known error with CodeMirror
-          const text = editor[0].CodeMirror.getValue();
-          expect(text).to.include('fleet.addons.cluster.x-k8s.io');
-        });
+        cy.checkYAMLText('fleet.addons.cluster.x-k8s.io', true);
       })
       );
     }
@@ -88,11 +84,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
         cy.checkCAPIClusterProvisioned(clusterName, timeout);
 
         cy.viewCAPIClusterYAML(clusterName);
-        cy.get('.CodeMirror').then((editor) => {
-          // @ts-expect-error known error with CodeMirror
-          const text = editor[0].CodeMirror.getValue();
-          expect(text).to.include('apiVersion: cluster.x-k8s.io/v1beta2');
-        });
+        cy.checkYAMLText('apiVersion: cluster.x-k8s.io/v1beta2', true);
 
         // Check CAPI cluster is Active
         cy.searchCluster(clusterName);
@@ -107,11 +99,7 @@ describe('Import CAPD RKE2 Class-Cluster for Upgrade', {tags: '@upgrade'}, () =>
 
         // Check the finalizer is set on CAPI cluster
         cy.viewCAPIClusterYAML(clusterName);
-        cy.get('.CodeMirror').then((editor) => {
-          // @ts-expect-error known error with CodeMirror
-          const text = editor[0].CodeMirror.getValue();
-          expect(text).to.include('fleet.addons.cluster.x-k8s.io');
-        });
+        cy.checkYAMLText('fleet.addons.cluster.x-k8s.io', true);
       })
       );
 
