@@ -123,7 +123,7 @@ describe('Import CAPD Kubeadm Class-Cluster for Use-CAAPF Migration', {tags: ['@
 
     qase(593, it('Set .helm.force=true for Calico CNI Helm Op', () => {
       ['calico-cni'].forEach((resourceName) => {
-        const resourceKind = 'HelmOp';
+        const resourceKind = 'Helm Ops';
         const namespace = vars.capiClustersNS;
         const patch = {spec: {helm: {'force': true}}};
         cy.patchYamlResource(vars.localCluster, namespace, resourceKind, resourceName, patch);

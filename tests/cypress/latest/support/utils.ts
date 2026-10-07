@@ -31,7 +31,7 @@ export const isPrimeChannel = (): boolean => {
 
 // Check if Rancher comes from pre-release Prime channel
 export const isPrePrimeChannel = (): boolean => {
-  return rancherVersion.includes('prime-alpha') || rancherVersion.includes('prime-rc') || isStgRegistryHeadVersions;
+  return rancherVersion.includes('prime-alpha') || rancherVersion.includes('prime-rc') || rancherVersion.includes('prime-head') || isStgRegistryHeadVersions;
 }
 
 // Check if Rancher should use staging registry to install Rancher Turtles Providers Chart
