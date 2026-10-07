@@ -143,8 +143,7 @@ describe('Import CAPV RKE2 Class-Cluster', {tags: ['@vsphere', '@capvr']}, () =>
   context('[CLUSTER-OPERATIONS]', () => {
     qase(131, it('Validate kube-vip leader election ability across CPs', () => {
         function getActiveKubeVipLeaderNode() {
-          cy.burgerMenuOperate('open');
-          cy.contains(clusterName).click();
+          cy.exploreCluster(clusterName);
           cy.accesMenuSelection(['More Resources', 'Coordination', 'Leases']);
           cy.setNamespace('All Namespaces', 'all_user');
           // Filter out kube-vip lease resource

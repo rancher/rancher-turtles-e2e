@@ -92,18 +92,19 @@ describe('Import CAPD RKE2 (Default CNI) Class-Cluster using Fleet', {tags: '@sh
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    qase(743, it('Check RKE2 Default CNI', () => {
-      cy.contains(clusterName).click();
-      cy.accesMenuSelection(['Workloads', 'Pods']);
-      cy.setNamespace('All Namespaces', 'all_user');
-      // Filter out cni pods by image name
-      cy.typeInFilter('calico');
-      cy.waitForAllRowsInState('Running', timeout);
+    qase(744, it('Install App on imported cluster', {retries: 1}, () => {
+      cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
     );
 
-    qase(744, it('Install App on imported cluster', {retries: 1}, () => {
-      cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
+    qase(743, it('Check RKE2 Default CNI', () => {
+      cy.exploreCluster(clusterName);
+      cy.accesMenuSelection(['Workloads', 'Pods']);
+      cy.setNamespace('All Namespaces', 'all_user');
+      cy.wait(2000);
+      // Filter out cni pods by image name
+      cy.typeInFilter('calico');
+      cy.waitForAllRowsInState('Running', timeout);
     })
     );
   })

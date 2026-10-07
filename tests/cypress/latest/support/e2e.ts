@@ -61,7 +61,7 @@ declare global {
       checkCAPIMenu(): Chainable<Element>;
       checkFleetHelmOps(appList: string[]): Chainable<Element>;
       namespaceReset(): Chainable<Element>;
-
+      performDelete(): Chainable<Element>;
       navigateToProviders(): Chainable<Element>;
       addCustomProvider(name: string, namespace: string, providerName: string, providerType: string, version?: string, url?: string): Chainable<Element>;
       addInfraProvider(providerType: string, namespace: string, cloudCredentials?: string): Chainable<Element>;
@@ -94,6 +94,7 @@ declare global {
       kubectlExecute(commands: string[], timeout?: number): Chainable<Element>;
       filterPodErrorLogs(podName: string): Chainable<Element>;
       checkAppDeployed(appName: string, namespace: string, chartVersion: string): Chainable<Element>;
+      checkYAMLText(content: string, shouldExist: boolean): Chainable<Element>;
       // Functions declared in capz_support.js
       createAzureClusterIdentity(clientID: string, tenantID: string, clientSecret: string): Chainable<Element>;
       createAzureASOCredential(clientID: string, tenantID: string, clientSecret: string, subscriptionID: string): Chainable<Element>;

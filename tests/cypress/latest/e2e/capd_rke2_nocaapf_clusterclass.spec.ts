@@ -82,13 +82,8 @@ describe('Import CAPD RKE2 (No-Caapf) Class-Cluster using Fleet', {tags: ['@shor
   })
 
   context('[CLUSTER-OPERATIONS]', () => {
-    qase(576, it('Check RKE2 Default CNI', () => {
-      cy.contains(clusterName).click();
-      cy.accesMenuSelection(['Workloads', 'Pods']);
-      cy.setNamespace('All Namespaces', 'all_user');
-      // Filter out cni pods by image name
-      cy.typeInFilter('calico');
-      cy.waitForAllRowsInState('Running', timeout);
+    qase(579, it('Install App on imported cluster', {retries: 1}, () => {
+      cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
     );
 
@@ -111,16 +106,18 @@ describe('Import CAPD RKE2 (No-Caapf) Class-Cluster using Fleet', {tags: ['@shor
 
       // Check the finalizer is not set on CAPI cluster
       cy.viewCAPIClusterYAML(clusterName);
-      cy.get('.CodeMirror').then((editor) => {
-        // @ts-expect-error known error with CodeMirror
-        const text = editor[0].CodeMirror.getValue();
-        expect(text).not.to.include('fleet.addons.cluster.x-k8s.io');
-      });
+      cy.checkYAMLText('fleet.addons.cluster.x-k8s.io', false);
     })
     );
 
-    qase(579, it('Install App on imported cluster', {retries: 1}, () => {
-      cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
+    qase(576, it('Check RKE2 Default CNI', () => {
+      cy.exploreCluster(clusterName);
+      cy.accesMenuSelection(['Workloads', 'Pods']);
+      cy.setNamespace('All Namespaces', 'all_user');
+      cy.wait(2000);
+      // Filter out cni pods by image name
+      cy.typeInFilter('calico');
+      cy.waitForAllRowsInState('Running', timeout);
     })
     );
 

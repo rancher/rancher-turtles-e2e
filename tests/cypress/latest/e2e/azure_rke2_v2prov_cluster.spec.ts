@@ -2,6 +2,7 @@ import '../support/commands';
 import {isRancherManagerVersion, skipClusterDeletion} from '../support/utils';
 import * as randomstring from "randomstring";
 import {vars} from '../support/variables';
+import {setYamlContent} from "../support/commands";
 
 Cypress.config();
 describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration', '@v2prov']}, () => {
@@ -83,16 +84,12 @@ describe('Create Azure RKE2 Cluster', {tags: ['@short', '@migration', '@v2prov']
           cy.getBySel('yaml-editor-code-mirror').should('be.visible');
 
           cy.readFile(clusterFileName).then((data) => {
-            cy.get('.CodeMirror')
-              .then((editor) => {
-                data = data.replace(/replace_user_id/g, userID)
-                data = data.replace(/replace_cluster_name/g, clusterName)
-                data = data.replace(/replace_cloudcred_id/g, ccID)
-                data = data.replace(/replace_rke2_version/g, k8sVersion)
-                // @ts-expect-error expected error with CodeMirror
-                editor[0].CodeMirror.setValue(data);
-              })
-            });
+            data = data.replace(/replace_user_id/g, userID)
+            data = data.replace(/replace_cluster_name/g, clusterName)
+            data = data.replace(/replace_cloudcred_id/g, ccID)
+            data = data.replace(/replace_rke2_version/g, k8sVersion)
+            setYamlContent(data);
+          });
           cy.clickButton('Create');
           cy.getBySel('cluster-list').should('be.visible');
 

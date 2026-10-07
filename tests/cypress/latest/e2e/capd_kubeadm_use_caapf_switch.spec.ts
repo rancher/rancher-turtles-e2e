@@ -172,11 +172,7 @@ describe('Import CAPD Kubeadm Class-Cluster for Use-CAAPF Migration', {tags: ['@
 
         // Check the finalizer is removed from the CAPI cluster
         cy.viewCAPIClusterYAML(clusterName);
-        cy.get('.CodeMirror').then((editor) => {
-          // @ts-expect-error known error with CodeMirror
-          const text = editor[0].CodeMirror.getValue();
-          expect(text).not.to.include('fleet.addons.cluster.x-k8s.io');
-        });
+        cy.checkYAMLText('fleet.addons.cluster.x-k8s.io', false);
       })
     )
 

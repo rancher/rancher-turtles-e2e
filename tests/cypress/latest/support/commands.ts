@@ -19,6 +19,7 @@ import * as cypressLib from '@rancher-ecp-qa/cypress-library';
 import jsyaml from 'js-yaml';
 import yaml from 'js-yaml';
 import _ from 'lodash';
+import { EditorView } from '@codemirror/view';
 import {
   capiNamespace,
   isAPIv1beta1,
@@ -77,7 +78,7 @@ Cypress.Commands.add('setAutoImport', (mode) => {
 Cypress.Commands.add('clusterAutoImport', (clusterName, mode) => {
   // Navigate to Cluster Menu
   cy.checkCAPIMenu();
-  cy.getBySel('button-group-child-1').click();
+  cy.getBySel('sortable-table-list-container').click();
   cy.typeInFilter(clusterName);
   cy.setAutoImport(mode);
 });
@@ -297,7 +298,7 @@ Cypress.Commands.add('createCAPICluster', (cluster) => {
 // Command to check CAPI cluster presence under CAPI Menu
 Cypress.Commands.add('checkCAPICluster', (clusterName) => {
   cy.checkCAPIMenu();
-  cy.getBySel('button-group-child-1').click();
+  cy.getBySel('sortable-table-list-container').click();
   cy.typeInFilter(clusterName);
   cy.getBySel('sortable-cell-0-1', {timeout: 90000}).should('exist');
 });
@@ -306,7 +307,7 @@ Cypress.Commands.add('checkCAPICluster', (clusterName) => {
 Cypress.Commands.add('checkCAPIClusterClass', (className) => {
   cy.checkCAPIMenu();
   cy.contains('Cluster Classes').click();
-  cy.getBySel('button-group-child-1').click();
+  cy.getBySel('sortable-table-list-container').click();
   cy.typeInFilter(className);
   cy.waitForAllRowsInState('Active', 20000);
 });
@@ -325,7 +326,7 @@ Cypress.Commands.add('checkCAPIClusterActive', (clusterName, timeout = 90000, sk
 // Command to check CAPI cluster Provisioned status
 Cypress.Commands.add('checkCAPIClusterProvisioned', (clusterName, timeout) => {
   cy.checkCAPIMenu();
-  cy.getBySel('button-group-child-1').click();
+  cy.getBySel('sortable-table-list-container').click();
   cy.typeInFilter(clusterName);
   if (timeout != undefined) {
     timeout = timeout
@@ -333,7 +334,11 @@ Cypress.Commands.add('checkCAPIClusterProvisioned', (clusterName, timeout) => {
     timeout = 90000
   }
   if (!isAPIv1beta1) {
-    cy.getBySel('sortable-cell-0-3', {timeout: timeout}).should('have.text', 'True');
+    if (isRancherManagerVersion('>=2.16')) {
+      cy.getBySel('sortable-cell-0-4', {timeout: timeout}).should('have.text', 'True');  
+    } else {
+      cy.getBySel('sortable-cell-0-3', {timeout: timeout}).should('have.text', 'True');
+    }
   }
   cy.contains(new RegExp('Provisioned.*' + clusterName), {timeout: timeout});
 });
@@ -341,7 +346,7 @@ Cypress.Commands.add('checkCAPIClusterProvisioned', (clusterName, timeout) => {
 // Command to check CAPI cluster deletion status
 Cypress.Commands.add('checkCAPIClusterDeleted', (clusterName, timeout) => {
   cy.checkCAPIMenu();
-  cy.getBySel('button-group-child-1').click();
+  cy.getBySel('sortable-table-list-container').click();
   cy.typeInFilter(clusterName);
   cy.getBySel('sortable-cell-0-1', {timeout: timeout}).should('not.exist');
 });
@@ -431,12 +436,12 @@ Cypress.Commands.add('removeCAPIResource', (resourcetype, resourceName, timeout)
   if (resourcetype != 'Clusters') {
     cy.contains(resourcetype).click();
   }
-  cy.getBySel('button-group-child-1').click();
+  cy.getBySel('sortable-table-list-container').click();
   cy.typeInFilter(resourceName);
   cy.getBySel('sortable-cell-0-1').should('exist');
   cy.viewport(1920, 1080);
   cy.getBySel('sortable-table_check_select_all').click();
-  cy.getBySel('sortable-table-promptRemove').click({ctrlKey: true}); // this will prevent to display confirmation dialog
+  cy.performDelete();
   cy.wait(2000); // needed for 2.12
   if (timeout != undefined) {
     cy.getBySel('sortable-cell-0-1', {timeout: timeout}).should('not.exist');
@@ -467,7 +472,7 @@ Cypress.Commands.add('deleteCloudCredsAWS', (name) => {
   cy.typeInFilter(name);
   cy.viewport(1920, 1080);
   cy.getBySel('sortable-table_check_select_all').click();
-  cy.getBySel('sortable-table-promptRemove').click({ctrlKey: true});
+  cy.performDelete();
 });
 
 // Command to add GCP Cloud Credentials
@@ -702,14 +707,33 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
     }
 
     if (options.modifyYAMLOperation) {
-      cy.get('.CodeMirror').then((editor) => {
-        // @ts-expect-error known error with CodeMirror
-        let text = yaml.load(editor[0].CodeMirror.getValue());
-        // @ts-ignore
-        options.modifyYAMLOperation(text);
-        // @ts-expect-error known error with CodeMirror
-        editor[0].CodeMirror.setValue(yaml.dump(text));
-      });
+      if (isRancherManagerVersion('<2.16')) {
+        cy.get('.CodeMirror').then((editor) => {
+          // @ts-expect-error known error with CodeMirror
+          let text = yaml.load(editor[0].CodeMirror.getValue());
+          // @ts-ignore
+          options.modifyYAMLOperation(text);
+          // @ts-expect-error known error with CodeMirror
+          editor[0].CodeMirror.setValue(yaml.dump(text));
+        });
+      } else {
+        cy.get('.cm-content').then((editor) => {
+          const view = EditorView.findFromDOM(editor[0]);
+          if (!view) {
+            throw new Error('CodeMirror EditorView not found');
+          }
+          const text = yaml.load(view.state.doc.toString());
+          // @ts-ignore
+          options.modifyYAMLOperation(text);
+          view.dispatch({
+            changes: {
+            from: 0,
+            to: view.state.doc.length,
+            insert: yaml.dump(text),
+            },
+          });
+        });
+      }
     }
 
     const buttonText = isRancherManagerVersion('>=2.13') && (isUpdateOperation) ? 'Save changes' : operation;
@@ -761,10 +785,8 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
   };
 
   cy.burgerMenuOperate('open');
-  // Click on the cluster
-  cy.getBySel('side-menu').within(() => {
-    cy.contains(clusterName).click();
-  });
+  // Explore the cluster
+  cy.exploreCluster(clusterName);
 
   if (operation === 'Install' && Cypress.currentRetry > 0) {
     cy.clickNavMenu(['Apps', 'Installed Apps']);
@@ -810,45 +832,59 @@ Cypress.Commands.add('patchYamlResource', (clusterName, namespace, resourceKind,
   //cy.get('.btn.actions.role-multi-action').click();
   cy.contains('Edit YAML').click();
 
-  // Do the CodeMirror magic here
-  cy.get('.CodeMirror').then((editor) => {
-    // @ts-expect-error known error with CodeMirror
-    const yaml = editor[0].CodeMirror.getValue();
-    const yamlObject = jsyaml.load(yaml);
-
-    function applyPatch(yamlObj, patchObj) {
-      Object.keys(patchObj).forEach(key => {
-        if (patchObj[key].isNestedIn) {
-          // If the patch is for a nested object merge the original and patched objects
-          const originalValue = _.get(yamlObj, key);
-          let nestedObject = {};
-          if (originalValue) {
-            nestedObject = jsyaml.load(originalValue);
-          }
-          const patchedNestedObject = _.merge(nestedObject, _.omit(patchObj[key], 'isNestedIn'));
-          _.set(yamlObj, key, jsyaml.dump(patchedNestedObject));
-        } else if (typeof patchObj[key] === 'object' && !Array.isArray(patchObj[key])) {
-          // If the patch is for an object, recursively apply the patch
-          if (!yamlObj[key]) {
-            yamlObj[key] = {};
-          }
-          applyPatch(yamlObj[key], patchObj[key]);
-        } else {
-          // If the patch is for a value, simply set the value in the YAML object
-          _.set(yamlObj, key, patchObj[key]);
+  function applyPatch(yamlObj, patchObj) {
+    Object.keys(patchObj).forEach(key => {
+      if (patchObj[key].isNestedIn) {
+        // If the patch is for a nested object merge the original and patched objects
+        const originalValue = _.get(yamlObj, key);
+        let nestedObject = {};
+        if (originalValue) {
+          nestedObject = jsyaml.load(originalValue);
         }
-      });
-    }
+        const patchedNestedObject = _.merge(nestedObject, _.omit(patchObj[key], 'isNestedIn'));
+        _.set(yamlObj, key, jsyaml.dump(patchedNestedObject));
+      } else if (typeof patchObj[key] === 'object' && !Array.isArray(patchObj[key])) {
+        // If the patch is for an object, recursively apply the patch
+        if (!yamlObj[key]) {
+          yamlObj[key] = {};
+        }
+        applyPatch(yamlObj[key], patchObj[key]);
+      } else {
+        // If the patch is for a value, simply set the value in the YAML object
+        _.set(yamlObj, key, patchObj[key]);
+      }
+    });
+  }
 
-    applyPatch(yamlObject, patch);
+  // Do the CodeMirror magic here
+  if (isRancherManagerVersion('<2.16')) {
+    cy.get('.CodeMirror').then((editor) => {
+      // @ts-expect-error known error with CodeMirror
+      const yaml = editor[0].CodeMirror.getValue();
+      const yamlObject = jsyaml.load(yaml);
+      applyPatch(yamlObject, patch);
 
-    const patchedYaml = jsyaml.dump(yamlObject);
-    // Set the modified YAML back to the editor
-    // @ts-expect-error known error with CodeMirror
-    editor[0].CodeMirror.setValue(patchedYaml);
-    cy.clickButton('Save');
-  });
+      const patchedYaml = jsyaml.dump(yamlObject);
+      // Set the modified YAML back to the editor
+      setYamlContent(patchedYaml);
+    });
+  } else {
+    cy.get('.cm-content').then((editor) => {
+      const view = EditorView.findFromDOM(editor[0]);
+      if (!view) {
+        throw new Error('CodeMirror EditorView not found');
+      }
+      const yaml = view.state.doc.toString();
+      const yamlObject = jsyaml.load(yaml);
+      applyPatch(yamlObject, patch);
 
+      const patchedYaml = jsyaml.dump(yamlObject);
+      // Set the modified YAML back to the editor
+      setYamlContent(patchedYaml);
+    });
+  }
+
+  cy.clickButton('Save');
   // Reset the namespace after the operation
   cy.namespaceReset();
 });
@@ -868,7 +904,7 @@ Cypress.Commands.add('deleteCluster', (clusterName, timeout = 120000) => {
   cy.get("table.sortable-table tbody tr").should('not.have.class', 'no-results');
   cy.viewport(1920, 1080);
   cy.getBySel('sortable-table_check_select_all').click();
-  cy.getBySel('sortable-table-promptRemove').click({ctrlKey: true});
+  cy.performDelete();
   cy.wait(2000); // needed for 2.12
   cy.contains(clusterName, {timeout: timeout}).should('not.exist');
 });
@@ -1066,7 +1102,7 @@ Cypress.Commands.add('deleteKubernetesResource', (clusterName = vars.localCluste
       cy.getBySel('sortable-cell-0-1').should('exist');
       cy.viewport(1920, 1080);
       cy.getBySel('sortable-table_check_select_all').click();
-      cy.getBySel('sortable-table-promptRemove').click({ctrlKey: true}); // this will prevent to display confirmation dialog
+      cy.performDelete();
       cy.wait(2000); // needed for 2.12
       cy.typeInFilter(resourceName);
       cy.getBySel('sortable-cell-0-1', {timeout: 60000}).should('not.exist');
@@ -1095,14 +1131,33 @@ Cypress.Commands.add('editKubernetesResource', (options) => {
   cy.get('div.dropdownTarget').contains('Edit YAML').click();
 
   if (options.modifyYAMLOperation) {
-    cy.get('.CodeMirror').then((editor) => {
-      // @ts-expect-error known error with CodeMirror
-      let text = yaml.load(editor[0].CodeMirror.getValue());
-      // @ts-ignore
-      options.modifyYAMLOperation(text);
-      // @ts-expect-error known error with CodeMirror
-      editor[0].CodeMirror.setValue(yaml.dump(text));
-    });
+    if (isRancherManagerVersion('<2.16')) {
+      cy.get('.CodeMirror').then((editor) => {
+        // @ts-expect-error known error with CodeMirror
+        let text = yaml.load(editor[0].CodeMirror.getValue());
+        // @ts-ignore
+        options.modifyYAMLOperation(text);
+        // @ts-expect-error known error with CodeMirror
+        editor[0].CodeMirror.setValue(yaml.dump(text));
+      });
+    } else {
+      cy.get('.cm-content').then((editor) => {
+        const view = EditorView.findFromDOM(editor[0]);
+        if (!view) {
+          throw new Error('CodeMirror EditorView not found');
+        }
+        const text = yaml.load(view.state.doc.toString());
+        // @ts-ignore
+        options.modifyYAMLOperation(text);
+        view.dispatch({
+          changes: {
+          from: 0,
+          to: view.state.doc.length,
+          insert: yaml.dump(text),
+          },
+        });
+      });
+    }
   }
   cy.clickButton('Save');
   // ensure there was no error with Editing the YAML.
@@ -1171,8 +1226,8 @@ Cypress.Commands.add('checkKubernetesResource', (clusterName = vars.localCluster
 });
 
 Cypress.Commands.add('exploreCluster', (clusterName: string) => {
-  cy.burgerMenuOperate('open');
-  cy.accesMenuSelection([clusterName])
+  cy.searchCluster(clusterName);
+  cy.getBySel('cluster-manager-list-explore-management').click();
   cy.getBySel('header').get('.cluster-name').contains(clusterName);
 });
 
@@ -1242,14 +1297,6 @@ Cypress.Commands.add('importYAML', (yamlOrPath, namespace, clusterName = vars.lo
     cy.get('.vs__selected-options').click();
     cy.contains('.vs__dropdown-menu .vs__dropdown-option', namespace).click();
   }
-
-  // Paste file content into the CodeMirror editor
-  const setYamlContent = (content: string) => {
-    cy.get('.CodeMirror').then((codeMirrorElement) => {
-      const cm = (codeMirrorElement[0] as any).CodeMirror;
-      cm.setValue(content);
-    });
-  };
 
   if (
     typeof yamlOrPath === 'string' &&
@@ -1418,15 +1465,11 @@ Cypress.Commands.add('checkExternalFleetAnnotation', (clusterName, required = tr
   cy.get('a[href*="management.cattle.io.cluster/c-"]').click();
   const annotation = 'provisioning.cattle.io/externally-managed: \'true\'';
 
-  cy.get('.CodeMirror').then((editor) => {
-    // @ts-expect-error known error with CodeMirror
-    const text = editor[0].CodeMirror.getValue();
-    if (required) {
-      expect(text).to.include(annotation);
-    } else {
-      expect(text).to.not.include(annotation);
-    }
-  });
+  if (required) {
+    cy.checkYAMLText(annotation, true);
+  } else {
+    cy.checkYAMLText(annotation, false);
+  }
 });
 
 // Commands to execute on kubectl shell
@@ -1456,23 +1499,44 @@ Cypress.Commands.add('viewCAPIClusterYAML', (clusterName) => {
 });
 
 Cypress.Commands.add('checkCAPIClusterCPInitialized', (clusterName) => {
+  const cpText = 'controlPlaneInitialized:true';
   function checkCAPIClusterCP(retries = 40) {
-    cy.get('.CodeMirror-scroll').invoke('text').then((text) => {
-      if (text.replace(/\s+/g, '').includes('controlPlaneInitialized:true')) {
-        return;
-      }
-
-      if (retries <= 0) {
-        cy.contains(text).should('exist');
-        return;
-      }
-      // Retry for 10mins
-      cy.log(`Refreshing... (${retries} retries remaining)`);
-      cy.wait(15000);
-      cy.reload();
-
-      checkCAPIClusterCP(retries - 1);
-    });
+    if (isRancherManagerVersion('>=2.16')) {
+      cy.get('.cm-content').then((editor) => {
+        const view = EditorView.findFromDOM(editor[0]);
+        if (!view) {
+          throw new Error('CodeMirror EditorView not found');
+        }
+        const text = view.state.doc.toString();
+        if (text.replace(/\s+/g, '').includes(cpText)) {
+          return;
+        }
+        if (retries <= 0) {
+          cy.contains(text).should('exist');
+          return;
+        }
+        // Retry for 10mins
+        cy.log(`Refreshing... (${retries} retries remaining)`);
+        cy.wait(15000);
+        cy.reload();
+        checkCAPIClusterCP(retries - 1);
+      });
+    } else {
+      cy.get('.CodeMirror-scroll').invoke('text').then((text) => {
+        if (text.replace(/\s+/g, '').includes(cpText)) {
+         return;
+        }
+        if (retries <= 0) {
+          cy.contains(text).should('exist');
+          return;
+        }
+        // Retry for 10mins
+        cy.log(`Refreshing... (${retries} retries remaining)`);
+        cy.wait(15000);
+        cy.reload();
+        checkCAPIClusterCP(retries - 1);
+      });
+    }
   }
 
   cy.viewCAPIClusterYAML(clusterName);
@@ -1513,6 +1577,66 @@ Cypress.Commands.add('checkAppDeployed', (appName: string, namespace: string, ch
   cy.waitForAllRowsInState('Deployed', vars.shortTimeout);
   cy.namespaceReset();
 });
+
+Cypress.Commands.add('checkYAMLText', (content: string, shouldExist: boolean) => {
+  if (isRancherManagerVersion('>=2.16')) {
+    cy.get('.cm-content').then((editor) => {
+      const view = EditorView.findFromDOM(editor[0]);
+      if (!view) {
+        throw new Error('CodeMirror EditorView not found');
+      }
+      const text = view.state.doc.toString();
+      if (shouldExist) {
+        expect(text).to.include(content);
+      } else {
+        expect(text).to.not.include(content);
+      }
+    });
+  } else {
+    cy.get('.CodeMirror').then((editor) => {
+      // @ts-expect-error known error with CodeMirror
+      const text = editor[0].CodeMirror.getValue();
+      if (shouldExist) {
+        expect(text).to.include(content);
+      } else {
+        expect(text).to.not.include(content);
+      }
+    });
+  }
+});
+
+Cypress.Commands.add('performDelete', () => {
+  if (isRancherManagerVersion('>=2.16')) {
+    cy.getBySel('sortable-table-selection-actions').click();
+    cy.getBySel('sortable-table-selection-action-delete').click({ctrlKey: true}); // this will prevent to display confirmation dialog  
+  } else {
+    cy.getBySel('sortable-table-promptRemove').click({ctrlKey: true}); // this will prevent to display confirmation dialog
+  }
+});
+
+export function setYamlContent(content: string) {
+  if (isRancherManagerVersion('<2.16')) {
+    // Paste file content into the CodeMirror editor  
+    cy.get('.CodeMirror').then((codeMirrorElement) => {
+      const cm = (codeMirrorElement[0] as any).CodeMirror;
+      cm.setValue(content);
+    });
+  } else {
+    cy.get('.cm-content').then((editor) => {
+    const view = EditorView.findFromDOM(editor[0]);
+    if (!view) {
+     throw new Error('CodeMirror EditorView not found');
+    }
+    view.dispatch({
+     changes: {
+      from: 0,
+      to: view.state.doc.length,
+      insert: content,
+      },
+    });
+    });
+  }
+};
 
 export function matchAndWaitForProviderReadyStatus(
   providerString: string,
@@ -1569,8 +1693,9 @@ export function setUseCAAPFFeatureGate(enabled: boolean, wait: boolean=true) {
     cy.getBySel('sortable-table-0-action-button').click();
     cy.get('div.dropdownTarget').contains('Show Configuration').click();
     cy.getBySel('btn-yaml-tab').click();
-    cy.get('.CodeMirror-code').contains(`use-caapf=${enabled}`);
-    cy.clickButton('Close');
+    cy.getBySel('save-configuration-bttn').click();
+    cy.checkYAMLText(`use-caapf=${enabled}`, true);
+    cy.clickButton('Cancel');
     cy.namespaceReset();
   }
 }

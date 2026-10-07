@@ -140,11 +140,7 @@ describe('Import CAPD RKE2 Class-Cluster for Migration', {tags: '@migration'}, (
         // click the three-dots menu and click View YAML
         cy.getBySel('sortable-table-0-action-button').click();
         cy.contains('View YAML').click();
-        cy.get('.CodeMirror').then((editor) => {
-          // @ts-expect-error known error with CodeMirror
-          const text = editor[0].CodeMirror.getValue();
-          expect(text).to.include('WranglerManagedCertificates');
-        });
+        cy.checkYAMLText('WranglerManagedCertificates', true);
 
         // Check CAPI cluster is Active
         cy.searchCluster(clusterName);
