@@ -166,11 +166,6 @@ jobs:
           GREPTAGS="${{ inputs.grep_test_by_tag }}"
           minor() { sed -E "$RANCHER_MINOR_SED" <<< "$1"; }
 
-          if [[ "$GREPTAGS" =~ "@migration" && "$GREPTAGS" =~ "@upgrade" ]]; then
-            echo "ERROR: @migration and @upgrade tags cannot be used together"
-            exit 1
-          fi
-
           if [[ "$GREPTAGS" =~ "@migration" ]]; then
             RANCHER_VERSION="${RANCHER_VERSION:-${{ env.PRE_MIGRATION_DEFAULT_RANCHER_VERSION }}}"
             RANCHER_UPGRADE_VERSION="${INPUT_UPGRADE_VERSION:-${{ env.POST_MIGRATION_DEFAULT_RANCHER_VERSION }}}"
@@ -503,7 +498,7 @@ jobs:
           echo "${HELM_SHA256}  helm.tar.gz" | sha256sum -c -
           sudo tar -xzf helm.tar.gz --strip-components=1 -C /usr/local/bin/ linux-amd64/helm && rm helm.tar.gz
       - name: Set COMMON_SPECS for Migration, Upgrade
-        if: ${{ env.RANCHER_UPGRADE_VERSION != '' }}
+        if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         run: |
           echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> ${GITHUB_ENV}
           # Unlike @upgrade, @migration runs the common specs only after the migration
@@ -640,13 +635,8 @@ jobs:
       - name: Get Rancher prime-head tag for Install
         if: ${{ contains(env.RANCHER_VERSION, 'prime-head') }}
         run: |
-          set -o pipefail
           HEAD_VERSION="${RANCHER_VERSION#prime-head/}"
           RM_VERSION=$(curl -fsSL ${{ secrets.prime_head_chart_url }} | yq ".entries.rancher | map(select(.version | test(\"^${HEAD_VERSION}\"))) | sort_by(.created) | .[-1].version")
-          if [[ -z "${RM_VERSION}" || "${RM_VERSION}" == "null" ]]; then
-            echo "ERROR: No Rancher version matching '${HEAD_VERSION}' found in the prime-head chart index"
-            exit 1
-          fi
           echo "RANCHER_VERSION=prime-rc/${RM_VERSION}" >> ${GITHUB_ENV}
       - name: Install Rancher Manager
         env:
@@ -749,13 +739,8 @@ jobs:
       - name: Get Rancher prime-head tag for Upgrade
         if: ${{ contains(env.RANCHER_VERSION, 'prime-head') && (contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
         run: |
-          set -o pipefail
           HEAD_VERSION="${RANCHER_VERSION#prime-head/}"
           RM_VERSION=$(curl -fsSL ${{ secrets.prime_head_chart_url }} | yq ".entries.rancher | map(select(.version | test(\"^${HEAD_VERSION}\"))) | sort_by(.created) | .[-1].version")
-          if [[ -z "${RM_VERSION}" || "${RM_VERSION}" == "null" ]]; then
-            echo "ERROR: No Rancher version matching '${HEAD_VERSION}' found in the prime-head chart index"
-            exit 1
-          fi
           echo "RANCHER_VERSION=prime-rc/${RM_VERSION}" >> ${GITHUB_ENV}
       - name: Upgrade Rancher Manager
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
