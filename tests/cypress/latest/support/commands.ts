@@ -762,7 +762,7 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
 
   cy.burgerMenuOperate('open');
   // Click on the cluster
-  cy.get('.side-menu .clusters').within(() => {
+  cy.getBySel('side-menu').within(() => {
     cy.contains(clusterName).click();
   });
 
@@ -874,7 +874,7 @@ Cypress.Commands.add('deleteCluster', (clusterName, timeout = 120000) => {
 });
 
 // Command to type in Filter input
-let filter = isRancherManagerVersion('<2.16') ? '.input-sm' : '[data-testid="search-box-filter-row"]'
+let filter = isRancherManagerVersion('<2.16') ? '.input-sm' : '[data-testid="table-views-query"]'
 Cypress.Commands.add('typeInFilter', (text, selector = filter) => {
   cy.get(selector)
     .click()
@@ -1528,26 +1528,30 @@ export function matchAndWaitForProviderReadyStatus(
     .contains('a', providerString)
     .closest('tr')
     .within(() => {
-      cy.get('td').eq(1).should('contain.text', readyState);    // State
-      cy.get('td').eq(2).should('contain.text', providerString);  // Name
-      cy.get('td').eq(3).should('contain.text', providerType);    // Type
-      cy.get('td').eq(4).should('contain.text', providerName);    // ProviderName
+      let row = 1;
+      cy.get('td').eq(row).should('contain.text', readyState); row++; // State
+      cy.get('td').eq(row).should('contain.text', providerString); row++;  // Name
+      if (isRancherManagerVersion('>=2.16')) {
+        cy.get('td').eq(row).should('contain.text', providerNamespace); row++;  // ProviderNamespace
+      }
+      cy.get('td').eq(row).should('contain.text', providerType); row++;  // Type
+      cy.get('td').eq(row).should('contain.text', providerName); row++;  // ProviderName
       // Only check provider version for Rancher >=2.13 and -
       // 1. pre-prime & prime rancher
       // 2. for turtles build with dev=true & target_build_type=prime
-      if (isRancherManagerVersion('>=2.13') && (isPrimeChannel() || isPrePrimeChannel() || (isTurtlesDevChart && isTurtlesPrimeBuild()))) {
-        cy.get('td').eq(5).should('contain.text', providerVersion); // InstalledVersion
+      if ((isRancherManagerVersion('>=2.13')) && (isPrimeChannel() || isPrePrimeChannel() || (isTurtlesDevChart && isTurtlesPrimeBuild()))) {
+        cy.get('td').eq(row).should('contain.text', providerVersion); row++;  // InstalledVersion
       } else {
-        cy.task('log', 'This is not a prime Rancher; skipping provider version check');
+        cy.task('log', 'This is not a prime Rancher; skipping provider version check'); row++;
       }
-      cy.get('td').eq(6).should('contain.text', readyState);      // Phase
+      cy.get('td').eq(row).should('contain.text', readyState);  // Phase
     });
     // Verify provider image
     cy.verifyCAPIProviderImage(providerNamespace);
 }
 
 export function setUseCAAPFFeatureGate(enabled: boolean, wait: boolean=true) {
-  const resourceKind = 'ConfigMap';
+  const resourceKind = 'ConfigMaps';
   const namespace = vars.cattleSystemNS;
   const patch = {data: {"rancher-turtles": {isNestedIn: true, "features": {"use-caapf": {"enabled": Boolean(enabled)}}}}};
   cy.patchYamlResource(vars.localCluster, namespace, resourceKind, 'rancher-config', patch);
@@ -1579,10 +1583,9 @@ export function searchResourceKind(resourceKind: string) {
     cy.contains('a', resourceKind, {matchCase: false}).click();
   } else {
     cy.getBySel('nav-jump-to-input').click();
-    cy.getBySel('nav-jump-to-dropdown')
-      .should('be.visible')
-      .contains(resourceKind)
-      .click();
+    cy.getBySel('nav-jump-to-dropdown').should('be.visible');
+    cy.getBySel('nav-jump-to-input').type(resourceKind)
+    cy.getBySel('nav-jump-to-option').click();
   }
 }
 
