@@ -179,7 +179,7 @@ jobs:
           # If no patch version found (for e.g. VERSION=2.15), calculate the latest patch version
           if [[ "${VERSION}" =~ ^[0-9]+\.[0-9]+$ ]]; then
             # Query the latest released patch for this minor version
-            LATEST=$(gh api "repos/rancher/rancher/releases?per_page=100" \
+            LATEST=$(gh api --paginate "repos/rancher/rancher/releases?per_page=100" \
               --jq '.[] | select(.prerelease == false) | .tag_name' | \
               { grep "^v${VERSION}\." || true; } | sort -V | tail -n 1)
             if [[ -z "${LATEST}" ]]; then
@@ -206,18 +206,20 @@ jobs:
 
           # 1. Try to find existing milestone ID
           MILESTONE_ID=$(
-            curl -s --request GET \
-              --url "https://api.qase.io/v1/milestone/${QASE_PROJECT_CODE}?search=${MILESTONE_TITLE}" \
+            curl -s --show-error --fail --request GET \
+              --url "https://api.qase.io/v1/milestone/${QASE_PROJECT_CODE}" \
               --header "Token: ${QASE_API_TOKEN}" \
               --header "accept: application/json" \
-            | jq -r --arg TITLE "$MILESTONE_TITLE" '.result.entities[] | select(.title == $TITLE) | .id'
+              --data-urlencode "search=${MILESTONE_TITLE}" \
+              --data-urlencode "limit=100" \
+            | jq -r --arg TITLE "$MILESTONE_TITLE" '[.result.entities[]? | select(.title == $TITLE) | .id] | min // empty'
             )
 
           # 2. If not found, create it and get the new ID
           if [ -z "$MILESTONE_ID" ]; then
             echo "Creating new milestone ${MILESTONE_TITLE} in QASE"
             MILESTONE_ID=$(
-              curl -s --request POST \
+              curl -s --show-error --fail --request POST \
                 --url "https://api.qase.io/v1/milestone/${QASE_PROJECT_CODE}" \
                 --header "Token: ${QASE_API_TOKEN}" \
                 --header "Content-Type: application/json" \
@@ -702,7 +704,7 @@ jobs:
           fi
           ## Set milestone_id for the current run
           if [ -n "${QASE_TESTOPS_RUN_ID}" ] && [ -n "${QASE_TESTOPS_MILESTONE_ID}" ]; then
-            STATUS=$(curl -s --request PATCH \
+            STATUS=$(curl -s --show-error --fail --request PATCH \
               --url "https://api.qase.io/v1/run/${QASE_PROJECT_CODE}/${QASE_TESTOPS_RUN_ID}" \
               --header "Token: ${QASE_API_TOKEN}" \
               --header "Content-Type: application/json" \
@@ -927,7 +929,7 @@ jobs:
             # Push the summary to Qase Run description
             RUNNER_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
             payload=$(jq -n --arg url "${RUNNER_URL}" --rawfile desc "${GITHUB_STEP_SUMMARY}" '{"description": ($url +"\n\n"+ $desc)}')
-            curl -s \
+            curl -s --show-error --fail \
               --request PATCH \
               --url "https://api.qase.io/v1/run/${QASE_PROJECT_CODE}/${QASE_TESTOPS_RUN_ID}" \
               --header "Token: ${QASE_API_TOKEN}" \
