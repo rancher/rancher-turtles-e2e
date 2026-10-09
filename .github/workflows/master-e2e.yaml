@@ -516,10 +516,10 @@ jobs:
       - name: Set COMMON_SPECS for Migration, Upgrade
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         run: |
-          echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> ${GITHUB_ENV}
+          echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" | tee -a ${GITHUB_ENV}
           # Unlike @upgrade, @migration runs the common specs only after the migration
           if [[ "${{ inputs.grep_test_by_tag }}" =~ "@migration" ]]; then
-            echo "SPECS=" >> ${GITHUB_ENV}
+            echo "SPECS=" | tee -a ${GITHUB_ENV}
           fi
 
       - name: Set Rancher Manager point version
@@ -531,7 +531,7 @@ jobs:
 
           # Point version is known for 2.12 and the versions in RANCHER_RECENT_VERSIONS (2.13 onwards)
           if [[ "$MINOR" == "2.12" || "$MINOR" =~ ^${RANCHER_RECENT_VERSIONS}$ ]]; then
-            echo RANCHER_POINT_VERSION="$MINOR" >> ${GITHUB_ENV}
+            echo RANCHER_POINT_VERSION="$MINOR" | tee -a ${GITHUB_ENV}
           else
             echo "ERROR: Cannot determine Rancher point version from '${TARGET_VERSION}', is it missing in RANCHER_RECENT_VERSIONS?"
             exit 1
@@ -544,14 +544,14 @@ jobs:
           MINOR=$(sed -E "$RANCHER_MINOR_SED" <<< "${RANCHER_UPGRADE_VERSION:-$RANCHER_VERSION}")
           BRANCH=$(awk -v m="$MINOR" '$1 == m {print $2}' <<< "$TURTLES_BRANCHES")
           if [[ -n "$BRANCH" ]]; then
-            echo "TURTLES_BRANCH=$BRANCH" >> ${GITHUB_ENV}
+            echo "TURTLES_BRANCH=$BRANCH" | tee -a ${GITHUB_ENV}
           else
             echo "::notice::No rancher/turtles branch found for Rancher $MINOR in TURTLES_BRANCHES, using default branch $TURTLES_BRANCH"
           fi
       - name: Set k3s Install version
         run: |
           if [[ "$(sed -E "$RANCHER_MINOR_SED" <<< "$RANCHER_VERSION")" == "2.12" ]]; then
-            echo INSTALL_K3S_VERSION="v1.32.4+k3s1" >> ${GITHUB_ENV}
+            echo INSTALL_K3S_VERSION="v1.32.4+k3s1" | tee -a ${GITHUB_ENV}
           fi
 
       # Checkout into r/turtles repo if dev=true to build turtles and providers chart;
@@ -571,7 +571,7 @@ jobs:
 
       - name: Set date variable
         run: |
-          echo "TAG=$(date "+%Y.%m.%d")" >> ${GITHUB_ENV}
+          echo "TAG=$(date "+%Y.%m.%d")" | tee -a ${GITHUB_ENV}
 
       # This step builds latest turtles chart and pushes latest turtles docker image to local docker registry
       - name: Make Turtles chart
@@ -654,7 +654,7 @@ jobs:
         run: |
           HEAD_VERSION="${RANCHER_VERSION#prime-head/}"
           RM_VERSION=$(curl -fsSL ${{ secrets.prime_head_chart_url }} | yq ".entries.rancher | map(select(.version | test(\"^${HEAD_VERSION}\"))) | sort_by(.created) | .[-1].version")
-          echo "RANCHER_VERSION=prime-rc/${RM_VERSION}" >> ${GITHUB_ENV}
+          echo "RANCHER_VERSION=prime-rc/${RM_VERSION}" | tee -a ${GITHUB_ENV}
       - name: Install Rancher Manager
         env:
           PUBLIC_DNS: ${{ needs.create-runner.outputs.public_dns }}
@@ -752,13 +752,13 @@ jobs:
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         run: |
           # RANCHER_UPGRADE_VERSION is validated and defaulted in the determine-versions job
-          echo "RANCHER_VERSION=$RANCHER_UPGRADE_VERSION" >> "$GITHUB_ENV"
+          echo "RANCHER_VERSION=$RANCHER_UPGRADE_VERSION" | tee -a "$GITHUB_ENV"
       - name: Get Rancher prime-head tag for Upgrade
         if: ${{ contains(env.RANCHER_VERSION, 'prime-head') && (contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
         run: |
           HEAD_VERSION="${RANCHER_VERSION#prime-head/}"
           RM_VERSION=$(curl -fsSL ${{ secrets.prime_head_chart_url }} | yq ".entries.rancher | map(select(.version | test(\"^${HEAD_VERSION}\"))) | sort_by(.created) | .[-1].version")
-          echo "RANCHER_VERSION=prime-rc/${RM_VERSION}" >> ${GITHUB_ENV}
+          echo "RANCHER_VERSION=prime-rc/${RM_VERSION}" | tee -a ${GITHUB_ENV}
       - name: Upgrade Rancher Manager
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:
@@ -926,7 +926,7 @@ jobs:
           fi
 
   delete-runner:
-    if: ${{ always() && contains(needs.create-runner.outputs.uuid, 'vsphere') == false && inputs.destroy_runner == true && needs.create-runner.outputs.uuid != '' }}
+    if: ${{ always() && contains(needs.create-runner.outputs.uuid, 'vsphere') == false }}
     needs: [ create-runner, e2e ]
     runs-on: ubuntu-latest
     steps:
