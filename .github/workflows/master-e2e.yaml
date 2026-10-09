@@ -131,13 +131,6 @@ on:
         type: boolean
         default: false
 
-# Shared by the determine-milestone and e2e jobs
-env:
-  PRE_MIGRATION_DEFAULT_RANCHER_VERSION: prime-head/2.12
-  POST_MIGRATION_DEFAULT_RANCHER_VERSION: prime-head/2.13
-  PRE_UPGRADE_DEFAULT_RANCHER_VERSION: prime-head/2.14
-  POST_UPGRADE_DEFAULT_RANCHER_VERSION: prime-head/2.15
-
 jobs:
   determine-milestone:
     runs-on: ubuntu-latest
@@ -146,6 +139,10 @@ jobs:
       milestone: ${{ steps.milestone.outputs.milestone }}
       milestone_id: ${{ steps.milestone.outputs.milestone_id }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: tests/scripts
       - name: Determine milestone from latest matching rancher/rancher release
         id: milestone
         env:
@@ -153,19 +150,19 @@ jobs:
           QASE_API_TOKEN: ${{ secrets.qase_api_token }}
           QASE_PROJECT_CODE: RT
           QASE_REPORT: ${{ inputs.qase_report }}
-          RANCHER_VERSION: ${{ inputs.rancher_version }}
-          RANCHER_UPGRADE_VERSION: ${{ inputs.rancher_upgrade_version }}
+          IN_RANCHER_VERSION: ${{ inputs.rancher_version }}
+          IN_UPGRADE_VERSION: ${{ inputs.rancher_upgrade_version }}
           GREPTAGS: ${{ inputs.grep_test_by_tag }}
         run: |
+          E2E_ENV=$(tests/scripts/compute-e2e-env \
+            --rancher-version "${IN_RANCHER_VERSION}" \
+            --upgrade-version "${IN_UPGRADE_VERSION}" \
+            --tags "${GREPTAGS}")
+          eval "${E2E_ENV}"
           # Migration and upgrade runs end on the upgrade target, so the milestone
           # must track that version rather than the one installed first.
-          # WARN: Unlike e2e job, this will not flag if RANCHER_UPGRADE_VERSION is invalid,
-          # so a milestone might still be created even if the job later fails.
-          if [[ "${GREPTAGS}" =~ @migration ]]; then
-            RANCHER_VERSION="${RANCHER_UPGRADE_VERSION:-${POST_MIGRATION_DEFAULT_RANCHER_VERSION}}"
-          fi
-          if [[ "${GREPTAGS}" =~ @upgrade ]]; then
-            RANCHER_VERSION="${RANCHER_UPGRADE_VERSION:-${POST_UPGRADE_DEFAULT_RANCHER_VERSION}}"
+          if [[ -n "${RANCHER_UPGRADE_VERSION}" ]]; then
+            RANCHER_VERSION="${RANCHER_UPGRADE_VERSION}"
           fi
 
           CHANNEL="${RANCHER_VERSION%%/*}"
@@ -336,11 +333,8 @@ jobs:
     outputs:
       qase_run_id: ${{ steps.qase_run_id.outputs.qase_run_id }}
     env:
-      # Rancher versions with embedded turtles
-      RANCHER_RECENT_VERSIONS: '2\.(13|14|15|16)'
       # K3S flags to use for installation
       INSTALL_K3S_SKIP_ENABLE: true
-      INSTALL_K3S_VERSION: ${{ inputs.upstream_cluster_version }}
       # For Rancher Manager
       RANCHER_USER: admin
       RANCHER_URL: https://${{ needs.create-runner.outputs.public_dns }}/dashboard
@@ -354,7 +348,6 @@ jobs:
       QASE_TESTOPS_MILESTONE_ID: ${{ needs.determine-milestone.outputs.milestone_id }}
       # Cypress
       TURTLES_REPO: rancher/turtles
-      TURTLES_BRANCH: main
       TURTLES_CHART_DEV_VERSION: 108.0.0+up99.99.99
       CONTROLLER_IMG: localhost:5000/rancher/turtles
       BROWSER: chrome
@@ -388,39 +381,6 @@ jobs:
       # Script to zip and encrypt artifacts
       ARTIFACT_ENCRYPTOR: ${{ github.workspace }}/.github/scripts/encrypt-artifact.sh
 
-      # Common specs: @short @vsphere @full
-      SPECS: |
-        e2e/providers_setup_legacy.spec.ts
-        e2e/providers_setup.spec.ts
-        e2e/capd_kubeadm_nocaapf_clusterclass.spec.ts
-        e2e/capd_rke2_nocaapf_clusterclass.spec.ts
-        e2e/capa_kubeadm_nocaapf_clusterclass.spec.ts
-        e2e/capa_eks_nocaapf_clusterclass.spec.ts
-        e2e/capa_rke2_nocaapf_clusterclass.spec.ts
-        e2e/capz_aks_nocaapf_clusterclass.spec.ts
-        e2e/capz_kubeadm_nocaapf_clusterclass.spec.ts
-        e2e/capz_rke2_nocaapf_clusterclass.spec.ts
-        e2e/capg_kubeadm_nocaapf_clusterclass.spec.ts
-        e2e/capg_gke_nocaapf_clusterclass.spec.ts
-        e2e/capv_rke2_nocaapf_clusterclass.spec.ts
-        e2e/capv_kubeadm_nocaapf_clusterclass.spec.ts
-        e2e/fleet_addon_provider_setup.spec.ts
-        e2e/capd_rke2_clusterclass.spec.ts
-        e2e/capd_rke2_fleet_clusterclass.spec.ts
-        e2e/capd_kubeadm_clusterclass.spec.ts
-        e2e/azure_rke2_v2prov_cluster.spec.ts
-        e2e/capv_rke2_clusterclass.spec.ts
-        e2e/capv_kubeadm_clusterclass.spec.ts
-        e2e/capa_rke2_clusterclass.spec.ts
-        e2e/capa_kubeadm_clusterclass.spec.ts
-        e2e/capa_eks_clusterclass.spec.ts
-        e2e/capg_gke_clusterclass.spec.ts
-        e2e/capg_kubeadm_clusterclass.spec.ts
-        e2e/capz_aks_clusterclass.spec.ts
-        e2e/capz_rke2_clusterclass.spec.ts
-        e2e/capz_kubeadm_clusterclass.spec.ts
-        e2e/capi_features_switch.spec.ts
-        e2e/capd_kubeadm_use_caapf_switch.spec.ts
     steps:
       - name: Add /usr/local/bin into PATH
         run: |
@@ -440,99 +400,28 @@ jobs:
           echo "${HELM_SHA256}  helm.tar.gz" | sha256sum -c -
           sudo tar -xzf helm.tar.gz --strip-components=1 -C /usr/local/bin/ linux-amd64/helm && rm helm.tar.gz
 
-      - name: Set Rancher Manager version for Installation
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: tests/scripts
+      # Computes RANCHER_VERSION, RANCHER_UPGRADE_VERSION, RANCHER_POINT_VERSION, TURTLES_BRANCH,
+      # INSTALL_K3S_VERSION, SPEC, UPGRADE_SPEC, ... and validates migration/upgrade versions
+      - name: Compute e2e environment
+        env:
+          IN_RANCHER_VERSION: ${{ inputs.rancher_version }}
+          IN_UPGRADE_VERSION: ${{ inputs.rancher_upgrade_version }}
+          IN_TAGS: ${{ inputs.grep_test_by_tag }}
+          IN_DEV_CHART: ${{ inputs.turtles_dev_chart }}
+          IN_K3S_VERSION: ${{ inputs.upstream_cluster_version }}
+        # Explicit shell enables pipefail, so a validation error fails the step
+        shell: bash
         run: |
-          # Default version for tests
-          echo "RANCHER_VERSION=${{ inputs.rancher_version }}" >> ${GITHUB_ENV}
-
-      - name: Set Rancher Manager version and COMMON_SPECS for Pre-Migration
-        if: ${{ contains(inputs.grep_test_by_tag, '@migration') }}
-        run: |
-          echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> ${GITHUB_ENV}
-          echo "SPECS=" >> ${GITHUB_ENV}
-          # Pre-Migration
-          if [[ "$RANCHER_VERSION" == *"2.12"* ]]; then
-            echo "RANCHER_VERSION=$RANCHER_VERSION" >> "$GITHUB_ENV"
-          else
-            # Default version for pre-migration tests
-            echo "RANCHER_VERSION=${{ env.PRE_MIGRATION_DEFAULT_RANCHER_VERSION }}" >> "$GITHUB_ENV"
-          fi
-
-      - name: Set Rancher Manager version and COMMON_SPECS for Pre-Upgrade
-        if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') }}
-        run: |
-          echo "COMMON_SPECS=$(echo "${{ env.SPECS }}" | tr '\n' ' ')" >> ${GITHUB_ENV}
-          # Pre-Upgrade
-          if [[ "$RANCHER_VERSION" == *"2.13"* || "$RANCHER_VERSION" == *"2.14"* ]]; then
-            echo "RANCHER_VERSION=$RANCHER_VERSION" >> "$GITHUB_ENV"
-          else
-            # Default version for pre-upgrade tests
-            echo "RANCHER_VERSION=${{ env.PRE_UPGRADE_DEFAULT_RANCHER_VERSION }}" >> "$GITHUB_ENV"
-          fi
-
-      - name: Set Rancher Manager point version
-        if: ${{ inputs.turtles_dev_chart == true }}
-        run: |
-          # Rancher 2.12
-          if [[ "${{env.RANCHER_VERSION }}" =~ 2.12 ]]; then
-            echo RANCHER_POINT_VERSION="2.12" >> ${GITHUB_ENV}
-          fi
-
-          # Rancher 2.13 onwards
-          if [[ "${{ env.RANCHER_VERSION }}" =~ $RANCHER_RECENT_VERSIONS ]]; then
-            echo RANCHER_POINT_VERSION="${BASH_REMATCH[0]}" >> ${GITHUB_ENV}
-          fi
-
-          # Migration tests
-          if [[ "${{ inputs.grep_test_by_tag }}" =~ "@migration" ]]; then
-            echo RANCHER_POINT_VERSION="2.13" >> ${GITHUB_ENV}
-          fi
-
-          # Upgrade tests
-          if [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
-            if [[ "${{ env.RANCHER_VERSION }}" =~ 2.13 ]]; then
-              echo RANCHER_POINT_VERSION="2.14" >> ${GITHUB_ENV}
-            elif [[ "${{ env.RANCHER_VERSION }}" =~ 2.14 ]]; then
-              echo RANCHER_POINT_VERSION="2.15" >> ${GITHUB_ENV}
-            fi
-          fi
-      - name: Set rancher/turtles repo branch
-        if: ${{ inputs.turtles_dev_chart == true }}
-        run: |
-
-          # Migration tests
-          if [[ "${{ inputs.grep_test_by_tag }}" =~ "@migration" ]]; then
-            echo "TURTLES_BRANCH=release/v0.25" >> ${GITHUB_ENV}
-
-          # Upgrade tests
-          elif [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" ]]; then
-            if [[ "${{ env.RANCHER_VERSION }}" =~ 2.13 ]]; then
-              echo "TURTLES_BRANCH=release/v0.26" >> ${GITHUB_ENV}
-            elif [[ "${{ env.RANCHER_VERSION }}" =~ 2.14 ]]; then
-              echo "TURTLES_BRANCH=release/v0.27" >> ${GITHUB_ENV}
-            fi
-
-          # Fresh-install tests
-          else
-            if [[ "${{ env.RANCHER_VERSION }}" =~ 2.12 ]]; then
-              echo "TURTLES_BRANCH=release-0.24" >> ${GITHUB_ENV}
-            elif [[ "${{ env.RANCHER_VERSION }}" =~ 2.13 ]]; then
-              echo "TURTLES_BRANCH=release/v0.25" >> ${GITHUB_ENV}
-            elif [[ "${{ env.RANCHER_VERSION }}" =~ 2.14 ]]; then
-              echo "TURTLES_BRANCH=release/v0.26" >> ${GITHUB_ENV}
-            elif [[ "${{ env.RANCHER_VERSION }}" =~ 2.15 ]]; then
-              echo "TURTLES_BRANCH=release/v0.27" >> ${GITHUB_ENV}
-            else
-              echo "TURTLES_BRANCH=${{ env.TURTLES_BRANCH }}" >> ${GITHUB_ENV}
-            fi
-          fi
-      - name: Set k3s Install version
-        run: |
-          if [[ "${{ env.RANCHER_VERSION }}" =~ (2\.12) ]]; then
-            echo INSTALL_K3S_VERSION="v1.32.4+k3s1" >> ${GITHUB_ENV}
-          else
-            echo INSTALL_K3S_VERSION=${{ inputs.upstream_cluster_version }} >> ${GITHUB_ENV}
-          fi
+          tests/scripts/compute-e2e-env --format github \
+            --rancher-version "${IN_RANCHER_VERSION}" \
+            --upgrade-version "${IN_UPGRADE_VERSION}" \
+            --tags "${IN_TAGS}" \
+            --dev-chart "${IN_DEV_CHART}" \
+            --k3s-version "${IN_K3S_VERSION}" | tee -a "${GITHUB_ENV}"
 
       # Checkout into r/turtles repo if dev=true to build turtles and providers chart;
       # or if it's a migration test, then to copy the provider migration script
@@ -629,22 +518,6 @@ jobs:
           INDEX=$(((${{ github.run_number }} % 3) + 1))
           CP_ENDPOINT_IP=$(echo ${{ secrets.vsphere_endpoints_list }} | cut -d' ' -f${INDEX})
           sed -i "s/replace_cluster_control_plane_endpoint_ip/${CP_ENDPOINT_IP}/" tests/cypress/latest/fixtures/vsphere/capv-helm-values.yaml
-      - name: Check Rancher Manager version for Pre-Migration, Pre-Upgrade
-        run: |
-          if [[ "${{ inputs.grep_test_by_tag }}" =~ "@migration" && "$RANCHER_VERSION" != *"2.12"* ]]; then
-            echo "ERROR: Migration is only allowed from 2.12 Rancher Version"
-            exit 1
-          fi
-          if [[ "${{ inputs.grep_test_by_tag }}" =~ "@upgrade" && ! "$RANCHER_VERSION" =~ 2\.(13|14) ]]; then
-            echo "ERROR: Upgrade is only allowed from 2.13, 2.14 Rancher Version"
-            exit 1
-          fi
-      - name: Get Rancher prime-head tag for Install
-        if: ${{ contains(env.RANCHER_VERSION, 'prime-head') }}
-        run: |
-          HEAD_VERSION="${RANCHER_VERSION#prime-head/}"
-          RM_VERSION=$(curl -fsSL ${{ secrets.prime_head_chart_url }} | yq ".entries.rancher | map(select(.version | test(\"^${HEAD_VERSION}\"))) | sort_by(.created) | .[-1].version")
-          echo "RANCHER_VERSION=prime-rc/${RM_VERSION}" >> ${GITHUB_ENV}
       - name: Install Rancher Manager
         env:
           RANCHER_VERSION: ${{ env.RANCHER_VERSION }}
@@ -680,15 +553,7 @@ jobs:
           RANCHER_TURTLES_E2E_BRANCH: ${{ env.RANCHER_TURTLES_E2E_BRANCH }}
           RANCHER_VERSION: ${{ env.RANCHER_VERSION }}
           RANCHER_PASSWORD: ${{ secrets.rancher_password }}
-          SPEC: |
-            e2e/first_connection.spec.ts
-            e2e/turtles_chart_legacy.spec.ts
-            e2e/turtles_ui_extension.spec.ts
-            e2e/menu.spec.ts
-            ${{ env.SPECS }}
-            e2e/capd_rke2_migration_clusterclass.spec.ts
-            e2e/capd_rke2_upgrade_clusterclass.spec.ts
-            e2e/pre_upgrade_setup.spec.ts
+          SPEC: ${{ env.SPEC }}
         run: |
           if [ ${{ inputs.turtles_dev_chart }} == true ]; then
             export CHARTMUSEUM_REPO=http://${{ needs.create-runner.outputs.public_dns }}
@@ -741,34 +606,10 @@ jobs:
           retention-days: 7
           archive: 'false'
           if-no-files-found: ignore
-      - name: Set Rancher Manager version for Post-Migration
-        if: ${{ contains(inputs.grep_test_by_tag, '@migration') }}
-        run: |
-          RANCHER_UPGRADE_VERSION="${{ inputs.rancher_upgrade_version }}"
-          # Post-Migration
-          if [[ "$RANCHER_VERSION" == *"2.12"* && "$RANCHER_UPGRADE_VERSION" == *"2.13"* ]]; then
-            echo "RANCHER_VERSION=$RANCHER_UPGRADE_VERSION" >> "$GITHUB_ENV"
-          elif [ -z "$RANCHER_UPGRADE_VERSION" ]; then
-            # Default version for post-migration tests
-            echo "RANCHER_VERSION=${{ env.POST_MIGRATION_DEFAULT_RANCHER_VERSION }}" >> "$GITHUB_ENV"
-          else
-            echo "ERROR: Migration is only allowed to 2.13 Rancher Version"
-            exit 1
-          fi
-      - name: Set Rancher Manager version for Post-Upgrade
-        if: ${{ contains(inputs.grep_test_by_tag, '@upgrade') }}
-        run: |
-          RANCHER_UPGRADE_VERSION="${{ inputs.rancher_upgrade_version }}"
-          # Post-Upgrade
-          if [[ "$RANCHER_VERSION" == *"2.13"* && "$RANCHER_UPGRADE_VERSION" == *"2.14"* || "$RANCHER_VERSION" == *"2.14"* && "$RANCHER_UPGRADE_VERSION" == *"2.15"* ]]; then
-            echo "RANCHER_VERSION=$RANCHER_UPGRADE_VERSION" >> "$GITHUB_ENV"
-          elif [ -z "$RANCHER_UPGRADE_VERSION" ]; then
-            # Default version for post-upgrade tests
-            echo "RANCHER_VERSION=${{ env.POST_UPGRADE_DEFAULT_RANCHER_VERSION }}" >> "$GITHUB_ENV"
-          else
-            echo "ERROR: Upgrade is only allowed to 2.14, 2.15 Rancher Versions"
-            exit 1
-          fi
+      - name: Set Rancher Manager version for Post-Migration, Post-Upgrade
+        if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
+        # Upgrade target was already computed and validated by tests/scripts/compute-e2e-env
+        run: echo "RANCHER_VERSION=${RANCHER_UPGRADE_VERSION}" >> "$GITHUB_ENV"
       - name: Get Rancher prime-head tag for Upgrade
         if: ${{ contains(env.RANCHER_VERSION, 'prime-head') && (contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
         run: |
@@ -807,11 +648,7 @@ jobs:
           RANCHER_PASSWORD: ${{ secrets.rancher_password }}
           QASE_TESTOPS_RUN_ID: ${{ steps.qase_run_id.outputs.qase_run_id }}
           IS_RANCHER_UPGRADED: true
-          SPEC: |
-            e2e/post_upgrade_setup.spec.ts
-            e2e/capd_rke2_migration_clusterclass.spec.ts
-            ${{ env.COMMON_SPECS }}
-            e2e/capd_rke2_upgrade_clusterclass.spec.ts
+          SPEC: ${{ env.UPGRADE_SPEC }}
         run: |
           if [ ${{ inputs.turtles_dev_chart }} == true ]; then
             export CHARTMUSEUM_REPO=http://${{ needs.create-runner.outputs.public_dns }}
