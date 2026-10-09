@@ -416,7 +416,14 @@ jobs:
       QASE_API_TOKEN: ${{ secrets.qase_api_token }}
       QASE_PROJECT_CODE: RT
       QASE_MODE: ${{ inputs.qase_report == true && 'testops' || 'off' }}
-      QASE_TESTOPS_RUN_TITLE: ${{ format('[{4}] Rancher-{0}{5} - {1} destroy={2} dev={3}', needs.determine-versions.outputs.rancher_version, inputs.grep_test_by_tag, inputs.destroy_runner, inputs.turtles_dev_chart, github.run_number, needs.determine-versions.outputs.rancher_upgrade_version && format(' -> {0}', needs.determine-versions.outputs.rancher_upgrade_version) || '') }}
+      QASE_TESTOPS_RUN_TITLE: >-
+        ${{ format('[{0}] Rancher-{1}{2} - {3} destroy={4} dev={5}',
+                   github.run_number,
+                   needs.determine-versions.outputs.rancher_version,
+                   needs.determine-versions.outputs.rancher_upgrade_version && format(' -> {0}', needs.determine-versions.outputs.rancher_upgrade_version) || '',
+                   inputs.grep_test_by_tag,
+                   inputs.destroy_runner,
+                   inputs.turtles_dev_chart) }}
       QASE_TESTOPS_RUN_MILESTONE: ${{ needs.determine-milestone.outputs.milestone }} ### Used only in Summary report
       QASE_TESTOPS_MILESTONE_ID: ${{ needs.determine-milestone.outputs.milestone_id }}
       # Cypress
@@ -1003,7 +1010,14 @@ jobs:
             *)         STATUS="❓ Unknown" ;;
           esac
 
-          RUN_NAME="[${{ github.run_number }}] Rancher-${{ needs.determine-versions.outputs.rancher_version || inputs.rancher_version }} - **${{ inputs.grep_test_by_tag }}** dev=${{ inputs.turtles_dev_chart }} destroy=${{ inputs.destroy_runner }}"
+          # Same format as the Qase run title; falls back to the raw inputs if determine-versions failed
+          RUN_NAME="${{ format('[{0}] Rancher-{1}{2} - {3} destroy={4} dev={5}',
+                               github.run_number,
+                               needs.determine-versions.outputs.rancher_version || inputs.rancher_version || 'default',
+                               needs.determine-versions.outputs.rancher_upgrade_version && format(' -> {0}', needs.determine-versions.outputs.rancher_upgrade_version) || '',
+                               inputs.grep_test_by_tag,
+                               inputs.destroy_runner,
+                               inputs.turtles_dev_chart) }}"
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           NEW_ROW="| [${RUN_NAME}](${RUN_URL}) | ${STATUS} | |"
 

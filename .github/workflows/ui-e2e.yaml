@@ -2,9 +2,13 @@
 name: UI-E2E
 run-name: >-
   ${{ github.event_name == 'workflow_dispatch' &&
-      format('[{4}] Rancher-`{0}` - `{1}` destroy={2} dev={3}',
-             inputs.rancher_version || 'default', inputs.grep_test_by_tag,
-             inputs.destroy_runner, inputs.turtles_dev_chart, github.run_number) ||
+      format('[{0}] Rancher-{1}{2} - {3} destroy={4} dev={5}',
+             github.run_number,
+             inputs.rancher_version || 'default',
+             inputs.rancher_upgrade_version && format(' -> {0}', inputs.rancher_upgrade_version) || '',
+             inputs.grep_test_by_tag,
+             inputs.destroy_runner,
+             inputs.turtles_dev_chart) ||
       github.event_name == 'schedule' &&
       (github.event.schedule == '0 3 * * *' && format('[{0}] Nightly e2e job for `@short`', github.run_number) ||
       github.event.schedule == '0 4 * * *' && format('[{0}] Nightly e2e job for `@vsphere`', github.run_number) ||
