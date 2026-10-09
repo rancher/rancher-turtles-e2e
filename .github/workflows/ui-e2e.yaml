@@ -2,9 +2,13 @@
 name: UI-E2E
 run-name: >-
   ${{ github.event_name == 'workflow_dispatch' &&
-      format('[{4}] Rancher-`{0}` - `{1}` destroy={2} dev={3}',
-             inputs.rancher_version, inputs.grep_test_by_tag,
-             inputs.destroy_runner, inputs.turtles_dev_chart, github.run_number) ||
+      format('[{0}] Rancher-{1}{2} - {3} destroy={4} dev={5}',
+             github.run_number,
+             inputs.rancher_version || 'default',
+             inputs.rancher_upgrade_version && format(' -> {0}', inputs.rancher_upgrade_version) || '',
+             inputs.grep_test_by_tag,
+             inputs.destroy_runner,
+             inputs.turtles_dev_chart) ||
       github.event_name == 'schedule' &&
       (github.event.schedule == '0 3 * * *' && format('[{0}] Nightly e2e job for `@short`', github.run_number) ||
       github.event.schedule == '0 4 * * *' && format('[{0}] Nightly e2e job for `@vsphere`', github.run_number) ||
@@ -18,11 +22,10 @@ on:
   workflow_dispatch:
     inputs:
       rancher_version:
-        description: Rancher Manager version to use for installation/pre-upgrade/pre-migration, format - channel/<version|head_version>[/head_version]
-        default: head/2.15
+        description: Rancher Manager version to use for installation/pre-upgrade/pre-migration, format - channel/<version|head_version>[/head_version]. Leave empty to use the default for the selected tags
         type: string
       rancher_upgrade_version:
-        description: Rancher Manager version to use for post-upgrade/post-migration, format - channel/<version|head_version>[/head_version]
+        description: Rancher Manager version to use for post-upgrade/post-migration, format - channel/<version|head_version>[/head_version]. Leave empty to use the default for the selected tags
         type: string
       grep_test_by_tag:
         description: Test tags. For multiple selection separate with spaces (Available options - @install [@migration @upgrade @short @full | @vsphere]). Keep always @install
@@ -99,8 +102,9 @@ jobs:
     with:
       test_description: "UI - e2e tests with Standard K3s"
       destroy_runner: ${{ github.event_name == 'schedule' && true || inputs.destroy_runner }}
-      rancher_version: ${{ inputs.rancher_version || 'head/2.15' }}
-      rancher_upgrade_version: ${{ inputs.rancher_upgrade_version || '' }}
+      # Leave empty so master-e2e picks the default matching the tags (install, migration or upgrade)
+      rancher_version: ${{ inputs.rancher_version }}
+      rancher_upgrade_version: ${{ inputs.rancher_upgrade_version }}
       qase_report: ${{ inputs.qase_report == true || (github.event_name == 'schedule' && true) }}
       turtles_dev_chart: ${{ inputs.turtles_dev_chart == true || (github.event_name == 'schedule' && true) }}
       target_build_type: ${{ inputs.target_build_type || 'prime' }}
