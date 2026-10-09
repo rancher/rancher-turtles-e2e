@@ -131,12 +131,29 @@ on:
         type: boolean
         default: false
 
-# Defaults used by the determine-versions job
+# Per-release settings: this is the only place to edit when adding a new Rancher version or upgrade path
 env:
   DEFAULT_RANCHER_VERSION: head/2.15
   # sed expression extracting the X.Y minor from a version string (e.g. prime-head/2.13, v2.13.1-rc1 -> 2.13).
   # Use it instead of unanchored matching, which would also hit patch numbers (e.g. v2.12.13 contains 2.13)
   RANCHER_MINOR_SED: 's#^(.*/)?v?([0-9]+\.[0-9]+).*#\2#'
+  # Supported @upgrade/@migration paths, one per line: "<default from version> <default to version>".
+  # Versions can use any channel/format (prime-head/X.Y, prime/X.Y.Z, prime-alpha/X.Y.Z, ...);
+  # paths are matched on the X.Y minor only. The first line is the default when rancher_version is empty.
+  # To add a new upgrade path, add a line at the top of UPGRADE_PATHS.
+  UPGRADE_PATHS: |
+    prime-head/2.14 prime-head/2.15
+    prime-head/2.13 prime-head/2.14
+  MIGRATION_PATHS: |
+    prime-head/2.12 prime-head/2.13
+  # Rancher versions with embedded turtles
+  RANCHER_RECENT_VERSIONS: '2\.(13|14|15|16)'
+  # rancher/turtles branch per Rancher minor, one per line: "<X.Y> <branch>" (main if missing)
+  TURTLES_BRANCHES: |
+    2.12 release-0.24
+    2.13 release/v0.25
+    2.14 release/v0.26
+    2.15 release/v0.27
 
 jobs:
   # Single place that validates and sets the Rancher versions used by the determine-milestone and e2e jobs.
@@ -149,13 +166,6 @@ jobs:
     outputs:
       rancher_version: ${{ steps.versions.outputs.rancher_version }}
       rancher_upgrade_version: ${{ steps.versions.outputs.rancher_upgrade_version }}
-    env:
-      PRE_MIGRATION_DEFAULT_RANCHER_VERSION: prime-head/2.12
-      POST_MIGRATION_DEFAULT_RANCHER_VERSION: prime-head/2.13
-      PRE_UPGRADE_DEFAULT_RANCHER_VERSION: prime-head/2.14
-      POST_UPGRADE_DEFAULT_RANCHER_VERSION: prime-head/2.15
-      # Upgrade is one minor step only, so 2.13 cannot use POST_UPGRADE_DEFAULT_RANCHER_VERSION
-      POST_UPGRADE_FROM_2_13_DEFAULT_RANCHER_VERSION: prime-head/2.14
     steps:
       - name: Validate and set Rancher versions
         id: versions
@@ -166,39 +176,40 @@ jobs:
           GREPTAGS="${{ inputs.grep_test_by_tag }}"
           minor() { sed -E "$RANCHER_MINOR_SED" <<< "$1"; }
 
+          # Validate RANCHER_VERSION/INPUT_UPGRADE_VERSION against a paths table (UPGRADE_PATHS or MIGRATION_PATHS)
+          # and default empty values from it. Usage: resolve_path <Upgrade|Migration> <paths table>
+          resolve_path() {
+            local kind="$1" paths="$2" from to allowed=""
+            # List the allowed paths as X.Y->X.Y (e.g. "2.14->2.15, 2.13->2.14") for error messages
+            while read -r from to; do
+              [[ -n "$from" ]] && allowed+="${allowed:+, }$(minor "$from")->$(minor "$to")"
+            done <<< "$paths"
+
+            # Empty rancher_version input: install the "from" version of the first (non-empty) line
+            RANCHER_VERSION="${RANCHER_VERSION:-$(awk 'NF {print $1; exit}' <<< "$paths")}"
+            minor_from=$(minor "$RANCHER_VERSION")
+            # Find the path starting from the installed minor; skip empty lines and other paths
+            while read -r from to; do
+              [[ -n "$from" && "$(minor "$from")" == "$minor_from" ]] || continue
+              # Empty rancher_upgrade_version input: upgrade to the "to" version of the matching path
+              RANCHER_UPGRADE_VERSION="${INPUT_UPGRADE_VERSION:-$to}"
+              minor_to=$(minor "$RANCHER_UPGRADE_VERSION")
+              # A given rancher_upgrade_version must have the same minor as the path's "to" version
+              if [[ "$minor_to" != "$(minor "$to")" ]]; then
+                echo "ERROR: Invalid $kind path: from $minor_from to $minor_to. Allowed paths: $allowed"
+                exit 1
+              fi
+              return 0
+            done <<< "$paths"
+            # No path starts from the installed minor
+            echo "ERROR: $kind is not allowed from $RANCHER_VERSION. Allowed paths: $allowed"
+            exit 1
+          }
+
           if [[ "$GREPTAGS" =~ "@migration" ]]; then
-            RANCHER_VERSION="${RANCHER_VERSION:-${{ env.PRE_MIGRATION_DEFAULT_RANCHER_VERSION }}}"
-            RANCHER_UPGRADE_VERSION="${INPUT_UPGRADE_VERSION:-${{ env.POST_MIGRATION_DEFAULT_RANCHER_VERSION }}}"
-            MINOR_FROM=$(minor "$RANCHER_VERSION")
-            MINOR_TO=$(minor "$RANCHER_UPGRADE_VERSION")
-            if [[ "$MINOR_FROM" != "2.12" ]]; then
-              echo "ERROR: Migration is only allowed from 2.12 Rancher Version (got $RANCHER_VERSION)"
-              exit 1
-            fi
-            if [[ "$MINOR_TO" != "2.13" ]]; then
-              echo "ERROR: Migration is only allowed to 2.13 Rancher Version (got $RANCHER_UPGRADE_VERSION)"
-              exit 1
-            fi
+            resolve_path Migration "$MIGRATION_PATHS"
           elif [[ "$GREPTAGS" =~ "@upgrade" ]]; then
-            RANCHER_VERSION="${RANCHER_VERSION:-${{ env.PRE_UPGRADE_DEFAULT_RANCHER_VERSION }}}"
-            MINOR_FROM=$(minor "$RANCHER_VERSION")
-            if [[ "$MINOR_FROM" != "2.13" && "$MINOR_FROM" != "2.14" ]]; then
-              echo "ERROR: Upgrade is only allowed from 2.13, 2.14 Rancher Version (got $RANCHER_VERSION)"
-              exit 1
-            fi
-            # Upgrade is one minor step only, so the default target depends on the installed minor
-            if [[ -n "$INPUT_UPGRADE_VERSION" ]]; then
-              RANCHER_UPGRADE_VERSION="$INPUT_UPGRADE_VERSION"
-            elif [[ "$MINOR_FROM" == "2.13" ]]; then
-              RANCHER_UPGRADE_VERSION="${{ env.POST_UPGRADE_FROM_2_13_DEFAULT_RANCHER_VERSION }}"
-            else
-              RANCHER_UPGRADE_VERSION="${{ env.POST_UPGRADE_DEFAULT_RANCHER_VERSION }}"
-            fi
-            MINOR_TO=$(minor "$RANCHER_UPGRADE_VERSION")
-            if ! [[ "$MINOR_FROM" == "2.13" && "$MINOR_TO" == "2.14" || "$MINOR_FROM" == "2.14" && "$MINOR_TO" == "2.15" ]]; then
-              echo "ERROR: Invalid upgrade path: from $MINOR_FROM to $MINOR_TO. Allowed paths: 2.13->2.14, 2.14->2.15"
-              exit 1
-            fi
+            resolve_path Upgrade "$UPGRADE_PATHS"
           else
             RANCHER_VERSION="${RANCHER_VERSION:-${{ env.DEFAULT_RANCHER_VERSION }}}"
           fi
@@ -394,8 +405,6 @@ jobs:
       # Validated and defaulted in the determine-versions job
       RANCHER_VERSION: ${{ needs.determine-versions.outputs.rancher_version }}
       RANCHER_UPGRADE_VERSION: ${{ needs.determine-versions.outputs.rancher_upgrade_version }}
-      # Rancher versions with embedded turtles
-      RANCHER_RECENT_VERSIONS: '2\.(13|14|15|16)'
       # K3S flags to use for installation
       INSTALL_K3S_SKIP_ENABLE: true
       INSTALL_K3S_VERSION: ${{ inputs.upstream_cluster_version }}
@@ -525,12 +534,13 @@ jobs:
         if: ${{ inputs.turtles_dev_chart == true || contains(inputs.grep_test_by_tag, '@migration') }}
         run: |
           # Use the branch of the final Rancher version: the upgrade target for @migration/@upgrade
-          case "$(sed -E "$RANCHER_MINOR_SED" <<< "${RANCHER_UPGRADE_VERSION:-$RANCHER_VERSION}")" in
-            2.12) echo "TURTLES_BRANCH=release-0.24" >> ${GITHUB_ENV} ;;
-            2.13) echo "TURTLES_BRANCH=release/v0.25" >> ${GITHUB_ENV} ;;
-            2.14) echo "TURTLES_BRANCH=release/v0.26" >> ${GITHUB_ENV} ;;
-            2.15) echo "TURTLES_BRANCH=release/v0.27" >> ${GITHUB_ENV} ;;
-          esac
+          MINOR=$(sed -E "$RANCHER_MINOR_SED" <<< "${RANCHER_UPGRADE_VERSION:-$RANCHER_VERSION}")
+          BRANCH=$(awk -v m="$MINOR" '$1 == m {print $2}' <<< "$TURTLES_BRANCHES")
+          if [[ -n "$BRANCH" ]]; then
+            echo "TURTLES_BRANCH=$BRANCH" >> ${GITHUB_ENV}
+          else
+            echo "::notice::No rancher/turtles branch found for Rancher $MINOR in TURTLES_BRANCHES, using default branch $TURTLES_BRANCH"
+          fi
       - name: Set k3s Install version
         run: |
           if [[ "$(sed -E "$RANCHER_MINOR_SED" <<< "$RANCHER_VERSION")" == "2.12" ]]; then
