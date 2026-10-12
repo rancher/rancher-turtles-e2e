@@ -206,7 +206,7 @@ const buildTypeVersionMap = {
     capi: 'v1.13.3',
     rke2: 'v0.25.2',
     kubeadm: 'v1.13.3',
-    fleet: 'v0.15.0',
+    fleet: 'v0.15.1',
     vsphere: 'v1.16.1',
     amazon: 'v2.11.1',
     google: 'v1.13.1',
