@@ -106,4 +106,4 @@ require (
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
 
-replace github.com/rancher-sandbox/ele-testhelpers => github.com/valaparthvi/ele-testhelpers v0.0.0-20261012134045-e7587d754900
+replace github.com/rancher-sandbox/ele-testhelpers => github.com/valaparthvi/ele-testhelpers v0.0.0-20261013114924-0ce9ebacd9a1
