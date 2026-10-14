@@ -593,7 +593,7 @@ jobs:
           ./scripts/build-local-rancher-charts.sh
 
           # Note allow port tcp/4080 by a firewall rule on GCP
-          docker run --name git-http-backend -d -p 4080:80 -v /tmp/system-charts:/git ynohat/git-http-backend
+          docker run --name git-http-backend -d -p 4080:80 -v /tmp/system-charts:/git thehejik/git-http-backend:v0.1@sha256:f5c28f2714217c010d90d7adc62abd83890c23e1bcc4ec8b2875f8ebbdb355d6 # Multi-arch git HTTP backend cloned from ynohat/git-http-backend
 
       - name: Copy Migration Script (to be run after migration from 2.12 to 2.13)
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') }}
