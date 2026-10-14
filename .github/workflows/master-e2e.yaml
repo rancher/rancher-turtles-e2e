@@ -567,6 +567,10 @@ jobs:
           TARGET_BUILD=${{ env.BUILD_TYPE }} TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} make e2e-image-build
           RELEASE_TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} CONTROLLER_IMAGE_VERSION=v${{ env.TAG }} make build-chart # verify-gen
           docker run -d -p 5000:5000 --name registry registry:2
+          until curl -s -f http://localhost:5000/v2/ >/dev/null 2>&1; do
+            echo "Blocking until local Docker registry is responding..."
+            sleep 1
+          done
           docker push ${{ env.CONTROLLER_IMG }}:v${{ env.TAG }}
 
       # Build providers chart to push to chartmuseum in a later step
