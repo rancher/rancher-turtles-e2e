@@ -429,12 +429,18 @@ jobs:
           password: ${{ secrets.docker_auth_password }}
       - name: Install helm
         run: |
+          ARCH=$(uname -m)
+          if [[ "$ARCH" == "x86_64" ]]; then
+            HELM_SHA256="1e4ab49e429626cf6c6958d914248b78c9730803c2751b87627e171dc800e7bb" # amd64
+            RELEASE_ARCH="amd64"
+          elif [[ "$ARCH" == "aarch64" ]]; then
+            HELM_SHA256="f14e804dfee240f55525b667488fe9adca349e63e00c9af634c0beb1421ac310" # arm64
+            RELEASE_ARCH="arm64"
+          fi
           HELM_VERSION="3.22.0"
-          HELM_SHA256="1e4ab49e429626cf6c6958d914248b78c9730803c2751b87627e171dc800e7bb"
-          curl -sk https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz -o helm.tar.gz
+          curl -sk https://get.helm.sh/helm-v${HELM_VERSION}-linux-${RELEASE_ARCH}.tar.gz -o helm.tar.gz
           echo "${HELM_SHA256}  helm.tar.gz" | sha256sum -c -
-          sudo tar -xzf helm.tar.gz --strip-components=1 -C /usr/local/bin/ linux-amd64/helm && rm helm.tar.gz
-
+          sudo tar -xzf helm.tar.gz --strip-components=1 -C /usr/local/bin/ linux-${RELEASE_ARCH}/helm && rm helm.tar.gz
       - name: Set Rancher Manager version for Installation
         run: |
           # Default version for tests

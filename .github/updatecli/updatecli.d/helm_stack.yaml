@@ -12,14 +12,23 @@ sources:
     transformers:
       - trimprefix: "v"
 
-  helmCliSha:
-    name: "Get Helm CLI SHA256"
+  helmCliShaAmd64:
+    name: "Get Helm CLI amd64 SHA256"
     kind: "shell"
-    spec:
-      # Direct link to the sha256 file Helm provides for each release
-      command: 'curl -sL https://get.helm.sh/helm-v{{ source "helmCliVersion" }}-linux-amd64.tar.gz.sha256'
     dependson:
       - helmCliVersion
+    spec:
+      # Direct link to the sha256 file Helm provides for x86_64/amd64
+      command: 'curl -sL https://get.helm.sh/helm-v{{ source "helmCliVersion" }}-linux-amd64.tar.gz.sha256'
+
+  helmCliShaArm64:
+    name: "Get Helm CLI arm64 SHA256"
+    kind: "shell"
+    dependson:
+      - helmCliVersion
+    spec:
+      # Direct link to the sha256 file Helm provides for aarch64/arm64
+      command: 'curl -sL https://get.helm.sh/helm-v{{ source "helmCliVersion" }}-linux-arm64.tar.gz.sha256'
 
   chartmuseumVersion:
     name: "Get latest ChartMuseum version"
@@ -32,11 +41,11 @@ sources:
   chartmuseumSha:
     name: "Get ChartMuseum SHA256"
     kind: "shell"
+    dependson:
+      - chartmuseumVersion
     spec:
       # Direct link to the sha256 file ChartMuseum provides for each release
       command: 'curl -sL https://raw.githubusercontent.com/helm/chartmuseum/refs/tags/{{ source "chartmuseumVersion" }}/scripts/get-chartmuseum | sha256sum | awk ''{print $1}'''
-    dependson:
-      - chartmuseumVersion
 
   helmPluginVersion:
     name: "Get latest Helm Push Plugin version"
@@ -62,18 +71,31 @@ targets:
       matchpattern: 'HELM_VERSION=".*"'
       replacepattern: 'HELM_VERSION="{{ source "helmCliVersion" }}"'
 
-  helmCliSha:
-    name: "Update HELM_SHA256"
+  helmCliShaAmd64:
+    name: "Update HELM_SHA256 for amd64"
     kind: "file"
-    sourceid: helmCliSha
+    sourceid: helmCliShaAmd64
     # {{ if .scm.enabled }}
     scmid: default
     actionid: default
     # {{ end }}
     spec:
       file: ".github/workflows/master-e2e.yaml"
-      matchpattern: 'HELM_SHA256=".*"'
-      replacepattern: 'HELM_SHA256="{{ source "helmCliSha" }}"'
+      matchpattern: 'HELM_SHA256=".*" # amd64'
+      replacepattern: 'HELM_SHA256="{{ source "helmCliShaAmd64" }}" # amd64'
+
+  helmCliShaArm64:
+    name: "Update HELM_SHA256 for arm64"
+    kind: "file"
+    sourceid: helmCliShaArm64
+    # {{ if .scm.enabled }}
+    scmid: default
+    actionid: default
+    # {{ end }}
+    spec:
+      file: ".github/workflows/master-e2e.yaml"
+      matchpattern: 'HELM_SHA256=".*" # arm64'
+      replacepattern: 'HELM_SHA256="{{ source "helmCliShaArm64" }}" # arm64'
 
   chartmuseumVersion:
     name: "Update CHARTMUSEUM_VERSION"
