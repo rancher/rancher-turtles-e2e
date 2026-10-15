@@ -115,11 +115,7 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: ['@short', '@capdk']}, () =
 
         // Check the finalizer is set on CAPI cluster
         cy.viewCAPIClusterYAML(clusterName);
-        cy.get('.CodeMirror').then((editor) => {
-          // @ts-expect-error known error with CodeMirror
-          const text = editor[0].CodeMirror.getValue();
-          expect(text).to.include('fleet.addons.cluster.x-k8s.io');
-        });
+        cy.checkYAMLText('fleet.addons.cluster.x-k8s.io', true);
       })
     )
 
@@ -153,6 +149,7 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: ['@short', '@capdk']}, () =
       })
     );
 
+    if (isRancherManagerVersion('<2.16')) {
     qase(459, it('Re-import the CAPD cluster', () => {
       // Delete the imported cluster
       // Ensure that the provisioned CAPI cluster still exists
@@ -161,6 +158,7 @@ describe('Import CAPD Kubeadm Class-Cluster', {tags: ['@short', '@capdk']}, () =
       reImportRancherv3Cluster(clusterName);
     })
     );
+    }
 
     it('Check for any errors in Turtles logs', () => {
       // Check for any errors

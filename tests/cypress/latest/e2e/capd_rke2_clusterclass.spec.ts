@@ -144,6 +144,7 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: ['@short', '@capdr']}, () => {
     );
     }
 
+    if (isRancherManagerVersion('<2.16')) {
     qase(458, it('Re-import the CAPD cluster', () => {
       // Delete the imported cluster
       // Ensure that the provisioned CAPI cluster still exists
@@ -152,6 +153,7 @@ describe('Import CAPD RKE2 Class-Cluster', {tags: ['@short', '@capdr']}, () => {
       reImportRancherv3Cluster(clusterName);
     })
     );
+    }
 
     it('Check for any errors in Turtles logs', () => {
       // Check for any errors
