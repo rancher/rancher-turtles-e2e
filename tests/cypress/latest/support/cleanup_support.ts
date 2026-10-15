@@ -29,11 +29,7 @@ export function importedRancherv3ClusterDeletion(clusterName: string, namespace:
 
     // Check the annotation is set on CAPI cluster
     cy.viewCAPIClusterYAML(clusterName);
-    cy.get('.CodeMirror').then((editor) => {
-      // @ts-expect-error known error with CodeMirror
-      const text = editor[0].CodeMirror.getValue();
-      expect(text).to.include("imported: 'true'");
-    });
+    cy.checkYAMLText("imported: 'true'", true);
   });
 }
 
