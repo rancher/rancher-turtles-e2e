@@ -562,10 +562,8 @@ jobs:
           TARGET_BUILD=${{ env.BUILD_TYPE }} TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} make e2e-image-build
           RELEASE_TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} CONTROLLER_IMAGE_VERSION=v${{ env.TAG }} make build-chart # verify-gen
           docker run -d -p 5000:5000 --name registry registry:2
-          until curl -s -f http://localhost:5000/v2/ >/dev/null 2>&1; do
-            echo "Blocking until local Docker registry is responding..."
-            sleep 1
-          done
+          # Block until local Docker registry is responding and ready to push images to it
+          curl --retry 10 --retry-delay 2 --retry-all-errors --retry-connrefused http://localhost:5000/v2/ >/dev/null || { echo "Local Docker registry is not responding"; exit 1; }
           docker push ${{ env.CONTROLLER_IMG }}:v${{ env.TAG }}
 
       # Build providers chart to push to chartmuseum in a later step
@@ -587,8 +585,9 @@ jobs:
           chmod +x scripts/build-local-rancher-charts.sh
           ./scripts/build-local-rancher-charts.sh
 
+          # Multi-arch git HTTP backend cloned from ynohat/git-http-backend
           # Note allow port tcp/4080 by a firewall rule on GCP
-          docker run --name git-http-backend -d -p 4080:80 -v /tmp/system-charts:/git thehejik/git-http-backend:v0.1@sha256:f3be174899b07ef09c32610e224984e09fc7ff2364cc1d634fd32a8b03da9c9d # Multi-arch git HTTP backend cloned from ynohat/git-http-backend
+          docker run --name git-http-backend -d -p 4080:80 -v /tmp/system-charts:/git thehejik/git-http-backend:v0.1@sha256:f3be174899b07ef09c32610e224984e09fc7ff2364cc1d634fd32a8b03da9c9d
 
       - name: Copy Migration Script (to be run after migration from 2.12 to 2.13)
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') }}
