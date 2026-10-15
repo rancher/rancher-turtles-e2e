@@ -21,6 +21,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/rancher-sandbox/ele-testhelpers/rancher"
 	"go.yaml.in/yaml/v3"
 )
 
@@ -98,6 +99,12 @@ var _ = Describe("E2E - Airgap Precheck Tests", Label("airgap"), func() {
 		// Although it can be expanded to support community channels where we need basically check only rancher/cluster-api-controller (also in env) and rancher/turtles images
 		if !strings.Contains(rancherChannel, "prime") || isRancherManagerVersion("<2.13") {
 			Skip(fmt.Sprintf("Skipping airgap precheck: requires prime channel and Rancher >= 2.13 (channel=%q, version=%s)", rancherChannel, rancherVersion))
+		}
+		// If the channel is prime-head, we need to fetch the latest RC head version to check the images
+		if strings.Contains(rancherChannel, "prime-head") {
+			latestVersion, err := rancher.FetchPrimeRCHeadVersion(rancherVersion)
+			Expect(err).To(BeNil(), "Failed to fetch latest Prime RC head version")
+			rancherVersion = latestVersion
 		}
 	})
 
