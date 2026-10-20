@@ -29,25 +29,22 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/rancher-sandbox/ele-testhelpers/kubectl"
+	"github.com/rancher-sandbox/ele-testhelpers/rancher"
 	"github.com/rancher-sandbox/ele-testhelpers/tools"
 )
 
 var (
-	arch                string
-	CertManagerVersion  string
-	clusterName         string
-	clusterNS           string
-	rancherHostname     string
-	rancherChannel      string
-	rancherHeadVersion  string
-	rancherLogCollector string
-	rancherVersion      string
-	primeRegistry       string
-	stgPrimeRegistry    string
-	primeArtifactsURL   string
-	controllerImage     string
-	turtlesDevChart     bool
-	isUpgradeTest       bool
+	rancherHostname    string
+	rancherChannel     string
+	rancherHeadVersion string
+	rancherVersion     string
+	primeRegistry      string
+	stgPrimeRegistry   string
+	primeArtifactsURL  string
+	controllerImage    string
+	turtlesDevChart    bool
+	isUpgradeTest      bool
+	primeRCHeadCommit string
 )
 
 /**
@@ -133,12 +130,7 @@ func TestE2E(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
-	arch = os.Getenv("ARCH")
-	CertManagerVersion = os.Getenv("CERT_MANAGER_VERSION")
-	clusterName = os.Getenv("CLUSTER_NAME")
-	clusterNS = os.Getenv("CLUSTER_NS")
 	rancherHostname = os.Getenv("PUBLIC_DNS")
-	rancherLogCollector = os.Getenv("RANCHER_LOG_COLLECTOR")
 	rancherVersion = os.Getenv("RANCHER_VERSION")
 	turtlesDevChart = os.Getenv("TURTLES_DEV_CHART") == "true"
 	isUpgradeTest = strings.Contains(os.Getenv("GREPTAGS"), "upgrade") || strings.Contains(os.Getenv("GREPTAGS"), "migration")
@@ -153,7 +145,7 @@ var _ = BeforeSuite(func() {
 		s := strings.Split(rancherVersion, "/")
 		rancherVersion = ""
 
-		// Get needed informations
+		// Get needed information
 		rancherChannel = s[0]
 		if len(s) > 1 {
 			rancherVersion = s[1]
@@ -162,4 +154,40 @@ var _ = BeforeSuite(func() {
 			rancherHeadVersion = s[2]
 		}
 	}
+
+	// prime-head is a prime-rc build: resolve X.Y to the latest X.Y.Z-rcN once
+	// and export it so later workflow steps (Cypress, summary) use the same version
+	if rancherChannel == "prime-head" {
+		resolvedVersion, err := rancher.FetchPrimeRCHeadVersion(rancherVersion)
+		Expect(err).ToNot(HaveOccurred(), "Failed to resolve prime-head version")
+		rancherChannel = "prime-rc"
+		rancherVersion = resolvedVersion
+		exportRancherVersion(rancherChannel + "/" + rancherVersion)
+	}
+
+	if rancherChannel == "prime-rc" && strings.HasSuffix(rancherVersion, "-head") {
+		primeRCHeadCommit = strings.Split(rancherVersion, "-")[1]
+	}
 })
+
+/**
+ * Export RANCHER_VERSION to the current process and, in GitHub Actions, to the following workflow steps
+ * @param version Rancher channel/version (e.g. prime-rc/2.15.1-rc2)
+ * @returns Nothing, the function will fail through Ginkgo in case of issue
+ */
+func exportRancherVersion(version string) {
+	// isRancherManagerVersion reads RANCHER_VERSION from the environment
+	Expect(os.Setenv("RANCHER_VERSION", version)).To(Succeed())
+	GinkgoWriter.Printf("RANCHER_VERSION set to %s\n", version)
+
+	githubEnv := os.Getenv("GITHUB_ENV")
+	if githubEnv == "" {
+		return
+	}
+	f, err := os.OpenFile(githubEnv, os.O_APPEND|os.O_WRONLY, 0)
+	Expect(err).ToNot(HaveOccurred())
+	defer f.Close()
+	_, err = fmt.Fprintf(f, "RANCHER_VERSION=%s\n", version)
+	Expect(err).ToNot(HaveOccurred())
+	GinkgoWriter.Printf("RANCHER_VERSION exported to GITHUB_ENV\n")
+}

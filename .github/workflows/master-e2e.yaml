@@ -69,9 +69,6 @@ on:
       prime_artifacts_url:
         description: URL to fetch artifacts list for prime releases
         required: true
-      prime_head_chart_url:
-        description: URL to fetch prime pre-release helm chart
-        required: true
       log_encryption_key:
         description: Passphrase used to GPG-encrypt the uploaded test artifacts
         required: true
@@ -637,12 +634,6 @@ jobs:
             echo "ERROR: Upgrade is only allowed from 2.13, 2.14 Rancher Version"
             exit 1
           fi
-      - name: Get Rancher prime-head tag for Install
-        if: ${{ contains(env.RANCHER_VERSION, 'prime-head') }}
-        run: |
-          HEAD_VERSION="${RANCHER_VERSION#prime-head/}"
-          RM_VERSION=$(curl -fsSL ${{ secrets.prime_head_chart_url }} | yq ".entries.rancher | map(select(.version | test(\"^${HEAD_VERSION}\"))) | sort_by(.created) | .[-1].version")
-          echo "RANCHER_VERSION=prime-rc/${RM_VERSION}" >> ${GITHUB_ENV}
       - name: Install Rancher Manager
         env:
           RANCHER_VERSION: ${{ env.RANCHER_VERSION }}
@@ -767,12 +758,6 @@ jobs:
             echo "ERROR: Upgrade is only allowed to 2.14, 2.15 Rancher Versions"
             exit 1
           fi
-      - name: Get Rancher prime-head tag for Upgrade
-        if: ${{ contains(env.RANCHER_VERSION, 'prime-head') && (contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
-        run: |
-          HEAD_VERSION="${RANCHER_VERSION#prime-head/}"
-          RM_VERSION=$(curl -fsSL ${{ secrets.prime_head_chart_url }} | yq ".entries.rancher | map(select(.version | test(\"^${HEAD_VERSION}\"))) | sort_by(.created) | .[-1].version")
-          echo "RANCHER_VERSION=prime-rc/${RM_VERSION}" >> ${GITHUB_ENV}
       - name: Upgrade Rancher Manager
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:
