@@ -61,11 +61,11 @@ export const vars = {
   gcpCCMYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/cloud-provider-gcp.yaml',
   vSphereCCMYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/cloud-provider-vsphere.yaml',
   vSphereCSIYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/csi-vsphere.yaml',
-  turtlesChartVersion: isRancherManagerVersion('2.12') ? '0.24' 
-                     : isRancherManagerVersion('2.13') ? '0.25' 
-                     : isRancherManagerVersion('2.14') ? '0.26' 
-                     : isRancherManagerVersion('2.15') ? '0.27' 
-                     : isRancherManagerVersion('2.16') ? '0.28' 
+  turtlesChartVersion: isRancherManagerVersion('2.12') ? '0.24'
+                     : isRancherManagerVersion('2.13') ? '0.25'
+                     : isRancherManagerVersion('2.14') ? '0.26'
+                     : isRancherManagerVersion('2.15') ? '0.27'
+                     : isRancherManagerVersion('2.16') ? '0.28'
                      : '0.29',
   turtlesProvidersChartVersion: (() => {
     if ((!isTurtlesDevChart) || (isUpgrade && !isRancherUpgraded)) {
@@ -144,9 +144,9 @@ const buildTypeVersionMap = {
   },
   'prod-v2.14': {
     capi: 'v1.12.7',
-    rke2: 'v0.24.5',
+    rke2: 'v0.24.4',
     kubeadm: 'v1.12.7',
-    fleet: 'v0.14.2',
+    fleet: 'v0.14.1',
     vsphere: 'v1.15.2',
     amazon: 'v2.11.1',
     google: 'v1.11.1',
