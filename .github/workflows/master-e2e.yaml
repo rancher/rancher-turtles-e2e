@@ -207,11 +207,9 @@ jobs:
           # 1. Try to find existing milestone ID
           MILESTONE_ID=$(
             curl -s --show-error --fail --request GET \
-              --url "https://api.qase.io/v1/milestone/${QASE_PROJECT_CODE}" \
+              --url "https://api.qase.io/v1/milestone/${QASE_PROJECT_CODE}?search=${MILESTONE_TITLE}&limit=100" \
               --header "Token: ${QASE_API_TOKEN}" \
               --header "accept: application/json" \
-              --data-urlencode "search=${MILESTONE_TITLE}" \
-              --data-urlencode "limit=100" \
             | jq -r --arg TITLE "$MILESTONE_TITLE" '[.result.entities[]? | select(.title == $TITLE) | .id] | min // empty'
             )
 
