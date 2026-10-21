@@ -897,8 +897,7 @@ jobs:
           else
             TURTLES_NAMESPACE="rancher-turtles-system"
           fi
-           # Select the charts by name, the providers chart name starts with the turtles chart name
-          TURTLES_VERSION=$(helm list -n "$TURTLES_NAMESPACE" --filter '^rancher-turtles$' -o json  2> /dev/null | jq -r '.[0].chart')
+          TURTLES_VERSION=$(helm list -n $TURTLES_NAMESPACE --filter '^rancher-turtles$' -o json  2> /dev/null | jq -r '.[0].chart')
           echo "Rancher Turtles Installed/Upgraded Chart Version: $TURTLES_VERSION" >> ${GITHUB_STEP_SUMMARY}
           if [[ ${{ inputs.turtles_dev_chart }} == true ]]; then
             echo "Rancher Turtles Dev Build Type: ${{ inputs.target_build_type }}" >> ${GITHUB_STEP_SUMMARY}
