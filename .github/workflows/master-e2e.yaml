@@ -106,7 +106,7 @@ on:
         type: string
       zone:
         description: GCP zone to host the runner
-        default: europe-west4-c
+        default: europe-west4-b
         type: string
       qase_report:
         description: Report to QASE
