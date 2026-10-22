@@ -1,5 +1,5 @@
 /*
-Copyright © 2022 - 2023 SUSE LLC
+Copyright © 2022 - 2026 SUSE LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@ limitations under the License.
 */
 
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
+import {isRancherManagerVersion} from '../support/utils';
 
 Cypress.config();
 describe('First login on Rancher - @install', {tags: '@install'}, () => {
@@ -45,6 +46,12 @@ describe('First login on Rancher - @install', {tags: '@install'}, () => {
     cy.then(() => {
       Cypress.expose = originalExpose;
     });
+
+    if (isRancherManagerVersion('>=2.16')) {
+      // Check and close the dialog
+      cy.getBySel('release-welcome').should('be.visible');
+      cy.getBySel('release-welcome-close').click();
+    }
   })
   );
 

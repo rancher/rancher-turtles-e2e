@@ -163,9 +163,9 @@ const buildTypeVersionMap = {
     azure: 'v1.26.0'
   },
   'prod-v2.16': {
-    capi: 'v1.14.2',
-    rke2: 'v0.27.0-rc.1',
-    kubeadm: 'v1.14.2',
+    capi: 'v1.14.3',
+    rke2: 'v0.27.0',
+    kubeadm: 'v1.14.3',
     fleet: 'v0.15.0',
     vsphere: 'v1.17.0',
     amazon: 'v2.13.0',
@@ -213,9 +213,9 @@ const buildTypeVersionMap = {
     azure: 'v1.26.0'
   },
   'dev-v2.16': {
-    capi: 'v1.14.2',
-    rke2: 'v0.27.0-rc.1',
-    kubeadm: 'v1.14.2',
+    capi: 'v1.14.3',
+    rke2: 'v0.27.0',
+    kubeadm: 'v1.14.3',
     fleet: 'v0.15.0',
     vsphere: 'v1.17.0',
     amazon: 'v2.13.0',
