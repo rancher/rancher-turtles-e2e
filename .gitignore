@@ -12,3 +12,4 @@
 /tests/cypress/*/node_modules
 *package-lock.json
 /tests/cypress/*/fixtures/runtime_test_result.yaml
+/tests/vendor
