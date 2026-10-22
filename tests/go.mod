@@ -1,6 +1,6 @@
 module github.com/rancher/rancher-turtles-e2e/tests
 
-go 1.26.0
+go 1.26.10
 
 require (
 	github.com/Masterminds/semver/v3 v3.5.0
