@@ -7,7 +7,7 @@ require (
 	github.com/google/go-containerregistry v0.22.1
 	github.com/onsi/ginkgo/v2 v2.33.0
 	github.com/onsi/gomega v1.44.0
-	github.com/rancher-sandbox/ele-testhelpers v0.0.0-20261013120928-f6bbbd8e77f7
+	github.com/rancher-sandbox/ele-testhelpers v0.0.0-20261022160047-dff477ee82dc
 	go.yaml.in/yaml/v3 v3.0.5
 )
 
@@ -105,5 +105,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v6 v6.4.2 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
-
-replace github.com/rancher-sandbox/ele-testhelpers v0.0.0-20261013120928-f6bbbd8e77f7 => github.com/valaparthvi/ele-testhelpers v0.0.0-20261022055645-a12d41622bdf
