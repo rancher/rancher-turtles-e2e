@@ -17,7 +17,7 @@ jobs:
         uses: rancher/aws-janitor@84b177ff822fb41a00b892d4294769fef3815dc5 # v0.3.0
         with:
           regions: eu-central-1
-          commit: true
+          commit: false
           ignore-tag: janitor-ignore
 
   gcp-janitor:
