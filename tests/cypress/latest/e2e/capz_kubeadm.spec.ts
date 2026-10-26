@@ -1,0 +1,149 @@
+import '../support/commands';
+import {
+  getClusterName,
+  skipClusterDeletion,
+  isRancherManagerVersion,
+  getCAPIClusterKubeconfig,
+  applyYAMLManifest
+} from '../support/utils';
+import {capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
+import {vars} from '../support/variables';
+
+Cypress.config();
+describe('Import CAPZ Kubeadm Cluster', {tags: ['@full', '@capzk']}, () => {
+  const timeout = vars.fullTimeout
+  const classNamePrefix = 'azure-kubeadm'
+  const clusterName = getClusterName(classNamePrefix)
+  const classesPath = 'examples/clusterclasses/azure/kubeadm'
+  const clusterClassRepoName = "azure-kubeadm-clusterclass"
+  const clusterFileName = './fixtures/azure/capz-kubeadm-cluster.yaml'
+
+  const subscriptionID = Cypress.expose("azure_subscription_id")
+
+  const azureCCMFileName = "cloud-provider-azure.yaml"
+  const azureCCMCmd = [`wget ${vars.azureCCMYaml}`, `sed -i 's|\${CLUSTER_CIDR}|192.168.0.0/16|g' ${azureCCMFileName}`, applyYAMLManifest(clusterName, azureCCMFileName)]
+
+  before(function () {
+    if (isRancherManagerVersion('<2.16')) {
+      return cy.task('suiteLog', "NoCAAPF is only supported on Rancher Version >=2.16; skipping...").then(() => {
+        this.skip();
+      })
+    }
+  })
+
+  beforeEach(function () {
+    cy.login();
+    cy.burgerMenuOperate('open');
+  });
+
+  context('[SETUP]', () => {
+    qase(605, it('Setup the namespace for importing', () => {
+      cy.namespaceAutoImport('Disable');
+    })
+    );
+
+    qase(607, it('Add CAPZ Kubeadm ClusterClass Fleet Repo', () => {
+      cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
+      // Go to CAPI > ClusterClass to ensure the clusterclass is created
+      cy.checkCAPIClusterClass(classNamePrefix);
+    })
+    );
+  })
+
+  context('[CLUSTER-IMPORT]', () => {
+    qase(608, it('Import CAPZ Kubeadm cluster using YAML', () => {
+      cy.readFile(clusterFileName).then((data) => {
+        data = data.replace(/replace_cluster_name/g, clusterName)
+        data = data.replace(/replace_k8sVersion/g, vars.kubeadmVersion)
+        data = data.replace(/replace_subscription_id/g, subscriptionID)
+        cy.importYAML(data, vars.capiClustersNS)
+      });
+      // Check CAPI cluster using its name
+      cy.checkCAPICluster(clusterName);
+
+      // Check CAPI cluster status
+      cy.checkCAPIClusterCPInitialized(clusterName);
+    })
+    );
+
+    qase(609, it('Apply the CNI & CCM manifest', () => {
+      cy.kubectlExecute([getCAPIClusterKubeconfig(clusterName), applyYAMLManifest(clusterName, vars.calicoCNIYaml), azureCCMCmd[0], azureCCMCmd[1], azureCCMCmd[2]]);
+    })
+    );
+
+    qase(610, it('Auto import child CAPZ Kubeadm cluster', () => {
+      // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+      cy.checkCAPIClusterProvisioned(clusterName, timeout);
+
+      // Check child cluster is created and auto-imported
+      // This is checked by ensuring the cluster is available in navigation menu
+      cy.goToHome();
+      cy.contains(clusterName, {timeout: timeout}).should('exist');
+
+      // Check cluster is Active
+      cy.searchCluster(clusterName);
+      cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
+
+      // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+      // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
+      cy.checkCAPIClusterActive(clusterName, timeout);
+    })
+    );
+  })
+
+  context('[CLUSTER-OPERATIONS]', () => {
+    qase(611, it('Install App on imported cluster', {retries: 1}, () => {
+      cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
+    })
+    );
+
+    qase(612, it("Scale up imported CAPZ cluster by patching cluster yaml", () => {
+      cy.readFile(clusterFileName).then((data) => {
+        data = data.replace(/replicas: 2/g, 'replicas: 3')
+
+        // workaround; these values need to be re-replaced before applying the scaling changes
+        data = data.replace(/replace_cluster_name/g, clusterName)
+        data = data.replace(/replace_k8sVersion/g, vars.kubeadmVersion)
+        data = data.replace(/replace_subscription_id/g, subscriptionID)
+        cy.importYAML(data, vars.capiClustersNS)
+      })
+
+      // Check CAPI cluster status
+      cy.checkCAPIMenu();
+      cy.contains('Machine Deployments').click();
+      cy.typeInFilter(clusterName);
+      cy.get('.content > .count', {timeout: timeout}).should('have.text', '3');
+      cy.checkCAPIClusterActive(clusterName);
+    })
+    );
+
+    qase(613, it('Check for any errors in Turtles logs', () => {
+      // Check for any errors
+      cy.filterPodErrorLogs('rancher-turtles-controller-manager');
+    })
+    );
+  })
+
+  context('[TEARDOWN]', () => {
+    if (skipClusterDeletion) {
+      qase(614, it('Remove imported CAPZ cluster from Rancher Manager', () => {
+        // Delete the imported cluster
+        // Ensure that the provisioned CAPI cluster still exists
+        importedRancherv3ClusterDeletion(clusterName);
+      })
+      );
+
+      qase(615, it('Delete the CAPZ cluster', () => {
+        // Remove CAPI Resources related to the cluster
+        capiClusterDeletion(clusterName, timeout);
+      })
+      );
+
+      qase(616, it('Delete the ClusterClass fleet repo and other resources', () => {
+        // Remove the clusterclass repo
+        cy.removeFleetGitRepo(clusterClassRepoName);
+      })
+      );
+    }
+  })
+});

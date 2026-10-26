@@ -99,7 +99,7 @@ on:
         type: string
       upstream_cluster_version:
         description: Cluster upstream version where to install Rancher (K3s)
-        default: v1.34.4+k3s1
+        default: v1.35.4+k3s1
         type: string
       zone:
         description: GCP zone to host the runner
@@ -385,35 +385,35 @@ jobs:
 
       # Common specs: @short @vsphere @full
       SPECS: |
-        e2e/providers_setup_legacy.spec.ts
-        e2e/providers_setup.spec.ts
-        e2e/capd_kubeadm_nocaapf_clusterclass.spec.ts
-        e2e/capd_rke2_nocaapf_clusterclass.spec.ts
-        e2e/capa_kubeadm_nocaapf_clusterclass.spec.ts
-        e2e/capa_eks_nocaapf_clusterclass.spec.ts
-        e2e/capa_rke2_nocaapf_clusterclass.spec.ts
-        e2e/capz_aks_nocaapf_clusterclass.spec.ts
-        e2e/capz_kubeadm_nocaapf_clusterclass.spec.ts
-        e2e/capz_rke2_nocaapf_clusterclass.spec.ts
-        e2e/capg_kubeadm_nocaapf_clusterclass.spec.ts
-        e2e/capg_gke_nocaapf_clusterclass.spec.ts
-        e2e/capv_rke2_nocaapf_clusterclass.spec.ts
-        e2e/capv_kubeadm_nocaapf_clusterclass.spec.ts
-        e2e/fleet_addon_provider_setup.spec.ts
-        e2e/capd_rke2_clusterclass.spec.ts
-        e2e/capd_rke2_fleet_clusterclass.spec.ts
-        e2e/capd_kubeadm_clusterclass.spec.ts
-        e2e/azure_rke2_v2prov_cluster.spec.ts
-        e2e/capv_rke2_clusterclass.spec.ts
-        e2e/capv_kubeadm_clusterclass.spec.ts
-        e2e/capa_rke2_clusterclass.spec.ts
-        e2e/capa_kubeadm_clusterclass.spec.ts
-        e2e/capa_eks_clusterclass.spec.ts
-        e2e/capg_gke_clusterclass.spec.ts
-        e2e/capg_kubeadm_clusterclass.spec.ts
-        e2e/capz_aks_clusterclass.spec.ts
-        e2e/capz_rke2_clusterclass.spec.ts
-        e2e/capz_kubeadm_clusterclass.spec.ts
+        e2e/capi_providers_legacy.spec.ts
+        e2e/capi_providers.spec.ts
+        e2e/capd_kubeadm.spec.ts
+        e2e/capd_rke2_fleet.spec.ts
+        e2e/capa_kubeadm.spec.ts
+        e2e/capa_eks.spec.ts
+        e2e/capa_rke2.spec.ts
+        e2e/capz_aks.spec.ts
+        e2e/capz_kubeadm.spec.ts
+        e2e/capz_rke2.spec.ts
+        e2e/capg_kubeadm.spec.ts
+        e2e/capg_gke.spec.ts
+        e2e/capv_rke2.spec.ts
+        e2e/capv_kubeadm.spec.ts
+        e2e/fleet_addon_provider.spec.ts
+        e2e/capd_rke2_caapf.spec.ts
+        e2e/capd_rke2_v1beta1_fleet.spec.ts
+        e2e/capd_kubeadm_caapf.spec.ts
+        e2e/azure_rke2_v2prov.spec.ts
+        e2e/capv_rke2_caapf.spec.ts
+        e2e/capv_kubeadm_caapf.spec.ts
+        e2e/capa_rke2_caapf.spec.ts
+        e2e/capa_kubeadm_caapf.spec.ts
+        e2e/capa_eks_caapf.spec.ts
+        e2e/capg_gke_caapf.spec.ts
+        e2e/capg_kubeadm_caapf.spec.ts
+        e2e/capz_aks_caapf.spec.ts
+        e2e/capz_rke2_caapf.spec.ts
+        e2e/capz_kubeadm_caapf.spec.ts
         e2e/capi_features_switch.spec.ts
         e2e/capd_kubeadm_use_caapf_switch.spec.ts
     steps:
@@ -525,6 +525,8 @@ jobs:
         run: |
           if [[ "${{ env.RANCHER_VERSION }}" =~ (2\.12) ]]; then
             echo INSTALL_K3S_VERSION="v1.32.4+k3s1" >> ${GITHUB_ENV}
+          elif [[ "${{ env.RANCHER_VERSION }}" =~ (2\.13) ]]; then
+            echo INSTALL_K3S_VERSION="v1.34.4+k3s1" >> ${GITHUB_ENV}
           else
             echo INSTALL_K3S_VERSION=${{ inputs.upstream_cluster_version }} >> ${GITHUB_ENV}
           fi
@@ -675,9 +677,9 @@ jobs:
             e2e/turtles_ui_extension.spec.ts
             e2e/menu.spec.ts
             ${{ env.SPECS }}
-            e2e/capd_rke2_migration_clusterclass.spec.ts
-            e2e/capd_rke2_upgrade_clusterclass.spec.ts
-            e2e/pre_upgrade_setup.spec.ts
+            e2e/capd_rke2_migration.spec.ts
+            e2e/capd_rke2_upgrade.spec.ts
+            e2e/pre_upgrade.spec.ts
         run: |
           if [ ${{ inputs.turtles_dev_chart }} == true ]; then
             export CHARTMUSEUM_REPO=http://${{ needs.create-runner.outputs.public_dns }}
@@ -791,10 +793,10 @@ jobs:
           QASE_TESTOPS_RUN_ID: ${{ steps.qase_run_id.outputs.qase_run_id }}
           IS_RANCHER_UPGRADED: true
           SPEC: |
-            e2e/post_upgrade_setup.spec.ts
-            e2e/capd_rke2_migration_clusterclass.spec.ts
+            e2e/post_upgrade.spec.ts
+            e2e/capd_rke2_migration.spec.ts
             ${{ env.COMMON_SPECS }}
-            e2e/capd_rke2_upgrade_clusterclass.spec.ts
+            e2e/capd_rke2_upgrade.spec.ts
         run: |
           if [ ${{ inputs.turtles_dev_chart }} == true ]; then
             export CHARTMUSEUM_REPO=http://${{ needs.create-runner.outputs.public_dns }}

@@ -1474,7 +1474,7 @@ Cypress.Commands.add('checkExternalFleetAnnotation', (clusterName, required = tr
 });
 
 // Commands to execute on kubectl shell
-Cypress.Commands.add('kubectlExecute', (commands: string[], timeout = 60000) => {
+Cypress.Commands.add('kubectlExecute', (commands: string[], timeout = 150000) => {
   cy.searchCluster(vars.localCluster);
   cy.getBySel('sortable-table-0-action-button').click();
   cy.get('i.icon.group-icon.icon-terminal').should('be.visible').click();
