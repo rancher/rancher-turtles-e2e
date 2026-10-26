@@ -72,7 +72,7 @@ targets:
       replacepattern: 'HELM_VERSION="{{ source "helmCliVersion" }}"'
 
   helmCliShaAmd64:
-    name: "Update HELM_SHA256 for amd64"
+    name: "Update HELM_SHA256_AMD64"
     kind: "file"
     sourceid: helmCliShaAmd64
     # {{ if .scm.enabled }}
@@ -81,11 +81,11 @@ targets:
     # {{ end }}
     spec:
       file: ".github/workflows/master-e2e.yaml"
-      matchpattern: 'HELM_SHA256=".*" # amd64'
-      replacepattern: 'HELM_SHA256="{{ source "helmCliShaAmd64" }}" # amd64'
+      matchpattern: 'HELM_SHA256_AMD64=".*"'
+      replacepattern: 'HELM_SHA256_AMD64="{{ source "helmCliShaAmd64" }}"'
 
   helmCliShaArm64:
-    name: "Update HELM_SHA256 for arm64"
+    name: "Update HELM_SHA256_ARM64"
     kind: "file"
     sourceid: helmCliShaArm64
     # {{ if .scm.enabled }}
@@ -94,8 +94,8 @@ targets:
     # {{ end }}
     spec:
       file: ".github/workflows/master-e2e.yaml"
-      matchpattern: 'HELM_SHA256=".*" # arm64'
-      replacepattern: 'HELM_SHA256="{{ source "helmCliShaArm64" }}" # arm64'
+      matchpattern: 'HELM_SHA256_ARM64=".*"'
+      replacepattern: 'HELM_SHA256_ARM64="{{ source "helmCliShaArm64" }}"'
 
   chartmuseumVersion:
     name: "Update CHARTMUSEUM_VERSION"
