@@ -49,8 +49,9 @@ describe('First login on Rancher - @install', {tags: '@install'}, () => {
 
     if (isRancherManagerVersion('>=2.16')) {
       // Check and close the dialog
-      cy.getBySel('release-welcome').should('be.visible');
+      cy.getBySel('release-welcome-registration-open').should('be.visible');
       cy.getBySel('release-welcome-close').click();
+      cy.wait(2000);
     }
   })
   );

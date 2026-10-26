@@ -16,7 +16,6 @@ export const vars = {
   fullTimeout: 1500000,
   rancherTurtlesE2EBranch: Cypress.expose('rancher_turtles_e2e_branch'),
   classBranch: isRancherManagerVersion('2.12') ? 'release-0.24' : isRancherManagerVersion('2.13') ? 'release/v0.25' : isRancherManagerVersion('2.14') ? 'release/v0.26' : isRancherManagerVersion('2.15') ? 'release/v0.27' : 'main',
-  noCaapfClassBranch: 'main', // use main branch for no-caapf tests
   capiClustersNS: 'capi-clusters',
   capiClassesNS: 'capi-classes',
   fleetDefaultNS: 'fleet-default',

@@ -18,7 +18,7 @@ export function importedRancherv3ClusterDeletion(clusterName: string, namespace:
     }
 
     // Delete the imported mgmt v3 cluster from Cluster Management using kubectl
-    cy.kubectlExecute([v3ClusterDeleteCommand(clusterName, namespace)]);
+    cy.kubectlExecute([v3ClusterDeleteCommand(clusterName, namespace)], 300000);
 
     // Ensure the cluster is not available on the home page
     cy.goToHome();
