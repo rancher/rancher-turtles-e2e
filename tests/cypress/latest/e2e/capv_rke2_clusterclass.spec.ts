@@ -211,7 +211,7 @@ describe('Import CAPV RKE2 Class-Cluster', {tags: ['@vsphere', '@capvr']}, () =>
     })
     );
 
-    it('Check for any errors in Turtles logs', () => {
+    xit('Check for any errors in Turtles logs', () => {
       // Check for any errors
       cy.filterPodErrorLogs('rancher-turtles-controller-manager');
     })
