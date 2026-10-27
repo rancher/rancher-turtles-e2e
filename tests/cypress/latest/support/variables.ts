@@ -134,7 +134,7 @@ const buildTypeVersionMap = {
   },
   'prod-v2.13': {
     capi: 'v1.10.6',
-    rke2: 'v0.21.1',
+    rke2: 'v0.21.2',
     kubeadm: 'v1.10.6',
     fleet: 'v0.12.1',
     vsphere: 'v1.13.1',
@@ -184,7 +184,7 @@ const buildTypeVersionMap = {
   },
   'dev-v2.13': {
     capi: 'v1.10.6',
-    rke2: 'v0.21.1',
+    rke2: 'v0.21.2',
     kubeadm: 'v1.10.6',
     fleet: 'v0.12.1',
     vsphere: 'v1.13.1',
