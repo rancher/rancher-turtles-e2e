@@ -8,8 +8,6 @@ const qaseAPIToken = process.env.QASE_API_TOKEN
 export default defineConfig({
   defaultCommandTimeout: 30000,
   video: true,
-  viewportWidth: 1920,
-  viewportHeight: 1080,
   reporter: 'cypress-multi-reporters',
   reporterOptions: {
     reporterEnabled: 'cypress-mochawesome-reporter, cypress-qase-reporter',
