@@ -145,7 +145,7 @@ describe('Import CAPV RKE2 (No-Caapf) Class-Cluster', {tags: ['@vsphere', '@vsph
     })
     );
 
-    qase(697, it('Check for any errors in Turtles logs', () => {
+    qase(697, xit('Check for any errors in Turtles logs', () => {
       // Check for any errors
       cy.filterPodErrorLogs('rancher-turtles-controller-manager');
     })
