@@ -1,5 +1,5 @@
 /*
-Copyright © 2022 - 2023 SUSE LLC
+Copyright © 2022 - 2026 SUSE LLC
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -26,8 +26,8 @@ import {matchAndWaitForProviderReadyStatus, setUseCAAPFFeatureGate} from "../sup
 Cypress.config();
 describe('Enable use-caapf feature gate and install fleet-addon provider', {tags: '@install'}, () => {
   before(function () {
-    if (isRancherManagerVersion('2.12')){
-      return cy.task('suiteLog', 'Skipping test on Rancher 2.12...').then(()=>{
+    if (isRancherManagerVersion('2.12') || isRancherManagerVersion('>=2.16')){
+      return cy.task('suiteLog', 'Skipping test on Rancher 2.12 or Rancher 2.16+...').then(()=>{
         this.skip();
       })
     }

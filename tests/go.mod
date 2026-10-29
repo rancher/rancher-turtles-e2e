@@ -1,13 +1,13 @@
 module github.com/rancher/rancher-turtles-e2e/tests
 
-go 1.25.0
+go 1.26.10
 
 require (
 	github.com/Masterminds/semver/v3 v3.5.0
 	github.com/google/go-containerregistry v0.22.1
-	github.com/onsi/ginkgo/v2 v2.33.0
+	github.com/onsi/ginkgo/v2 v2.33.1
 	github.com/onsi/gomega v1.44.0
-	github.com/rancher-sandbox/ele-testhelpers v0.0.0-20261002115220-2559d04bf130
+	github.com/rancher-sandbox/ele-testhelpers v0.0.0-20261023090800-9cad863e4420
 	go.yaml.in/yaml/v3 v3.0.5
 )
 

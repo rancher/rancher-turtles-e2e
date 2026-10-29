@@ -737,6 +737,7 @@ Cypress.Commands.add('checkChart', (clusterName, operation, chartName, namespace
     }
 
     const buttonText = isRancherManagerVersion('>=2.13') && (isUpdateOperation) ? 'Save changes' : operation;
+    cy.wait(2000);
     cy.clickButton(buttonText);
 
     // If 'namespaces <namespace> not found' error or `Error` button is visible,
