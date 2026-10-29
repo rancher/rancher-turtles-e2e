@@ -92,7 +92,7 @@ on:
         type: boolean
       runner_template:
         description: Runner template to use
-        default: rancher-turtles-e2e-ci-spot-20261001132136551600000001
+        default: rancher-turtles-e2e-ci-amd64-spot-20261014-1255
         type: string
       test_description:
         description: Short description of the test
@@ -103,7 +103,7 @@ on:
         type: string
       zone:
         description: GCP zone to host the runner
-        default: asia-south1-c
+        default: europe-west4-b
         type: string
       qase_report:
         description: Report to QASE
@@ -430,11 +430,19 @@ jobs:
       - name: Install helm
         run: |
           HELM_VERSION="3.22.0"
-          HELM_SHA256="1e4ab49e429626cf6c6958d914248b78c9730803c2751b87627e171dc800e7bb"
-          curl -sk https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz -o helm.tar.gz
+          HELM_SHA256_AMD64="1e4ab49e429626cf6c6958d914248b78c9730803c2751b87627e171dc800e7bb"
+          HELM_SHA256_ARM64="f14e804dfee240f55525b667488fe9adca349e63e00c9af634c0beb1421ac310"
+          ARCH=$(uname -m)
+          if [[ "$ARCH" == "x86_64" ]]; then
+            HELM_SHA256="$HELM_SHA256_AMD64"
+            RELEASE_ARCH="amd64"
+          elif [[ "$ARCH" == "aarch64" ]]; then
+            HELM_SHA256="$HELM_SHA256_ARM64"
+            RELEASE_ARCH="arm64"
+          fi
+          curl -sk https://get.helm.sh/helm-v${HELM_VERSION}-linux-${RELEASE_ARCH}.tar.gz -o helm.tar.gz
           echo "${HELM_SHA256}  helm.tar.gz" | sha256sum -c -
-          sudo tar -xzf helm.tar.gz --strip-components=1 -C /usr/local/bin/ linux-amd64/helm && rm helm.tar.gz
-
+          sudo tar -xzf helm.tar.gz --strip-components=1 -C /usr/local/bin/ linux-${RELEASE_ARCH}/helm && rm helm.tar.gz
       - name: Set Rancher Manager version for Installation
         run: |
           # Default version for tests
@@ -556,6 +564,8 @@ jobs:
           TARGET_BUILD=${{ env.BUILD_TYPE }} TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} make e2e-image-build
           RELEASE_TAG=v${{ env.TAG }} CONTROLLER_IMG=${{ env.CONTROLLER_IMG }} CONTROLLER_IMAGE_VERSION=v${{ env.TAG }} make build-chart # verify-gen
           docker run -d -p 5000:5000 --name registry registry:2
+          # Block until local Docker registry is responding and ready to push images to it
+          curl --retry 10 --retry-delay 2 --retry-all-errors --retry-connrefused http://localhost:5000/v2/ >/dev/null || { echo "Local Docker registry is not responding"; exit 1; }
           docker push ${{ env.CONTROLLER_IMG }}:v${{ env.TAG }}
 
       # Build providers chart to push to chartmuseum in a later step
@@ -577,8 +587,9 @@ jobs:
           chmod +x scripts/build-local-rancher-charts.sh
           ./scripts/build-local-rancher-charts.sh
 
+          # Multi-arch git HTTP backend cloned from ynohat/git-http-backend
           # Note allow port tcp/4080 by a firewall rule on GCP
-          docker run --name git-http-backend -d -p 4080:80 -v /tmp/system-charts:/git ynohat/git-http-backend
+          docker run --name git-http-backend -d -p 4080:80 -v /tmp/system-charts:/git thehejik/git-http-backend:v0.1@sha256:f3be174899b07ef09c32610e224984e09fc7ff2364cc1d634fd32a8b03da9c9d
 
       - name: Copy Migration Script (to be run after migration from 2.12 to 2.13)
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') }}
