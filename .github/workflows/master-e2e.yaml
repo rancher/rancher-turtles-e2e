@@ -69,9 +69,6 @@ on:
       prime_artifacts_url:
         description: URL to fetch artifacts list for prime releases
         required: true
-      prime_head_chart_url:
-        description: URL to fetch prime pre-release helm chart
-        required: true
       log_encryption_key:
         description: Passphrase used to GPG-encrypt the uploaded test artifacts
         required: true
@@ -207,11 +204,9 @@ jobs:
           # 1. Try to find existing milestone ID
           MILESTONE_ID=$(
             curl -s --show-error --fail --request GET \
-              --url "https://api.qase.io/v1/milestone/${QASE_PROJECT_CODE}" \
+              --url "https://api.qase.io/v1/milestone/${QASE_PROJECT_CODE}?search=${MILESTONE_TITLE}&limit=100" \
               --header "Token: ${QASE_API_TOKEN}" \
               --header "accept: application/json" \
-              --data-urlencode "search=${MILESTONE_TITLE}" \
-              --data-urlencode "limit=100" \
             | jq -r --arg TITLE "$MILESTONE_TITLE" '[.result.entities[]? | select(.title == $TITLE) | .id] | min // empty'
             )
 
@@ -639,12 +634,6 @@ jobs:
             echo "ERROR: Upgrade is only allowed from 2.13, 2.14 Rancher Version"
             exit 1
           fi
-      - name: Get Rancher prime-head tag for Install
-        if: ${{ contains(env.RANCHER_VERSION, 'prime-head') }}
-        run: |
-          HEAD_VERSION="${RANCHER_VERSION#prime-head/}"
-          RM_VERSION=$(curl -fsSL ${{ secrets.prime_head_chart_url }} | yq ".entries.rancher | map(select(.version | test(\"^${HEAD_VERSION}\"))) | sort_by(.created) | .[-1].version")
-          echo "RANCHER_VERSION=prime-rc/${RM_VERSION}" >> ${GITHUB_ENV}
       - name: Install Rancher Manager
         env:
           RANCHER_VERSION: ${{ env.RANCHER_VERSION }}
@@ -769,12 +758,6 @@ jobs:
             echo "ERROR: Upgrade is only allowed to 2.14, 2.15 Rancher Versions"
             exit 1
           fi
-      - name: Get Rancher prime-head tag for Upgrade
-        if: ${{ contains(env.RANCHER_VERSION, 'prime-head') && (contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade')) }}
-        run: |
-          HEAD_VERSION="${RANCHER_VERSION#prime-head/}"
-          RM_VERSION=$(curl -fsSL ${{ secrets.prime_head_chart_url }} | yq ".entries.rancher | map(select(.version | test(\"^${HEAD_VERSION}\"))) | sort_by(.created) | .[-1].version")
-          echo "RANCHER_VERSION=prime-rc/${RM_VERSION}" >> ${GITHUB_ENV}
       - name: Upgrade Rancher Manager
         if: ${{ contains(inputs.grep_test_by_tag, '@migration') || contains(inputs.grep_test_by_tag, '@upgrade') }}
         env:
@@ -897,12 +880,12 @@ jobs:
           else
             TURTLES_NAMESPACE="rancher-turtles-system"
           fi
-          TURTLES_VERSION=$(helm list -n $TURTLES_NAMESPACE -o json 2> /dev/null | jq -r '.[] | .chart' | head -n 1)
+          TURTLES_VERSION=$(helm list -n $TURTLES_NAMESPACE --filter '^rancher-turtles$' -o json  2> /dev/null | jq -r '.[0].chart')
           echo "Rancher Turtles Installed/Upgraded Chart Version: $TURTLES_VERSION" >> ${GITHUB_STEP_SUMMARY}
           if [[ ${{ inputs.turtles_dev_chart }} == true ]]; then
             echo "Rancher Turtles Dev Build Type: ${{ inputs.target_build_type }}" >> ${GITHUB_STEP_SUMMARY}
           fi
-          TURTLES_PROVIDERS_VERSION=$(helm list -n $TURTLES_NAMESPACE -o json 2> /dev/null | jq -r '.[] | .chart' | tail -n 1)
+          TURTLES_PROVIDERS_VERSION=$(helm list -n $TURTLES_NAMESPACE --filter '^rancher-turtles-providers$' -o json 2> /dev/null | jq -r '.[0].chart')
           echo "Rancher Turtles Providers Chart Version: $TURTLES_PROVIDERS_VERSION" >> ${GITHUB_STEP_SUMMARY}
           # Only add provider section if providers exist
           PROVIDER_DATA=$(kubectl get capiproviders.turtles-capi.cattle.io -A \

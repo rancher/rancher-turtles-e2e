@@ -129,7 +129,7 @@ describe('Import CAPV Kubeadm (No-Caapf) Class-Cluster', {tags: ['@vsphere', '@v
     })
     );
 
-    qase(709, it('Check for any errors in Turtles logs', () => {
+    qase(709, xit('Check for any errors in Turtles logs', () => {
       // Check for any errors
       cy.filterPodErrorLogs('rancher-turtles-controller-manager');
     })

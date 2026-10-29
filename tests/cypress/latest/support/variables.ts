@@ -134,7 +134,7 @@ const buildTypeVersionMap = {
   },
   'prod-v2.13': {
     capi: 'v1.10.6',
-    rke2: 'v0.21.1',
+    rke2: 'v0.21.2',
     kubeadm: 'v1.10.6',
     fleet: 'v0.12.1',
     vsphere: 'v1.13.1',
@@ -144,7 +144,7 @@ const buildTypeVersionMap = {
   },
   'prod-v2.14': {
     capi: 'v1.12.7',
-    rke2: 'v0.24.5',
+    rke2: 'v0.24.6',
     kubeadm: 'v1.12.7',
     fleet: 'v0.14.2',
     vsphere: 'v1.15.2',
@@ -154,7 +154,7 @@ const buildTypeVersionMap = {
   },
   'prod-v2.15': {
     capi: 'v1.13.3',
-    rke2: 'v0.25.2',
+    rke2: 'v0.25.3',
     kubeadm: 'v1.13.3',
     fleet: 'v0.15.1',
     vsphere: 'v1.16.1',
@@ -163,9 +163,9 @@ const buildTypeVersionMap = {
     azure: 'v1.26.0'
   },
   'prod-v2.16': {
-    capi: 'v1.14.2',
-    rke2: 'v0.27.0-rc.1',
-    kubeadm: 'v1.14.2',
+    capi: 'v1.14.3',
+    rke2: 'v0.27.1',
+    kubeadm: 'v1.14.3',
     fleet: 'v0.15.0',
     vsphere: 'v1.17.0',
     amazon: 'v2.13.0',
@@ -184,7 +184,7 @@ const buildTypeVersionMap = {
   },
   'dev-v2.13': {
     capi: 'v1.10.6',
-    rke2: 'v0.21.1',
+    rke2: 'v0.21.2',
     kubeadm: 'v1.10.6',
     fleet: 'v0.12.1',
     vsphere: 'v1.13.1',
@@ -194,7 +194,7 @@ const buildTypeVersionMap = {
   },
   'dev-v2.14': {
     capi: 'v1.12.7',
-    rke2: 'v0.24.5',
+    rke2: 'v0.24.6',
     kubeadm: 'v1.12.7',
     fleet: 'v0.14.2',
     vsphere: 'v1.15.2',
@@ -204,7 +204,7 @@ const buildTypeVersionMap = {
   },
   'dev-v2.15': {
     capi: 'v1.13.3',
-    rke2: 'v0.25.2',
+    rke2: 'v0.25.3',
     kubeadm: 'v1.13.3',
     fleet: 'v0.15.1',
     vsphere: 'v1.16.1',
@@ -213,9 +213,9 @@ const buildTypeVersionMap = {
     azure: 'v1.26.0'
   },
   'dev-v2.16': {
-    capi: 'v1.14.2',
-    rke2: 'v0.27.0-rc.1',
-    kubeadm: 'v1.14.2',
+    capi: 'v1.14.3',
+    rke2: 'v0.27.1',
+    kubeadm: 'v1.14.3',
     fleet: 'v0.15.0',
     vsphere: 'v1.17.0',
     amazon: 'v2.13.0',

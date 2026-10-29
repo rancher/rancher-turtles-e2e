@@ -93,6 +93,7 @@ func getAsoVersion() string {
 }
 
 var _ = Describe("E2E - Airgap Precheck Tests", Label("airgap"), func() {
+
 	BeforeEach(func() {
 		// Test is suitable for Prime and rancher >= 2.13 only
 		// Although it can be expanded to support community channels where we need basically check only rancher/cluster-api-controller (also in env) and rancher/turtles images
@@ -104,7 +105,12 @@ var _ = Describe("E2E - Airgap Precheck Tests", Label("airgap"), func() {
 	It("Phase 1: Data gathering", func() {
 		By("Fetch and Parse Versions from Rancher & Turtles Sources", func() {
 			// 1. Parse Rancher build.yaml
-			buildURL := fmt.Sprintf("https://raw.githubusercontent.com/rancher/rancher/v%s/build.yaml", rancherVersion)
+			buildPath := fmt.Sprintf("v%s", rancherVersion)
+			if primeRCHeadCommit != "" {
+				buildPath = primeRCHeadCommit
+			}
+			buildURL := fmt.Sprintf("https://raw.githubusercontent.com/rancher/rancher/%s/build.yaml", buildPath)
+			GinkgoWriter.Println(buildURL)
 			var build struct {
 				TurtlesVersion string `yaml:"turtlesVersion"`
 			}
@@ -172,7 +178,7 @@ var _ = Describe("E2E - Airgap Precheck Tests", Label("airgap"), func() {
 	It("Phase 2: Validation", func() {
 		By("Verify images exist in the registry", func() {
 			host := primeRegistry
-			if strings.Contains(rancherVersion, "-rc") || strings.Contains(rancherVersion, "-alpha") {
+			if strings.Contains(rancherVersion, "-rc") || strings.Contains(rancherVersion, "-head") || strings.Contains(rancherVersion, "-alpha") {
 				host = stgPrimeRegistry
 			}
 			images := allProviderImages()
@@ -193,7 +199,11 @@ var _ = Describe("E2E - Airgap Precheck Tests", Label("airgap"), func() {
 		})
 
 		By("Verify images are listed in rancher-images.txt", func() {
-			url := fmt.Sprintf("%s/rancher/v%s/rancher-images.txt", primeArtifactsURL, rancherVersion)
+			artifactPath := fmt.Sprintf("v%s", rancherVersion)
+			if primeRCHeadCommit != "" {
+				artifactPath = fmt.Sprintf("internal/prime/head/v%s", rancherVersion)
+			}
+			url := fmt.Sprintf("%s/rancher/%s/rancher-images.txt", primeArtifactsURL, artifactPath)
 			content := string(fetchBytes(url))
 
 			images := allProviderImages()
@@ -205,7 +215,11 @@ var _ = Describe("E2E - Airgap Precheck Tests", Label("airgap"), func() {
 		})
 
 		By("Verify CAPI version match in package-env", func() {
-			url := fmt.Sprintf("https://raw.githubusercontent.com/rancher/rancher/refs/tags/v%s/scripts/package-env", rancherVersion)
+			packageEnvPath := fmt.Sprintf("refs/tags/v%s", rancherVersion)
+			if primeRCHeadCommit != "" {
+				packageEnvPath = primeRCHeadCommit
+			}
+			url := fmt.Sprintf("https://raw.githubusercontent.com/rancher/rancher/%s/scripts/package-env", packageEnvPath)
 			re := regexp.MustCompile(`CLUSTER_API_CONTROLLER_TAG=(v[0-9]+\.[0-9]+\.[0-9]+)`)
 			matches := re.FindStringSubmatch(string(fetchBytes(url)))
 			Expect(matches).To(HaveLen(2), "CLUSTER_API_CONTROLLER_TAG not found in package-env")
