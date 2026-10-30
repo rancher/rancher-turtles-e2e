@@ -1,0 +1,190 @@
+import '../support/commands';
+import {getClusterName, isAPIv1beta1, isRancherManagerVersion, skipClusterDeletion} from '../support/utils';
+import {capaResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
+import {vars} from '../support/variables';
+
+Cypress.config();
+describe('Import CAPA RKE2 Cluster (Caapf)', {tags: ['@full', '@capar']}, () => {
+  let ccID: string;
+  const timeout = vars.fullTimeout
+  const classNamePrefix = 'aws-rke2'
+  const clusterName = getClusterName(classNamePrefix)
+  const classesPath = 'examples/clusterclasses/aws/rke2'
+  const clusterClassRepoName = 'aws-rke2-clusterclass'
+  const clusterFileName = isAPIv1beta1 ? './fixtures/aws/capa-rke2-cluster-v1beta1-caapf.yaml' : './fixtures/aws/capa-rke2-cluster-caapf.yaml'
+
+  const providerName = 'aws'
+  const accessKey = Cypress.expose('aws_access_key')
+  const secretKey = Cypress.expose('aws_secret_key')
+
+  before(function () {
+    if (isRancherManagerVersion('>=2.16')) {
+      return cy.task('suiteLog', "CAAPF is unsupported on Rancher Version >=2.16; skipping...").then(() => {
+        this.skip();
+      })
+    }
+  })
+
+  beforeEach(() => {
+    cy.login();
+    cy.burgerMenuOperate('open');
+  });
+
+  context('[SETUP]', () => {
+    qase(311, it('Setup the namespace for importing', () => {
+      cy.namespaceAutoImport('Disable');
+    })
+    );
+
+    qase(341, it('Create AWS CAPIProvider & AWSClusterStaticIdentity', () => {
+      if (isRancherManagerVersion('<2.13')) {
+        cy.checkCAPIProvider(providerName);
+      }
+      if (isRancherManagerVersion('<2.15')) {
+        cy.createAWSClusterStaticIdentity(accessKey, secretKey);
+      } else {
+        cy.checkAWSClusterStaticIdentity();
+      }
+    })
+    );
+
+    it('Get Cloud credential ID', () => {
+      cy.accesMenuSelection(['Cluster Management', 'Cloud Credentials']);
+      cy.getBySel('sortable-table-list-container').should('be.visible');
+      cy.typeInFilter(providerName);
+      // Get the CC id
+      cy.getBySel('sortable-cell-0-0').then(($cell) => {
+        ccID = $cell.text();
+        cy.task('suiteLog', `Cloud credential ID: ${ccID}`);
+      });
+    })
+
+    // HelmOps to be used for this spec
+    // AWSClusterStaticIdentity only allows provisioning clusters in "fleet-default"
+    it('Add Applications fleet repo', () => {
+      // Add upstream apps repo
+      cy.addFleetGitRepo('helm-ops-aws', vars.turtlesRepoUrl, vars.classBranch, 'examples/applications/', vars.fleetDefaultNS);
+    })
+    
+    qase(116,
+      it('Add CAPA RKE2 ClusterClass Fleet Repo and check Applications', () => {
+        cy.addFleetGitRepo(clusterClassRepoName, vars.turtlesRepoUrl, vars.classBranch, classesPath, vars.capiClassesNS)
+        // Go to CAPI > ClusterClass to ensure the clusterclass is created
+        cy.checkCAPIClusterClass(classNamePrefix);
+
+        // Navigate to `local` cluster, More Resources > Fleet > HelmOps and ensure the charts are present.
+        cy.checkFleetHelmOps(['aws-ccm', 'aws-csi-driver']);
+      })
+    );
+  })
+
+  context('[CLUSTER-IMPORT]', () => {
+
+    qase(110,
+      it('Import CAPA RKE2 cluster using YAML', () => {
+        cy.readFile(clusterFileName).then((data) => {
+          data = data.replace(/replace_cluster_name/g, clusterName)
+          data = data.replace(/replace_rke2_version/g, vars.rke2Version)
+          data = data.replace(/replace_amiID/g, vars.amiID)
+          if (isRancherManagerVersion('<2.15')) {
+            data = data.replace(/replace_identity_name/g, "cluster-identity")
+          } else {
+            data = data.replace(/replace_identity_name/g, ccID)
+          }
+          cy.importYAML(data);
+        });
+        // Check CAPI cluster using its name
+        cy.checkCAPICluster(clusterName);
+      })
+    );
+
+    qase(111,
+      it('Auto import child CAPA cluster', () => {
+        // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+        cy.checkCAPIClusterProvisioned(clusterName, timeout);
+
+        // Check child cluster is created and auto-imported
+        // This is checked by ensuring the cluster is available in navigation menu
+        cy.goToHome();
+        cy.contains(clusterName).should('exist');
+
+        // Check cluster is Active
+        cy.searchCluster(clusterName);
+        cy.contains(new RegExp('Active.*' + clusterName), {timeout: timeout});
+
+        // Go to Cluster Management > CAPI > Clusters and check if the cluster has provisioned
+        // Ensuring cluster is provisioned also ensures all the Cluster Management > Advanced > Machines for the given cluster are Active.
+        cy.checkCAPIClusterActive(clusterName, timeout);
+      })
+    );
+
+  })
+
+  context('[CLUSTER-OPERATIONS]', () => {
+    qase(112,
+      it('Install App on imported cluster', {retries: 1}, () => {
+        cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
+      })
+    );
+
+    qase(312, it("Scale up imported CAPA cluster by patching cluster yaml", () => {
+      cy.readFile(clusterFileName).then((data) => {
+        data = data.replace(/replicas: 2/g, 'replicas: 3')
+
+        // workaround; these values need to be re-replaced before applying the scaling changes
+        data = data.replace(/replace_cluster_name/g, clusterName)
+        data = data.replace(/replace_rke2_version/g, vars.rke2Version)
+        data = data.replace(/replace_amiID/g, vars.amiID)
+        if (isRancherManagerVersion('<2.15')) {
+          data = data.replace(/replace_identity_name/g, "cluster-identity")
+        } else {
+          data = data.replace(/replace_identity_name/g, ccID)
+        }
+        // AWSClusterStaticIdentity only allows provisioning clusters in "fleet-default"
+        cy.importYAML(data);
+      })
+
+      // Check CAPI cluster status
+      cy.checkCAPIMenu();
+      cy.contains('Machine Deployments').click();
+      cy.typeInFilter(clusterName);
+      cy.get('.content > .count', {timeout: timeout}).should('have.text', '3');
+      cy.checkCAPIClusterActive(clusterName);
+    })
+    );
+
+    it('Check for any errors in Turtles logs', () => {
+      // Check for any errors
+      cy.filterPodErrorLogs('rancher-turtles-controller-manager');
+    })
+  })
+
+  context('[TEARDOWN]', () => {
+    if (skipClusterDeletion) {
+      qase(360, it('Remove imported CAPA cluster from Rancher Manager', {retries: 1}, () => {
+        // Delete the imported cluster
+        // Ensure that the provisioned CAPI cluster still exists
+        // this check can fail, ref: https://github.com/rancher/turtles/issues/1587
+        importedRancherv3ClusterDeletion(clusterName, vars.fleetDefaultNS);
+      })
+      );
+
+
+      qase(114,
+        it('Delete the CAPA cluster', () => {
+          // Remove CAPI Resources related to the cluster
+          capiClusterDeletion(clusterName, timeout);
+        })
+      );
+
+      qase(115,
+        it('Delete the ClusterClass fleet repo and other resources', () => {
+          // Remove the clusterclass repo
+          cy.removeFleetGitRepo(clusterClassRepoName);
+          // Cleanup other resources
+          capaResourcesCleanup();
+        })
+      );
+    }
+  })
+});

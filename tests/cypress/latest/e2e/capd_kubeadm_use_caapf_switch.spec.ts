@@ -17,7 +17,7 @@ import '../support/commands';
 import {
   getClusterName,
   isRancherManagerVersion,
-  isUseCAAPFSupported,
+  isUseCAAPFFeatureSupported,
   skipClusterDeletion,
   turtlesNamespace
 } from '../support/utils';
@@ -26,20 +26,20 @@ import {vars} from '../support/variables';
 import {setUseCAAPFFeatureGate} from "../support/commands";
 
 Cypress.config();
-describe('Import CAPD Kubeadm Class-Cluster for Use-CAAPF Migration', {tags: ['@short', '@use-caapf-switch']}, () => {
+describe('Import CAPD Kubeadm Cluster for Use-CAAPF Migration', {tags: ['@short', '@use-caapf-switch']}, () => {
   const timeout = vars.shortTimeout
   const classNamePrefix = 'docker-kubeadm'
   const clusterName = getClusterName(classNamePrefix)
   const classesPath = 'examples/clusterclasses/docker/kubeadm'
   const clusterClassRepoName = 'docker-kb-clusterclass'
-  const classClusterFileName = "./fixtures/docker/capd-kubeadm-class-cluster.yaml"
+  const clusterFileName = "./fixtures/docker/capd-kubeadm-cluster-caapf.yaml"
   let migrationCMD = (phase: 'pre'|'post'): string[] => {
     return ["curl -sSfLO https://raw.githubusercontent.com/rancher/turtles/main/scripts/migrate-caapf.sh", "chmod +x migrate-caapf.sh", `DRY_RUN=false ./migrate-caapf.sh ${phase}`]
   }
   const dockerRegistryConfigBase64 = btoa(Cypress.expose('docker_registry_config'))
 
   before(function () {
-    if (!isUseCAAPFSupported) {
+    if (!isUseCAAPFFeatureSupported) {
       return cy.task('suiteLog', "use-caapf feature gate is not supported on this Rancher version").then(() => {
         this.skip();
       })
@@ -79,8 +79,8 @@ describe('Import CAPD Kubeadm Class-Cluster for Use-CAAPF Migration', {tags: ['@
 
   context('[CLUSTER-IMPORT]', () => {
     qase(590,
-      it('Import CAPD Kubeadm class-clusters using YAML', () => {
-        cy.readFile(classClusterFileName).then((data) => {
+      it('Import CAPD Kubeadm cluster using YAML', () => {
+        cy.readFile(clusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName)
           data = data.replace(/replace_kindVersion/g, vars.kindVersion)
           if (isRancherManagerVersion(">=2.16")) {
@@ -183,8 +183,8 @@ describe('Import CAPD Kubeadm Class-Cluster for Use-CAAPF Migration', {tags: ['@
     );
 
     qase(600,
-      it("Scale up imported CAPD cluster by patching class-cluster yaml", () => {
-        cy.readFile(classClusterFileName).then((data) => {
+      it("Scale up imported CAPD cluster by patching cluster yaml", () => {
+        cy.readFile(clusterFileName).then((data) => {
           data = data.replace(/replicas: 2/g, 'replicas: 3')
 
           // workaround; these values need to be re-replaced before applying the scaling changes
