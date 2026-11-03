@@ -5,10 +5,10 @@ set -eo pipefail
 # Variables
 
 # Rancher support-tools log collector (pinned by commit + checksum)
-RANCHER_LOG_COLLECTER_COMMIT="7347a41244742575aff9eefcb151ec02c74d4677"
+RANCHER_LOG_COLLECTER_COMMIT="fe54dfce82828b684cb59e49a69a837b09262da2"
 RANCHER_LOG_COLLECTER_PATH="collection/rancher/v2.x/logs-collector/rancher2_logs_collector.sh"
 RANCHER_LOG_COLLECTER="https://raw.githubusercontent.com/rancherlabs/support-tools/${RANCHER_LOG_COLLECTER_COMMIT}/${RANCHER_LOG_COLLECTER_PATH}"
-RANCHER_LOG_COLLECTER_SHA256="47ba6552166b36a45c44746d297088da507e1e5225bda61a9b6dbfcf19aa7093"
+RANCHER_LOG_COLLECTER_SHA256="5c3b007ce050dab7ddf0a67813216f6894659005427072a4d5523ba9b4d98b2f"
 # To refresh SHA256:
 # RANCHER_LOG_COLLECTER_SHA256="$(curl -sSfL "${RANCHER_LOG_COLLECTER}" | sha256sum | awk '{print $1}')"
 
