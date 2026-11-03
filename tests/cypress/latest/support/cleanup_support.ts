@@ -1,7 +1,7 @@
 import {vars} from '../support/variables';
 
 export const v3ClusterDeleteCommand = (clusterName: string, namespace: string = vars.capiClustersNS): string => {
-  return `kubectl delete clusters.management.cattle.io -l cluster-api.cattle.io/capi-cluster-owner=${clusterName} -l cluster-api.cattle.io/capi-cluster-owner-ns=${namespace}`;
+  return `kubectl delete clusters.management.cattle.io -l cluster-api.cattle.io/capi-cluster-owner=${clusterName},cluster-api.cattle.io/capi-cluster-owner-ns=${namespace}`;
 };
 
 export const reImportClusterPatchCommand = (clusterName: string): string => {
