@@ -431,7 +431,7 @@ jobs:
         run: |
           HELM_VERSION="3.22.1"
           HELM_SHA256_AMD64="1e4ab49e429626cf6c6958d914248b78c9730803c2751b87627e171dc800e7bb"
-          HELM_SHA256_ARM64="f14e804dfee240f55525b667488fe9adca349e63e00c9af634c0beb1421ac310"
+          HELM_SHA256_ARM64="4c29e286b279d170fa048ddfc3e4e83dcd069ca9c52102766ba672d7149e694d"
           ARCH=$(uname -m)
           if [[ "$ARCH" == "x86_64" ]]; then
             HELM_SHA256="$HELM_SHA256_AMD64"
