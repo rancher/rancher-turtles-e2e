@@ -20,7 +20,7 @@ describe('Switch CAPI Feature Flags (2.13)', {tags: '@switch'}, () => {
   const clusterName = getClusterName(classNamePrefix);
   const classesPath = 'examples/clusterclasses/docker/rke2';
   const clusterClassRepoName = 'docker-rke2-clusterclass';
-  const classClusterFileName = './fixtures/docker/capd-rke2-class-cluster-v1beta1.yaml';
+  const clusterFileName = './fixtures/docker/capd-rke2-cluster-v1beta1-caapf.yaml';
   const dockerAuthUsernameBase64 = btoa(Cypress.expose('docker_auth_username'));
   const dockerAuthPasswordBase64 = btoa(Cypress.expose('docker_auth_password'));
 
@@ -77,8 +77,8 @@ describe('Switch CAPI Feature Flags (2.13)', {tags: '@switch'}, () => {
       })
     );
 
-    qase(467, it('Import CAPD RKE2 class-cluster using YAML', () => {
-        cy.readFile(classClusterFileName).then((data) => {
+    qase(467, it('Import CAPD RKE2 cluster using YAML', () => {
+        cy.readFile(clusterFileName).then((data) => {
           data = data.replace(/replace_cluster_name/g, clusterName);
           data = data.replace(/replace_rke2_version/g, vars.rke2Version);
           data = data.replace(/replace_kind_version/g, vars.kindVersion);

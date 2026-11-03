@@ -1,0 +1,290 @@
+/*
+Copyright © 2022 - 2023 SUSE LLC
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+    http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+import '../support/commands';
+import {
+  capiNamespace,
+  isCypressTag,
+  isRancherManagerVersion,
+  isRancherUpgraded,
+  isTurtlesDevChart,
+  isUpgrade,
+  turtlesNamespace,
+} from '../support/utils';
+import {providers, vars} from '../support/variables';
+import {addChartMuseumRepo, addTurtlesProvidersRepo, matchAndWaitForProviderReadyStatus} from "../support/commands";
+
+Cypress.config();
+describe('Enable CAPI Providers', () => {
+  before(function () {
+    if (isRancherManagerVersion('<2.13')) {
+      return cy.task('suiteLog', 'Skipping for Rancher versions < 2.13').then(() => {
+        this.skip();
+      })
+    }
+  })
+
+  beforeEach(() => {
+    cy.login();
+    cy.burgerMenuOperate('open');
+  });
+
+  context('Setup providers chart repository', {tags: ['@install']}, () => {
+
+    qase(403, it("Add Rancher Turtles Providers Chart GitRepo", () => {
+      // For upgrade tests, dev=true is only applicable to the target version
+      if (isUpgrade) {
+        if (isRancherUpgraded) {
+          // Ensure that correct providers chart repo is used post-upgrade by deleting the repo that was added in pre-upgrade
+          cy.task('suiteLog', "Removing providers chart repo added in pre-upgrade");
+          cy.deleteKubernetesResource(vars.localCluster, ["Apps", "Repositories"], vars.providersChartRepoName);
+        } else {
+          addTurtlesProvidersRepo();
+          return
+        }
+      }
+
+      if (isTurtlesDevChart) {
+        addChartMuseumRepo();
+      } else {
+        addTurtlesProvidersRepo();
+      }
+    }));
+  })
+
+  context('Local providers - @install', {tags: '@install'}, () => {
+    // HelmOps to be used across all specs
+    qase(90, (isRancherUpgraded) ? it.skip : it)('Add Applications fleet repo', () => {
+      // Use release branch as main does not have helm-ops applications targets
+      let classBranch = isRancherManagerVersion('>=2.15') ? 'release/v0.27' : vars.classBranch
+      // Add upstream apps repo
+      cy.addFleetGitRepo('helm-ops', vars.turtlesRepoUrl, classBranch, 'examples/applications/', vars.capiClustersNS);
+    })
+
+    // Run this test for:
+    // - dev=false
+    // - If dev=true and upgrade tests
+    if ((isRancherManagerVersion('>=2.14') && !isTurtlesDevChart) || (isTurtlesDevChart && isUpgrade && !isRancherUpgraded)) {
+      qase(716, it('Patch the providers chart repository with OCIOptions.downloadAllTags: true', () => {
+        // Enabling this option downloads all the chart versions and ensures only supported versions show up
+        // Doing so makes updating the chart a smoother process.
+        const repositoryName = vars.providersChartRepoName;
+        const resourceKind = 'Repositories';
+        const patch = {spec: {OCIOptions: {'downloadAllTags': true}}};
+        cy.patchYamlResource(vars.localCluster, 'default', resourceKind, repositoryName, patch);
+        cy.typeInFilter(repositoryName);
+        // Make sure the repo is active before leaving
+        // Always press Refresh button as workaround for https://github.com/rancher/rancher/issues/49671
+        cy.getBySel('sortable-table-0-action-button').click();
+        cy.wait(1000);
+        cy.get('.icon.group-icon.icon-refresh').parent().click();
+        cy.wait(1000);
+        cy.contains(new RegExp('Active.*' + repositoryName), {timeout: 150000});
+      })
+      );
+    }
+
+    qase(338, it('Create Providers using Charts', () => {
+      const providerSelectionFunction = (text: any) => {
+        // @ts-ignore
+        text.providers.bootstrapKubeadm.enabled = true;
+        // @ts-ignore
+        text.providers.bootstrapKubeadm.enableAutomaticUpdate = true;
+
+        // @ts-ignore
+        text.providers.controlplaneKubeadm.enabled = true;
+        // @ts-ignore
+        text.providers.controlplaneKubeadm.enableAutomaticUpdate = true;
+
+        // @ts-ignore
+        text.providers.infrastructureDocker.enabled = true;
+        // @ts-ignore
+        text.providers.infrastructureDocker.enableAutomaticUpdate = true;
+
+        // there is no easy way to only install a specific provider when something like `@capgke` is passed, so we enable all the cloud providers
+        if (isCypressTag('@full') || isCypressTag('@capg') || isCypressTag('@capa') || isCypressTag('@capz')) {
+            // @ts-ignore
+            text.providers.infrastructureGCP.enabled = true;
+            // @ts-ignore
+            text.providers.infrastructureGCP.enableAutomaticUpdate = true;
+            // @ts-ignore
+            text.providers.infrastructureGCP.variables.GCP_B64ENCODED_CREDENTIALS = '';
+
+            // @ts-ignore
+            text.providers.infrastructureAzure.enabled = true;
+            // @ts-ignore
+            text.providers.infrastructureAzure.enableAutomaticUpdate = true;
+
+            // @ts-ignore
+            text.providers.infrastructureAWS.enabled = true;
+            // @ts-ignore
+            text.providers.infrastructureAWS.enableAutomaticUpdate = true;
+          }
+
+        if (isCypressTag('@vsphere') || isCypressTag('@capv')) {
+            // @ts-ignore
+            text.providers.infrastructureVSphere.enabled = true;
+            // @ts-ignore
+            text.providers.infrastructureVSphere.enableAutomaticUpdate = true;
+          }
+      }
+
+      // Install Rancher Turtles Certified Providers chart
+      let operation = (isUpgrade && isRancherUpgraded) ? 'Upgrade' : 'Install'
+      cy.task('suiteLog', `${operation} turtles providers chart version: ${vars.turtlesProvidersChartVersion}`)
+      cy.checkChart(vars.localCluster, operation, vars.turtlesProvidersChartName, turtlesNamespace, {
+        version: vars.turtlesProvidersChartVersion,
+        modifyYAMLOperation: providerSelectionFunction
+      });
+    })
+    );
+
+    qase(347, it('Wait for all the providers to be Ready', {retries: 2}, () => {
+      // Adding this extra check so that retry is not needed in other tests.
+      cy.navigateToProviders();
+      cy.waitForAllRowsInState('Ready', vars.shortTimeout);
+    })
+    );
+
+    qase(367, it('Verify Core CAPI Provider', () => {
+      cy.navigateToProviders();
+      matchAndWaitForProviderReadyStatus(providers.coreCAPIProvider, 'core', providers.coreCAPIProvider, providers.coreCAPIProviderVersion, capiNamespace);
+    })
+    );
+
+    const kubeadmProviderTypes = [
+      {qaseID: 420, type: 'bootstrap', namespace: 'capi-kubeadm-bootstrap-system'},
+      {qaseID: 421, type: 'control plane', namespace: 'capi-kubeadm-control-plane-system'}
+    ]
+    kubeadmProviderTypes.forEach((kubeadmProvider) => {
+      qase(kubeadmProvider.qaseID, it('Verify Kubeadm Providers - ' + kubeadmProvider.type, () => {
+          // Verify CAPI Kubeadm providers
+          if (kubeadmProvider.type == 'control plane') {
+            const namespace = kubeadmProvider.namespace
+            const providerName = providers.kubeadmProvider + '-' + 'control-plane'
+            cy.navigateToProviders();
+            matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', providers.kubeadmProvider, providers.kubeadmProviderVersion, namespace);
+          } else {
+            const namespace = kubeadmProvider.namespace
+            const providerName = providers.kubeadmProvider + '-' + kubeadmProvider.type
+            cy.navigateToProviders()
+            matchAndWaitForProviderReadyStatus(providerName, kubeadmProvider.type, providers.kubeadmProvider, providers.kubeadmProviderVersion, namespace);
+          }
+        })
+      );
+    })
+
+    const rke2ProviderTypes = [
+      {qaseID: 369, type: 'bootstrap', namespace: 'rke2-bootstrap-system'},
+      {qaseID: 370, type: 'control plane', namespace: 'rke2-control-plane-system'}
+    ]
+    rke2ProviderTypes.forEach((rke2Provider) => {
+      qase(rke2Provider.qaseID, it('Verify RKE2 Providers - ' + rke2Provider.type, () => {
+          if (rke2Provider.type == 'control plane') {
+            const providerName = providers.rke2Provider + '-' + 'control-plane'
+            cy.navigateToProviders();
+            matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', providers.rke2Provider, providers.rke2ProviderVersion, rke2Provider.namespace);
+        } else {
+            const providerName = providers.rke2Provider + '-' + rke2Provider.type
+            cy.navigateToProviders();
+            matchAndWaitForProviderReadyStatus(providerName, rke2Provider.type, providers.rke2Provider, providers.rke2ProviderVersion, rke2Provider.namespace);
+        }
+      })
+      );
+    })
+
+    qase(422, it('Verify CAPD provider', () => {
+      // Verify Docker Infrastructure provider
+      const dockerProviderNamespace = 'capd-system'
+      cy.navigateToProviders();
+      matchAndWaitForProviderReadyStatus(providers.dockerProvider, 'infrastructure', providers.dockerProvider, providers.kubeadmProviderVersion, dockerProviderNamespace);
+    })
+    );
+  });
+
+  context('vSphere provider', {tags: ['@vsphere', '@capvk', '@capvr']}, () => {
+    const vsphereProviderNamespace = 'capv-system'
+    qase(423, it('Verify CAPV provider', () => {
+      // Verify vsphere Infrastructure provider
+      // See capv_rke2_cluster.spec.ts for more details about `vsphere_secrets_json_base64` structure
+      const vsphere_secrets_json_base64 = Cypress.expose("vsphere_secrets_json_base64")
+      // Decode the base64 encoded secret and make json object
+      const vsphere_secrets_json = JSON.parse(Buffer.from(vsphere_secrets_json_base64, 'base64').toString('utf-8'))
+      // Access keys from the json object
+      const vsphereUsername = vsphere_secrets_json.vsphere_username;
+      const vspherePassword = vsphere_secrets_json.vsphere_password;
+      const vsphereServer = vsphere_secrets_json.vsphere_server;
+      const vspherePort = '443';
+      cy.addCloudCredsVMware(providers.vsphereProvider, vsphereUsername, vspherePassword, vsphereServer, vspherePort);
+      cy.burgerMenuOperate('open');
+      cy.navigateToProviders();
+      matchAndWaitForProviderReadyStatus(providers.vsphereProvider, 'infrastructure', providers.vsphereProvider, providers.vsphereProviderVersion, vsphereProviderNamespace);
+    })
+    );
+  })
+
+  context('Cloud Providers', {tags: '@full'}, () => {
+    const providerType = 'infrastructure'
+    qase(424, it('Verify CAPA provider', {tags: ['@capak', '@capar', '@capaeks']},() => {
+      const namespace = 'capa-system'
+      // Verify AWS Infrastructure provider
+      cy.addCloudCredsAWS(providers.amazonProvider, Cypress.expose('aws_access_key'), Cypress.expose('aws_secret_key'));
+      cy.burgerMenuOperate('open');
+      cy.navigateToProviders();
+      matchAndWaitForProviderReadyStatus(providers.amazonProvider, providerType, providers.amazonProvider, providers.amazonProviderVersion, namespace);
+    })
+    );
+
+    qase(425, it('Verify CAPG provider', {tags: ['@capgk', '@capgke']}, () => {
+      const namespace = 'capg-system'
+      // Verify GCP Infrastructure provider
+      cy.navigateToProviders();
+
+      // Create GCP Cloud Credential until https://github.com/rancher/dashboard/issues/15391 is fixed
+      const row = isRancherManagerVersion('>=2.16') ? 8 : 7
+      cy.get('tr.main-row').contains('a', providers.googleProvider).closest('tr').within(() => {
+        cy.get('td').eq(row).click();      // Action button
+      })
+      cy.contains('Edit Config').click();
+      cy.contains(`Provider: Google - ${providers.googleProvider}`).should('exist');
+      cy.typeValue('Credential Name', providers.googleProvider);
+      cy.getBySel('text-area-auto-grow').type(Cypress.expose('gcp_credentials'), {log: false, parseSpecialCharSequences: false});
+      cy.clickButton('Continue');
+      cy.getBySel('cluster-prov-select-credential').contains(providers.googleProvider).should('be.visible');
+      cy.clickButton('Save');
+      matchAndWaitForProviderReadyStatus(providers.googleProvider, providerType, providers.googleProvider, providers.googleProviderVersion, namespace);
+    })
+    );
+
+    context('CAPZ Setup', {tags: ['@capzk', '@capzr', '@capzaks']}, ()=>{
+      qase(426,
+        it('Verify CAPZ provider', () => {
+          const namespace = 'capz-system'
+          // Verify Azure Infrastructure provider
+          cy.navigateToProviders();
+          matchAndWaitForProviderReadyStatus(providers.azureProvider, providerType, providers.azureProvider, providers.azureProviderVersion, namespace);
+        })
+      );
+
+      qase(685,
+        it('Create AzureClusterIdentity', () => {
+          const clientID = Cypress.expose("azure_client_id")
+          const clientSecret = btoa(Cypress.expose("azure_client_secret"))
+          const tenantID = Cypress.expose("azure_tenant_id")
+
+          cy.createAzureClusterIdentity(clientID, tenantID, clientSecret)
+        })
+      );
+    })
+  })
+});
