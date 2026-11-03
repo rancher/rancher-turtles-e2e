@@ -53,6 +53,7 @@ describe('Import CAPV RKE2 Cluster', {tags: ['@vsphere', '@capvr']}, () => {
         data = data.replace(/replace_vsphere_folder/g, JSON.stringify(vsphere_secrets_json.vsphere_folder))
         data = data.replace(/replace_vsphere_rke2_template/g, JSON.stringify(vsphere_secrets_json.vsphere_rke2_template))
         data = data.replace(/replace_vsphere_kubeadm_template/g, JSON.stringify(vsphere_secrets_json.vsphere_kubeadm_template))
+        data = data.replace(/replace_vsphere_kubeadm_caapf_template/g, JSON.stringify(vsphere_secrets_json.vsphere_kubeadm_caapf_template))
         data = data.replace(/replace_vsphere_ssh_authorized_key/g, JSON.stringify(vsphere_secrets_json.vsphere_ssh_authorized_key))
         data = data.replace(/replace_vsphere_tls_thumbprint/g, JSON.stringify(vsphere_secrets_json.vsphere_tls_thumbprint))
         // This is not mandatory field, usable for SLE only

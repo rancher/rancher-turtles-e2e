@@ -9,13 +9,14 @@ vsphere:
   folder: replace_vsphere_folder
   rke2_template: replace_vsphere_rke2_template
   kubeadm_template: replace_vsphere_kubeadm_template
+  kubeadm_caapf_template: replace_vsphere_kubeadm_caapf_template
   ssh_authorized_key: replace_vsphere_ssh_authorized_key
   tls_thumbprint: replace_vsphere_tls_thumbprint
 
 cluster:
   name: turtles-qa-capv-rke2
   namespace: capi-clusters
-  rke2_version: v1.34.1+rke2r1
+  rke2_version: v1.37.1+rke2r1
   control_plane_machine_count: 1
   worker_machine_count: 1
   product_key: ""
