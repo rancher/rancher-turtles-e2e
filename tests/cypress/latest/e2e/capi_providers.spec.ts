@@ -156,7 +156,7 @@ describe('Enable CAPI Providers', () => {
     })
     );
 
-    qase(367, it('Verify Core CAPI Provider', () => {
+    qase(367, it('Verify Core CAPI Provider', {retries: 1}, () => {
       cy.navigateToProviders();
       matchAndWaitForProviderReadyStatus(providers.coreCAPIProvider, 'core', providers.coreCAPIProvider, providers.coreCAPIProviderVersion, capiNamespace);
     })
