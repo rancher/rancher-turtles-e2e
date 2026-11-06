@@ -1556,12 +1556,12 @@ Cypress.Commands.add('filterPodErrorLogs', (podName) => {
   cy.get('.logs-container').then(($body) => {
     const bodyText = String($body.text().trim())
     if (bodyText.includes('No lines match the current filter.')) {
-      cy.task('log', 'No log entries found for filter: error');
+      cy.task('suiteLog', 'No log entries found for filter: error');
       return;
     } else {
       [...bodyText.matchAll(/(err="(?:\\"|[^"])+")/g)]
       .slice(0, 3)
-      .forEach((m) => cy.task('log', `[${podName}]: ${m[1]}`));
+      .forEach((m) => cy.task('suiteLog', `[${podName}]: ${m[1]}`));
     }
   });
   cy.getBySel('wm-tab-close-button').click();
@@ -1667,7 +1667,7 @@ export function matchAndWaitForProviderReadyStatus(
       if ((isRancherManagerVersion('>=2.13')) && (isPrimeChannel() || isPrePrimeChannel() || (isTurtlesDevChart && isTurtlesPrimeBuild()))) {
         cy.get('td').eq(row).should('contain.text', providerVersion); row++;  // InstalledVersion
       } else {
-        cy.task('log', 'This is not a prime Rancher; skipping provider version check'); row++;
+        cy.task('suiteLog', 'This is not a prime Rancher; skipping provider version check'); row++;
       }
       cy.get('td').eq(row).should('contain.text', readyState);  // Phase
     });
