@@ -14,7 +14,7 @@ run-name: >-
     github.event_name == 'schedule' &&
     (
       github.event.schedule == '0 3 * * *' && format('[{0}] Nightly e2e job for `@short`', github.run_number) ||
-      github.event.schedule == '0 3 5 * *' && format('[{0}] Nightly e2e job for `@short @aarch64`', github.run_number) ||
+      github.event.schedule == '5 3 * * *' && format('[{0}] Nightly e2e job for `@short @aarch64`', github.run_number) ||
       github.event.schedule == '0 4 * * *' && format('[{0}] Nightly e2e job for `@vsphere`', github.run_number) ||
       github.event.schedule == '0 4 * * 0' && format('[{0}] Weekly e2e job for `@full`', github.run_number) ||
       github.event.schedule == '0 3 * * 6' && format('[{0}] Weekly e2e job for `@migration`', github.run_number) ||
@@ -115,7 +115,7 @@ jobs:
       turtles_dev_chart: ${{ inputs.turtles_dev_chart == true || (github.event_name == 'schedule' && true) }}
       target_build_type: ${{ inputs.target_build_type || 'prime' }}
       skip_cluster_delete: ${{ inputs.skip_cluster_delete || (github.event_name == 'schedule' && false) }}
-      runner_template: ${{ inputs.runner_template || (github.event.schedule == '5 3 * * *' && 'rancher-turtles-e2e-ci-aarch64-spot-20261014-1255') || 'rancher-turtles-e2e-ci-amd64-spot-20261014-1255' }}
+      runner_template: ${{ inputs.runner_template || (github.event.schedule == '5 3 * * *' && 'rancher-turtles-e2e-ci-aarch64-spot-20261014-1233') || 'rancher-turtles-e2e-ci-amd64-spot-20261014-1255' }}
       cluster_name_suffix: ${{ inputs.cluster_name_suffix || github.run_number }}
       grep_test_by_tag: >-
         ${{ inputs.grep_test_by_tag ||
