@@ -46,8 +46,8 @@ github.com/opencontainers/image-spec v1.1.1 h1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJw
 github.com/opencontainers/image-spec v1.1.1/go.mod h1:qpqAh3Dmcf36wStyyWU+kCeDgrGnAve2nCC8+7h8Q0M=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
-github.com/rancher-sandbox/ele-testhelpers v0.0.0-20261023090800-9cad863e4420 h1:yvRt2EyB6QadMBbmsJrzgiSWKZ/BXLiB2JhmHlaGZF4=
-github.com/rancher-sandbox/ele-testhelpers v0.0.0-20261023090800-9cad863e4420/go.mod h1:zA6v8tPJLbFjcp6Mah1glRAjTlgAzTnlOn654P5Hg7o=
+github.com/rancher-sandbox/ele-testhelpers v0.0.0-20261111111335-a6761601fcd7 h1:rSId7RJgroAkElbda9VuPoPo0qecC+qgtI5HMAIceDM=
+github.com/rancher-sandbox/ele-testhelpers v0.0.0-20261111111335-a6761601fcd7/go.mod h1:zA6v8tPJLbFjcp6Mah1glRAjTlgAzTnlOn654P5Hg7o=
 github.com/rogpeppe/go-internal v1.14.1 h1:UQB4HGPB6osV0SQTLymcB4TgvyWu6ZyliaW0tI/otEQ=
 github.com/rogpeppe/go-internal v1.14.1/go.mod h1:MaRKkUm5W0goXpeCfT7UZI6fk/L7L7so1lCWt35ZSgc=
 github.com/sirupsen/logrus v1.9.4 h1:TsZE7l11zFCLZnZ+teH4Umoq5BhEIfIzfRDZ1Uzql2w=
