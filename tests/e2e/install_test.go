@@ -148,11 +148,6 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 			var extraFlags []string = nil
 			if (isRancherManagerVersion(">=2.13")) && turtlesDevChart {
 				extraEnvIndex := 1
-				// For prime-alpha and prime-rc channels extraEnvIndex needs to be shifted
-				// Ref. https://github.com/rancher-sandbox/ele-testhelpers/blob/main/rancher/install.go#L93
-				if strings.Contains(rancherChannel, "prime-") {
-					extraEnvIndex = 2
-				}
 
 				rancherPointVersion := os.Getenv("RANCHER_POINT_VERSION")
 				entries := []struct {
