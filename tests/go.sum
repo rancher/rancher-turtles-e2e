@@ -52,8 +52,8 @@ github.com/sirupsen/logrus v1.9.4 h1:TsZE7l11zFCLZnZ+teH4Umoq5BhEIfIzfRDZ1Uzql2w
 github.com/sirupsen/logrus v1.9.4/go.mod h1:ftWc9WdOfJ0a92nsE2jF5u5ZwH8Bv2zdeOC42RjbV2g=
 github.com/stretchr/testify v1.12.1 h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWDWE=
 github.com/stretchr/testify v1.12.1/go.mod h1:MDEgiDPPsNp5cuIrHPPCyornHKgEVbtFUmoNlxoYthg=
-github.com/thehejik/ele-testhelpers v0.0.0-20261106181806-568d2aa165e4 h1:r30Co1xXYvdLjzRRVMe51JTUcXB3SKqyI9Rr1VbI0es=
-github.com/thehejik/ele-testhelpers v0.0.0-20261106181806-568d2aa165e4/go.mod h1:zA6v8tPJLbFjcp6Mah1glRAjTlgAzTnlOn654P5Hg7o=
+github.com/thehejik/ele-testhelpers v0.0.0-20261109142609-d8906dc6d342 h1:6VUBYYgq4/AZ6LwXMCc54mxMhfvbAvM/EmUkz3b2DsU=
+github.com/thehejik/ele-testhelpers v0.0.0-20261109142609-d8906dc6d342/go.mod h1:zA6v8tPJLbFjcp6Mah1glRAjTlgAzTnlOn654P5Hg7o=
 github.com/tidwall/gjson v1.18.0 h1:FIDeeyB800efLX89e5a8Y0BNH+LOngJyGrIWxG2FKQY=
 github.com/tidwall/gjson v1.18.0/go.mod h1:/wbyibRr2FHMks5tjHJ5F8dMZh3AcwJEMf5vlfC0lxk=
 github.com/tidwall/match v1.1.1 h1:+Ho715JplO36QYgwN9PGYNhgZvoUSc9X2c80KVTi+GA=

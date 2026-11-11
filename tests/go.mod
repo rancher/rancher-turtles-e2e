@@ -37,4 +37,4 @@ require (
 	libvirt.org/libvirt-go-xml v7.4.0+incompatible // indirect
 )
 
-replace github.com/rancher-sandbox/ele-testhelpers v0.0.0-20261023090800-9cad863e4420 => github.com/thehejik/ele-testhelpers v0.0.0-20261106181806-568d2aa165e4
+replace github.com/rancher-sandbox/ele-testhelpers v0.0.0-20261023090800-9cad863e4420 => github.com/thehejik/ele-testhelpers v0.0.0-20261109142609-d8906dc6d342

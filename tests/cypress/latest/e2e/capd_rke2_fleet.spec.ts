@@ -15,11 +15,11 @@ describe('Import CAPD RKE2 (Default CNI) Cluster using Fleet', {tags: ['@short',
   const clusterClassRepoName = "docker-rke2-clusterclass"
 
   before(function () {
-    if (isCAAPFSupported) {
-      return cy.task('suiteLog', "Test uses RancherManagedFleet which is only supported on Rancher Version 2.16 onwards; skipping...").then(() => {
-        this.skip();
-      })
-    }
+    // if (isCAAPFSupported) {
+    //   return cy.task('suiteLog', "Test uses RancherManagedFleet which is only supported on Rancher Version 2.16 onwards; skipping...").then(() => {
+    //     this.skip();
+    //   })
+    // }
   })
 
   beforeEach(function () {

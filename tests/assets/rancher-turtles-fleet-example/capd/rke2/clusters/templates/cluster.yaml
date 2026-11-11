@@ -22,7 +22,7 @@ spec:
       name: docker-rke2-example
       namespace: capi-classes
     controlPlane:
-      replicas: 3
+      replicas: 1
     variables:
     - name: rke2CNI
       value: ""
@@ -35,4 +35,4 @@ spec:
       machineDeployments:
       - class: default-worker
         name: md-0
-        replicas: 3
+        replicas: 1
