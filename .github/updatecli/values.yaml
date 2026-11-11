@@ -3,7 +3,7 @@ scm:
   kind: github
   env_token: UPDATECLI_GITHUB_TOKEN
   owner: "rancher"
-  repository: "rancher-turtles-e2e"
+  repository: "turtles-e2e"
   #username: "updatecli[bot]"
   #user: "updatecli[bot]"
   #email: updatecli[bot]@users.noreply.github.com

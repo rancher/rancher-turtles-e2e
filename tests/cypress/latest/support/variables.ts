@@ -23,7 +23,7 @@ export const vars = {
   localCluster: 'local',
   chartMuseumRepoName: 'chartmuseum-repo',
   providersChartRepoName: 'turtles-providers-chart',
-  repoUrl: 'https://github.com/rancher/rancher-turtles-e2e',
+  repoUrl: 'https://github.com/rancher/turtles-e2e',
   turtlesRepoUrl: 'https://github.com/rancher/turtles',
   dockerAuthUsernameBase64: btoa(Cypress.expose("docker_auth_username")),
   dockerAuthPasswordBase64: btoa(Cypress.expose("docker_auth_password")),

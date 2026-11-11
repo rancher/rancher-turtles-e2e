@@ -1,6 +1,6 @@
 # GitHub Runner on vSphere Provisioned by Tofu/Terraform IaC
 
-> Current configuration is suitable for the `rancher/rancher-turtles-e2e` project.
+> Current configuration is suitable for the `rancher/turtles-e2e` project.
 
 ## Preparation
 

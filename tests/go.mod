@@ -1,4 +1,4 @@
-module github.com/rancher/rancher-turtles-e2e/tests
+module github.com/rancher/turtles-e2e/tests
 
 go 1.26.10
 
