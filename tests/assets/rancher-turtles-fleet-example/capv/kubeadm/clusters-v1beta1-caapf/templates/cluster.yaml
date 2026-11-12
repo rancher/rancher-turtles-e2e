@@ -44,7 +44,7 @@ spec:
     - name: vSphereServer
       value: {{ .Values.vsphere.server }}
     - name: vSphereTemplate
-      value: {{ .Values.vsphere.kubeadm_template }}
+      value: {{ .Values.vsphere.kubeadm_caapf_template }}
     - name: controlPlaneIpAddr
       value: {{ .Values.cluster.control_plane_endpoint_ip }}
     - name: controlPlanePort

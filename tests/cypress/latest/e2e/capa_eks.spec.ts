@@ -4,7 +4,7 @@ import {capaResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDelet
 import {vars} from '../support/variables';
 
 Cypress.config();
-// TODO: Enable tests once CAPI 1.14.4 is released
+// TODO: Enable tests once CAPI 1.14.4 & Provider bumps are released
 xdescribe('Import CAPA EKS Cluster', {tags: ['@full', '@capaeks']}, () => {
   const timeout = vars.fullTimeout
   const classNamePrefix = 'aws-eks'

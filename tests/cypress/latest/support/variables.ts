@@ -15,7 +15,12 @@ export const vars = {
   shortTimeout: 600000,
   fullTimeout: 1500000,
   rancherTurtlesE2EBranch: Cypress.expose('rancher_turtles_e2e_branch'),
-  classBranch: isRancherManagerVersion('2.12') ? 'release-0.24' : isRancherManagerVersion('2.13') ? 'release/v0.25' : isRancherManagerVersion('2.14') ? 'release/v0.26' : isRancherManagerVersion('2.15') ? 'release/v0.27' : 'main',
+  classBranch: isRancherManagerVersion('2.12') ? 'release-0.24'
+    : isRancherManagerVersion('2.13') ? 'release/v0.25'
+    : isRancherManagerVersion('2.14') ? 'release/v0.26'
+    : isRancherManagerVersion('2.15') ? 'release/v0.27'
+    : isRancherManagerVersion('2.16') ? 'release/v0.28'
+    : 'main',
   capiClustersNS: 'capi-clusters',
   capiClassesNS: 'capi-classes',
   fleetDefaultNS: 'fleet-default',
@@ -32,13 +37,13 @@ export const vars = {
   turtlesProvidersHelmApp: 'rancher-turtles-providers',
   turtlesProvidersOCIRepo: `oci://${turtlesProvidersRegistry}/rancher/charts/rancher-turtles-providers`,
   turtlesProvidersChartName: 'rancher-turtles-providers',
-  eksVersion: isAPIv1beta1 ? 'v1.32.0' : 'v1.35.4',
+  eksVersion: isAPIv1beta1 ? 'v1.32.0' : 'v1.35.6',
   gkeVersion: isRancherManagerVersion('2.14') ? 'v1.35.8' : 'v1.36.4',
-  aksVersion: isRancherManagerVersion('2.12') ? 'v1.33.4' : isRancherManagerVersion('2.13') ? 'v1.34.7' : 'v1.35.4',
-  kindVersion: isRancherManagerVersion('2.12') ? 'v1.33.4' : isRancherManagerVersion('2.13') ? 'v1.34.0' : isRancherManagerVersion('2.14') ? 'v1.35.0' : 'v1.36.1',
+  aksVersion: isRancherManagerVersion('2.12') ? 'v1.33.4' : isRancherManagerVersion('2.13') ? 'v1.34.12' : isRancherManagerVersion('2.14') ? 'v1.35.9' : isRancherManagerVersion('2.15') ? 'v1.36.5' : 'v1.37.1',
+  kindVersion: isRancherManagerVersion('2.12') ? 'v1.33.4' : isRancherManagerVersion('2.13') ? 'v1.34.0' : isRancherManagerVersion('2.14') ? 'v1.35.0' : isRancherManagerVersion('2.15') ? 'v1.36.1' : 'v1.37.0',
   kubeadmVersion: isRancherManagerVersion('2.12') ? 'v1.33.4' : isRancherManagerVersion('2.13') ? 'v1.34.1' : isRancherManagerVersion('2.14') ? 'v1.35.0' : 'v1.36.1',
-  rke2Version: isRancherManagerVersion('2.12') ? 'v1.33.4+rke2r1' : isRancherManagerVersion('2.13') ? 'v1.34.1+rke2r1' : isRancherManagerVersion('2.14') ? 'v1.35.0+rke2r1' : 'v1.36.0+rke2r1',
-  v2provRKE2Version: isRancherManagerVersion('2.12') ? 'v1.33.4+rke2r1' : isRancherManagerVersion('2.13') ? 'v1.34.10+rke2r1' : isRancherManagerVersion('2.14') ? 'v1.35.7+rke2r1' : 'v1.36.3+rke2r1',
+  rke2Version: isRancherManagerVersion('2.12') ? 'v1.33.4+rke2r1' : isRancherManagerVersion('2.13') ? 'v1.34.1+rke2r1' : isRancherManagerVersion('2.14') ? 'v1.35.0+rke2r1' : isRancherManagerVersion('2.15') ? 'v1.36.0+rke2r1' : 'v1.37.1+rke2r1',
+  v2provRKE2Version: isRancherManagerVersion('2.12') ? 'v1.33.4+rke2r1' : isRancherManagerVersion('2.13') ? 'v1.34.10+rke2r1' : isRancherManagerVersion('2.14') ? 'v1.35.7+rke2r1' : isRancherManagerVersion('2.15') ? 'v1.36.3+rke2r1' : 'v1.37.2+rke2r1',
   v2provImageId: isRancherManagerVersion('2.12') ? 'canonical:UbuntuServer:18.04-LTS:latest' : 'canonical:ubuntu-24_04-lts:server-gen1:latest',
   amiID: isRancherManagerVersion('2.12') ? 'ami-07cded2dd011bc687' // Private copy of ami-0cd9e4e7906f4c9dd from eu-west-2
   // Private copies of AMI's from eu-central-1 (eco)
@@ -60,11 +65,11 @@ export const vars = {
   gcpCCMYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/cloud-provider-gcp.yaml',
   vSphereCCMYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/cloud-provider-vsphere.yaml',
   vSphereCSIYaml: 'https://raw.githubusercontent.com/rancher/turtles/refs/heads/main/test/e2e/data/applications/csi-vsphere.yaml',
-  turtlesChartVersion: isRancherManagerVersion('2.12') ? '0.24' 
-                     : isRancherManagerVersion('2.13') ? '0.25' 
-                     : isRancherManagerVersion('2.14') ? '0.26' 
-                     : isRancherManagerVersion('2.15') ? '0.27' 
-                     : isRancherManagerVersion('2.16') ? '0.28' 
+  turtlesChartVersion: isRancherManagerVersion('2.12') ? '0.24'
+                     : isRancherManagerVersion('2.13') ? '0.25'
+                     : isRancherManagerVersion('2.14') ? '0.26'
+                     : isRancherManagerVersion('2.15') ? '0.27'
+                     : isRancherManagerVersion('2.16') ? '0.28'
                      : '0.29',
   turtlesProvidersChartVersion: (() => {
     if ((!isTurtlesDevChart) || (isUpgrade && !isRancherUpgraded)) {
@@ -163,7 +168,7 @@ const buildTypeVersionMap = {
   },
   'prod-v2.16': {
     capi: 'v1.14.4',
-    rke2: 'v0.27.1',
+    rke2: 'v0.27.2',
     kubeadm: 'v1.14.4',
     fleet: 'v0.15.0',
     vsphere: 'v1.17.0',
@@ -213,7 +218,7 @@ const buildTypeVersionMap = {
   },
   'dev-v2.16': {
     capi: 'v1.14.4',
-    rke2: 'v0.27.1',
+    rke2: 'v0.27.2',
     kubeadm: 'v1.14.4',
     fleet: 'v0.15.0',
     vsphere: 'v1.17.0',

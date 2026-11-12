@@ -13,6 +13,7 @@ describe('Import CAPZ RKE2 Cluster', {tags: ['@full', '@capzr']}, () => {
   const clusterFileName = './fixtures/azure/capz-rke2-cluster.yaml'
 
   const subscriptionID = Cypress.expose("azure_subscription_id")
+  const k8sVersion = 'v1.36.0+rke2r1'
 
   before(function () {
     if (isCAAPFSupported) {
@@ -46,7 +47,7 @@ describe('Import CAPZ RKE2 Cluster', {tags: ['@full', '@capzr']}, () => {
       cy.readFile(clusterFileName).then((data) => {
         data = data.replace(/replace_cluster_name/g, clusterName)
         data = data.replace(/replace_subscription_id/g, subscriptionID)
-        data = data.replace(/replace_rke2_version/g, vars.rke2Version)
+        data = data.replace(/replace_rke2_version/g, k8sVersion)
         data = data.replace(/replace_azure_ccm_version/g, vars.azureCCMVersion)
         cy.importYAML(data, vars.capiClustersNS)
       });
@@ -88,7 +89,7 @@ describe('Import CAPZ RKE2 Cluster', {tags: ['@full', '@capzr']}, () => {
         // workaround; these values need to be re-replaced before applying the scaling changes
         data = data.replace(/replace_cluster_name/g, clusterName)
         data = data.replace(/replace_subscription_id/g, subscriptionID)
-        data = data.replace(/replace_rke2_version/g, vars.rke2Version)
+        data = data.replace(/replace_rke2_version/g, k8sVersion)
         data = data.replace(/replace_azure_ccm_version/g, vars.azureCCMVersion)
         cy.importYAML(data, vars.capiClustersNS)
       })

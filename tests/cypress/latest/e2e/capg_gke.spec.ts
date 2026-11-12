@@ -4,7 +4,7 @@ import {capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/
 import {vars} from '../support/variables';
 
 Cypress.config();
-// TODO: Enable tests once CAPI 1.14.4 is released
+// TODO: Enable tests once CAPI 1.14.4 & Provider bumps are released
 xdescribe('Import CAPG GKE Cluster', {tags: ['@full', '@capgke']}, () => {
   const timeout = vars.fullTimeout * 2
   const classNamePrefix = 'gcp-gke'
