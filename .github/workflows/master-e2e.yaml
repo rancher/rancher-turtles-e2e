@@ -191,7 +191,7 @@ jobs:
 
           # Append "-head" to the milestone title if the channel is "head"
           # WORKAROUND 11/26: Do not append "-head" for manually triggered runs
-          if [[ "${CHANNEL}" =~ head && ${{ github.event_name == 'schedule' }} ]]; then
+          if [[ "${CHANNEL}" =~ head ]] && [[ "${{ github.event_name }}" == "schedule" ]]; then
             MILESTONE_TITLE="${MILESTONE_TITLE}-head"
           fi
 
