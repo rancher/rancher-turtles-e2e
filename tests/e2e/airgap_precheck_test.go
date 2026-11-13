@@ -49,7 +49,7 @@ func allProviderImages() []imageRef {
 		{"rancher/turtles", vTurtles},
 		{"rancher/charts/rancher-turtles-providers", vTurtlesChart}, // This is actually chart repo
 		{"rancher/cluster-api-controller", vCoreCAPI},
-		{"rancher/cluster-api-addon-provider-fleet", vFleet},
+		// {"rancher/cluster-api-addon-provider-fleet", vFleet},
 		{"rancher/cluster-api-aws-controller", vAws},
 		{"rancher/cluster-api-azure-controller", vAzure},
 		{"rancher/cluster-api-gcp-controller", vGcp},
@@ -65,7 +65,7 @@ func allProviderImages() []imageRef {
 func componentManifestImages() []imageRef {
 	return []imageRef{
 		{"rancher/cluster-api-controller-components", vCoreCAPI}, // This also contains capd and kubeadm manifests
-		{"rancher/cluster-api-addon-provider-fleet-components", vFleet},
+		// {"rancher/cluster-api-addon-provider-fleet-components", vFleet},
 		{"rancher/cluster-api-aws-controller-components", vAws},
 		{"rancher/cluster-api-azure-controller-components", vAzure},
 		{"rancher/cluster-api-gcp-controller-components", vGcp},
@@ -214,17 +214,20 @@ var _ = Describe("E2E - Airgap Precheck Tests", Label("airgap"), func() {
 			}
 		})
 
-		By("Verify CAPI version match in package-env", func() {
-			packageEnvPath := fmt.Sprintf("refs/tags/v%s", rancherVersion)
-			if primeRCHeadCommit != "" {
-				packageEnvPath = primeRCHeadCommit
-			}
-			url := fmt.Sprintf("https://raw.githubusercontent.com/rancher/rancher/%s/scripts/package-env", packageEnvPath)
-			re := regexp.MustCompile(`CLUSTER_API_CONTROLLER_TAG=(v[0-9]+\.[0-9]+\.[0-9]+)`)
-			matches := re.FindStringSubmatch(string(fetchBytes(url)))
-			Expect(matches).To(HaveLen(2), "CLUSTER_API_CONTROLLER_TAG not found in package-env")
-			GinkgoWriter.Printf("CAPI version in package-env: %s\n", matches[1])
-			Expect(matches[1]).To(Equal(vCoreCAPI), "Mismatch between config-prime.yaml and package-env")
-		})
+		/*
+			// the packege-env is able to get the CAPI version for rancher 2.16 automatically and it is not hardcoded anymore
+			By("Verify CAPI version match in package-env", func() {
+				packageEnvPath := fmt.Sprintf("refs/tags/v%s", rancherVersion)
+				if primeRCHeadCommit != "" {
+					packageEnvPath = primeRCHeadCommit
+				}
+				url := fmt.Sprintf("https://raw.githubusercontent.com/rancher/rancher/%s/scripts/package-env", packageEnvPath)
+				re := regexp.MustCompile(`CLUSTER_API_CONTROLLER_TAG=(v[0-9]+\.[0-9]+\.[0-9]+)`)
+				matches := re.FindStringSubmatch(string(fetchBytes(url)))
+				Expect(matches).To(HaveLen(2), "CLUSTER_API_CONTROLLER_TAG not found in package-env")
+				GinkgoWriter.Printf("CAPI version in package-env: %s\n", matches[1])
+				Expect(matches[1]).To(Equal(vCoreCAPI), "Mismatch between config-prime.yaml and package-env")
+			})
+		*/
 	})
 })
