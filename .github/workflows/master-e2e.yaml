@@ -153,6 +153,7 @@ jobs:
           RANCHER_VERSION: ${{ inputs.rancher_version }}
           RANCHER_UPGRADE_VERSION: ${{ inputs.rancher_upgrade_version }}
           GREPTAGS: ${{ inputs.grep_test_by_tag }}
+          TURTLES_DEV_CHART: ${{ inputs.turtles_dev_chart }}
         run: |
           # Migration and upgrade runs end on the upgrade target, so the milestone
           # must track that version rather than the one installed first.
@@ -189,9 +190,8 @@ jobs:
             MILESTONE_TITLE="v${VERSION}"
           fi
 
-          # Append "-head" to the milestone title if the channel is "head"
-          # WORKAROUND 11/26: Do not append "-head" for manually triggered runs
-          if [[ "${CHANNEL}" =~ head ]] && [[ "${{ github.event_name }}" == "schedule" ]]; then
+          # Append "-head" to the milestone title if the channel is "head" and this is a dev run
+          if [[ "${CHANNEL}" =~ head && "${TURTLES_DEV_CHART}" == "true" ]]; then
             MILESTONE_TITLE="${MILESTONE_TITLE}-head"
           fi
 
