@@ -56,6 +56,8 @@ func allProviderImages() []imageRef {
 		{"rancher/cluster-api-vsphere-controller", vVsphere},
 		{"rancher/cluster-api-provider-rke2-bootstrap", vRke2},
 		{"rancher/cluster-api-provider-rke2-controlplane", vRke2},
+		// rke2 rancher/cluster-api-provider-rke2-extension:v0.27.2
+		{"rancher/cluster-api-provider-rke2-extension", vRke2},
 		{"rancher/kubeadm-bootstrap-controller", vKubeadm},
 		{"rancher/kubeadm-control-plane-controller", vKubeadm},
 		{"rancher/azureserviceoperator", vAso},
@@ -70,6 +72,7 @@ func componentManifestImages() []imageRef {
 		{"rancher/cluster-api-azure-controller-components", vAzure},
 		{"rancher/cluster-api-gcp-controller-components", vGcp},
 		{"rancher/cluster-api-provider-rke2-components", vRke2},
+		// is there extra manifest for rke2 extension components???
 		{"rancher/cluster-api-vsphere-controller-components", vVsphere},
 	}
 }
@@ -215,7 +218,7 @@ var _ = Describe("E2E - Airgap Precheck Tests", Label("airgap"), func() {
 		})
 
 		/*
-			// the packege-env is able to get the CAPI version for rancher 2.16 automatically and it is not hardcoded anymore
+			// package-env is able to get the CAPI version for rancher 2.16 automatically and it is not hardcoded anymore
 			By("Verify CAPI version match in package-env", func() {
 				packageEnvPath := fmt.Sprintf("refs/tags/v%s", rancherVersion)
 				if primeRCHeadCommit != "" {
