@@ -13,7 +13,6 @@ limitations under the License.
 */
 
 import './commands';
-import yaml from 'js-yaml';
 import './capz_support';
 import './cleanup_support';
 import {ChartInstallExtraOptions, Cluster, EditKubernetesResourceOptions} from './structs';
@@ -130,73 +129,60 @@ require('cypress-plugin-tab');
 require('@rancher-ecp-qa/cypress-library');
 registerCypressGrep()
 
-// Abort on first failure in @install tests or skip rest of the tests in spec in case of [SETUP] test failure
-const resultFile = './fixtures/runtime_test_result.yaml'
+// Fail-fast rules (CI only):
+//  1. An @install test fails (after all retries)  -> skip every remaining test in every spec
+//  2. A [SETUP] test fails (after all retries)     -> skip the rest of the spec
+//  3. A [CLUSTER-IMPORT] test fails (after retries) -> skip the rest of the spec except [TEARDOWN] tests
+// State (runAborted) is kept in memory only: the run-wide flag lives in the Node process (see cypress.config.ts tasks),
+// and the per-spec mode (specMode) below resets automatically because the support file is re-evaluated for every spec.
+const isCI = String(Cypress.expose('ci')).toLowerCase() === "true";
+let specMode: 'skip-all' | 'teardown-only' | undefined;  // undefined = no failure yet, run tests normally
 
-// reset the resultFile before every suite run (i.e. `*.spec.ts`); unless the failure is from @install tests
+// Rule 1 (cross-spec): an @install test failed in an earlier spec - skip this whole spec
 before(function () {
-  if (Cypress.expose("ci")) {
-    cy.readFile(resultFile).then((data) => {
-      const content = yaml.load(data);
-      if (content['stop_cypress'] != 'true') {
-        const result = {'test_result': 'passed'}
-        cy.writeFile(resultFile, yaml.dump(result));
-      }
-    })
-  }
-})
-
-beforeEach(function () {
-  if (Cypress.expose("ci")) {
-    cy.readFile(resultFile).then((data) => {
-      const content = yaml.load(data)
-      const result = content['test_result']
-      const stop_cypress = content['stop_cypress']
-      const skip_all_tests = content['skip_all_tests']
-      const run_delete_tests = content['run_delete_tests']
-      if (result == 'failed') {
-        if (stop_cypress == 'true') {
-          cy.task('suiteLog', 'Stopping test run - previous test(s) have failed')
-          Cypress.stop()
-        } else if (skip_all_tests == 'true') {
-          // Skip tests if a setup test failed; in case cluster is created, do not skip if it is a @delete test
-          if (run_delete_tests == 'true' && this.currentTest?.fullTitle?.().includes('[TEARDOWN]')) {
-            cy.task('suiteLog', 'CAPI Cluster was created; running delete tests for a proper cleanup.')
-          } else {
-            cy.task('suiteLog', 'A [SETUP]/[CLUSTER-IMPORT] test has failed - skipping rest of the tests.')
-            this.skip();
-          }
-        }
-      }
-    });
-  } else cy.task('suiteLog', 'Not running in GitHub Actions - skipping test result check');
+  if (!isCI) return;
+  cy.task('isRunAborted').then((aborted) => {
+    if (aborted) {
+      cy.task('suiteLog', 'An @install test has failed earlier in this run - skipping spec.');
+      this.skip();
+    }
+  });
 });
 
-afterEach(function () {
-  if (Cypress.expose("ci")) {
-    const test_title = this.currentTest?.fullTitle?.() || '';
-    const test_result = this.currentTest?.state || '';
+// Rules 1-3 (within the spec)
+beforeEach(function () {
+  if (!isCI) return;
 
-    if (test_result == 'failed') {
-      let result: Record<string, string> = {
-        test_result: test_result,
-        test_title: test_title,
-        stop_cypress: 'false',
-        skip_all_tests: 'false',
-        run_delete_tests: 'false',
-      };
-
-      if (test_title.includes('@install')) {
-        result['stop_cypress'] = 'true';
-      } else if (test_title.includes('[SETUP]')) {
-        result['skip_all_tests'] = 'true'
-      } else if (test_title.includes('[CLUSTER-IMPORT]')) {
-        result['skip_all_tests'] = 'true'
-        result['run_delete_tests'] = 'true'
-      }
-
-      const data = yaml.dump(result);
-      cy.writeFile(resultFile, data);
+  if (specMode === 'skip-all') {
+    this.skip();
+  } else if (specMode === 'teardown-only') {
+    if (this.currentTest!.fullTitle().includes('[TEARDOWN]')) {
+      cy.task('suiteLog', 'A [CLUSTER-IMPORT] test has failed - running [TEARDOWN] test for a proper cleanup.');
+    } else {
+      this.skip();
     }
   }
-})
+});
+
+// Decide the mode only once a test has failed its final attempt, so retries are not skipped
+afterEach(function () {
+  if (!isCI) return;
+
+  // currentTest is always set in beforeEach/afterEach; `!` only satisfies the Mocha typings
+  const test = this.currentTest;
+  const finalAttempt = Cypress.currentRetry == (Cypress.getTestRetries() || 0);
+  if (!test || test.state !== 'failed' || !finalAttempt) return;
+
+  const title = test.fullTitle();
+  if (title.includes('@install')) {
+    specMode = 'skip-all';
+    cy.task('markRunAborted');
+    cy.task('suiteLog', `@install test "${title}" has failed - skipping all remaining tests.`);
+  } else if (title.includes('[SETUP]')) {
+    specMode = 'skip-all';
+    cy.task('suiteLog', `[SETUP] test "${title}" has failed - skipping rest of the spec.`);
+  } else if (title.includes('[CLUSTER-IMPORT]')) {
+    specMode = 'teardown-only';
+    cy.task('suiteLog', `[CLUSTER-IMPORT] test "${title}" has failed - skipping rest of the spec except [TEARDOWN] tests.`);
+  }
+});
