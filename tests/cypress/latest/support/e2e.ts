@@ -135,7 +135,7 @@ registerCypressGrep()
 //  3. A [CLUSTER-IMPORT] test fails (after retries) -> skip the rest of the spec except [TEARDOWN] tests
 // State (runAborted) is kept in memory only: the run-wide flag lives in the Node process (see cypress.config.ts tasks),
 // and the per-spec mode (specMode) below resets automatically because the support file is re-evaluated for every spec.
-const isCI = !!Cypress.expose('ci');
+const isCI = String(Cypress.expose('ci')).toLowerCase() === "true";
 let specMode: 'skip-all' | 'teardown-only' | undefined;  // undefined = no failure yet, run tests normally
 
 // Rule 1 (cross-spec): an @install test failed in an earlier spec - skip this whole spec
