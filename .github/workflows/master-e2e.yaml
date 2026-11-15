@@ -430,7 +430,7 @@ jobs:
           password: ${{ secrets.docker_auth_password }}
       - name: Install helm
         run: |
-          HELM_VERSION="3.22.1"
+          HELM_VERSION="4.3.2"
           HELM_SHA256_AMD64="896cf63684a42a723d61c980369d6e588330927deb13676ca0d85006dd6da0ea"
           HELM_SHA256_ARM64="4c29e286b279d170fa048ddfc3e4e83dcd069ca9c52102766ba672d7149e694d"
           ARCH=$(uname -m)
