@@ -19,6 +19,7 @@ docker system prune --all --volumes --force
 /usr/local/bin/k3s-killall.sh
 /usr/local/bin/k3s-uninstall.sh
 # Delete all files in the workspace
+echo "Deleting all files in the workspace: ${WORKSPACE}"
 [ -n "${WORKSPACE}" ] && [ -d "${WORKSPACE}" ] && rm -r "${WORKSPACE}"/*
 
 # Ensure the script always returns 0
