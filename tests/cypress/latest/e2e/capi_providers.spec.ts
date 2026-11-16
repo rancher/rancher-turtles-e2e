@@ -39,7 +39,7 @@ describe('Enable CAPI Providers', () => {
     cy.burgerMenuOperate('open');
   });
 
-  context('Setup providers chart repository', {tags: ['@install']}, () => {
+  context('Setup providers chart repository - @install', {tags: ['@install']}, () => {
 
     qase(403, it("Add Rancher Turtles Providers Chart GitRepo", () => {
       // For upgrade tests, dev=true is only applicable to the target version

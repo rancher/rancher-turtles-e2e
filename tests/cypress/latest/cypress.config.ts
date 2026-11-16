@@ -79,11 +79,19 @@ export default defineConfig({
         //   process.stdout.write(`${key}=${value}\n`);
         // }
       });
-      // Register the 'suiteLog' task
+      let runAborted = false;
       on('task', {
         suiteLog(message) {
           console.log(message);
           return null; // Tasks must return a value or null
+        },
+        // Run-wide fail-fast flag (see support/e2e.ts); in-memory, so it resets on every `cypress run`
+        markRunAborted() {
+          runAborted = true;
+          return null;
+        },
+        isRunAborted() {
+          return runAborted;
         },
       });
       cypressGrepPlugin(config);
