@@ -44,7 +44,7 @@ var (
 	controllerImage    string
 	turtlesDevChart    bool
 	isUpgradeTest      bool
-	primeRCHeadCommit string
+	primeRCHeadCommit  string
 )
 
 /**
