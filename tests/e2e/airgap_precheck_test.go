@@ -80,7 +80,7 @@ func componentManifestImages() []imageRef {
 		{"rancher/cluster-api-vsphere-controller-components", vVsphere},
 	}
 
-	// The RKE2 provider components v0.21 are not available for Rancher <= 2.13, see SURE-11020
+	// The RKE2 provider components v0.21.x are not available for Rancher <= 2.13, see SURE-11020
 	if isRancherManagerVersion(">2.13") {
 		images = append(images, imageRef{"rancher/cluster-api-provider-rke2-components", vRke2}) // RKE2 provider components including extensions
 	}
@@ -232,22 +232,37 @@ var _ = Describe("E2E - Airgap Precheck Tests", Label("airgap"), func() {
 			}
 		})
 
-		By("Verify CAPI version match in package-env", func() {
-			if isRancherManagerVersion(">=2.16") {
-				GinkgoWriter.Println("Skipping: package-env automatically handles CAPI version for Rancher >= 2.16")
-				return // Skip() would mark entrire It() block as skipped, but we just want to skip this By block early
-			}
-
+		By("Verify CAPI version defined in rancher source", func() {
 			packageEnvPath := fmt.Sprintf("refs/tags/v%s", rancherVersion)
 			if primeRCHeadCommit != "" {
 				packageEnvPath = primeRCHeadCommit
 			}
-			url := fmt.Sprintf("https://raw.githubusercontent.com/rancher/rancher/%s/scripts/package-env", packageEnvPath)
-			re := regexp.MustCompile(`CLUSTER_API_CONTROLLER_TAG=(v[0-9]+\.[0-9]+\.[0-9]+)`)
-			matches := re.FindStringSubmatch(string(fetchBytes(url)))
-			Expect(matches).To(HaveLen(2), "CLUSTER_API_CONTROLLER_TAG not found in package-env")
-			GinkgoWriter.Printf("CAPI version in package-env: %s\n", matches[1])
-			Expect(matches[1]).To(Equal(vCoreCAPI), "Mismatch between config-prime.yaml and package-env")
+
+			var url, pattern string
+			var capiVersion string
+
+			if isRancherManagerVersion(">=2.16") {
+				// For Rancher >= 2.16
+				url = fmt.Sprintf("https://raw.githubusercontent.com/rancher/rancher/%s/build.yaml", packageEnvPath)
+				pattern = `clusterAPIControllerImage: rancher/cluster-api-controller:(v[0-9]+\.[0-9]+\.[0-9]+)`
+			} else {
+				// For Rancher < 2.16
+				url = fmt.Sprintf("https://raw.githubusercontent.com/rancher/rancher/%s/scripts/package-env", packageEnvPath)
+				pattern = `CLUSTER_API_CONTROLLER_TAG=(v[0-9]+\.[0-9]+\.[0-9]+)`
+			}
+
+			content := string(fetchBytes(url))
+			re := regexp.MustCompile(pattern)
+			matches := re.FindStringSubmatch(content)
+			Expect(matches).To(HaveLen(2), "CAPI version not found in source")
+			capiVersion = matches[1]
+			GinkgoWriter.Printf("CAPI version: %s\n", capiVersion)
+			Expect(capiVersion).To(Equal(vCoreCAPI), "Mismatch between config-prime.yaml and version source")
+
+			if isRancherManagerVersion(">=2.16") {
+				turtlesSuffixPattern := `clusterAPIControllerImage: rancher/cluster-api-controller:v[0-9]+\.[0-9]+\.[0-9]+-turtles\.[0-9]+`
+				Expect(content).To(MatchRegexp(turtlesSuffixPattern), "Image should have -turtles.<NUMBER> suffix")
+			}
 		})
 	})
 })
