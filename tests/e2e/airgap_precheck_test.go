@@ -171,6 +171,8 @@ var _ = Describe("E2E - Airgap Precheck Tests", Label("airgap"), func() {
 				switch p.Name {
 				case "cluster-api":
 					vCoreCAPI = matches[1]
+					// Convert to OCI-compatible format (replace '+' with '_') - only in case the version contains '+' like on 2.16
+					vCoreCAPI = strings.ReplaceAll(vCoreCAPI, "+", "_")
 				case "rancher-fleet":
 					vFleet = matches[1]
 				case "aws":
@@ -242,11 +244,9 @@ var _ = Describe("E2E - Airgap Precheck Tests", Label("airgap"), func() {
 			var capiVersion string
 
 			if isRancherManagerVersion(">=2.16") {
-				// For Rancher >= 2.16
 				url = fmt.Sprintf("https://raw.githubusercontent.com/rancher/rancher/%s/build.yaml", packageEnvPath)
-				pattern = `clusterAPIControllerImage: rancher/cluster-api-controller:(v[0-9]+\.[0-9]+\.[0-9]+)`
+				pattern = `clusterAPIControllerImage: rancher/cluster-api-controller:(v[0-9]+\.[0-9]+\.[0-9]+_turtles\.[0-9]+)`
 			} else {
-				// For Rancher < 2.16
 				url = fmt.Sprintf("https://raw.githubusercontent.com/rancher/rancher/%s/scripts/package-env", packageEnvPath)
 				pattern = `CLUSTER_API_CONTROLLER_TAG=(v[0-9]+\.[0-9]+\.[0-9]+)`
 			}
@@ -258,11 +258,6 @@ var _ = Describe("E2E - Airgap Precheck Tests", Label("airgap"), func() {
 			capiVersion = matches[1]
 			GinkgoWriter.Printf("CAPI version: %s\n", capiVersion)
 			Expect(capiVersion).To(Equal(vCoreCAPI), "Mismatch between config-prime.yaml and version source")
-
-			if isRancherManagerVersion(">=2.16") {
-				turtlesSuffixPattern := `clusterAPIControllerImage: rancher/cluster-api-controller:v[0-9]+\.[0-9]+\.[0-9]+-turtles\.[0-9]+`
-				Expect(content).To(MatchRegexp(turtlesSuffixPattern), "Image should have -turtles.<NUMBER> suffix")
-			}
 		})
 	})
 })
