@@ -44,7 +44,7 @@ describe('Import CAPG GKE Cluster', {tags: ['@full', '@capgke']}, () => {
     qase(677, it('Import CAPG GKE cluster using YAML', () => {
       cy.readFile(clusterFileName).then((data) => {
         data = data.replace(/replace_cluster_name/g, clusterName)
-        data = data.replace(/replace_k8sVersion/g, vars.gkeVersion)
+        data = data.replace(/replace_k8sVersion/g, "v1.35.8")
         data = data.replace(/replace_gcp_project/g, gcpProject)
         cy.importYAML(data, vars.capiClustersNS)
       });
