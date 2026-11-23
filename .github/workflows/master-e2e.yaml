@@ -586,7 +586,7 @@ jobs:
       - name: Set Rancher Charts Base Branch for 2.13 onwards
         if: ${{ inputs.turtles_dev_chart == true && (!contains(env.RANCHER_POINT_VERSION, '2.12')) }}
         run: |
-          if [[ "${{ env.RANCHER_VERSION }}" =~ $RANCHER_DEV_CHART_VERSIONS]]; then
+          if [[ "${{ env.RANCHER_VERSION }}" =~ $RANCHER_DEV_CHART_VERSIONS ]]; then
             echo RANCHER_CHARTS_BASE_BRANCH=dev-v${{ env.RANCHER_POINT_VERSION }} >> ${GITHUB_ENV}
           elif [[ "${{ env.RANCHER_VERSION }}" =~ $RANCHER_RECENT_VERSIONS ]]; then
             echo RANCHER_CHARTS_BASE_BRANCH=staging >> ${GITHUB_ENV}
