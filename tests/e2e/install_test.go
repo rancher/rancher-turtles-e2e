@@ -149,13 +149,13 @@ var _ = Describe("E2E - Install/Upgrade Rancher Manager", Label("install", "upgr
 			if (isRancherManagerVersion(">=2.13")) && turtlesDevChart {
 				extraEnvIndex := 1
 
-				rancherPointVersion := os.Getenv("RANCHER_POINT_VERSION")
+				rancherChartsBaseBranch := os.Getenv("RANCHER_CHARTS_BASE_BRANCH")
 				entries := []struct {
 					name  string
 					value string
 				}{
 					{"CATTLE_CHART_DEFAULT_URL", "http://" + rancherHostname + ":4080" + "/git/charts"}, // Can we leave it hardcoded?
-					{"CATTLE_CHART_DEFAULT_BRANCH", "dev-v" + rancherPointVersion},
+					{"CATTLE_CHART_DEFAULT_BRANCH", rancherChartsBaseBranch},
 					{"CATTLE_RANCHER_TURTLES_VERSION", "108.0.0+up99.99.99"}, // Ensure using custom built turtles
 				}
 
