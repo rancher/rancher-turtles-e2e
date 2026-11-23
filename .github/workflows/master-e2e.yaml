@@ -332,8 +332,10 @@ jobs:
     outputs:
       qase_run_id: ${{ steps.qase_run_id.outputs.qase_run_id }}
     env:
-      # Rancher versions with embedded turtles
-      RANCHER_RECENT_VERSIONS: '2\.(13|14|15|16)'
+      # Rancher versions with embedded turtles & dev-v2.x charts branch
+      RANCHER_DEV_CHART_VERSIONS: '2\.(13|14|15)'
+      # Rancher versions with embedded turtles & staging charts branch
+      RANCHER_RECENT_VERSIONS: '2\.(16)'
       # K3S flags to use for installation
       INSTALL_K3S_SKIP_ENABLE: true
       INSTALL_K3S_VERSION: ${{ inputs.upstream_cluster_version }}
@@ -482,7 +484,12 @@ jobs:
             echo RANCHER_POINT_VERSION="2.12" >> ${GITHUB_ENV}
           fi
 
-          # Rancher 2.13 onwards
+          # Rancher 2.13 to 2.15
+          if [[ "${{ env.RANCHER_VERSION }}" =~ $RANCHER_DEV_CHART_VERSIONS ]]; then
+            echo RANCHER_POINT_VERSION="${BASH_REMATCH[0]}" >> ${GITHUB_ENV}
+          fi
+
+          # Rancher 2.16 onwards
           if [[ "${{ env.RANCHER_VERSION }}" =~ $RANCHER_RECENT_VERSIONS ]]; then
             echo RANCHER_POINT_VERSION="${BASH_REMATCH[0]}" >> ${GITHUB_ENV}
           fi
@@ -576,13 +583,22 @@ jobs:
         if: ${{ inputs.turtles_dev_chart == true && (!contains(env.RANCHER_POINT_VERSION, '2.12')) }}
         run: RELEASE_TAG=v${{ env.TAG }} make build-providers-chart
 
+      - name: Set Rancher Charts Base Branch for 2.13 onwards
+        if: ${{ inputs.turtles_dev_chart == true && (!contains(env.RANCHER_POINT_VERSION, '2.12')) }}
+        run: |
+          if [[ "${{ env.RANCHER_VERSION }}" =~ $RANCHER_DEV_CHART_VERSIONS ]]; then
+            echo RANCHER_CHARTS_BASE_BRANCH=dev-v${{ env.RANCHER_POINT_VERSION }} >> ${GITHUB_ENV}
+          elif [[ "${{ env.RANCHER_VERSION }}" =~ $RANCHER_RECENT_VERSIONS ]]; then
+            echo RANCHER_CHARTS_BASE_BRANCH=staging >> ${GITHUB_ENV}
+          fi
+
       - name: Clone, build and publish artificial system charts for 2.13 onwards
         if: ${{ inputs.turtles_dev_chart == true && (!contains(env.RANCHER_POINT_VERSION, '2.12')) }}
         run: |
           # Dir outside github workspace must be used for destroy=false persistance
           export RANCHER_CHARTS_REPO_DIR=/tmp/system-charts/charts
           export RANCHER_CHART_DEV_VERSION=${{ env.TURTLES_CHART_DEV_VERSION }}
-          export RANCHER_CHARTS_BASE_BRANCH=dev-v${{ env.RANCHER_POINT_VERSION }}
+          export RANCHER_CHARTS_BASE_BRANCH=${{ env.RANCHER_CHARTS_BASE_BRANCH }}
           export CHART_RELEASE_DIR=${{ github.workspace }}/out/charts/rancher-turtles
           export HELM=helm
 
@@ -889,10 +905,10 @@ jobs:
           echo "Rancher Manager Version: ${{ steps.component.outputs.rm_version }}" >> ${GITHUB_STEP_SUMMARY}
           echo "Rancher Manager Milestone: ${{ needs.determine-milestone.outputs.milestone }}" >> ${GITHUB_STEP_SUMMARY}
           echo "CertManager Image: ${{ steps.component.outputs.cert_manager_image_version }}" >> ${GITHUB_STEP_SUMMARY}
-          if [[ "${{ env.RANCHER_VERSION }}" =~ $RANCHER_RECENT_VERSIONS ]]; then
-            TURTLES_NAMESPACE="cattle-turtles-system"
-          else
+          if [[ "${{ env.RANCHER_VERSION }}" =~ (2\.12) ]]; then
             TURTLES_NAMESPACE="rancher-turtles-system"
+          else
+            TURTLES_NAMESPACE="cattle-turtles-system"
           fi
           TURTLES_VERSION=$(helm list -n $TURTLES_NAMESPACE --filter '^rancher-turtles$' -o json  2> /dev/null | jq -r '.[0].chart')
           echo "Rancher Turtles Installed/Upgraded Chart Version: $TURTLES_VERSION" >> ${GITHUB_STEP_SUMMARY}
