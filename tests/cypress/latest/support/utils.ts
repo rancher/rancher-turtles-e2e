@@ -69,8 +69,6 @@ export const isUseCAAPFFeatureSupported = isRancherManagerVersion('2.14') || isR
 
 export const isCAAPFSupported = isRancherManagerVersion('<2.16')
 
-export const skipFleetAddOnInstallation = Cypress.expose('skip_fleet_addon_installation')
-
 export const getCAPIClusterKubeconfig = (
   clusterName: string,
   namespace: string = 'capi-clusters'

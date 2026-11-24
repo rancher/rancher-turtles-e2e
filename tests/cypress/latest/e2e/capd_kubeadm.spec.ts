@@ -103,11 +103,11 @@ describe('Import CAPD Kubeadm Cluster', {tags: ['@short', '@capdk']}, () => {
 
     qase(567, it("Scale up imported CAPD cluster by patching cluster yaml", () => {
       cy.readFile(clusterFileName).then((data) => {
-        data = data.replace(/replace_cluster_name/g, clusterName)
+        data = data.replace(/replicas: 2/g, 'replicas: 3')
 
         // workaround; these values need to be re-replaced before applying the scaling changes
+        data = data.replace(/replace_cluster_name/g, clusterName)
         data = data.replace(/replace_kindVersion/g, vars.kindVersion)
-        data = data.replace(/replicas: 2/g, 'replicas: 3')
         cy.importYAML(data, vars.capiClustersNS)
       });
 

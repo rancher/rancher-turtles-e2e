@@ -123,10 +123,6 @@ on:
       target_build_type:
         description: Build type for turtles_dev_chart (prime|community)
         type: string
-      skip_fleet_addon_installation:
-        description: Skip Fleet Addon provider installation
-        type: boolean
-        default: false
 
 # Shared by the determine-milestone and e2e jobs
 env:
@@ -365,7 +361,6 @@ jobs:
       CLUSTER_NAME_SUFFIX: ${{ inputs.cluster_name_suffix }}
       BUILD_TYPE: ${{ inputs.target_build_type }}
       TURTLES_DEV_CHART: ${{ inputs.turtles_dev_chart }}
-      SKIP_FLEET_ADDON_INSTALLATION: ${{ inputs.skip_fleet_addon_installation }}
       # Secrets
       AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_key }}
@@ -391,6 +386,7 @@ jobs:
         e2e/capi_providers_legacy.spec.ts
         e2e/capi_providers.spec.ts
         e2e/capd_kubeadm.spec.ts
+        e2e/capd_rke2.spec.ts
         e2e/capd_rke2_fleet.spec.ts
         e2e/capa_kubeadm.spec.ts
         e2e/capa_eks.spec.ts
@@ -403,9 +399,9 @@ jobs:
         e2e/capv_rke2.spec.ts
         e2e/capv_kubeadm.spec.ts
         e2e/fleet_addon_provider.spec.ts
-        e2e/capd_rke2_caapf.spec.ts
-        e2e/capd_rke2_v1beta1_fleet.spec.ts
         e2e/capd_kubeadm_caapf.spec.ts
+        e2e/capd_rke2_caapf.spec.ts
+        e2e/capd_rke2_caapf_fleet.spec.ts
         e2e/azure_rke2_v2prov.spec.ts
         e2e/capv_rke2_caapf.spec.ts
         e2e/capv_kubeadm_caapf.spec.ts

@@ -57,10 +57,6 @@ on:
         description: Skip CAPI cluster and fleet repo deletion tests
         default: false
         type: boolean
-      skip_fleet_addon_installation:
-        description: Skip fleet addon installation tests; useful while debugging only NoCAAPF tests
-        default: false
-        type: boolean
       qase_report:
         description: Report to QASE
         default: false
@@ -125,4 +121,3 @@ jobs:
         (github.event.schedule == '0 4 * * 0' && '@install @full') ||
         (github.event.schedule == '0 3 * * 6' && '@install @migration') ||
         (github.event.schedule == '0 5 * * 0' && '@install @upgrade') }}
-      skip_fleet_addon_installation: ${{ inputs.skip_fleet_addon_installation || (github.event_name == 'schedule' && false) }}
