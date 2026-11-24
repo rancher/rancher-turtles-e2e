@@ -45,11 +45,10 @@ type imageRef struct {
 }
 
 func allProviderImages() []imageRef {
-	return []imageRef{
+	images := []imageRef{
 		{"rancher/turtles", vTurtles},
 		{"rancher/charts/rancher-turtles-providers", vTurtlesChart}, // This is actually chart repo
 		{"rancher/cluster-api-controller", vCoreCAPI},
-		{"rancher/cluster-api-addon-provider-fleet", vFleet},
 		{"rancher/cluster-api-aws-controller", vAws},
 		{"rancher/cluster-api-azure-controller", vAzure},
 		{"rancher/cluster-api-gcp-controller", vGcp},
@@ -60,18 +59,37 @@ func allProviderImages() []imageRef {
 		{"rancher/kubeadm-control-plane-controller", vKubeadm},
 		{"rancher/azureserviceoperator", vAso},
 	}
+
+	if isRancherManagerVersion("<2.16") {
+		images = append(images, imageRef{"rancher/cluster-api-addon-provider-fleet", vFleet})
+	}
+
+	if isRancherManagerVersion(">=2.16") {
+		images = append(images, imageRef{"rancher/cluster-api-provider-rke2-extension", vRke2})
+	}
+
+	return images
 }
 
 func componentManifestImages() []imageRef {
-	return []imageRef{
+	images := []imageRef{
 		{"rancher/cluster-api-controller-components", vCoreCAPI}, // This also contains capd and kubeadm manifests
-		{"rancher/cluster-api-addon-provider-fleet-components", vFleet},
 		{"rancher/cluster-api-aws-controller-components", vAws},
 		{"rancher/cluster-api-azure-controller-components", vAzure},
 		{"rancher/cluster-api-gcp-controller-components", vGcp},
-		{"rancher/cluster-api-provider-rke2-components", vRke2},
 		{"rancher/cluster-api-vsphere-controller-components", vVsphere},
 	}
+
+	// The RKE2 provider components v0.21.x are not available for Rancher <= 2.13, see SURE-11020
+	if isRancherManagerVersion(">2.13") {
+		images = append(images, imageRef{"rancher/cluster-api-provider-rke2-components", vRke2}) // RKE2 provider components including extensions
+	}
+
+	if isRancherManagerVersion("<2.16") {
+		images = append(images, imageRef{"rancher/cluster-api-addon-provider-fleet-components", vFleet})
+	}
+
+	return images
 }
 
 func getAsoVersion() string {
@@ -153,6 +171,8 @@ var _ = Describe("E2E - Airgap Precheck Tests", Label("airgap"), func() {
 				switch p.Name {
 				case "cluster-api":
 					vCoreCAPI = matches[1]
+					// Convert to OCI-compatible format (replace '+' with '_') - only in case the version contains '+' like on 2.16
+					vCoreCAPI = strings.ReplaceAll(vCoreCAPI, "+", "_")
 				case "rancher-fleet":
 					vFleet = matches[1]
 				case "aws":
@@ -214,17 +234,30 @@ var _ = Describe("E2E - Airgap Precheck Tests", Label("airgap"), func() {
 			}
 		})
 
-		By("Verify CAPI version match in package-env", func() {
+		By("Verify CAPI version defined in rancher source", func() {
 			packageEnvPath := fmt.Sprintf("refs/tags/v%s", rancherVersion)
 			if primeRCHeadCommit != "" {
 				packageEnvPath = primeRCHeadCommit
 			}
-			url := fmt.Sprintf("https://raw.githubusercontent.com/rancher/rancher/%s/scripts/package-env", packageEnvPath)
-			re := regexp.MustCompile(`CLUSTER_API_CONTROLLER_TAG=(v[0-9]+\.[0-9]+\.[0-9]+)`)
-			matches := re.FindStringSubmatch(string(fetchBytes(url)))
-			Expect(matches).To(HaveLen(2), "CLUSTER_API_CONTROLLER_TAG not found in package-env")
-			GinkgoWriter.Printf("CAPI version in package-env: %s\n", matches[1])
-			Expect(matches[1]).To(Equal(vCoreCAPI), "Mismatch between config-prime.yaml and package-env")
+
+			var url, pattern string
+			var capiVersion string
+
+			if isRancherManagerVersion(">=2.16") {
+				url = fmt.Sprintf("https://raw.githubusercontent.com/rancher/rancher/%s/build.yaml", packageEnvPath)
+				pattern = `clusterAPIControllerImage: rancher/cluster-api-controller:(v[0-9]+\.[0-9]+\.[0-9]+_turtles\.[0-9]+)`
+			} else {
+				url = fmt.Sprintf("https://raw.githubusercontent.com/rancher/rancher/%s/scripts/package-env", packageEnvPath)
+				pattern = `CLUSTER_API_CONTROLLER_TAG=(v[0-9]+\.[0-9]+\.[0-9]+)`
+			}
+
+			content := string(fetchBytes(url))
+			re := regexp.MustCompile(pattern)
+			matches := re.FindStringSubmatch(content)
+			Expect(matches).To(HaveLen(2), "CAPI version not found in source")
+			capiVersion = matches[1]
+			GinkgoWriter.Printf("CAPI version: %s\n", capiVersion)
+			Expect(capiVersion).To(Equal(vCoreCAPI), "Mismatch between config-prime.yaml and version source")
 		})
 	})
 })
