@@ -187,11 +187,11 @@ describe('Enable CAPI Providers', () => {
     })
 
     const rke2ProviderTypes = [
-      {qaseID: '369', type: 'bootstrap', name: 'bootstrap', namespace: 'rke2-bootstrap-system'},
-      {qaseID: '370', type: 'controlPlane', name: 'control-plane', namespace: 'rke2-control-plane-system'},
+      {qaseID: 369, type: 'bootstrap', name: 'bootstrap', namespace: 'rke2-bootstrap-system'},
+      {qaseID: 370, type: 'controlPlane', name: 'control-plane', namespace: 'rke2-control-plane-system'},
     ]
     if (isRancherManagerVersion('>=2.16')){
-      rke2ProviderTypes.push({qaseID: '', type: 'runtimeextension', name: 'extension', namespace: 'rke2-extension-system'})
+      rke2ProviderTypes.push({qaseID: 778, type: 'runtimeextension', name: 'extension', namespace: 'rke2-extension-system'})
     }
     rke2ProviderTypes.forEach((rke2Provider) => {
       qase(rke2Provider.qaseID, it('Verify RKE2 Providers - ' + rke2Provider.type, () => {
