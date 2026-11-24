@@ -1,0 +1,66 @@
+name: "[updatecli] Bump Cypress"
+pipelineid: "cypress_update"
+
+# Cypress is bumped here instead of dependabot because the npm package and the
+# cypress/included docker image used to run the tests must stay in sync.
+
+sources:
+  cypressVersion:
+    # Use the docker image tags as the source of truth, the image is published
+    # after the npm package, so both are guaranteed to exist for this version.
+    name: "Get latest cypress/included image version"
+    kind: "dockerimage"
+    spec:
+      image: "cypress/included"
+      tagfilter: '^\d+\.\d+\.\d+$'
+      versionfilter:
+        kind: "semver"
+
+  cypressImageDigest:
+    name: "Get cypress/included image digest"
+    kind: "shell"
+    dependson:
+      - cypressVersion
+    spec:
+      # Multi-arch (manifest list) digest; jq -e fails the pipeline if the digest is missing
+      command: 'curl -sfL "https://hub.docker.com/v2/repositories/cypress/included/tags/{{ source "cypressVersion" }}" | jq -er ''.digest'''
+
+targets:
+  cypressNpmVersion:
+    name: "Update cypress in package.json"
+    kind: "file"
+    sourceid: cypressVersion
+    # {{ if .scm.enabled }}
+    scmid: default
+    actionid: default
+    # {{ end }}
+    spec:
+      file: "tests/cypress/latest/package.json"
+      matchpattern: '"cypress": "[^"]*"'
+      replacepattern: '"cypress": "{{ source "cypressVersion" }}"'
+
+  cypressAllowScripts:
+    name: "Update cypress allowScripts in package.json"
+    kind: "file"
+    sourceid: cypressVersion
+    # {{ if .scm.enabled }}
+    scmid: default
+    actionid: default
+    # {{ end }}
+    spec:
+      file: "tests/cypress/latest/package.json"
+      matchpattern: '"cypress@[^"]*": true'
+      replacepattern: '"cypress@{{ source "cypressVersion" }}": true'
+
+  cypressDockerImage:
+    name: "Update CYPRESS_DOCKER image"
+    kind: "file"
+    sourceid: cypressImageDigest
+    # {{ if .scm.enabled }}
+    scmid: default
+    actionid: default
+    # {{ end }}
+    spec:
+      file: ".github/workflows/master-e2e.yaml"
+      matchpattern: 'cypress/included:[^@'']+@sha256:[a-f0-9]{64}'
+      replacepattern: 'cypress/included:{{ source "cypressVersion" }}@{{ source "cypressImageDigest" }}'
