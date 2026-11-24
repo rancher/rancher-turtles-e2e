@@ -1671,14 +1671,8 @@ export function matchAndWaitForProviderReadyStatus(
       }
       cy.get('td').eq(row).should('contain.text', readyState);  // Phase
     });
-
     // Verify provider image
-    if (providerString == "rke2-extension"){
-      // TODO: Skip the image verification for rke2-extension until it is fixed, currently it uses upstream image instead of prime one
-      // https://github.com/rancher/turtles/issues/3065
-      return;
-    }
-  cy.verifyCAPIProviderImage(providerNamespace);
+    cy.verifyCAPIProviderImage(providerNamespace);
 }
 
 export function setUseCAAPFFeatureGate(enabled: boolean, wait: boolean=true) {
