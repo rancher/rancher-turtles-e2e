@@ -109,6 +109,10 @@ describe('Enable CAPI Providers', () => {
         // @ts-ignore
         text.providers.infrastructureDocker.enableAutomaticUpdate = true;
 
+        if (isRancherManagerVersion('>=2.16')) {
+          // @ts-ignore
+          text.providers.controlplaneRKE2.features = {'inPlaceUpdates': true};
+        }
         // there is no easy way to only install a specific provider when something like `@capgke` is passed, so we enable all the cloud providers
         if (isCypressTag('@full') || isCypressTag('@capg') || isCypressTag('@capa') || isCypressTag('@capz')) {
             // @ts-ignore
@@ -183,20 +187,17 @@ describe('Enable CAPI Providers', () => {
     })
 
     const rke2ProviderTypes = [
-      {qaseID: 369, type: 'bootstrap', namespace: 'rke2-bootstrap-system'},
-      {qaseID: 370, type: 'control plane', namespace: 'rke2-control-plane-system'}
+      {qaseID: 369, type: 'bootstrap', name: 'bootstrap', namespace: 'rke2-bootstrap-system'},
+      {qaseID: 370, type: 'controlPlane', name: 'control-plane', namespace: 'rke2-control-plane-system'},
     ]
+    if (isRancherManagerVersion('>=2.16')){
+      rke2ProviderTypes.push({qaseID: 778, type: 'runtimeextension', name: 'extension', namespace: 'rke2-extension-system'})
+    }
     rke2ProviderTypes.forEach((rke2Provider) => {
       qase(rke2Provider.qaseID, it('Verify RKE2 Providers - ' + rke2Provider.type, () => {
-          if (rke2Provider.type == 'control plane') {
-            const providerName = providers.rke2Provider + '-' + 'control-plane'
-            cy.navigateToProviders();
-            matchAndWaitForProviderReadyStatus(providerName, 'controlPlane', providers.rke2Provider, providers.rke2ProviderVersion, rke2Provider.namespace);
-        } else {
-            const providerName = providers.rke2Provider + '-' + rke2Provider.type
-            cy.navigateToProviders();
-            matchAndWaitForProviderReadyStatus(providerName, rke2Provider.type, providers.rke2Provider, providers.rke2ProviderVersion, rke2Provider.namespace);
-        }
+          const providerName = providers.rke2Provider + '-' + rke2Provider.name
+          cy.navigateToProviders();
+          matchAndWaitForProviderReadyStatus(providerName, rke2Provider.type, providers.rke2Provider, providers.rke2ProviderVersion, rke2Provider.namespace);
       })
       );
     })
