@@ -1,0 +1,6 @@
+{
+  "projectCode": "RT",
+  "specs": [
+    "e2e/*.spec.ts"
+  ]
+}
