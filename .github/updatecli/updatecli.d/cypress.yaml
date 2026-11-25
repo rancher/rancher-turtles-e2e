@@ -12,18 +12,18 @@ sources:
     kind: "dockerimage"
     spec:
       image: "cypress/included"
-      tagfilter: '^\d+\.\d+\.\d+$'
+      tagfilter: '^[0-9]+\.[0-9]+\.[0-9]+$'
       versionfilter:
         kind: "semver"
 
   cypressImageDigest:
     name: "Get cypress/included image digest"
-    kind: "shell"
+    kind: "dockerdigest"
     dependson:
       - cypressVersion
     spec:
-      # Multi-arch (manifest list) digest; jq -e fails the pipeline if the digest is missing
-      command: 'curl -sfL "https://hub.docker.com/v2/repositories/cypress/included/tags/{{ source "cypressVersion" }}" | jq -er ''.digest'''
+      image: "cypress/included"
+      tag: '{{ source "cypressVersion" }}'
 
 targets:
   cypressNpmVersion:
@@ -36,7 +36,7 @@ targets:
     # {{ end }}
     spec:
       file: "tests/cypress/latest/package.json"
-      matchpattern: '"cypress": "[^"]*"'
+      matchpattern: '"cypress": "[0-9]+\.[0-9]+\.[0-9]+"'
       replacepattern: '"cypress": "{{ source "cypressVersion" }}"'
 
   cypressAllowScripts:
@@ -49,7 +49,7 @@ targets:
     # {{ end }}
     spec:
       file: "tests/cypress/latest/package.json"
-      matchpattern: '"cypress@[^"]*": true'
+      matchpattern: '"cypress@[0-9]+\.[0-9]+\.[0-9]+": true'
       replacepattern: '"cypress@{{ source "cypressVersion" }}": true'
 
   cypressDockerImage:
@@ -62,5 +62,5 @@ targets:
     # {{ end }}
     spec:
       file: ".github/workflows/master-e2e.yaml"
-      matchpattern: 'cypress/included:[^@'']+@sha256:[a-f0-9]{64}'
-      replacepattern: 'cypress/included:{{ source "cypressVersion" }}@{{ source "cypressImageDigest" }}'
+      matchpattern: 'cypress/included:[0-9]+\.[0-9]+\.[0-9]+@sha256:[a-f0-9]{64}'
+      replacepattern: 'cypress/included:{{ source "cypressImageDigest" }}'
