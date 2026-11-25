@@ -1,5 +1,5 @@
 /*
-Copyright © 2022 - 2023 SUSE LLC
+Copyright © 2022 - 2026 SUSE LLC
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -13,25 +13,30 @@ limitations under the License.
 
 import '../support/commands';
 import * as cypressLib from '@rancher-ecp-qa/cypress-library';
-import {isUseCAAPFFeatureSupported, skipClusterDeletion} from '../support/utils';
+import {isCAAPFSupported, skipClusterDeletion, isAPIv1beta1} from '../support/utils';
 import {capdResourcesCleanup, capiClusterDeletion, importedRancherv3ClusterDeletion} from "../support/cleanup_support";
 import {vars} from '../support/variables';
 
 Cypress.config();
-describe('[2.13] Import CAPD RKE2 (Default CNI) Cluster using Fleet', {tags: '@short'}, () => {
+describe('[2.13, 2.14, 2.15] Import CAPD RKE2 (Default CNI) Cluster using Fleet', {tags: ['@short', '@capdr']}, () => {
   let clusterName: string
   const timeout = vars.shortTimeout
   const classNamePrefix = 'docker-rke2'
-  const path = '/tests/assets/rancher-turtles-fleet-example/capd/rke2/clusters-v1beta1'
+  const path = isAPIv1beta1 ? '/tests/assets/rancher-turtles-fleet-example/capd/rke2/clusters-v1beta1' : '/tests/assets/rancher-turtles-fleet-example/capd/rke2/clusters-v1beta2'
   const classesPath = 'examples/clusterclasses/docker/rke2'
   const clustersRepoName = 'docker-rke2-clusters'
   const clusterClassRepoName = "docker-rke2-clusterclass"
 
-  beforeEach(function () {
-    if (isUseCAAPFFeatureSupported) {
-      // This test is only meant for <2.14.1
-      this.skip();
+  before(function () {
+    if (!isCAAPFSupported) {
+      // This test is only meant for 2.13, 2.14 or 2.15
+      return cy.task('suiteLog', 'Test is only supported on 2.13, 2.14 or 2.15 skipping...').then(() => {
+        this.skip();
+      })
     }
+  })
+
+  beforeEach(function () {
     cy.login();
     cy.burgerMenuOperate('open');
   });
@@ -96,6 +101,27 @@ describe('[2.13] Import CAPD RKE2 (Default CNI) Cluster using Fleet', {tags: '@s
       cy.checkChart(clusterName, 'Install', 'Logging', 'cattle-logging-system');
     })
     );
+
+    it('Check the fleet-addon annotation and finalizer is not set on clusters', () => {
+      // Check the externally-managed annotation is not set on Rancher management cluster
+      cy.checkExternalFleetAnnotation(clusterName, false);
+
+      // Check the finalizer is not set on CAPI cluster
+      cy.viewCAPIClusterYAML(clusterName);
+      cy.checkYAMLText('fleet.addons.cluster.x-k8s.io', false);
+    })
+
+    it('Check if cluster is registered in Fleet only once', () => {
+      cypressLib.accesMenu('Continuous Delivery');
+      cy.contains('Dashboard').should('be.visible');
+      cypressLib.accesMenu('Clusters');
+      cy.fleetNamespaceToggle(vars.fleetDefaultNS);
+      // Verify the cluster is registered and Active
+      const rowNumber = 0
+      cy.verifyTableRow(rowNumber, 'Active', clusterName);
+      // Make sure there is only one registered cluster in fleet (there should be one table row)
+      cy.get('table.sortable-table').find(`tbody tr[data-testid="sortable-table-${rowNumber}-row"]`).should('have.length', 1);
+    })
 
     qase(743, it('Check RKE2 Default CNI', () => {
       cy.exploreCluster(clusterName);

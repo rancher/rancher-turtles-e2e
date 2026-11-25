@@ -1,0 +1,36 @@
+apiVersion: cluster.x-k8s.io/v1beta2
+kind: Cluster
+metadata:
+  name: replace_cluster_name
+  annotations:
+    cluster-api.cattle.io/upstream-system-agent: "true"
+  labels:
+    cluster-api.cattle.io/rancher-auto-import: "true"
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+        - 10.45.0.0/16
+    services:
+      cidrBlocks:
+        - 10.46.0.0/16
+    serviceDomain: cluster.local
+  topology:
+    classRef:
+      name: docker-rke2-example
+      namespace: capi-classes
+    controlPlane:
+      replicas: 3
+    variables:
+      - name: rke2CNI
+        value: ""
+      - name: dockerImage
+        value: kindest/node:replace_kind_version
+      - name: dockerAuthSecret
+        value: capd-docker-token
+    version: replace_rke2_version
+    workers:
+      machineDeployments:
+        - class: default-worker
+          name: md-0
+          replicas: 2
