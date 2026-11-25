@@ -86,6 +86,10 @@ CI runs upload three kinds of artifact:
 | `cypress-videos-<run_number>.tar.gpg`               | Cypress videos                                     |
 | `cypress-videos-after-upgrade-<run_number>.tar.gpg` | Cypress videos from `@migration`/`@upgrade` runs   |
 
+`<run_number>` is actually the cluster name suffix, which defaults to the run number. When a
+`UI-E2E` run tests several Rancher versions, the matrix index is appended, e.g.
+`cypress-videos-123-0.tar.gpg`, `cypress-videos-123-1.tar.gpg`, one per Rancher version.
+
 All are tarballs encrypted with GPG symmetric AES256, using the `LOG_ENCRYPTION_KEY` repository
 secret as the passphrase — ask a repository admin if you need it. Video archives are not gzipped,
 since Cypress writes already-compressed mp4.

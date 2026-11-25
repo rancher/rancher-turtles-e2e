@@ -1,4 +1,5 @@
-# This workflow calls the master E2E workflow with custom variables
+# This workflow calls the master E2E workflow with custom variables,
+# once per Rancher version given in the rancher_version input
 name: UI-E2E
 run-name: >-
   ${{
@@ -27,11 +28,11 @@ on:
   workflow_dispatch:
     inputs:
       rancher_version:
-        description: Rancher Manager version to use for installation/pre-upgrade/pre-migration, format - channel/<version|head_version>[/head_version]
+        description: >-
+          Rancher Manager versions, separated by spaces or commas, one test run each.
+          Entry format - <version>[:<upgrade_version>], each as channel/<version|head_version>[/head_version];
+          <upgrade_version> is used for post-upgrade/post-migration (e.g. head/2.16 head/2.13:head/2.14)
         default: head/2.16
-        type: string
-      rancher_upgrade_version:
-        description: Rancher Manager version to use for post-upgrade/post-migration, format - channel/<version|head_version>[/head_version]
         type: string
       grep_test_by_tag:
         description: Test tags. For multiple selection separate with spaces (Available options - @install [@migration @upgrade @short @full | @vsphere]). Keep always @install
@@ -61,6 +62,10 @@ on:
         description: Report to QASE
         default: false
         type: boolean
+      max_parallel:
+        description: Maximum number of Rancher versions tested in parallel (forced to 1 for @vsphere)
+        default: 5
+        type: number
       runner_template:
         description: Runner template to use
         default: rancher-turtles-e2e-ci-amd64-spot-20261014-1255
@@ -79,7 +84,45 @@ on:
     - cron: '0 5 * * 0' # @upgrade on Sundays only
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - name: Build Rancher versions matrix
+        id: matrix
+        env:
+          VERSIONS: ${{ inputs.rancher_version || 'head/2.16' }}
+        run: |
+          # "head/2.16 head/2.13:head/2.14" ->
+          # [{"rancher_version":"head/2.13","rancher_upgrade_version":"head/2.14"},{"rancher_version":"head/2.16"}]
+          MATRIX=$(jq -cRn --arg v "${VERSIONS}" '
+            $v | split("[ ,]+"; null) | map(select(length > 0))
+            | map(
+                split(":") as $p
+                | if ($p | length) > 2 or ($p[0] | length) == 0 then
+                    error("Invalid entry \"\(.)\", expected <version>[:<upgrade_version>]")
+                  else
+                    {rancher_version: $p[0]}
+                    + (if ($p[1] // "") != "" then {rancher_upgrade_version: $p[1]} else {} end)
+                  end
+              )
+            | unique') || exit 1
+          if [[ "${MATRIX}" == "[]" ]]; then
+            echo "ERROR: no Rancher version provided"
+            exit 1
+          fi
+          echo "matrix=${MATRIX}" | tee -a "${GITHUB_OUTPUT}"
+
   ui:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      # vSphere tests share a single self-hosted runner and kube-vip IP pool
+      # Dispatch inputs arrive as strings here, but max-parallel needs a number, hence fromJSON
+      max-parallel: ${{ contains(inputs.grep_test_by_tag, '@vsphere') && 1 || fromJSON(format('{0}', inputs.max_parallel || 5)) }}
+      matrix:
+        include: ${{ fromJSON(needs.prepare.outputs.matrix) }}
     uses: ./.github/workflows/master-e2e.yaml
     secrets:
       gcp_credentials: ${{ secrets.GCP_CREDENTIALS }}
@@ -105,14 +148,18 @@ jobs:
     with:
       test_description: "UI - e2e tests with Standard K3s"
       destroy_runner: ${{ github.event_name == 'schedule' && true || inputs.destroy_runner }}
-      rancher_version: ${{ inputs.rancher_version || 'head/2.16' }}
-      rancher_upgrade_version: ${{ inputs.rancher_upgrade_version || '' }}
+      rancher_version: ${{ matrix.rancher_version }}
+      rancher_upgrade_version: ${{ matrix.rancher_upgrade_version || '' }}
       qase_report: ${{ inputs.qase_report == true || (github.event_name == 'schedule' && true) }}
       turtles_dev_chart: ${{ inputs.turtles_dev_chart == true || (github.event_name == 'schedule' && true) }}
       target_build_type: ${{ inputs.target_build_type || 'prime' }}
       skip_cluster_delete: ${{ inputs.skip_cluster_delete || (github.event_name == 'schedule' && false) }}
       runner_template: ${{ inputs.runner_template || (github.event.schedule == '5 3 * * *' && 'rancher-turtles-e2e-ci-aarch64-spot-20261014-1233') || 'rancher-turtles-e2e-ci-amd64-spot-20261014-1255' }}
-      cluster_name_suffix: ${{ inputs.cluster_name_suffix || github.run_number }}
+      # With several versions, the matrix index is appended so cluster and artifact names don't clash
+      cluster_name_suffix: >-
+        ${{ strategy.job-total > 1 &&
+        format('{0}-{1}', inputs.cluster_name_suffix || github.run_number, strategy.job-index) ||
+        (inputs.cluster_name_suffix || github.run_number) }}
       grep_test_by_tag: >-
         ${{ inputs.grep_test_by_tag ||
         (github.event.schedule == '0 3 * * *' && '@install @short') ||

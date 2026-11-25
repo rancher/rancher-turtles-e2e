@@ -359,6 +359,8 @@ jobs:
       GREPTAGS: ${{ inputs.grep_test_by_tag }}
       SKIP_CLUSTER_DELETE: ${{ inputs.skip_cluster_delete }}
       CLUSTER_NAME_SUFFIX: ${{ inputs.cluster_name_suffix }}
+      # Unique per call within a workflow run (used for artifact names)
+      RUN_SUFFIX: ${{ inputs.cluster_name_suffix || github.run_number }}
       BUILD_TYPE: ${{ inputs.target_build_type }}
       TURTLES_DEV_CHART: ${{ inputs.turtles_dev_chart }}
       # Secrets
@@ -746,13 +748,13 @@ jobs:
         run: |
           bash ${{ env.ARTIFACT_ENCRYPTOR }} \
             tests/cypress/latest/videos \
-            ${{ runner.temp }}/cypress-videos-${{ github.run_number }}.tar.gpg
+            ${{ runner.temp }}/cypress-videos-${{ env.RUN_SUFFIX }}.tar.gpg
       - name: Upload encrypted Cypress videos
         if: ${{ always() && steps.cypress.outcome != 'skipped' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: cypress-videos-${{ github.run_number }}.tar.gpg
-          path: ${{ runner.temp }}/cypress-videos-${{ github.run_number }}.tar.gpg
+          name: cypress-videos-${{ env.RUN_SUFFIX }}.tar.gpg
+          path: ${{ runner.temp }}/cypress-videos-${{ env.RUN_SUFFIX }}.tar.gpg
           retention-days: 7
           archive: 'false'
           if-no-files-found: ignore
@@ -842,13 +844,13 @@ jobs:
         run: |
           bash ${{ env.ARTIFACT_ENCRYPTOR }} \
             tests/cypress/latest/videos \
-            ${{ runner.temp }}/cypress-videos-after-upgrade-${{ github.run_number }}.tar.gpg
+            ${{ runner.temp }}/cypress-videos-after-upgrade-${{ env.RUN_SUFFIX }}.tar.gpg
       - name: Upload encrypted Cypress videos (after-upgrade)
         if: ${{ always() && steps.cypress_upgraded.outcome != 'skipped' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: cypress-videos-after-upgrade-${{ github.run_number }}.tar.gpg
-          path: ${{ runner.temp }}/cypress-videos-after-upgrade-${{ github.run_number }}.tar.gpg
+          name: cypress-videos-after-upgrade-${{ env.RUN_SUFFIX }}.tar.gpg
+          path: ${{ runner.temp }}/cypress-videos-after-upgrade-${{ env.RUN_SUFFIX }}.tar.gpg
           retention-days: 7
           archive: 'false'
           if-no-files-found: ignore
@@ -876,13 +878,13 @@ jobs:
         run: |
           bash ${{ env.ARTIFACT_ENCRYPTOR }} \
             ${{ runner.temp }}/logs-and-screenshots \
-            ${{ runner.temp }}/logs-and-screenshots-${{ github.run_number }}.tar.gpg
+            ${{ runner.temp }}/logs-and-screenshots-${{ env.RUN_SUFFIX }}.tar.gpg
       - name: Upload encrypted screenshots and cluster logs
         if: ${{ always() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: logs-and-screenshots-${{ github.run_number }}.tar.gpg
-          path: ${{ runner.temp }}/logs-and-screenshots-${{ github.run_number }}.tar.gpg
+          name: logs-and-screenshots-${{ env.RUN_SUFFIX }}.tar.gpg
+          path: ${{ runner.temp }}/logs-and-screenshots-${{ env.RUN_SUFFIX }}.tar.gpg
           retention-days: 7
           archive: 'false'
           if-no-files-found: ignore
