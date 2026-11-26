@@ -121,8 +121,9 @@ on:
         description: Suffix to be used in cluster name (default - github.run_number)
         type: string
       artifact_suffix:
-        description: Suffix to be used in artifact names (default - cluster_name_suffix, then github.run_number); must not contain '/' or ':'
+        description: Suffix to be used in artifact names (default - github.run_number); must not contain '/' or ':'
         type: string
+        default: ${{ github.run_number }}
       target_build_type:
         description: Build type for turtles_dev_chart (prime|community)
         type: string
@@ -362,8 +363,6 @@ jobs:
       GREPTAGS: ${{ inputs.grep_test_by_tag }}
       SKIP_CLUSTER_DELETE: ${{ inputs.skip_cluster_delete }}
       CLUSTER_NAME_SUFFIX: ${{ inputs.cluster_name_suffix }}
-      # Unique per call within a workflow run (used for artifact names)
-      RUN_SUFFIX: ${{ inputs.artifact_suffix || inputs.cluster_name_suffix || github.run_number }}
       BUILD_TYPE: ${{ inputs.target_build_type }}
       TURTLES_DEV_CHART: ${{ inputs.turtles_dev_chart }}
       # Secrets
@@ -751,13 +750,13 @@ jobs:
         run: |
           bash ${{ env.ARTIFACT_ENCRYPTOR }} \
             tests/cypress/latest/videos \
-            ${{ runner.temp }}/cypress-videos-${{ env.RUN_SUFFIX }}.tar.gpg
+            ${{ runner.temp }}/cypress-videos-${{ inputs.artifact_suffix }}.tar.gpg
       - name: Upload encrypted Cypress videos
         if: ${{ always() && steps.cypress.outcome != 'skipped' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: cypress-videos-${{ env.RUN_SUFFIX }}.tar.gpg
-          path: ${{ runner.temp }}/cypress-videos-${{ env.RUN_SUFFIX }}.tar.gpg
+          name: cypress-videos-${{ inputs.artifact_suffix }}.tar.gpg
+          path: ${{ runner.temp }}/cypress-videos-${{ inputs.artifact_suffix }}.tar.gpg
           retention-days: 7
           archive: 'false'
           if-no-files-found: ignore
@@ -847,13 +846,13 @@ jobs:
         run: |
           bash ${{ env.ARTIFACT_ENCRYPTOR }} \
             tests/cypress/latest/videos \
-            ${{ runner.temp }}/cypress-videos-after-upgrade-${{ env.RUN_SUFFIX }}.tar.gpg
+            ${{ runner.temp }}/cypress-videos-after-upgrade-${{ inputs.artifact_suffix }}.tar.gpg
       - name: Upload encrypted Cypress videos (after-upgrade)
         if: ${{ always() && steps.cypress_upgraded.outcome != 'skipped' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: cypress-videos-after-upgrade-${{ env.RUN_SUFFIX }}.tar.gpg
-          path: ${{ runner.temp }}/cypress-videos-after-upgrade-${{ env.RUN_SUFFIX }}.tar.gpg
+          name: cypress-videos-after-upgrade-${{ inputs.artifact_suffix }}.tar.gpg
+          path: ${{ runner.temp }}/cypress-videos-after-upgrade-${{ inputs.artifact_suffix }}.tar.gpg
           retention-days: 7
           archive: 'false'
           if-no-files-found: ignore
@@ -881,13 +880,13 @@ jobs:
         run: |
           bash ${{ env.ARTIFACT_ENCRYPTOR }} \
             ${{ runner.temp }}/logs-and-screenshots \
-            ${{ runner.temp }}/logs-and-screenshots-${{ env.RUN_SUFFIX }}.tar.gpg
+            ${{ runner.temp }}/logs-and-screenshots-${{ inputs.artifact_suffix }}.tar.gpg
       - name: Upload encrypted screenshots and cluster logs
         if: ${{ always() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: logs-and-screenshots-${{ env.RUN_SUFFIX }}.tar.gpg
-          path: ${{ runner.temp }}/logs-and-screenshots-${{ env.RUN_SUFFIX }}.tar.gpg
+          name: logs-and-screenshots-${{ inputs.artifact_suffix }}.tar.gpg
+          path: ${{ runner.temp }}/logs-and-screenshots-${{ inputs.artifact_suffix }}.tar.gpg
           retention-days: 7
           archive: 'false'
           if-no-files-found: ignore
@@ -1042,35 +1041,22 @@ jobs:
             *)         STATUS="❓ Unknown" ;;
           esac
 
-          # Rancher version, plus upgrade target if any, so each matrix entry gets a distinct row
+          # Rancher version, plus upgrade target if any
           UPGRADE_VERSION="${{ inputs.rancher_upgrade_version }}"
           RANCHER_LABEL="${{ inputs.rancher_version }}${UPGRADE_VERSION:+ → ${UPGRADE_VERSION}}"
           RUN_NAME="[${{ github.run_number }}] Rancher-${RANCHER_LABEL} - **${{ inputs.grep_test_by_tag }}** dev=${{ inputs.turtles_dev_chart }} destroy=${{ inputs.destroy_runner }}"
-          # Attempt-specific URL, so a re-run adds its own row
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"
           NEW_ROW="| [${RUN_NAME}](${RUN_URL}) | ${STATUS} | |"
 
-          # Several runs (e.g. one per Rancher version in ui-e2e-multi-version.yaml) can update the
-          # PR body at the same time, each writing back its own copy, so a row can be overwritten.
-          # Write the row, wait, re-read and add it again if it was lost.
-          MAX_ATTEMPTS=5
-          for ATTEMPT in $(seq 1 ${MAX_ATTEMPTS}); do
-            gh pr view "$PR_NUMBER" --repo "$REPO" --json body --jq '.body' > /tmp/pr_body.txt
+          # Get current PR body
+          gh pr view "$PR_NUMBER" --repo "$REPO" --json body --jq '.body' > /tmp/pr_body.txt
 
-            if grep -qF -- "${NEW_ROW}" /tmp/pr_body.txt; then
-              echo "Result row is in the description of PR #${PR_NUMBER}."
-              exit 0
-            fi
-            if [[ ${ATTEMPT} -eq ${MAX_ATTEMPTS} ]]; then
-              break
-            fi
-
-            if grep -q '<!-- e2e-result-end -->' /tmp/pr_body.txt; then
-              # Append new row before end marker (preserves all existing rows)
-              sed -i "/<!-- e2e-result-end -->/i\\${NEW_ROW}" /tmp/pr_body.txt
-            else
-              # Fallback for legacy PRs without markers: append full section
-              cat >> /tmp/pr_body.txt <<EOF
+          if grep -q '<!-- e2e-result-end -->' /tmp/pr_body.txt; then
+            # Append new row before end marker (preserves all existing rows)
+            sed -i "/<!-- e2e-result-end -->/i\\${NEW_ROW}" /tmp/pr_body.txt
+          else
+            # Fallback for legacy PRs without markers: append full section
+            cat >> /tmp/pr_body.txt <<EOF
 
           <!-- e2e-result-start -->
           ### E2E Test Results:
@@ -1080,11 +1066,6 @@ jobs:
           ${NEW_ROW}
           <!-- e2e-result-end -->
           EOF
-            fi
+          fi
 
-            gh pr edit "$PR_NUMBER" --repo "$REPO" --body-file /tmp/pr_body.txt
-            # Random wait so concurrent writers don't keep colliding
-            sleep $((20 + RANDOM % 20))
-          done
-
-          echo "::warning::Could not confirm the result row in the description of PR #${PR_NUMBER} after ${MAX_ATTEMPTS} attempts."
+          gh pr edit "$PR_NUMBER" --repo "$REPO" --body-file /tmp/pr_body.txt

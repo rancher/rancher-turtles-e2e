@@ -21,7 +21,7 @@ on:
           Entry format - <version>[:<upgrade_version>], each as channel/<version|head_version>[/head_version];
           <upgrade_version> is used for post-upgrade/post-migration (e.g. head/2.16 head/2.13:head/2.14)
         required: true
-        default: head/2.16
+        default: prime-head/2.16 prime-head/2.15 prime-head/2.14
         type: string
       grep_test_by_tag:
         description: Test tags. For multiple selection separate with spaces (Available options - @install [@migration @upgrade @short @full]; @vsphere/@capv are not supported here, use UI-E2E). Keep always @install
@@ -32,12 +32,9 @@ on:
         description: Build type for turtles_dev_chart (prime|community)
         default: 'prime'
         type: string
-      cluster_name_suffix:
-        description: Suffix to be used in cluster name (default - github.run_number); the matrix index is always appended
-        type: string
       turtles_dev_chart:
         description: Install rancher turtles dev chart
-        default: true
+        default: false
         type: boolean
       destroy_runner:
         description: Destroy the auto-generated self-hosted runners
@@ -67,16 +64,6 @@ jobs:
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
-      - name: Reject unsupported test tags
-        env:
-          TAGS: ${{ inputs.grep_test_by_tag }}
-        run: |
-          # vSphere tests (master-e2e.yaml routes both tags to it) share a single self-hosted runner
-          # and kube-vip IP pool, so they can't run once per Rancher version in parallel
-          if [[ "${TAGS}" =~ (@vsphere|@capv) ]]; then
-            echo "::error::@vsphere and @capv tests are not supported by this workflow, use UI-E2E instead."
-            exit 1
-          fi
       - name: Build Rancher versions matrix
         id: matrix
         env:
@@ -84,26 +71,25 @@ jobs:
         run: |
           # "head/2.16 head/2.13:head/2.14" ->
           # [{"rancher_version":"head/2.13","rancher_upgrade_version":"head/2.14","artifact_label":"head-2.13-to-head-2.14"},
-          #  {"rancher_version":"head/2.16","artifact_label":"head-2.16"}]
-          MATRIX=$(jq -cRn --arg v "${VERSIONS}" '
-            $v | split("[ ,]+"; null) | map(select(length > 0))
-            | map(
-                split(":") as $p
-                | if ($p | length) > 2 or ($p[0] | length) == 0 then
-                    error("Invalid entry \"\(.)\", expected <version>[:<upgrade_version>]")
-                  else
-                    {rancher_version: $p[0]}
-                    + (if ($p[1] // "") != "" then {rancher_upgrade_version: $p[1]} else {} end)
-                    # Artifact names must not contain / or :
-                    + {artifact_label: ($p[0] + (if ($p[1] // "") != "" then "-to-" + $p[1] else "" end)
-                                        | gsub("[^A-Za-z0-9._-]"; "-"))}
-                  end
-              )
-            | unique') || exit 1
-          if [[ "${MATRIX}" == "[]" ]]; then
-            echo "ERROR: no Rancher version provided"
-            exit 1
-          fi
+          #  {"rancher_version":"head/2.16","rancher_upgrade_version":"","artifact_label":"head-2.16"}]
+          MATRIX=$(jq -cRn --arg versions "${VERSIONS}" '
+            [
+              $versions
+              | splits("[ ,]+")
+              | select(. != "")
+              | split(":") as [$version, $upgrade]
+              | ($upgrade // "") as $upgrade
+              | {
+                  rancher_version: $version,
+                  rancher_upgrade_version: $upgrade,
+                  # Artifact names must not contain / or :
+                  artifact_label: (
+                    if $upgrade == "" then $version else "\($version)-to-\($upgrade)" end
+                    | gsub("[/:]"; "-")
+                  )
+                }
+            ]
+            | unique')
           echo "matrix=${MATRIX}" | tee -a "${GITHUB_OUTPUT}"
 
   ui:
@@ -139,7 +125,7 @@ jobs:
       test_description: "UI - e2e tests with Standard K3s (${{ matrix.rancher_version }})"
       destroy_runner: ${{ inputs.destroy_runner }}
       rancher_version: ${{ matrix.rancher_version }}
-      rancher_upgrade_version: ${{ matrix.rancher_upgrade_version || '' }}
+      rancher_upgrade_version: ${{ matrix.rancher_upgrade_version }}
       qase_report: ${{ inputs.qase_report }}
       turtles_dev_chart: ${{ inputs.turtles_dev_chart }}
       target_build_type: ${{ inputs.target_build_type || 'prime' }}
@@ -147,7 +133,7 @@ jobs:
       runner_template: ${{ inputs.runner_template }}
       # Unique per matrix entry so cluster names don't clash; kept short, as cluster names
       # have length limits (e.g. 40 characters on GKE) and only allow [a-z0-9-]
-      cluster_name_suffix: ${{ format('{0}-{1}', inputs.cluster_name_suffix || github.run_number, strategy.job-index) }}
+      cluster_name_suffix: ${{ format('{0}-{1}', github.run_number, strategy.job-index) }}
       # Unique per matrix entry and readable, e.g. 123-head-2.13-to-head-2.14
       artifact_suffix: ${{ format('{0}-{1}', github.run_number, matrix.artifact_label) }}
       grep_test_by_tag: ${{ inputs.grep_test_by_tag }}

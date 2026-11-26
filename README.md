@@ -76,19 +76,6 @@ For example:
 npx cypress run -C cypress.config.ts  --env grepTags="@short" cypress/e2e/*.spec.ts
 ```
 
-# Testing several Rancher versions in one run
-
-The `UI-E2E (multi-version)` workflow ([ui-e2e-multi-version.yaml](.github/workflows/ui-e2e-multi-version.yaml))
-runs the same tests once per Rancher version, in parallel, in a single workflow run. Start it manually from the
-Actions tab, or with:
-```
-gh workflow run ui-e2e-multi-version.yaml -f rancher_versions="head/2.16 head/2.13:head/2.14" -f grep_test_by_tag="@install @short"
-```
-- `rancher_versions` is a list separated by spaces or commas. Each entry is `<version>[:<upgrade_version>]`, where
-  `<upgrade_version>` is the post-upgrade/post-migration version (`master-e2e.yaml`'s default is used if omitted).
-- Each version gets its own runner and its own result. One failing version does not stop the others.
-- `@vsphere` and `@capv` tests are not supported (they share a single vSphere runner); use `UI-E2E` for them.
-
 # Test artifacts
 
 CI runs upload three kinds of artifact:
@@ -98,11 +85,6 @@ CI runs upload three kinds of artifact:
 | `logs-and-screenshots-<run_number>.tar.gz.gpg`      | Cypress screenshots and the collected cluster logs |
 | `cypress-videos-<run_number>.tar.gpg`               | Cypress videos                                     |
 | `cypress-videos-after-upgrade-<run_number>.tar.gpg` | Cypress videos from `@migration`/`@upgrade` runs   |
-
-`<run_number>` is actually the cluster name suffix, which defaults to the run number. Runs of the
-`UI-E2E (multi-version)` workflow use `<run_number>-<rancher_version>[-to-<upgrade_version>]` instead
-(`/` and `:` replaced by `-`), one set per Rancher version, e.g. `cypress-videos-123-head-2.16.tar.gpg`,
-`cypress-videos-123-head-2.13-to-head-2.14.tar.gpg`.
 
 All are tarballs encrypted with GPG symmetric AES256, using the `LOG_ENCRYPTION_KEY` repository
 secret as the passphrase — ask a repository admin if you need it. Video archives are not gzipped,
