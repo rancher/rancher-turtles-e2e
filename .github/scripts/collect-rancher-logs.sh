@@ -5,15 +5,15 @@ set -eo pipefail
 # Variables
 
 # Rancher support-tools log collector (pinned by commit + checksum)
-RANCHER_LOG_COLLECTER_COMMIT="fe54dfce82828b684cb59e49a69a837b09262da2"
+RANCHER_LOG_COLLECTER_COMMIT="9ece1fa65705905dc472da6afd14bb866ee610aa"
 RANCHER_LOG_COLLECTER_PATH="collection/rancher/v2.x/logs-collector/rancher2_logs_collector.sh"
 RANCHER_LOG_COLLECTER="https://raw.githubusercontent.com/rancherlabs/support-tools/${RANCHER_LOG_COLLECTER_COMMIT}/${RANCHER_LOG_COLLECTER_PATH}"
-RANCHER_LOG_COLLECTER_SHA256="5c3b007ce050dab7ddf0a67813216f6894659005427072a4d5523ba9b4d98b2f"
+RANCHER_LOG_COLLECTER_SHA256="6e3359826db98129585526721124d16a7dd3e6c5342a45d0f937b655b6354f5a"
 # To refresh SHA256:
 # RANCHER_LOG_COLLECTER_SHA256="$(curl -sSfL "${RANCHER_LOG_COLLECTER}" | sha256sum | awk '{print $1}')"
 
 # crust-gather installer (pinned by tag + checksum)
-CRUST_GATHER_INSTALLER_VERSION="v0.18.0"
+CRUST_GATHER_INSTALLER_VERSION="v0.18.2"
 CRUST_GATHER_INSTALLER="https://raw.githubusercontent.com/crust-gather/crust-gather/refs/tags/${CRUST_GATHER_INSTALLER_VERSION}/install.sh"
 CRUST_GATHER_INSTALLER_SHA256="b51cb2f18a7452e70b0d0f3090428a46ed97257ed0572c808f06e30885c29e4b"
 # To refresh SHA256:
