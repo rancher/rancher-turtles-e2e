@@ -1038,10 +1038,7 @@ jobs:
             *)         STATUS="❓ Unknown" ;;
           esac
 
-          # Rancher version, plus upgrade target if any
-          UPGRADE_VERSION="${{ inputs.rancher_upgrade_version }}"
-          RANCHER_LABEL="${{ inputs.rancher_version }}${UPGRADE_VERSION:+ → ${UPGRADE_VERSION}}"
-          RUN_NAME="[${{ github.run_number }}] Rancher-${RANCHER_LABEL} - **${{ inputs.grep_test_by_tag }}** dev=${{ inputs.turtles_dev_chart }} destroy=${{ inputs.destroy_runner }}"
+          RUN_NAME="[${{ github.run_number }}] Rancher-${{ inputs.rancher_version }} - **${{ inputs.grep_test_by_tag }}** dev=${{ inputs.turtles_dev_chart }} destroy=${{ inputs.destroy_runner }}"
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"
           NEW_ROW="| [${RUN_NAME}](${RUN_URL}) | ${STATUS} | |"
 
