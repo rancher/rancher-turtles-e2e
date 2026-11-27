@@ -1,11 +1,11 @@
-# This workflow calls the master E2E workflow once per Rancher version, with the same custom variables
-name: UI-E2E (multi-version)
+# This workflow calls the master E2E workflow once per test tag, with the same custom variables
+name: UI-E2E (multi-tags)
 run-name: >-
   ${{
     format(
       '[{0}] Rancher-`{1}` - `{2}` destroy={3} dev={4}',
       github.run_number,
-      inputs.rancher_versions,
+      inputs.rancher_version,
       inputs.grep_test_by_tag,
       inputs.destroy_runner,
       inputs.turtles_dev_chart
@@ -15,19 +15,21 @@ run-name: >-
 on:
   workflow_dispatch:
     inputs:
-      rancher_versions:
-        description: >-
-          Rancher Manager versions, separated by spaces or commas, one test run each.
-          Entry format - <version>[:<upgrade_version>], each as channel/<version|head_version>[/head_version];
-          <upgrade_version> is used for post-upgrade/post-migration (e.g. head/2.16 head/2.13:head/2.14)
+      rancher_version:
+        description: Rancher Manager version to use for installation/pre-upgrade/pre-migration, format - channel/<version|head_version>[/head_version]
         required: true
-        default: prime-head/2.16 prime-head/2.15 prime-head/2.14
+        default: prime-head/2.16
+        type: string
+      rancher_upgrade_version:
+        description: Rancher Manager version to use for post-upgrade/post-migration, format - channel/<version|head_version>[/head_version]
         type: string
       grep_test_by_tag:
-        description: Test tags. For multiple selection separate with spaces (Available options - @install [@migration @upgrade @short @full]; @vsphere/@capv are not supported here, use UI-E2E). Keep always @install
+        description: >-
+          Test tags, separated by spaces, one test run each; @install is added automatically
+          (Available options - @migration @upgrade @short @full; @vsphere/@capv are not supported here, use UI-E2E)
         required: true
         type: string
-        default: '@install @short'
+        default: '@short @full'
       target_build_type:
         description: Build type for turtles_dev_chart (prime|community)
         default: 'prime'
@@ -62,43 +64,25 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.matrix.outputs.matrix }}
+      tags: ${{ steps.tags.outputs.tags }}
     steps:
-      - name: Build Rancher versions matrix
-        id: matrix
+      - name: Build test tags matrix
+        id: tags
         env:
-          VERSIONS: ${{ inputs.rancher_versions }}
+          TAGS: ${{ inputs.grep_test_by_tag }}
         run: |
-          # "head/2.16 head/2.13:head/2.14" ->
-          # [{"rancher_version":"head/2.13","rancher_upgrade_version":"head/2.14","artifact_label":"head-2.13-to-head-2.14"},
-          #  {"rancher_version":"head/2.16","rancher_upgrade_version":"","artifact_label":"head-2.16"}]
-          MATRIX=$(jq -cRn --arg versions "${VERSIONS}" '
-            [
-              $versions
-              | splits("[ ,]+")
-              | select(. != "")
-              | split(":") as [$version, $upgrade]
-              | ($upgrade // "") as $upgrade
-              | {
-                  rancher_version: $version,
-                  rancher_upgrade_version: $upgrade,
-                  # Artifact names must not contain / or :
-                  artifact_label: (
-                    if $upgrade == "" then $version else "\($version)-to-\($upgrade)" end
-                    | gsub("[/:]"; "-")
-                  )
-                }
-            ]
-            | unique')
-          echo "matrix=${MATRIX}" | tee -a "${GITHUB_OUTPUT}"
+          # "@short @full @install" -> ["@full","@short"] (@install is added back to every run)
+          TAGS=$(jq -cRn --arg tags "${TAGS}" '
+            [ $tags | splits(" +") | select(. != "" and . != "@install") ] | unique')
+          echo "tags=${TAGS}" | tee -a "${GITHUB_OUTPUT}"
 
   ui:
-    name: ui (${{ matrix.rancher_version }}${{ matrix.rancher_upgrade_version && format(' → {0}', matrix.rancher_upgrade_version) || '' }})
+    name: ui (${{ matrix.tag }})
     needs: prepare
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+        tag: ${{ fromJSON(needs.prepare.outputs.tags) }}
     uses: ./.github/workflows/master-e2e.yaml
     secrets:
       gcp_credentials: ${{ secrets.GCP_CREDENTIALS }}
@@ -122,18 +106,16 @@ jobs:
       prime_artifacts_url: ${{ secrets.PRIME_ARTIFACTS_URL }}
       log_encryption_key: ${{ secrets.LOG_ENCRYPTION_KEY }}
     with:
-      test_description: "UI - e2e tests with Standard K3s (${{ matrix.rancher_version }})"
+      test_description: "UI - e2e tests with Standard K3s (${{ matrix.tag }})"
       destroy_runner: ${{ inputs.destroy_runner }}
-      rancher_version: ${{ matrix.rancher_version }}
-      rancher_upgrade_version: ${{ matrix.rancher_upgrade_version }}
+      rancher_version: ${{ inputs.rancher_version }}
+      rancher_upgrade_version: ${{ inputs.rancher_upgrade_version }}
       qase_report: ${{ inputs.qase_report }}
       turtles_dev_chart: ${{ inputs.turtles_dev_chart }}
       target_build_type: ${{ inputs.target_build_type || 'prime' }}
       skip_cluster_delete: ${{ inputs.skip_cluster_delete }}
       runner_template: ${{ inputs.runner_template }}
-      # Unique per matrix entry so cluster names don't clash; kept short, as cluster names
-      # have length limits (e.g. 40 characters on GKE) and only allow [a-z0-9-]
+      # Unique per matrix entry (e.g. 123-0) so cluster and artifact names don't clash; kept short,
+      # as cluster names have length limits (e.g. 40 characters on GKE) and only allow [a-z0-9-]
       cluster_name_suffix: ${{ format('{0}-{1}', github.run_number, strategy.job-index) }}
-      # Unique per matrix entry and readable, e.g. 123-head-2.13-to-head-2.14
-      artifact_suffix: ${{ format('{0}-{1}', github.run_number, matrix.artifact_label) }}
-      grep_test_by_tag: ${{ inputs.grep_test_by_tag }}
+      grep_test_by_tag: ${{ format('@install {0}', matrix.tag) }}
