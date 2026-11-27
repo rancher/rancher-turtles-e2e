@@ -109,7 +109,8 @@ jobs:
       test_description: "UI - e2e tests with Standard K3s (${{ matrix.tag }})"
       destroy_runner: ${{ inputs.destroy_runner }}
       rancher_version: ${{ inputs.rancher_version }}
-      rancher_upgrade_version: ${{ inputs.rancher_upgrade_version }}
+      # Only upgrade and migration runs use the upgrade target to not mess up milestone calculation for other test tags
+      rancher_upgrade_version: ${{ (matrix.tag == '@upgrade' || matrix.tag == '@migration') && inputs.rancher_upgrade_version || '' }}
       qase_report: ${{ inputs.qase_report }}
       turtles_dev_chart: ${{ inputs.turtles_dev_chart }}
       target_build_type: ${{ inputs.target_build_type || 'prime' }}
