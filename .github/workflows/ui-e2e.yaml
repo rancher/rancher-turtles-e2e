@@ -1,8 +1,7 @@
-# This workflow calls the master E2E workflow with custom variables
-name: UI-E2E
+# This workflow calls the master E2E workflow once per test tag, with the same custom variables
+name: UI-E2E (multi-tags)
 run-name: >-
   ${{
-    github.event_name == 'workflow_dispatch' &&
     format(
       '[{0}] Rancher-`{1}` - `{2}` destroy={3} dev={4}',
       github.run_number,
@@ -10,16 +9,6 @@ run-name: >-
       inputs.grep_test_by_tag,
       inputs.destroy_runner,
       inputs.turtles_dev_chart
-    ) ||
-    github.event_name == 'schedule' &&
-    (
-      github.event.schedule == '0 3 * * *' && format('[{0}] Nightly e2e job for `@short`', github.run_number) ||
-      github.event.schedule == '5 3 * * *' && format('[{0}] Nightly e2e job for `@short @aarch64`', github.run_number) ||
-      github.event.schedule == '0 4 * * *' && format('[{0}] Nightly e2e job for `@vsphere`', github.run_number) ||
-      github.event.schedule == '0 4 * * 0' && format('[{0}] Weekly e2e job for `@full`', github.run_number) ||
-      github.event.schedule == '0 3 * * 6' && format('[{0}] Weekly e2e job for `@migration`', github.run_number) ||
-      github.event.schedule == '0 5 * * 0' && format('[{0}] Weekly e2e job for `@upgrade`', github.run_number) ||
-      'Unknown scheduled job'
     )
   }}
 
@@ -28,29 +17,29 @@ on:
     inputs:
       rancher_version:
         description: Rancher Manager version to use for installation/pre-upgrade/pre-migration, format - channel/<version|head_version>[/head_version]
-        default: head/2.16
+        required: true
+        default: prime-head/2.16
         type: string
       rancher_upgrade_version:
         description: Rancher Manager version to use for post-upgrade/post-migration, format - channel/<version|head_version>[/head_version]
         type: string
       grep_test_by_tag:
-        description: Test tags. For multiple selection separate with spaces (Available options - @install [@migration @upgrade @short @full | @vsphere]). Keep always @install
+        description: >-
+          Test tags, separated by spaces, one test run each; @install is added automatically
+          (Available options - @migration @upgrade @short @full @vsphere)
         required: true
         type: string
-        default: '@install @short'
+        default: '@short @full'
       target_build_type:
         description: Build type for turtles_dev_chart (prime|community)
         default: 'prime'
         type: string
-      cluster_name_suffix:
-        description: Suffix to be used in cluster name (default - github.run_number)
-        type: string
       turtles_dev_chart:
         description: Install rancher turtles dev chart
-        default: true
+        default: false
         type: boolean
       destroy_runner:
-        description: Destroy the auto-generated self-hosted runner
+        description: Destroy the auto-generated self-hosted runners
         default: true
         type: boolean
       skip_cluster_delete:
@@ -70,16 +59,30 @@ on:
           - rancher-turtles-e2e-ci-amd64-standard-20261014-1253
           - rancher-turtles-e2e-ci-aarch64-spot-20261014-1233
           - rancher-turtles-e2e-ci-aarch64-standard-20261014-1233
-  schedule:
-    - cron: '0 3 * * *' # @short
-    - cron: '5 3 * * *' # @short @aarch64
-    - cron: '0 4 * * *' # @vsphere
-    - cron: '0 4 * * 0' # @full on Sundays only
-    - cron: '0 3 * * 6' # @migration @short on Saturdays only
-    - cron: '0 5 * * 0' # @upgrade on Sundays only
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      tags: ${{ steps.tags.outputs.tags }}
+    steps:
+      - name: Build test tags matrix
+        id: tags
+        env:
+          TAGS: ${{ inputs.grep_test_by_tag }}
+        run: |
+          # "@short @full @install" -> ["@full","@short"] (@install is added back to every run)
+          TAGS=$(jq -cRn --arg tags "${TAGS}" '
+            [ $tags | splits(" +") | select(. != "" and . != "@install") ] | unique')
+          echo "tags=${TAGS}" | tee -a "${GITHUB_OUTPUT}"
+
   ui:
+    name: ui (${{ matrix.tag }})
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        tag: ${{ fromJSON(needs.prepare.outputs.tags) }}
     uses: ./.github/workflows/master-e2e.yaml
     secrets:
       gcp_credentials: ${{ secrets.GCP_CREDENTIALS }}
@@ -103,21 +106,16 @@ jobs:
       prime_artifacts_url: ${{ secrets.PRIME_ARTIFACTS_URL }}
       log_encryption_key: ${{ secrets.LOG_ENCRYPTION_KEY }}
     with:
-      test_description: "UI - e2e tests with Standard K3s"
-      destroy_runner: ${{ github.event_name == 'schedule' && true || inputs.destroy_runner }}
-      rancher_version: ${{ inputs.rancher_version || 'head/2.16' }}
-      rancher_upgrade_version: ${{ inputs.rancher_upgrade_version || '' }}
-      qase_report: ${{ inputs.qase_report == true || (github.event_name == 'schedule' && true) }}
-      turtles_dev_chart: ${{ inputs.turtles_dev_chart == true || (github.event_name == 'schedule' && true) }}
+      test_description: "UI - e2e tests with Standard K3s (${{ matrix.tag }})"
+      destroy_runner: ${{ inputs.destroy_runner }}
+      rancher_version: ${{ inputs.rancher_version }}
+      rancher_upgrade_version: ${{ inputs.rancher_upgrade_version }}
+      qase_report: ${{ inputs.qase_report }}
+      turtles_dev_chart: ${{ inputs.turtles_dev_chart }}
       target_build_type: ${{ inputs.target_build_type || 'prime' }}
-      skip_cluster_delete: ${{ inputs.skip_cluster_delete || (github.event_name == 'schedule' && false) }}
-      runner_template: ${{ inputs.runner_template || (github.event.schedule == '5 3 * * *' && 'rancher-turtles-e2e-ci-aarch64-spot-20261014-1233') || 'rancher-turtles-e2e-ci-amd64-spot-20261014-1255' }}
-      cluster_name_suffix: ${{ inputs.cluster_name_suffix || github.run_number }}
-      grep_test_by_tag: >-
-        ${{ inputs.grep_test_by_tag ||
-        (github.event.schedule == '0 3 * * *' && '@install @short') ||
-        (github.event.schedule == '5 3 * * *' && '@install @short @aarch64') ||
-        (github.event.schedule == '0 4 * * *' && '@install @vsphere') ||
-        (github.event.schedule == '0 4 * * 0' && '@install @full') ||
-        (github.event.schedule == '0 3 * * 6' && '@install @migration') ||
-        (github.event.schedule == '0 5 * * 0' && '@install @upgrade') }}
+      skip_cluster_delete: ${{ inputs.skip_cluster_delete }}
+      runner_template: ${{ inputs.runner_template }}
+      # Unique per matrix entry (e.g. 123-0) so cluster and artifact names don't clash; kept short,
+      # as cluster names have length limits (e.g. 40 characters on GKE) and only allow [a-z0-9-]
+      cluster_name_suffix: ${{ format('{0}-{1}', github.run_number, strategy.job-index) }}
+      grep_test_by_tag: ${{ format('@install {0}', matrix.tag) }}
