@@ -139,89 +139,19 @@ jobs:
       milestone: ${{ steps.milestone.outputs.milestone }}
       milestone_id: ${{ steps.milestone.outputs.milestone_id }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Determine milestone from latest matching rancher/rancher release
         id: milestone
-        env:
-          GH_TOKEN: ${{ github.token }}
-          QASE_API_TOKEN: ${{ secrets.qase_api_token }}
-          QASE_PROJECT_CODE: RT
-          QASE_REPORT: ${{ inputs.qase_report }}
-          RANCHER_VERSION: ${{ inputs.rancher_version }}
-          RANCHER_UPGRADE_VERSION: ${{ inputs.rancher_upgrade_version }}
-          GREPTAGS: ${{ inputs.grep_test_by_tag }}
-          TURTLES_DEV_CHART: ${{ inputs.turtles_dev_chart }}
-        run: |
-          # Migration and upgrade runs end on the upgrade target, so the milestone
-          # must track that version rather than the one installed first.
-          # WARN: Unlike e2e job, this will not flag if RANCHER_UPGRADE_VERSION is invalid,
-          # so a milestone might still be created even if the job later fails.
-          if [[ "${GREPTAGS}" =~ @migration ]]; then
-            RANCHER_VERSION="${RANCHER_UPGRADE_VERSION:-${POST_MIGRATION_DEFAULT_RANCHER_VERSION}}"
-          fi
-          if [[ "${GREPTAGS}" =~ @upgrade ]]; then
-            RANCHER_VERSION="${RANCHER_UPGRADE_VERSION:-${POST_UPGRADE_DEFAULT_RANCHER_VERSION}}"
-          fi
-
-          CHANNEL="${RANCHER_VERSION%%/*}"
-          VERSION="${RANCHER_VERSION#*/}"
-          # Extract base version (e.g. "v2.15.1-<sha>-head" -> "2.15.1")
-          # Examples: 2.15.10. v2.15, v2.15-1-head-bla
-          if [[ "${VERSION}" =~ ^v?([0-9]+\.[0-9]+(\.[0-9]+)?) ]]; then
-            # Rematch returns first () matching group
-            VERSION="${BASH_REMATCH[1]}"
-          fi
-          # If no patch version found (for e.g. VERSION=2.15), calculate the latest patch version
-          if [[ "${VERSION}" =~ ^[0-9]+\.[0-9]+$ ]]; then
-            # Query the latest released patch for this minor version
-            LATEST=$(gh api --paginate "repos/rancher/rancher/releases?per_page=100" \
-              --jq '.[] | select(.prerelease == false) | .tag_name' | \
-              { grep "^v${VERSION}\." || true; } | sort -V | tail -n 1)
-            if [[ -z "${LATEST}" ]]; then
-              LATEST_PATCH=-1
-            else
-              LATEST_PATCH="${LATEST##*.}"
-            fi
-            MILESTONE_TITLE="v${VERSION}.$(( LATEST_PATCH + 1 ))" # For not released yet: -1+1=0
-          else
-            MILESTONE_TITLE="v${VERSION}"
-          fi
-
-          # Append "-head" to the milestone title if the channel is "head" and this is a dev run
-          if [[ "${CHANNEL}" =~ head && "${TURTLES_DEV_CHART}" == "true" ]]; then
-            MILESTONE_TITLE="${MILESTONE_TITLE}-head"
-          fi
-
-          echo "milestone=${MILESTONE_TITLE}" | tee -a "${GITHUB_OUTPUT}"
-
-          # Finish here if QASE reporting not enabled
-          if [ "${QASE_REPORT}" != "true" ]; then
-            exit 0
-          fi
-
-          # 1. Try to find existing milestone ID
-          MILESTONE_ID=$(
-            curl -s --show-error --fail --request GET \
-              --url "https://api.qase.io/v1/milestone/${QASE_PROJECT_CODE}?search=${MILESTONE_TITLE}&limit=100" \
-              --header "Token: ${QASE_API_TOKEN}" \
-              --header "accept: application/json" \
-            | jq -r --arg TITLE "$MILESTONE_TITLE" '[.result.entities[]? | select(.title == $TITLE) | .id] | min // empty'
-            )
-
-          # 2. If not found, create it and get the new ID
-          if [ -z "$MILESTONE_ID" ]; then
-            echo "Creating new milestone ${MILESTONE_TITLE} in QASE"
-            MILESTONE_ID=$(
-              curl -s --show-error --fail --request POST \
-                --url "https://api.qase.io/v1/milestone/${QASE_PROJECT_CODE}" \
-                --header "Token: ${QASE_API_TOKEN}" \
-                --header "Content-Type: application/json" \
-                --header "accept: application/json" \
-                --data "$(jq -n --arg t "$MILESTONE_TITLE" '{title: $t, description: $t}')" \
-              | jq -r '.result.id // empty'
-              )
-          fi
-
-          echo "milestone_id=${MILESTONE_ID}" | tee -a "${GITHUB_OUTPUT}"
+        uses: ./.github/actions/qase
+        with:
+          command: milestone
+          qase_api_token: ${{ secrets.qase_api_token }}
+          qase_report: ${{ inputs.qase_report }}
+          rancher_version: ${{ inputs.rancher_version }}
+          rancher_upgrade_version: ${{ inputs.rancher_upgrade_version }}
+          grep_test_by_tag: ${{ inputs.grep_test_by_tag }}
+          turtles_dev_chart: ${{ inputs.turtles_dev_chart }}
 
   determine-runner:
     runs-on: ubuntu-latest
@@ -710,27 +640,21 @@ jobs:
             export CHARTMUSEUM_REPO=http://${{ needs.create-runner.outputs.public_dns }}
           fi
           cd tests && make start-cypress-tests
-      - name: Set milestone_id for current run and store QASE_TESTOPS_RUN_ID for later
+      - name: Store QASE_TESTOPS_RUN_ID for later
         if: ${{ always() && inputs.qase_report == true }}
         id: qase_run_id
         run: |
           if [ -f tests/cypress/latest/QASE_TESTOPS_RUN_ID.txt ]; then
-            QASE_TESTOPS_RUN_ID=$(cat tests/cypress/latest/QASE_TESTOPS_RUN_ID.txt)
-            echo "qase_run_id=${QASE_TESTOPS_RUN_ID}" >> ${GITHUB_OUTPUT}
+            echo "qase_run_id=$(cat tests/cypress/latest/QASE_TESTOPS_RUN_ID.txt)" >> ${GITHUB_OUTPUT}
           fi
-          ## Set milestone_id for the current run
-          if [ -n "${QASE_TESTOPS_RUN_ID}" ] && [ -n "${QASE_TESTOPS_MILESTONE_ID}" ]; then
-            STATUS=$(curl -s --show-error --fail --request PATCH \
-              --url "https://api.qase.io/v1/run/${QASE_PROJECT_CODE}/${QASE_TESTOPS_RUN_ID}" \
-              --header "Token: ${QASE_API_TOKEN}" \
-              --header "Content-Type: application/json" \
-              --header "accept: application/json" \
-              --data "{\"milestone_id\":${QASE_TESTOPS_MILESTONE_ID}}" \
-              | jq -r '.status // empty')
-            if [ "$STATUS" != "true" ]; then
-              echo "Failed to set milestone ID ${QASE_TESTOPS_MILESTONE_ID} for run ${QASE_TESTOPS_RUN_ID}"
-            fi
-          fi
+      - name: Set milestone_id for current run
+        if: ${{ always() && inputs.qase_report == true && steps.qase_run_id.outputs.qase_run_id && needs.determine-milestone.outputs.milestone_id }}
+        uses: ./.github/actions/qase
+        with:
+          command: set-run-milestone
+          qase_api_token: ${{ secrets.qase_api_token }}
+          run_id: ${{ steps.qase_run_id.outputs.qase_run_id }}
+          milestone_id: ${{ needs.determine-milestone.outputs.milestone_id }}
       - name: Stage Cypress screenshots for upload
         if: ${{ failure() && steps.cypress.outcome != 'skipped' }}
         run: |
@@ -890,8 +814,6 @@ jobs:
       - name: Add summary
         env:
           KUBECONFIG: /etc/rancher/k3s/k3s.yaml
-          QASE_API_TOKEN: ${{ secrets.qase_api_token }}
-          QASE_PROJECT_CODE: RT
         if: ${{ always() }}
         run: |
           # Add summary
@@ -934,24 +856,24 @@ jobs:
           echo "### Kubernetes" >> ${GITHUB_STEP_SUMMARY}
           echo "K3s on Rancher Manager: ${{ env.INSTALL_K3S_VERSION }}" >> ${GITHUB_STEP_SUMMARY}
 
+          # The summary file is per step, keep a copy for the Qase run description
+          cp "${GITHUB_STEP_SUMMARY}" "${RUNNER_TEMP}/summary.md"
+
           QASE_TESTOPS_RUN_ID=${{ steps.qase_run_id.outputs.qase_run_id }}
           if [[ -n "${QASE_TESTOPS_RUN_ID}" ]]; then
-            # Push the summary to Qase Run description
-            RUNNER_URL=${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-            payload=$(jq -n --arg url "${RUNNER_URL}" --rawfile desc "${GITHUB_STEP_SUMMARY}" '{"description": ($url +"\n\n"+ $desc)}')
-            curl -s --show-error --fail \
-              --request PATCH \
-              --url "https://api.qase.io/v1/run/${QASE_PROJECT_CODE}/${QASE_TESTOPS_RUN_ID}" \
-              --header "Token: ${QASE_API_TOKEN}" \
-              --header "Content-Type: application/json" \
-              --header "Accept: application/json" \
-              --data "${payload}"
-
             echo -e "\n### QASE Report" >> ${GITHUB_STEP_SUMMARY}
             echo "View the detailed report [here](https://app.qase.io/run/RT/dashboard/${QASE_TESTOPS_RUN_ID})" >> ${GITHUB_STEP_SUMMARY}
           else
             echo -e "\n### Test not reported in QASE!" >> ${GITHUB_STEP_SUMMARY}
           fi
+      - name: Push the summary to Qase run description
+        if: ${{ always() && steps.qase_run_id.outputs.qase_run_id }}
+        uses: ./.github/actions/qase
+        with:
+          command: describe-run
+          qase_api_token: ${{ secrets.qase_api_token }}
+          run_id: ${{ steps.qase_run_id.outputs.qase_run_id }}
+          description_file: ${{ runner.temp }}/summary.md
 
   delete-runner:
     if: ${{ always() && contains(needs.create-runner.outputs.uuid, 'vsphere') == false }}
@@ -986,17 +908,18 @@ jobs:
     steps:
       - name: Specify in summary if something has been cancelled
         run: echo "# TEST CANCELLED!" >> ${GITHUB_STEP_SUMMARY}
+      - name: Checkout
+        if: ${{ needs.e2e.outputs.qase_run_id }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Complete the QASE run if cancelled
         # Otherwise the cancelled run would stay in "In Progress" state
-        run: |
-          RUN_ID=${{ needs.e2e.outputs.qase_run_id }}
-          if [ -n "$RUN_ID" ]; then
-            curl -X POST --data-raw="" \
-              --url https://api.qase.io/v1/run/RT/${RUN_ID}/complete \
-              -H "Token: ${{ secrets.QASE_API_TOKEN }}" \
-              -H 'accept: application/json'
-          fi
-          echo "QASE run $RUN_ID marked as Completed" >> ${GITHUB_STEP_SUMMARY}
+        if: ${{ needs.e2e.outputs.qase_run_id }}
+        uses: ./.github/actions/qase
+        with:
+          command: complete-run
+          qase_api_token: ${{ secrets.qase_api_token }}
+          run_id: ${{ needs.e2e.outputs.qase_run_id }}
+
   cleanup-vsphere-runner:
     if: ${{ always() && contains(needs.create-runner.outputs.uuid, 'vsphere') && inputs.destroy_runner == true }}
     needs: [create-runner, e2e]

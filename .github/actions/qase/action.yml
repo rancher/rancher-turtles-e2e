@@ -1,0 +1,64 @@
+name: Qase
+description: Qase helper for the e2e workflows. Pick the operation with `command`.
+
+inputs:
+  command:
+    description: |
+      milestone         - compute the Rancher milestone title and (if qase_report=true) find/create it in Qase
+      set-run-milestone - set milestone_id on the run run_id
+      describe-run      - set description of the run run_id to the run URL + content of description_file
+      complete-run      - mark the run run_id as completed
+    required: true
+  qase_api_token:
+    description: Qase API token
+    required: true
+  project_code:
+    description: Qase project code
+    default: RT
+  run_id:
+    description: Qase run ID (set-run-milestone, describe-run, complete-run)
+  milestone_id:
+    description: Qase milestone ID (set-run-milestone)
+  description_file:
+    description: File with the run description (describe-run)
+  rancher_version:
+    description: Rancher version, format channel/version (milestone)
+  rancher_upgrade_version:
+    description: Rancher upgrade version (milestone)
+  grep_test_by_tag:
+    description: Test tags (milestone)
+  turtles_dev_chart:
+    description: Whether the turtles dev chart is used (milestone)
+  qase_report:
+    description: If not "true", milestone is only computed and not looked up in Qase (milestone)
+  github_token:
+    description: Token to read rancher/rancher releases (milestone)
+    default: ${{ github.token }}
+
+outputs:
+  milestone:
+    description: Milestone title (milestone)
+    value: ${{ steps.qase.outputs.milestone }}
+  milestone_id:
+    description: Qase milestone ID, empty if qase_report is not "true" (milestone)
+    value: ${{ steps.qase.outputs.milestone_id }}
+
+runs:
+  using: composite
+  steps:
+    - id: qase
+      shell: bash
+      env:
+        COMMAND: ${{ inputs.command }}
+        QASE_API_TOKEN: ${{ inputs.qase_api_token }}
+        QASE_PROJECT_CODE: ${{ inputs.project_code }}
+        RUN_ID: ${{ inputs.run_id }}
+        MILESTONE_ID: ${{ inputs.milestone_id }}
+        DESCRIPTION_FILE: ${{ inputs.description_file }}
+        RANCHER_VERSION: ${{ inputs.rancher_version }}
+        RANCHER_UPGRADE_VERSION: ${{ inputs.rancher_upgrade_version }}
+        GREPTAGS: ${{ inputs.grep_test_by_tag }}
+        TURTLES_DEV_CHART: ${{ inputs.turtles_dev_chart }}
+        QASE_REPORT: ${{ inputs.qase_report }}
+        GH_TOKEN: ${{ inputs.github_token }}
+      run: ${{ github.action_path }}/qase.sh "$COMMAND"
