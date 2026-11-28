@@ -1,15 +1,14 @@
-# Validates Updatecli PRs with a minimal @install e2e run
+# Validates Updatecli branches (PRs) with a minimal @install e2e run
 name: Updatecli-E2E
-run-name: "[${{ github.run_number }}] Updatecli PR validation - ${{ github.head_ref || github.ref_name }}"
+run-name: "[${{ github.run_number }}] Updatecli PR validation - ${{ github.ref_name }}"
 
 on:
-  pull_request:
-    branches: [main]
+  push:
+    branches: ['updatecli_*']
   workflow_dispatch: # pick the branch in the UI
 
 jobs:
   e2e:
-    if: github.event_name == 'workflow_dispatch' || startsWith(github.head_ref, 'updatecli_')
     uses: ./.github/workflows/master-e2e.yaml
     secrets:
       gcp_credentials: ${{ secrets.GCP_CREDENTIALS }}
